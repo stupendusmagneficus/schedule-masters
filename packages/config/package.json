@@ -1,0 +1,10 @@
+{
+  "name": "@schedule-app/config",
+  "private": true,
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint": "./eslint.config.mjs",
+    "./prettier": "./prettier.config.mjs",
+    "./vitest": "./vitest.config.ts"
+  }
+}

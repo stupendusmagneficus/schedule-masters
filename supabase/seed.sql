@@ -1,0 +1,1 @@
+-- Product tables and seed data are intentionally out of scope for the scaffold.
