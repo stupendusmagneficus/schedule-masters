@@ -1,0 +1,26 @@
+{
+  "name": "@schedule-app/mobile",
+  "private": true,
+  "scripts": {
+    "dev": "expo start",
+    "build": "expo export --platform web",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "echo 'Mobile E2E is planned for a later task.'"
+  },
+  "dependencies": {
+    "expo": "57.0.24",
+    "expo-status-bar": "57.0.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.81.5",
+    "react-native-web": "0.21.2"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3",
+    "vite": "8.3.0",
+    "vitest": "5.0.1"
+  }
+}
