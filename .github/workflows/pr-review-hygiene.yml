@@ -1,0 +1,46 @@
+name: PR Review Hygiene
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  review-hygiene:
+    name: Review hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check diff whitespace
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
+
+      - name: Enforce Yarn lockfile policy
+        shell: bash
+        run: |
+          test -f yarn.lock
+          unexpected_lockfiles=$(find . -path './.git' -prune -o -path './node_modules' -prune -o -type f \( \
+            -name 'package-lock.json' -o \
+            -name 'pnpm-lock.yaml' -o \
+            -name 'bun.lockb' -o \
+            -name 'bun.lock' \
+          \) -print)
+          if [[ -n "$unexpected_lockfiles" ]]; then
+            echo "Unexpected lockfiles found:"
+            echo "$unexpected_lockfiles"
+            exit 1
+          fi
+
+      - name: Scan committed files for high-risk secrets
+        shell: bash
+        run: |
+          if rg -n --hidden -g '!.git/**' -g '!node_modules/**' -g '!pr-review-hygiene.yml' \
+            '(service_role|SUPABASE_SERVICE_ROLE|sk_live_|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' .; then
+            echo "Potential high-risk secret pattern detected."
+            exit 1
+          fi

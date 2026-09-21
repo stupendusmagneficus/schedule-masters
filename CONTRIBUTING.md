@@ -22,6 +22,22 @@ yarn test
 yarn build
 ~~~
 
+## Pull request review protocol
+
+Every pull request must receive a code review before merge. The review checks the
+task scope and acceptance criteria, correctness, security, maintainability, tests,
+and unintended product or architecture changes.
+
+The repository runs two GitHub Actions workflows for pull requests:
+
+- `CI` runs typecheck, lint, tests, and the build.
+- `PR Review Hygiene` checks diff whitespace, the Yarn lockfile policy, and high-risk secret patterns.
+
+The AI agent should perform a structured review before opening or updating a pull
+request and record the result in the pull request. CI provides deterministic gates;
+it does not automatically approve or merge code. A human review remains required
+before production-impacting changes are merged.
+
 The current scaffold intentionally has no product database schema, authentication, booking logic, notification provider, payment integration, or final UI library.
 
 ## Scope control
