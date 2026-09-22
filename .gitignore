@@ -5,6 +5,9 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 .turbo/
+.supabase/
+supabase/.branches/
+supabase/.temp/
 .expo/
 .next/
 dist/

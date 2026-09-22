@@ -14,7 +14,8 @@
   "dependencies": {
     "@schedule-app/domain": "workspace:*",
     "@schedule-app/types": "workspace:*",
-    "@schedule-app/validation": "workspace:*"
+    "@schedule-app/validation": "workspace:*",
+    "@supabase/supabase-js": "2.116.0"
   },
   "devDependencies": {
     "typescript": "5.9.3",

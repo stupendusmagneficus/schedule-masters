@@ -12,7 +12,12 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e"
+    "test:e2e": "turbo run test:e2e",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:reset": "npx supabase db reset",
+    "supabase:types": "npx supabase gen types typescript --local --schema public > packages/api/src/supabase/database.types.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",

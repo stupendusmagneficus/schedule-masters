@@ -19,7 +19,7 @@ packages/
   types/                   # shared technical types
   config/                  # shared tooling configuration
 
-supabase/                  # CLI placeholders; product schema comes later
+supabase/                  # PostgreSQL migrations, seed data, and local CLI config
 docs/                      # repository documentation
 ~~~
 
@@ -59,6 +59,18 @@ yarn build
 
 The mobile app starts with Expo. The booking web starts at http://localhost:3000.
 
+### Supabase
+
+The repository uses Supabase/PostgreSQL for the application backend. Run the local stack with Docker before working on database changes:
+
+```bash
+yarn supabase:start
+yarn supabase:reset
+yarn supabase:types
+```
+
+See [`docs/development/supabase.md`](docs/development/supabase.md) for environment boundaries, migration rules, and hosted project access.
+
 ## Documentation
 
 - [Monorepo architecture](docs/architecture/monorepo.md)
@@ -70,7 +82,7 @@ Product decisions remain in Linear. GitHub contains the implementation documenta
 
 ## Current scope
 
-This repository currently contains only the technical scaffold. Authentication, Supabase schema, RLS, booking availability, notifications, Stripe, production deployment, and the final UI library are intentionally implemented in later tasks.
+This repository contains the technical scaffold and the initial Supabase schema foundation. Authentication flows, public booking functions, booking availability, notifications, Stripe, production deployment, and the final UI library are implemented in later tasks.
 
 ## Contributing
 
