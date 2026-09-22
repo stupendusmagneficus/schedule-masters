@@ -70,6 +70,6 @@ Add a UI dependency only when it removes meaningful implementation risk or provi
 
 ## Deferred decisions
 
-- Exact token values and brand typography are deferred until naming and visual direction are finalized.
+- Exact MVP token values and visual direction are defined in `docs/design/DESIGN.md` and `docs/design/design-tokens.json`. The product name and final brand identity may still evolve without changing the semantic token contract.
 - Calendar/date-picker implementation will be selected while implementing the booking vertical slice.
 - A universal UI library such as Tamagui can be reconsidered if the product later requires extensive shared screens between mobile and web.

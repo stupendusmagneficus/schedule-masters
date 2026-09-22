@@ -17,7 +17,22 @@ export type MessageKey =
   | "common.loading"
   | "common.error"
   | "mobile.description"
-  | "booking.description";
+  | "booking.description"
+  | "booking.chooseService"
+  | "booking.chooseDate"
+  | "booking.chooseTime"
+  | "booking.yourDetails"
+  | "booking.name"
+  | "booking.email"
+  | "booking.phone"
+  | "booking.note"
+  | "booking.confirm"
+  | "booking.confirmed"
+  | "booking.noSlots"
+  | "booking.selectService"
+  | "booking.selectTime"
+  | "booking.required"
+  | "booking.loadingSlots";
 
 type Messages = Record<MessageKey, string>;
 
@@ -31,6 +46,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.error": "Что-то пошло не так",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "booking.description": "Страница онлайн-записи готова к работе.",
+    "booking.chooseService": "Выберите услугу",
+    "booking.chooseDate": "Выберите дату",
+    "booking.chooseTime": "Выберите время",
+    "booking.yourDetails": "Ваши данные",
+    "booking.name": "Имя",
+    "booking.email": "Email",
+    "booking.phone": "Телефон",
+    "booking.note": "Комментарий (необязательно)",
+    "booking.confirm": "Подтвердить запись",
+    "booking.confirmed": "Запись подтверждена",
+    "booking.noSlots": "На эту дату нет свободного времени.",
+    "booking.selectService": "Выберите услугу, чтобы увидеть свободное время.",
+    "booking.selectTime": "Выберите свободное время.",
+    "booking.required": "Заполните обязательные поля.",
+    "booking.loadingSlots": "Проверяем свободное время…",
   },
   cz: {
     "common.appName": "Schedule Masters",
@@ -41,6 +71,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.error": "Něco se pokazilo",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "booking.description": "Stránka online rezervací je připravena.",
+    "booking.chooseService": "Vyberte službu",
+    "booking.chooseDate": "Vyberte datum",
+    "booking.chooseTime": "Vyberte čas",
+    "booking.yourDetails": "Vaše údaje",
+    "booking.name": "Jméno",
+    "booking.email": "E-mail",
+    "booking.phone": "Telefon",
+    "booking.note": "Poznámka (nepovinné)",
+    "booking.confirm": "Potvrdit rezervaci",
+    "booking.confirmed": "Rezervace potvrzena",
+    "booking.noSlots": "Pro toto datum nejsou volné termíny.",
+    "booking.selectService": "Vyberte službu a zobrazí se volné termíny.",
+    "booking.selectTime": "Vyberte volný termín.",
+    "booking.required": "Vyplňte povinná pole.",
+    "booking.loadingSlots": "Kontrolujeme volné termíny…",
   },
   en: {
     "common.appName": "Schedule Masters",
@@ -51,6 +96,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.error": "Something went wrong",
     "mobile.description": "The master mobile app is ready.",
     "booking.description": "The online booking page is ready.",
+    "booking.chooseService": "Choose a service",
+    "booking.chooseDate": "Choose a date",
+    "booking.chooseTime": "Choose a time",
+    "booking.yourDetails": "Your details",
+    "booking.name": "Name",
+    "booking.email": "Email",
+    "booking.phone": "Phone",
+    "booking.note": "Note (optional)",
+    "booking.confirm": "Confirm booking",
+    "booking.confirmed": "Booking confirmed",
+    "booking.noSlots": "There are no available times on this date.",
+    "booking.selectService": "Choose a service to see available times.",
+    "booking.selectTime": "Choose an available time.",
+    "booking.required": "Please complete the required fields.",
+    "booking.loadingSlots": "Checking availability…",
   },
 };
 

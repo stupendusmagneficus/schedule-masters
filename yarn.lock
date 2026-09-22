@@ -2381,7 +2381,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@schedule-app/api@workspace:packages/api":
+"@schedule-app/api@workspace:*, @schedule-app/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@schedule-app/api@workspace:packages/api"
   dependencies:
@@ -2399,6 +2399,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@schedule-app/booking-web@workspace:apps/booking-web"
   dependencies:
+    "@schedule-app/api": "workspace:*"
     "@schedule-app/i18n": "workspace:*"
     "@types/node": "npm:24.10.1"
     "@types/react": "npm:19.2.7"

@@ -13,7 +13,7 @@ Do not use the hosted project for destructive local experiments. Do not commit d
 - Docker Desktop is running.
 - Node.js matches `.nvmrc`.
 - Corepack is enabled.
-- Supabase CLI is available through `npx supabase`.
+- Supabase CLI is invoked through the pinned `npx supabase@2.117.0` version used by the repository scripts and CI.
 
 ## Local commands
 
@@ -41,8 +41,8 @@ yarn supabase:stop
 Authenticate locally when hosted project operations are needed:
 
 ```bash
-npx supabase login
-npx supabase link --project-ref jakksxrebisudkecednm
+npx supabase@2.117.0 login
+npx supabase@2.117.0 link --project-ref jakksxrebisudkecednm
 ```
 
 The login token is managed by the local Supabase CLI and must not be pasted into the repository or chat. Linking is not required for local development.

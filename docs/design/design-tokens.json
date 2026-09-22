@@ -1,0 +1,109 @@
+{
+  "$schema": "https://schemas.tokens.studio/tokens.schema.json",
+  "meta": {
+    "name": "Schedule Masters",
+    "version": "0.1.0",
+    "status": "approved-mvp-direction",
+    "direction": "warm-vertical",
+    "source": "docs/design/DESIGN.md"
+  },
+  "color": {
+    "brand": {
+      "primary": { "value": "#2F8F7B", "type": "color" },
+      "primaryStrong": { "value": "#217464", "type": "color" },
+      "primarySoft": { "value": "#DDF1EB", "type": "color" },
+      "onPrimary": { "value": "#FFFFFF", "type": "color" }
+    },
+    "surface": {
+      "canvas": { "value": "#F5F5F2", "type": "color" },
+      "raised": { "value": "#FFFFFF", "type": "color" },
+      "subtle": { "value": "#FAFAF8", "type": "color" },
+      "sunken": { "value": "#E9EBE7", "type": "color" }
+    },
+    "content": {
+      "primary": { "value": "#202725", "type": "color" },
+      "secondary": { "value": "#4F5C58", "type": "color" },
+      "muted": { "value": "#75807C", "type": "color" },
+      "inverse": { "value": "#FFFFFF", "type": "color" }
+    },
+    "border": {
+      "default": { "value": "#DEE2DE", "type": "color" },
+      "strong": { "value": "#AEBBB5", "type": "color" },
+      "focus": { "value": "#2F8F7B", "type": "color" }
+    },
+    "status": {
+      "success": { "value": "#2D8A62", "type": "color" },
+      "successSoft": { "value": "#E1F3EA", "type": "color" },
+      "warning": { "value": "#B7791F", "type": "color" },
+      "warningSoft": { "value": "#FFF2D7", "type": "color" },
+      "danger": { "value": "#C65353", "type": "color" },
+      "dangerSoft": { "value": "#FBE5E3", "type": "color" },
+      "info": { "value": "#3D76A8", "type": "color" },
+      "infoSoft": { "value": "#E6F0F8", "type": "color" }
+    },
+    "schedule": {
+      "booked": { "value": "#DDF1EB", "type": "color" },
+      "bookedBorder": { "value": "#2F8F7B", "type": "color" },
+      "break": { "value": "#E9EBE7", "type": "color" },
+      "breakBorder": { "value": "#9AA8A2", "type": "color" },
+      "free": { "value": "#FFFFFF", "type": "color" }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": { "value": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "type": "fontFamily" }
+    },
+    "fontWeight": {
+      "regular": { "value": 400, "type": "fontWeight" },
+      "medium": { "value": 500, "type": "fontWeight" },
+      "semibold": { "value": 600, "type": "fontWeight" },
+      "bold": { "value": 700, "type": "fontWeight" }
+    },
+    "fontSize": {
+      "caption": { "value": "12px", "type": "dimension" },
+      "label": { "value": "14px", "type": "dimension" },
+      "body": { "value": "16px", "type": "dimension" },
+      "subtitle": { "value": "18px", "type": "dimension" },
+      "heading": { "value": "24px", "type": "dimension" },
+      "display": { "value": "32px", "type": "dimension" }
+    },
+    "lineHeight": {
+      "tight": { "value": 1.2, "type": "number" },
+      "normal": { "value": 1.5, "type": "number" },
+      "relaxed": { "value": 1.65, "type": "number" }
+    }
+  },
+  "spacing": {
+    "0": { "value": "0px", "type": "dimension" },
+    "1": { "value": "4px", "type": "dimension" },
+    "2": { "value": "8px", "type": "dimension" },
+    "3": { "value": "12px", "type": "dimension" },
+    "4": { "value": "16px", "type": "dimension" },
+    "5": { "value": "20px", "type": "dimension" },
+    "6": { "value": "24px", "type": "dimension" },
+    "8": { "value": "32px", "type": "dimension" },
+    "10": { "value": "40px", "type": "dimension" },
+    "12": { "value": "48px", "type": "dimension" }
+  },
+  "radius": {
+    "sm": { "value": "8px", "type": "dimension" },
+    "md": { "value": "12px", "type": "dimension" },
+    "lg": { "value": "16px", "type": "dimension" },
+    "pill": { "value": "999px", "type": "dimension" }
+  },
+  "shadow": {
+    "subtle": { "value": "0 1px 2px rgba(32, 39, 37, 0.04)", "type": "shadow" },
+    "raised": { "value": "0 6px 18px rgba(32, 39, 37, 0.06)", "type": "shadow" }
+  },
+  "motion": {
+    "micro": { "value": "160ms", "type": "duration" },
+    "standard": { "value": "220ms", "type": "duration" },
+    "easing": { "value": "cubic-bezier(0.2, 0.8, 0.2, 1)", "type": "cubicBezier" }
+  },
+  "layout": {
+    "mobileScreenPadding": { "value": "20px", "type": "dimension" },
+    "desktopScreenPadding": { "value": "32px", "type": "dimension" },
+    "minimumTouchTarget": { "value": "44px", "type": "dimension" },
+    "bookingContentMaxWidth": { "value": "720px", "type": "dimension" }
+  }
+}
