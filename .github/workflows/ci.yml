@@ -4,10 +4,20 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
+    name: Quality checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,12 +33,37 @@ jobs:
         run: yarn lint
       - name: Test
         run: yarn test
-      - name: Build
-        run: yarn build
+      - name: Build shared packages
+        run: yarn turbo run build --filter=./packages/*
+
+  app-builds:
+    name: Build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: mobile
+            filter: "@schedule-app/mobile"
+          - app: booking-web
+            filter: "@schedule-app/booking-web"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build application
+        run: yarn turbo run build --filter=${{ matrix.filter }}
 
   supabase:
     name: Supabase migrations
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,6 +77,8 @@ jobs:
         run: yarn supabase:start > /dev/null 2>&1
       - name: Apply migrations and seed
         run: yarn supabase:reset
+      - name: Lint local database
+        run: npx supabase db lint --local
       - name: Regenerate database types
         run: yarn supabase:types
       - name: Verify generated types are committed
