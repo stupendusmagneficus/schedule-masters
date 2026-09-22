@@ -6,7 +6,7 @@ The final brand name is not selected yet, so the repository uses neutral technic
 
 ## Repository structure
 
-~~~text
+```text
 apps/
   mobile/                  # Expo + React Native master app
   booking-web/             # Next.js public booking web
@@ -21,7 +21,7 @@ packages/
 
 supabase/                  # PostgreSQL migrations, seed data, and local CLI config
 docs/                      # repository documentation
-~~~
+```
 
 ## Prerequisites
 
@@ -33,14 +33,14 @@ docs/                      # repository documentation
 
 Enable the package manager and install dependencies:
 
-~~~bash
+```bash
 corepack enable
 yarn install
-~~~
+```
 
 ## Development commands
 
-~~~bash
+```bash
 # Run all persistent development tasks
 yarn dev
 
@@ -55,9 +55,19 @@ yarn typecheck
 yarn lint
 yarn test
 yarn build
-~~~
+```
 
 The mobile app starts with Expo. The booking web starts at http://localhost:3000.
+
+GitHub Actions runs the quality checks for pull requests, then builds the Expo
+mobile package and the Next.js booking web package as separate gates. The
+Supabase gate starts a local Docker stack, applies migrations and seed data,
+lints the database, and verifies that generated database types are committed.
+It does not require hosted Supabase credentials.
+
+The pull-request mobile build validates the Expo JavaScript bundle through the
+web export. Native iOS artifacts for TestFlight are produced later through the
+EAS/App Store delivery workflow; they are not part of this general CI gate.
 
 ### Supabase
 
