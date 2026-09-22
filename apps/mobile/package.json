@@ -10,7 +10,9 @@
     "test:e2e": "echo 'Mobile E2E is planned for a later task.'"
   },
   "dependencies": {
+    "@schedule-app/i18n": "workspace:*",
     "expo": "57.0.24",
+    "expo-localization": "~57.0.2",
     "expo-status-bar": "57.0.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
