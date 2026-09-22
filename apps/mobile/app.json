@@ -6,6 +6,17 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "plugins": [
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "ru", "cs"],
+            "android": ["en", "ru", "cs"]
+          }
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": false
     }

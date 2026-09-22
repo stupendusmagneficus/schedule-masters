@@ -20,3 +20,25 @@ body {
   padding: 2rem;
   text-align: center;
 }
+
+.language-picker {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.language-button {
+  background: transparent;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 44px;
+  padding: 8px 12px;
+}
+
+.language-button.selected {
+  background: #222;
+  border-color: #222;
+  color: #fff;
+}
