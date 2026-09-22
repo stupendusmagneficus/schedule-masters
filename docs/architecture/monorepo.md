@@ -15,10 +15,15 @@ Applications own routing, platform adapters, and presentation. They must not imp
 - `@schedule-app/api`: typed data-access boundary; no credentials or implementation yet.
 - `@schedule-app/types`: shared technical type placeholders.
 - `@schedule-app/config`: shared TypeScript, lint, formatting, and test configuration.
+- `@schedule-app/design-tokens`: shared platform-neutral visual tokens.
+- `@schedule-app/ui-mobile`: Expo and React Native UI primitives and compound components.
+- `@schedule-app/ui-web`: Next.js web UI primitives and compound components.
 
 ## Dependency direction
 
 Apps may depend on packages. Domain must stay at the bottom of the dependency graph. Packages must expose explicit public entrypoints and use workspace protocol dependencies. Supabase integration will be added behind the API boundary in a later task.
+
+UI-specific package boundaries and platform conventions are defined in [UI Architecture and Frontend Conventions](ui-conventions.md).
 
 ## Tooling
 
