@@ -84,6 +84,7 @@ See [`docs/development/supabase.md`](docs/development/supabase.md) for environme
 ## Documentation
 
 - [Monorepo architecture](docs/architecture/monorepo.md)
+- [UI architecture and frontend conventions](docs/architecture/ui-conventions.md)
 - [Technical scaffold design](docs/superpowers/specs/2026-09-19-technical-scaffold-design.md)
 - [Technical scaffold implementation plan](docs/superpowers/plans/2026-09-19-technical-scaffold-plan.md)
 - [Linear decision hub](https://linear.app/schedule-app-master/document/schedule-masters-centr-finalnyh-reshenij-8ea0c720e4f2)
