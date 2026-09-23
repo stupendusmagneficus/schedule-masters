@@ -107,4 +107,47 @@ describe("Supabase public booking contract", () => {
       expect(appointments.error).not.toBeNull();
     },
   );
+
+  integrationTest("limits new public booking attempts", async () => {
+    if (!supabase) return;
+
+    const firstDate = new Date("2030-01-07T00:00:00Z");
+    const errors: string[] = [];
+
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      const bookingDate = firstDate.toISOString().slice(0, 10);
+      const slots = await supabase.rpc("get_public_available_slots", {
+        p_date: bookingDate,
+        p_service_id: serviceId,
+        p_slug: "demo-studio",
+      });
+      const slot = slots.data?.[0];
+
+      if (slot?.starts_at) {
+        const booking = await supabase.rpc("create_public_booking", {
+          p_email: `quota-${attempt}@example.test`,
+          p_idempotency_key: `quota-${Date.now()}-${attempt}`,
+          p_name: `Quota test ${attempt}`,
+          p_phone: `+42011122${String(attempt).padStart(4, "0")}`,
+          p_service_id: serviceId,
+          p_slug: "demo-studio",
+          p_starts_at: slot.starts_at,
+        });
+
+        if (booking.error) {
+          errors.push(booking.error.message);
+        }
+      }
+
+      firstDate.setUTCDate(firstDate.getUTCDate() + 1);
+    }
+
+    expect(
+      errors.some(
+        (message) =>
+          message.includes("temporarily unavailable") ||
+          message.includes("Too many booking requests"),
+      ),
+    ).toBe(true);
+  });
 });
