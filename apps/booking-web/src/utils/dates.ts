@@ -12,6 +12,10 @@ function moveToWeekday(date: Date) {
   return date;
 }
 
+export function parseDateInput(value: string) {
+  return new Date(`${value}T12:00:00`);
+}
+
 export function getNextBookableDate(from = new Date()) {
   const nextDate = new Date(from);
   nextDate.setDate(nextDate.getDate() + 1);
@@ -19,7 +23,7 @@ export function getNextBookableDate(from = new Date()) {
 }
 
 export function getFollowingBookableDate(value: string) {
-  const date = new Date(`${value}T00:00:00`);
+  const date = parseDateInput(value);
   if (Number.isNaN(date.getTime())) {
     return getNextBookableDate();
   }

@@ -142,6 +142,13 @@ textarea {
 .date-input {
   max-width: 240px;
 }
+.date-context {
+  color: #4f5c58;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-top: 10px;
+}
 input:focus,
 textarea:focus,
 button:focus-visible {

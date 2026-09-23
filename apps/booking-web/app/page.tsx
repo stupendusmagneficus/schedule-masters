@@ -23,6 +23,7 @@ import { analytics } from "../src/lib/analytics";
 import {
   getFollowingBookableDate,
   getNextBookableDate,
+  parseDateInput,
 } from "../src/utils/dates";
 
 const localeStorageKey = "schedule-app-locale";
@@ -109,6 +110,18 @@ export default function HomePage() {
   }, [demoMode]);
   const selectedService = context.services.find(
     (service) => service.id === selectedServiceId,
+  );
+  const selectedDateLabel = formatDate(parseDateInput(date), locale, {
+    day: "numeric",
+    month: "long",
+    weekday: "long",
+  });
+  const availabilityForSelectedDate = t(
+    "booking.availableTimesForDate",
+  ).replace("{date}", selectedDateLabel);
+  const noSlotsForSelectedDate = t("booking.noSlotsForDate").replace(
+    "{date}",
+    selectedDateLabel,
   );
 
   useEffect(() => {
@@ -386,6 +399,9 @@ export default function HomePage() {
             type="date"
             value={date}
           />
+          <p className="date-context" aria-live="polite">
+            {availabilityForSelectedDate}
+          </p>
         </div>
 
         <div className="booking-section">
@@ -402,7 +418,7 @@ export default function HomePage() {
           )}
           {!isLoadingSlots && slots.length === 0 && (
             <div className="empty-state">
-              <p>{t("booking.noSlots")}</p>
+              <p>{noSlotsForSelectedDate}</p>
               <button
                 className="secondary-button"
                 onClick={() => setDate(getFollowingBookableDate(date))}
@@ -461,6 +477,7 @@ export default function HomePage() {
                 </span>
               </span>
               <input
+                aria-label={`${t("booking.email")} (${t("booking.optional")})`}
                 onChange={(event) => setEmail(event.target.value)}
                 type="email"
                 value={email}
@@ -474,6 +491,7 @@ export default function HomePage() {
                 </span>
               </span>
               <input
+                aria-label={`${t("booking.phone")} (${t("booking.optional")})`}
                 onChange={(event) => setPhone(event.target.value)}
                 type="tel"
                 value={phone}

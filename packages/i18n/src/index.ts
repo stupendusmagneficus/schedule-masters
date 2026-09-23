@@ -35,6 +35,8 @@ export type MessageKey =
   | "booking.loadingSlots"
   | "booking.nameRequired"
   | "booking.chooseAnotherDate"
+  | "booking.availableTimesForDate"
+  | "booking.noSlotsForDate"
   | "booking.requiredHint"
   | "booking.optional";
 
@@ -57,7 +59,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.name": "Имя",
     "booking.email": "Email",
     "booking.phone": "Телефон",
-    "booking.note": "Комментарий (необязательно)",
+    "booking.note": "Комментарий",
     "booking.confirm": "Подтвердить запись",
     "booking.confirmed": "Запись подтверждена",
     "booking.noSlots": "На эту дату нет свободного времени.",
@@ -66,7 +68,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.required": "Заполните обязательные поля.",
     "booking.loadingSlots": "Проверяем свободное время…",
     "booking.nameRequired": "Укажите ваше имя.",
-    "booking.chooseAnotherDate": "Выбрать другую дату",
+    "booking.chooseAnotherDate": "Проверить следующий рабочий день",
+    "booking.availableTimesForDate": "Свободное время на {date}",
+    "booking.noSlotsForDate": "На {date} свободного времени нет.",
     "booking.requiredHint":
       "Поля со знаком * обязательны. Email и телефон можно не заполнять.",
     "booking.optional": "необязательно",
@@ -87,7 +91,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.name": "Jméno",
     "booking.email": "E-mail",
     "booking.phone": "Telefon",
-    "booking.note": "Poznámka (nepovinné)",
+    "booking.note": "Poznámka",
     "booking.confirm": "Potvrdit rezervaci",
     "booking.confirmed": "Rezervace potvrzena",
     "booking.noSlots": "Pro toto datum nejsou volné termíny.",
@@ -96,7 +100,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.required": "Vyplňte povinná pole.",
     "booking.loadingSlots": "Kontrolujeme volné termíny…",
     "booking.nameRequired": "Zadejte své jméno.",
-    "booking.chooseAnotherDate": "Vybrat jiné datum",
+    "booking.chooseAnotherDate": "Zkontrolovat další pracovní den",
+    "booking.availableTimesForDate": "Volné termíny pro {date}",
+    "booking.noSlotsForDate": "Pro {date} nejsou volné termíny.",
     "booking.requiredHint":
       "Pole označená * jsou povinná. E-mail a telefon jsou nepovinné.",
     "booking.optional": "nepovinné",
@@ -117,7 +123,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.name": "Name",
     "booking.email": "Email",
     "booking.phone": "Phone",
-    "booking.note": "Note (optional)",
+    "booking.note": "Note",
     "booking.confirm": "Confirm booking",
     "booking.confirmed": "Booking confirmed",
     "booking.noSlots": "There are no available times on this date.",
@@ -126,7 +132,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.required": "Please complete the required fields.",
     "booking.loadingSlots": "Checking availability…",
     "booking.nameRequired": "Enter your name.",
-    "booking.chooseAnotherDate": "Choose another date",
+    "booking.chooseAnotherDate": "Check the next working day",
+    "booking.availableTimesForDate": "Available times for {date}",
+    "booking.noSlotsForDate": "There are no available times on {date}.",
     "booking.requiredHint":
       "Fields marked with * are required. Email and phone are optional.",
     "booking.optional": "optional",

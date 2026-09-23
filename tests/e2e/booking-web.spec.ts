@@ -13,8 +13,6 @@ test.describe("public booking web", () => {
       .first()
       .click();
     await page.getByLabel("Name").fill("Test client");
-    await page.getByLabel("Email").fill("test@example.com");
-    await page.getByLabel("Phone").fill("+420111222333");
     await page.getByRole("button", { name: "Confirm booking" }).click();
 
     await expect(
@@ -47,16 +45,32 @@ test.describe("public booking web", () => {
     );
   });
 
-  test("explains when no times are available and offers another date", async ({
+  test("clearly changes the selected date when no times are available", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
     await page.getByLabel("Choose a date").fill("2030-01-05");
 
     await expect(
-      page.getByText("There are no available times on this date."),
+      page.getByText("There are no available times on Saturday, January 5."),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Choose another date" }).click();
+    await page
+      .getByRole("button", { name: "Check the next working day" })
+      .click();
     await expect(page.getByLabel("Choose a date")).toHaveValue("2030-01-07");
+    await expect(
+      page.getByText("Available times for Monday, January 7"),
+    ).toBeVisible();
+  });
+
+  test("keeps email and phone optional", async ({ page }) => {
+    await page.goto("/?demo=1");
+
+    await expect(page.getByLabel("Email (optional)")).not.toHaveAttribute(
+      "required",
+    );
+    await expect(page.getByLabel("Phone (optional)")).not.toHaveAttribute(
+      "required",
+    );
   });
 });
