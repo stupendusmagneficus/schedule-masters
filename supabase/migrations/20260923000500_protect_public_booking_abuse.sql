@@ -1,0 +1,276 @@
+-- SCH-59: protect the anonymous booking endpoint from bursts and slot hoarding.
+-- The IP guard applies to the PostgREST RPC route. The workspace quota remains
+-- effective even when a trusted proxy does not provide an IP header.
+
+create schema if not exists private;
+
+create table if not exists private.public_booking_rate_limits (
+  ip inet not null,
+  request_at timestamptz not null default now()
+);
+
+create index if not exists public_booking_rate_limits_ip_request_idx
+  on private.public_booking_rate_limits (ip, request_at desc);
+
+revoke all on schema private from public, anon, authenticated;
+revoke all on private.public_booking_rate_limits from public, anon, authenticated;
+
+create or replace function public.check_public_booking_request()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_method text := current_setting('request.method', true);
+  v_path text := current_setting('request.path', true);
+  v_headers json;
+  v_forwarded_for text;
+  v_ip inet;
+  v_recent_requests integer;
+  v_window interval := interval '5 minutes';
+  v_max_requests integer := 30;
+begin
+  if coalesce(v_method, '') not in ('POST', 'PUT', 'PATCH', 'DELETE')
+    or coalesce(v_path, '') not like '%/rpc/create_public_booking' then
+    return;
+  end if;
+
+  begin
+    v_headers := current_setting('request.headers', true)::json;
+    v_forwarded_for := nullif(trim(split_part(v_headers->>'x-forwarded-for', ',', 1)), '');
+    if v_forwarded_for is not null then
+      v_ip := v_forwarded_for::inet;
+    end if;
+  exception
+    when others then
+      -- A missing or malformed proxy header must not break the booking API.
+      -- The workspace quota below still protects the endpoint in that case.
+      v_ip := null;
+  end;
+
+  if v_ip is null then
+    return;
+  end if;
+
+  perform pg_advisory_xact_lock(
+    hashtextextended('public-booking-ip:' || v_ip::text, 0)
+  );
+
+  select count(*)::integer
+  into v_recent_requests
+  from private.public_booking_rate_limits
+  where ip = v_ip
+    and request_at >= now() - v_window;
+
+  if v_recent_requests >= v_max_requests then
+    raise sqlstate 'PGRST'
+      using message = json_build_object(
+              'code', 'PUBLIC_BOOKING_RATE_LIMIT',
+              'message', 'Too many booking requests',
+              'details', 'Rate limit exceeded')::text,
+            detail = json_build_object(
+              'status', 429,
+              'headers', json_build_object(),
+              'status_text', 'Too Many Requests')::text;
+  end if;
+
+  insert into private.public_booking_rate_limits (ip)
+  values (v_ip);
+end;
+$$;
+
+revoke all on function public.check_public_booking_request() from public;
+grant execute on function public.check_public_booking_request() to anon, authenticated, authenticator;
+
+alter role authenticator set pgrst.db_pre_request = 'public.check_public_booking_request';
+notify pgrst, 'reload config';
+
+create index if not exists public_booking_requests_workspace_created_idx
+  on public.public_booking_requests (workspace_id, created_at desc);
+
+create or replace function public.enforce_public_booking_quota(
+  p_workspace_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_recent_requests integer;
+  v_window interval := interval '5 minutes';
+  v_max_requests integer := 30;
+begin
+  perform pg_advisory_xact_lock(
+    hashtextextended('public-booking-workspace:' || p_workspace_id::text, 0)
+  );
+
+  select count(*)::integer
+  into v_recent_requests
+  from public.public_booking_requests
+  where workspace_id = p_workspace_id
+    and created_at >= now() - v_window;
+
+  if v_recent_requests >= v_max_requests then
+    raise exception 'Booking is temporarily unavailable';
+  end if;
+end;
+$$;
+
+revoke all on function public.enforce_public_booking_quota(uuid)
+  from public, anon, authenticated;
+
+drop function public.create_public_booking(
+  text, uuid, text, text, text, timestamptz, text, text
+);
+
+create or replace function public.create_public_booking(
+  p_slug text,
+  p_service_id uuid,
+  p_name text,
+  p_email text,
+  p_phone text,
+  p_starts_at timestamptz,
+  p_customer_note text default null,
+  p_idempotency_key text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_workspace_id uuid;
+  v_timezone text;
+  v_service public.services%rowtype;
+  v_customer_id uuid;
+  v_appointment public.appointments%rowtype;
+  v_request_key text := nullif(trim(p_idempotency_key), '');
+  v_existing_response jsonb;
+  v_email text := nullif(lower(trim(p_email)), '');
+  v_phone text := nullif(trim(p_phone), '');
+begin
+  if nullif(trim(p_name), '') is null then
+    raise exception 'Customer name is required';
+  end if;
+
+  if length(trim(p_name)) > 200
+    or length(coalesce(p_email, '')) > 320
+    or length(coalesce(p_phone, '')) > 50
+    or length(coalesce(p_customer_note, '')) > 1000
+    or length(coalesce(p_idempotency_key, '')) > 100 then
+    raise exception 'Booking input is too long';
+  end if;
+
+  if v_request_key is null then
+    raise exception 'Idempotency key is required';
+  end if;
+
+  select bl.workspace_id, w.timezone
+  into v_workspace_id, v_timezone
+  from public.booking_links bl
+  join public.workspaces w on w.id = bl.workspace_id
+  where bl.slug = lower(trim(p_slug))
+    and bl.is_active = true
+    and w.status = 'active';
+
+  select * into v_service
+  from public.services s
+  where s.id = p_service_id
+    and s.workspace_id = v_workspace_id
+    and s.is_active = true
+    and s.archived_at is null;
+
+  if v_workspace_id is null or v_service.id is null then
+    raise exception 'Booking link or service is not available';
+  end if;
+
+  insert into public.public_booking_requests (workspace_id, idempotency_key)
+  values (v_workspace_id, v_request_key)
+  on conflict (workspace_id, idempotency_key) do nothing;
+
+  select response into v_existing_response
+  from public.public_booking_requests
+  where workspace_id = v_workspace_id
+    and idempotency_key = v_request_key
+  for update;
+
+  if v_existing_response is not null then
+    return v_existing_response;
+  end if;
+
+  perform public.enforce_public_booking_quota(v_workspace_id);
+
+  if not exists (
+    select 1
+    from public.get_public_available_slots(
+      p_slug,
+      p_service_id,
+      (p_starts_at at time zone v_timezone)::date
+    ) slot
+    where slot.starts_at = p_starts_at
+  ) then
+    raise exception 'Selected time is no longer available';
+  end if;
+
+  -- Anonymous contact data is never sufficient proof of ownership of an
+  -- existing customer profile. Always create a guest identity for a new
+  -- idempotent request; the master can merge records through an authenticated
+  -- workflow later.
+  insert into public.customers (
+    workspace_id, name, email, phone, normalized_email, normalized_phone
+  )
+  values (
+    v_workspace_id, trim(p_name), v_email, v_phone, v_email, v_phone
+  )
+  returning id into v_customer_id;
+
+  insert into public.appointments (
+    workspace_id, customer_id, service_id, service_name_snapshot,
+    duration_minutes_snapshot, price_amount_snapshot, currency_snapshot,
+    buffer_before_minutes_snapshot, buffer_after_minutes_snapshot,
+    starts_at, ends_at, status, source, customer_note
+  )
+  values (
+    v_workspace_id, v_customer_id, v_service.id, v_service.name,
+    v_service.duration_minutes, v_service.price_amount, v_service.currency,
+    v_service.buffer_before_minutes, v_service.buffer_after_minutes,
+    p_starts_at,
+    p_starts_at + make_interval(mins => v_service.duration_minutes),
+    'pending', 'public_booking', nullif(trim(p_customer_note), '')
+  )
+  returning * into v_appointment;
+
+  insert into public.appointment_events (
+    appointment_id, to_status, event_type
+  )
+  values (v_appointment.id, 'pending', 'created');
+
+  v_existing_response := jsonb_build_object(
+    'id', v_appointment.id,
+    'startsAt', v_appointment.starts_at,
+    'endsAt', v_appointment.ends_at,
+    'serviceName', v_appointment.service_name_snapshot,
+    'status', v_appointment.status
+  );
+
+  update public.public_booking_requests
+  set response = v_existing_response
+  where workspace_id = v_workspace_id
+    and idempotency_key = v_request_key;
+
+  return v_existing_response;
+exception
+  when exclusion_violation then
+    raise exception 'Selected time is no longer available';
+end;
+$$;
+
+revoke all on function public.create_public_booking(
+  text, uuid, text, text, text, timestamptz, text, text
+) from public;
+
+grant execute on function public.create_public_booking(
+  text, uuid, text, text, text, timestamptz, text, text
+) to anon, authenticated;

@@ -654,6 +654,7 @@ export type Database = {
         }
         Returns: Json
       }
+      check_public_booking_request: { Args: never; Returns: undefined }
       create_public_booking: {
         Args: {
           p_customer_note?: string
@@ -666,6 +667,10 @@ export type Database = {
           p_starts_at: string
         }
         Returns: Json
+      }
+      enforce_public_booking_quota: {
+        Args: { p_workspace_id: string }
+        Returns: undefined
       }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string; p_slug: string }
