@@ -69,6 +69,31 @@ describe("Supabase public booking contract", () => {
       });
       expect(retry.error).toBeNull();
       expect(retry.data).toEqual(first.data);
+
+      const nextDaySlots = await supabase.rpc("get_public_available_slots", {
+        p_date: "2030-01-04",
+        p_service_id: serviceId,
+        p_slug: "demo-studio",
+      });
+      expect(nextDaySlots.error).toBeNull();
+      const secondSlot = nextDaySlots.data?.[0];
+      expect(secondSlot).toBeDefined();
+
+      const secondBooking = await supabase.rpc("create_public_booking", {
+        p_email: "integration@example.test",
+        p_idempotency_key: `${idempotencyKey}-second`,
+        p_name: "Different guest name",
+        p_phone: "+420111222333",
+        p_service_id: serviceId,
+        p_slug: "demo-studio",
+        p_starts_at: secondSlot?.starts_at as string,
+      });
+
+      expect(secondBooking.error).toBeNull();
+      const firstBookingId = (first.data as { id?: string } | null)?.id;
+      const secondBookingId = (secondBooking.data as { id?: string } | null)
+        ?.id;
+      expect(secondBookingId).not.toEqual(firstBookingId);
     },
   );
 
