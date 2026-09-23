@@ -36,10 +36,27 @@ test.describe("public booking web", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
+    await page
+      .getByRole("button", { name: /\d{1,2}:\d{2} (AM|PM)/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "Confirm booking" }).click();
 
     await expect(page.locator("p[role=alert]")).toContainText(
-      "Please complete the required fields.",
+      "Enter your name.",
     );
+  });
+
+  test("explains when no times are available and offers another date", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await page.getByLabel("Choose a date").fill("2030-01-05");
+
+    await expect(
+      page.getByText("There are no available times on this date."),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Choose another date" }).click();
+    await expect(page.getByLabel("Choose a date")).toHaveValue("2030-01-07");
   });
 });
