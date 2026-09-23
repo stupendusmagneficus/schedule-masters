@@ -28,3 +28,13 @@ Before opening or updating a PR, review the change for responsibility boundaries
 Use Biome as the canonical formatter and linter for JavaScript, TypeScript, JSX, TSX, JSON, CSS, HTML, and GraphQL. Run `yarn format` locally and `yarn format:check` in CI. Do not add another formatter without an explicit architecture decision.
 
 The detailed conventions are in [Code organization and responsibility boundaries](docs/architecture/code-organization.md).
+
+## Architecture diagrams
+
+Use the project-local [Archify skill](.agents/skills/archify/SKILL.md) when a change needs an architecture, workflow, sequence, data-flow, or lifecycle diagram.
+
+- Keep authored Archify JSON sources under `docs/architecture/diagrams/`.
+- Validate every source with Archify before sharing or committing its rendered HTML.
+- Treat generated HTML as documentation only; never import Archify into a production app or runtime package.
+- Base repository diagrams on current source evidence and record the commit revision when source-backed links are required.
+- Do not claim browser or visual verification unless `visual-check` was actually run and the artifact was inspected.
