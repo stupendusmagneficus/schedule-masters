@@ -1,5 +1,6 @@
 "use client";
 
+import { analyticsEvents } from "@schedule-app/analytics";
 import {
   createSupabaseClient,
   type PublicBookingContext,
@@ -17,6 +18,8 @@ import {
   supportedLocales,
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { analytics } from "../src/lib/analytics";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -109,6 +112,11 @@ export default function HomePage() {
   const selectedService = context.services.find(
     (service) => service.id === selectedServiceId,
   );
+
+  useEffect(() => {
+    void analytics.init();
+    analytics.track(analyticsEvents.bookingPageViewed);
+  }, []);
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem(localeStorageKey);
@@ -208,6 +216,10 @@ export default function HomePage() {
           serviceName: selectedService.name,
           status: "pending",
         });
+        analytics.track(analyticsEvents.publicBookingSucceeded, {
+          locale,
+          mode: "demo",
+        });
         return;
       }
       if (!supabase) {
@@ -218,6 +230,7 @@ export default function HomePage() {
         "demo-studio";
       const idempotencyKey = bookingRequestKey.current ?? crypto.randomUUID();
       bookingRequestKey.current = idempotencyKey;
+      analytics.track(analyticsEvents.publicBookingSubmitted, { locale });
       const { data, error: bookingError } = await supabase.rpc(
         "create_public_booking",
         {
@@ -232,8 +245,13 @@ export default function HomePage() {
         },
       );
       if (bookingError) throw new Error(bookingError.message);
+      analytics.track(analyticsEvents.publicBookingSucceeded, { locale });
       setConfirmation(data as PublicBookingResult);
     } catch (submitError) {
+      analytics.track(analyticsEvents.publicBookingFailed, {
+        locale,
+        reason: "request_failed",
+      });
       setError(
         submitError instanceof Error ? submitError.message : t("common.error"),
       );
@@ -362,7 +380,12 @@ export default function HomePage() {
                     : "slot-option"
                 }
                 key={slot.startsAt}
-                onClick={() => setSelectedSlot(slot)}
+                onClick={() => {
+                  setSelectedSlot(slot);
+                  analytics.track(analyticsEvents.bookingSlotSelected, {
+                    locale,
+                  });
+                }}
                 type="button"
               >
                 {formatTime(new Date(slot.startsAt), locale)}

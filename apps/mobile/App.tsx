@@ -9,6 +9,7 @@ import {
   ConfigurationState,
   LoadingState,
 } from "./src/components/StatusStates";
+import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
@@ -23,6 +24,11 @@ export default function App() {
   const [loading, setLoading] = useState(Boolean(supabase));
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [service, setService] = useState<Service | null>(null);
+
+  useEffect(() => {
+    void analytics.init();
+    analytics.track(analyticsEvents.appOpened);
+  }, []);
 
   useEffect(() => {
     if (!supabase) return;
