@@ -32,7 +32,11 @@ export type MessageKey =
   | "booking.selectService"
   | "booking.selectTime"
   | "booking.required"
-  | "booking.loadingSlots";
+  | "booking.loadingSlots"
+  | "booking.nameRequired"
+  | "booking.chooseAnotherDate"
+  | "booking.requiredHint"
+  | "booking.optional";
 
 type Messages = Record<MessageKey, string>;
 
@@ -61,6 +65,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.selectTime": "Выберите свободное время.",
     "booking.required": "Заполните обязательные поля.",
     "booking.loadingSlots": "Проверяем свободное время…",
+    "booking.nameRequired": "Укажите ваше имя.",
+    "booking.chooseAnotherDate": "Выбрать другую дату",
+    "booking.requiredHint":
+      "Поля со знаком * обязательны. Email и телефон можно не заполнять.",
+    "booking.optional": "необязательно",
   },
   cz: {
     "common.appName": "Schedule Masters",
@@ -86,6 +95,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.selectTime": "Vyberte volný termín.",
     "booking.required": "Vyplňte povinná pole.",
     "booking.loadingSlots": "Kontrolujeme volné termíny…",
+    "booking.nameRequired": "Zadejte své jméno.",
+    "booking.chooseAnotherDate": "Vybrat jiné datum",
+    "booking.requiredHint":
+      "Pole označená * jsou povinná. E-mail a telefon jsou nepovinné.",
+    "booking.optional": "nepovinné",
   },
   en: {
     "common.appName": "Schedule Masters",
@@ -111,6 +125,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.selectTime": "Choose an available time.",
     "booking.required": "Please complete the required fields.",
     "booking.loadingSlots": "Checking availability…",
+    "booking.nameRequired": "Enter your name.",
+    "booking.chooseAnotherDate": "Choose another date",
+    "booking.requiredHint":
+      "Fields marked with * are required. Email and phone are optional.",
+    "booking.optional": "optional",
   },
 };
 

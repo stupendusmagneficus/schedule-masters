@@ -66,6 +66,19 @@ h2 {
   font-size: 17px;
   margin-bottom: 12px;
 }
+.required-marker {
+  color: #a13d3d;
+  margin-left: 4px;
+}
+.required-hint,
+.optional-label {
+  color: #75807c;
+  font-size: 12px;
+  font-weight: 400;
+}
+.required-hint {
+  margin: -4px 0 14px;
+}
 .muted-copy {
   color: #75807c;
   line-height: 1.5;
@@ -173,6 +186,20 @@ textarea {
   cursor: wait;
   opacity: 0.6;
 }
+.secondary-button {
+  min-height: 40px;
+  margin-top: 10px;
+  border: 1px solid #2f8f7b;
+  border-radius: 8px;
+  background: #fff;
+  color: #217464;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 12px;
+}
+.secondary-button:hover {
+  background: #ddf1eb;
+}
 .confirm-button {
   width: 100%;
   margin-top: 24px;
@@ -204,6 +231,9 @@ textarea {
 .empty-state {
   background: #fafaf8;
   color: #75807c;
+}
+.empty-state p {
+  line-height: 1.45;
 }
 .error-state {
   background: #fbe5e3;
