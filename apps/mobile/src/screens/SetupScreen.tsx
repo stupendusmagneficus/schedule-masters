@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
 } from "react-native";
-
+import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
 import { normalizeBookingSlug } from "../utils/slug";
 
@@ -43,7 +43,12 @@ export function SetupScreen({ locale, onComplete }: SetupScreenProps) {
     });
     setBusy(false);
     if (error) setMessage(error.message);
-    else onComplete();
+    else {
+      analytics.track(analyticsEvents.workspaceSetupCompleted, {
+        locale,
+      });
+      onComplete();
+    }
   }
 
   return (

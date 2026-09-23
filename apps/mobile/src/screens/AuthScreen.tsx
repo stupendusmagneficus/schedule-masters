@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
 } from "react-native";
-
+import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
 
 type AuthScreenProps = { readonly onAuthenticated: (session: Session) => void };
@@ -34,8 +34,14 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         });
     setBusy(false);
     if (result.error) setMessage(result.error.message);
-    else if (result.data.session) onAuthenticated(result.data.session);
-    else setMessage("Check your email to confirm the account, then sign in.");
+    else if (result.data.session) {
+      analytics.track(
+        isSignUp
+          ? analyticsEvents.accountSignedUp
+          : analyticsEvents.accountSignedIn,
+      );
+      onAuthenticated(result.data.session);
+    } else setMessage("Check your email to confirm the account, then sign in.");
   }
 
   return (
