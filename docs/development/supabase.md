@@ -50,3 +50,8 @@ The login token is managed by the local Supabase CLI and must not be pasted into
 ## Client keys
 
 The mobile and web clients may use only the public project URL and anon/publishable key. A service-role key is server-only and must never be bundled into Expo or Next.js browser code.
+## Mobile development
+
+Copy `apps/mobile/.env.example` to `apps/mobile/.env` and set the public Supabase URL and anon key. The mobile app uses Supabase Auth with persistent AsyncStorage sessions. Never put the service-role key in the mobile app.
+
+The first authenticated setup creates the master workspace, booking link, first service, and Monday–Friday availability through the `bootstrap_master_workspace` RPC. The RPC is authenticated and protected by `SECURITY DEFINER`; direct anonymous table access remains disabled.

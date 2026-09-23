@@ -538,6 +538,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_master_workspace: {
+        Args: {
+          p_duration_minutes: number
+          p_end_local_time: string
+          p_locale: string
+          p_name: string
+          p_price_amount: number
+          p_service_name: string
+          p_slug: string
+          p_start_local_time: string
+        }
+        Returns: Json
+      }
       create_public_booking: {
         Args: {
           p_customer_note?: string

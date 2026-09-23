@@ -1,142 +1,106 @@
+import "react-native-url-polyfill/auto";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createSupabaseClient } from "@schedule-app/api";
+import { createTranslator, detectLocale, localeLabels, supportedLocales, type SupportedLocale } from "@schedule-app/i18n";
 import { StatusBar } from "expo-status-bar";
 import { getLocales } from "expo-localization";
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import {
-  createTranslator,
-  detectLocale,
-  localeLabels,
-  supportedLocales,
-  type SupportedLocale,
-} from "@schedule-app/i18n";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import type { Session } from "@supabase/supabase-js";
+
+const expoEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+const supabaseUrl = expoEnv?.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = expoEnv?.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseAnonKey
+  ? createSupabaseClient({ url: supabaseUrl, anonKey: supabaseAnonKey, storage: AsyncStorage })
+  : null;
+
+type Workspace = { id: string; name: string; slug: string; timezone: string };
+type Service = { name: string; duration_minutes: number; price_amount: number };
 
 export default function App() {
-  const [locale, setLocale] = useState<SupportedLocale>(() =>
-    detectLocale(getLocales()[0]?.languageTag),
-  );
-  const [showSetup, setShowSetup] = useState(false);
-  const [serviceName, setServiceName] = useState("Gel manicure");
-  const [servicePrice, setServicePrice] = useState("700");
-  const [savedService, setSavedService] = useState({ name: "Gel manicure", price: "700" });
+  const [locale, setLocale] = useState<SupportedLocale>(() => detectLocale(getLocales()[0]?.languageTag));
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(Boolean(supabase));
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [service, setService] = useState<Service | null>(null);
   const t = useMemo(() => createTranslator(locale), [locale]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => { if (active) { setSession(data.session); setLoading(false); } });
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => { if (active) setSession(nextSession); });
+    return () => { active = false; data.subscription.unsubscribe(); };
+  }, []);
+
+  useEffect(() => {
+    if (supabase && session) void loadWorkspace(session.user.id);
+    else { setWorkspace(null); setService(null); }
+  }, [session]);
+
+  async function loadWorkspace(userId: string) {
+    if (!supabase) return;
+    setLoading(true);
+    const { data: member, error: memberError } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", userId).order("created_at", { ascending: true }).limit(1).maybeSingle();
+    if (memberError) { setLoading(false); return; }
+    if (!member) { setWorkspace(null); setService(null); setLoading(false); return; }
+    const [{ data: workspaceData }, { data: serviceData }] = await Promise.all([
+      supabase.from("workspaces").select("id, name, slug, timezone").eq("id", member.workspace_id).single(),
+      supabase.from("services").select("name, duration_minutes, price_amount").eq("workspace_id", member.workspace_id).eq("is_active", true).order("sort_order").limit(1).maybeSingle(),
+    ]);
+    setWorkspace(workspaceData); setService(serviceData); setLoading(false);
+  }
+
+  if (!supabase) return <ConfigurationState />;
+  if (loading && !session) return <LoadingState />;
+  if (!session) return <AuthScreen onAuthenticated={setSession} />;
+  if (!workspace) return <SetupScreen locale={locale} onComplete={() => void loadWorkspace(session.user.id)} />;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.eyebrow}>{t("common.appName")}</Text>
-          <Text style={styles.title}>Today</Text>
-          <Text style={styles.muted}>Tuesday, 22 September</Text>
-        </View>
-        <View style={styles.languagePicker} accessibilityRole="radiogroup">
-          {supportedLocales.map((item) => (
-            <Pressable
-              accessibilityLabel={localeLabels[item]}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: item === locale }}
-              key={item}
-              onPress={() => setLocale(item)}
-              style={[styles.languageButton, item === locale && styles.selectedLanguageButton]}
-            >
-              <Text style={item === locale && styles.selectedLanguageText}>{localeLabels[item]}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <View><Text style={styles.eyebrow}>{t("common.appName")}</Text><Text style={styles.title}>{workspace.name}</Text><Text style={styles.muted}>Today · {workspace.timezone}</Text></View>
+        <Pressable style={styles.signOut} onPress={() => void supabase.auth.signOut()}><Text style={styles.signOutText}>Sign out</Text></Pressable>
       </View>
-
-      <Pressable accessibilityRole="button" onPress={() => setShowSetup((value) => !value)} style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>{showSetup ? "Close setup" : "Add service or working time"}</Text>
-      </Pressable>
-
-      {showSetup && (
-        <View style={styles.panel}>
-          <Text style={styles.panelTitle}>First setup</Text>
-          <Text style={styles.label}>Service name</Text>
-          <TextInput onChangeText={setServiceName} style={styles.input} value={serviceName} />
-          <Text style={styles.label}>Price (CZK)</Text>
-          <TextInput keyboardType="decimal-pad" onChangeText={setServicePrice} style={styles.input} value={servicePrice} />
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              if (serviceName.trim()) setSavedService({ name: serviceName.trim(), price: servicePrice.trim() });
-              setShowSetup(false);
-            }}
-            style={styles.secondaryButton}
-          >
-            <Text style={styles.secondaryButtonText}>Save service</Text>
-          </Pressable>
-          <Text style={styles.helper}>Working time: Monday–Friday, 09:00–17:00</Text>
-        </View>
-      )}
-
-      <View style={styles.summaryGrid}>
-        <View style={styles.stat}><Text style={styles.statLabel}>Bookings</Text><Text style={styles.statValue}>4</Text></View>
-        <View style={styles.stat}><Text style={styles.statLabel}>Expected</Text><Text style={styles.statValue}>2 400 Kč</Text></View>
+      <View style={styles.languagePicker} accessibilityRole="radiogroup">
+        {supportedLocales.map((item) => <Pressable accessibilityRole="radio" accessibilityState={{ selected: item === locale }} key={item} onPress={() => setLocale(item)} style={[styles.languageButton, item === locale && styles.selectedLanguageButton]}><Text style={item === locale && styles.selectedLanguageText}>{localeLabels[item]}</Text></Pressable>)}
       </View>
-
-      <View style={styles.panel}>
-        <View style={styles.rowBetween}><Text style={styles.panelTitle}>Next appointments</Text><Text style={styles.helper}>4 total</Text></View>
-        <Appointment time="09:30" name="Anna K." service={savedService.name} />
-        <Appointment time="13:00" name="Maria P." service={savedService.name} />
-        <Appointment time="15:30" name="Eva S." service="Refill" />
-      </View>
-
-      <View style={styles.panel}>
-        <Text style={styles.panelTitle}>Public booking link</Text>
-        <Text style={styles.link}>schedule-masters.app/demo-studio</Text>
-        <Text style={styles.helper}>Clients can choose {savedService.name} and an available time.</Text>
-      </View>
+      <View style={styles.summaryGrid}><View style={styles.stat}><Text style={styles.statLabel}>Bookings</Text><Text style={styles.statValue}>0</Text></View><View style={styles.stat}><Text style={styles.statLabel}>Expected</Text><Text style={styles.statValue}>0 Kč</Text></View></View>
+      <View style={styles.panel}><Text style={styles.panelTitle}>Your first service</Text>{service ? <View style={styles.serviceRow}><View><Text style={styles.appointmentName}>{service.name}</Text><Text style={styles.helper}>{service.duration_minutes} min</Text></View><Text style={styles.price}>{Number(service.price_amount).toLocaleString("cs-CZ")} Kč</Text></View> : <Text style={styles.helper}>No active services yet.</Text>}</View>
+      <View style={styles.panel}><Text style={styles.panelTitle}>Public booking link</Text><Text style={styles.link}>/{workspace.slug}</Text><Text style={styles.helper}>Clients can choose a service and available time.</Text></View>
       <StatusBar style="auto" />
     </ScrollView>
   );
 }
 
-function Appointment({ time, name, service }: { time: string; name: string; service: string }) {
-  return (
-    <View style={styles.appointment}>
-      <View style={styles.time}><Text style={styles.appointmentTime}>{time}</Text><View style={styles.timeLine} /></View>
-      <View style={styles.appointmentContent}><Text style={styles.appointmentName}>{name}</Text><Text style={styles.helper}>{service}</Text></View>
-      <Text style={styles.status}>Confirmed</Text>
-    </View>
-  );
+function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: Session) => void }) {
+  const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [isSignUp, setIsSignUp] = useState(true); const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string | null>(null);
+  async function submit() {
+    if (!supabase || !email.trim() || password.length < 6) { setMessage("Enter an email and a password with at least 6 characters."); return; }
+    setBusy(true); setMessage(null);
+    const result = isSignUp ? await supabase.auth.signUp({ email: email.trim(), password }) : await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (result.error) setMessage(result.error.message); else if (result.data.session) onAuthenticated(result.data.session); else setMessage("Check your email to confirm the account, then sign in.");
+  }
+  return <ScrollView contentContainerStyle={styles.authContainer}><Text style={styles.eyebrow}>SCHEDULE MASTERS</Text><Text style={styles.title}>{isSignUp ? "Create your workspace" : "Welcome back"}</Text><Text style={styles.muted}>Manage your calendar and let clients book online.</Text><TextInput autoCapitalize="none" autoComplete="email" keyboardType="email-address" onChangeText={setEmail} placeholder="Email" style={styles.input} value={email} /><TextInput onChangeText={setPassword} placeholder="Password" secureTextEntry style={styles.input} value={password} />{message && <Text accessibilityRole="alert" style={styles.error}>{message}</Text>}<Pressable disabled={busy} onPress={() => void submit()} style={styles.primaryButton}><Text style={styles.primaryButtonText}>{busy ? "Loading…" : isSignUp ? "Create account" : "Sign in"}</Text></Pressable><Pressable onPress={() => setIsSignUp((value) => !value)}><Text style={styles.link}>{isSignUp ? "Already have an account? Sign in" : "Create a new account"}</Text></Pressable></ScrollView>;
 }
 
+function SetupScreen({ locale, onComplete }: { locale: SupportedLocale; onComplete: () => void }) {
+  const [name, setName] = useState(""); const [slug, setSlug] = useState(""); const [serviceName, setServiceName] = useState("Gel manicure"); const [price, setPrice] = useState("700"); const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string | null>(null);
+  async function submit() {
+    if (!supabase || !name.trim() || !slug.trim() || !serviceName.trim()) { setMessage("Complete the workspace, booking link, and service fields."); return; }
+    setBusy(true); setMessage(null);
+    const { error } = await supabase.rpc("bootstrap_master_workspace", { p_name: name.trim(), p_slug: slug.trim().toLowerCase(), p_locale: locale, p_service_name: serviceName.trim(), p_duration_minutes: 60, p_price_amount: Number(price) || 0, p_start_local_time: "09:00", p_end_local_time: "17:00" });
+    setBusy(false); if (error) setMessage(error.message); else onComplete();
+  }
+  return <ScrollView contentContainerStyle={styles.authContainer}><Text style={styles.eyebrow}>FIRST SETUP</Text><Text style={styles.title}>Set up your workspace</Text><Text style={styles.muted}>This creates Monday–Friday availability from 09:00 to 17:00. You can refine it later.</Text><TextInput onChangeText={setName} placeholder="Workspace name" style={styles.input} value={name} /><TextInput autoCapitalize="none" onChangeText={(value) => setSlug(value.replace(/[^a-zA-Z0-9-]/g, "-"))} placeholder="Booking link, e.g. anna-nails" style={styles.input} value={slug} /><TextInput onChangeText={setServiceName} placeholder="First service" style={styles.input} value={serviceName} /><TextInput keyboardType="decimal-pad" onChangeText={setPrice} placeholder="Price in CZK" style={styles.input} value={price} />{message && <Text accessibilityRole="alert" style={styles.error}>{message}</Text>}<Pressable disabled={busy} onPress={() => void submit()} style={styles.primaryButton}><Text style={styles.primaryButtonText}>{busy ? "Saving…" : "Save and continue"}</Text></Pressable></ScrollView>;
+}
+
+function LoadingState() { return <View style={styles.center}><ActivityIndicator color="#2f8f7b" /><Text style={styles.muted}>Loading…</Text></View>; }
+function ConfigurationState() { return <View style={styles.center}><Text style={styles.title}>Mobile configuration required</Text><Text style={styles.muted}>Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to run the mobile app.</Text></View>; }
+
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#f5f5f2",
-    gap: 16,
-    padding: 20,
-  },
-  header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", width: "100%" },
-  eyebrow: { color: "#2f8f7b", fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 8 },
-  title: { color: "#202725", fontSize: 30,
-    fontWeight: "700",
-  },
-  muted: { color: "#75807c", marginTop: 4 },
-  languagePicker: { flexDirection: "row", gap: 4 },
-  languageButton: { alignItems: "center", borderColor: "#dee2de", borderRadius: 999, borderWidth: 1, height: 36, justifyContent: "center", minWidth: 44, paddingHorizontal: 8 },
-  selectedLanguageButton: { backgroundColor: "#202725", borderColor: "#202725" },
-  selectedLanguageText: { color: "#ffffff" },
-  primaryButton: { alignItems: "center", backgroundColor: "#2f8f7b", borderRadius: 8, justifyContent: "center", minHeight: 48, paddingHorizontal: 16, width: "100%" },
-  primaryButtonText: { color: "#ffffff", fontWeight: "700" },
-  panel: { backgroundColor: "#ffffff", borderColor: "#dee2de", borderRadius: 12, borderWidth: 1, gap: 12, padding: 16, width: "100%" },
-  panelTitle: { color: "#202725", fontSize: 17, fontWeight: "700" },
-  summaryGrid: { flexDirection: "row", gap: 8, width: "100%" },
-  stat: { backgroundColor: "#fafaf8", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, flex: 1, padding: 14 },
-  statLabel: { color: "#75807c", fontSize: 12 },
-  statValue: { color: "#202725", fontSize: 21, fontWeight: "700", marginTop: 6 },
-  rowBetween: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  appointment: { alignItems: "center", borderTopColor: "#dee2de", borderTopWidth: 1, flexDirection: "row", gap: 12, paddingVertical: 14 },
-  time: { alignItems: "center", width: 48 },
-  appointmentTime: { color: "#4f5c58", fontSize: 12, fontWeight: "700" },
-  timeLine: { backgroundColor: "#2f8f7b", height: 3, marginTop: 6, width: 24 },
-  appointmentContent: { flex: 1 },
-  appointmentName: { color: "#202725", fontSize: 16, fontWeight: "600" },
-  status: { backgroundColor: "#ddf1eb", borderRadius: 999, color: "#217464", fontSize: 11, overflow: "hidden", paddingHorizontal: 8, paddingVertical: 5 },
-  label: { color: "#4f5c58", fontSize: 13, fontWeight: "600" },
-  input: { backgroundColor: "#fafaf8", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, minHeight: 44, paddingHorizontal: 12 },
-  secondaryButton: { alignItems: "center", borderColor: "#2f8f7b", borderRadius: 8, borderWidth: 1, minHeight: 44, justifyContent: "center" },
-  secondaryButtonText: { color: "#217464", fontWeight: "700" },
-  link: { color: "#217464", fontSize: 15, fontWeight: "600" },
-  helper: { color: "#75807c", fontSize: 12, lineHeight: 18 },
+  container: { backgroundColor: "#f5f5f2", gap: 16, padding: 20 }, authContainer: { backgroundColor: "#f5f5f2", gap: 14, justifyContent: "center", minHeight: "100%", padding: 24 }, center: { alignItems: "center", backgroundColor: "#f5f5f2", flex: 1, gap: 12, justifyContent: "center", padding: 24 }, header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", width: "100%" }, eyebrow: { color: "#2f8f7b", fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }, title: { color: "#202725", fontSize: 30, fontWeight: "700" }, muted: { color: "#75807c", lineHeight: 20, marginTop: 4 }, signOut: { padding: 8 }, signOutText: { color: "#217464", fontWeight: "700" }, languagePicker: { flexDirection: "row", gap: 4 }, languageButton: { alignItems: "center", borderColor: "#dee2de", borderRadius: 999, borderWidth: 1, height: 36, justifyContent: "center", minWidth: 44, paddingHorizontal: 8 }, selectedLanguageButton: { backgroundColor: "#202725", borderColor: "#202725" }, selectedLanguageText: { color: "#fff" }, primaryButton: { alignItems: "center", backgroundColor: "#2f8f7b", borderRadius: 8, justifyContent: "center", minHeight: 48, paddingHorizontal: 16, width: "100%" }, primaryButtonText: { color: "#fff", fontWeight: "700" }, panel: { backgroundColor: "#fff", borderColor: "#dee2de", borderRadius: 12, borderWidth: 1, gap: 12, padding: 16, width: "100%" }, panelTitle: { color: "#202725", fontSize: 17, fontWeight: "700" }, summaryGrid: { flexDirection: "row", gap: 8, width: "100%" }, stat: { backgroundColor: "#fafaf8", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, flex: 1, padding: 14 }, statLabel: { color: "#75807c", fontSize: 12 }, statValue: { color: "#202725", fontSize: 21, fontWeight: "700", marginTop: 6 }, serviceRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" }, appointmentName: { color: "#202725", fontSize: 16, fontWeight: "600" }, helper: { color: "#75807c", fontSize: 12, lineHeight: 18 }, price: { color: "#217464", fontWeight: "700" }, link: { color: "#217464", fontSize: 15, fontWeight: "600" }, input: { backgroundColor: "#fff", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, minHeight: 48, paddingHorizontal: 12 }, error: { color: "#a13d3d", fontSize: 13 },
 });
