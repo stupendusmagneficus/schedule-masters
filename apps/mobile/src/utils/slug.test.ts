@@ -8,6 +8,6 @@ describe("normalizeBookingSlug", () => {
   });
 
   it("collapses repeated separators", () => {
-    expect(normalizeBookingSlug("anna---nails" )).toBe("anna-nails");
+    expect(normalizeBookingSlug("anna---nails")).toBe("anna-nails");
   });
 });

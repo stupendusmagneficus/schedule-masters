@@ -27,16 +27,16 @@ packages/<package>/src/
 
 ## Responsibility rules
 
-| Concern | Belongs in | Must not own |
-| --- | --- | --- |
-| Routing and composition | app entry/routes | business rules or data-access details |
-| Screen orchestration | `screens/` or `features/` | generic primitives used by unrelated flows |
-| Reusable UI | `components/` or `ui-*` packages | Supabase queries and navigation decisions |
-| API/Supabase integration | `lib/`, `@schedule-app/api`, adapters | visual layout |
-| Environment variables | `config/` | feature behavior and secrets |
-| Pure business logic | `utils/`, domain, validation | React rendering and side effects |
-| Types | owning module/package | unrelated types from other features |
-| Tests | colocated `*.test.*` or package test folders | production runtime code |
+| Concern                  | Belongs in                                   | Must not own                               |
+| ------------------------ | -------------------------------------------- | ------------------------------------------ |
+| Routing and composition  | app entry/routes                             | business rules or data-access details      |
+| Screen orchestration     | `screens/` or `features/`                    | generic primitives used by unrelated flows |
+| Reusable UI              | `components/` or `ui-*` packages             | Supabase queries and navigation decisions  |
+| API/Supabase integration | `lib/`, `@schedule-app/api`, adapters        | visual layout                              |
+| Environment variables    | `config/`                                    | feature behavior and secrets               |
+| Pure business logic      | `utils/`, domain, validation                 | React rendering and side effects           |
+| Types                    | owning module/package                        | unrelated types from other features        |
+| Tests                    | colocated `*.test.*` or package test folders | production runtime code                    |
 
 ## File-size and extraction rule
 

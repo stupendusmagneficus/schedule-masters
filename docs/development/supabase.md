@@ -50,6 +50,7 @@ The login token is managed by the local Supabase CLI and must not be pasted into
 ## Client keys
 
 The mobile and web clients may use only the public project URL and anon/publishable key. A service-role key is server-only and must never be bundled into Expo or Next.js browser code.
+
 ## Mobile development
 
 Copy `apps/mobile/.env.example` to `apps/mobile/.env` and set the public Supabase URL and publishable key. The mobile app uses Supabase Auth with persistent Keychain-backed SecureStore sessions. Never put the secret/service-role key in the mobile app.

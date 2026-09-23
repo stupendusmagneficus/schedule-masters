@@ -18,13 +18,14 @@ All applications and packages follow the repository-wide [code organization stan
 
 Before opening a pull request, run:
 
-~~~bash
+```bash
 yarn install --immutable
 yarn typecheck
+yarn format:check
 yarn lint
 yarn test
 yarn build
-~~~
+```
 
 ## Pull request review protocol
 

@@ -29,6 +29,8 @@ jobs:
         run: yarn install --immutable
       - name: Typecheck
         run: yarn typecheck
+      - name: Format check
+        run: yarn format:check
       - name: Lint
         run: yarn lint
       - name: Test

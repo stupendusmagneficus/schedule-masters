@@ -9,10 +9,11 @@ const secureStorage = {
   setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
 };
 
-export const supabase = mobileEnv.supabaseUrl && mobileEnv.supabasePublishableKey
-  ? createSupabaseClient({
-      url: mobileEnv.supabaseUrl,
-      publishableKey: mobileEnv.supabasePublishableKey,
-      storage: secureStorage,
-    })
-  : null;
+export const supabase =
+  mobileEnv.supabaseUrl && mobileEnv.supabasePublishableKey
+    ? createSupabaseClient({
+        url: mobileEnv.supabaseUrl,
+        publishableKey: mobileEnv.supabasePublishableKey,
+        storage: secureStorage,
+      })
+    : null;

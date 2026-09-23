@@ -1,6 +1,12 @@
 import type { Session } from "@supabase/supabase-js";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+} from "react-native";
 
 import { supabase } from "../lib/supabase";
 
@@ -22,24 +28,101 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     setMessage(null);
     const result = isSignUp
       ? await supabase.auth.signUp({ email: email.trim(), password })
-      : await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      : await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
     setBusy(false);
     if (result.error) setMessage(result.error.message);
     else if (result.data.session) onAuthenticated(result.data.session);
     else setMessage("Check your email to confirm the account, then sign in.");
   }
 
-  return <ScrollView contentContainerStyle={styles.container}><Text style={styles.eyebrow}>SCHEDULE MASTERS</Text><Text style={styles.title}>{isSignUp ? "Create your workspace" : "Welcome back"}</Text><Text style={styles.muted}>Manage your calendar and let clients book online.</Text><TextInput autoCapitalize="none" autoComplete="email" keyboardType="email-address" onChangeText={setEmail} placeholder="Email" style={styles.input} value={email} /><TextInput onChangeText={setPassword} placeholder="Password" secureTextEntry style={styles.input} value={password} />{message && <Text accessibilityRole="alert" style={styles.error}>{message}</Text>}<Pressable disabled={busy} onPress={() => void submit()} style={styles.primaryButton}><Text style={styles.primaryButtonText}>{busy ? "Loading…" : isSignUp ? "Create account" : "Sign in"}</Text></Pressable><Pressable onPress={() => setIsSignUp((value) => !value)}><Text style={styles.link}>{isSignUp ? "Already have an account? Sign in" : "Create a new account"}</Text></Pressable></ScrollView>;
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.eyebrow}>SCHEDULE MASTERS</Text>
+      <Text style={styles.title}>
+        {isSignUp ? "Create your workspace" : "Welcome back"}
+      </Text>
+      <Text style={styles.muted}>
+        Manage your calendar and let clients book online.
+      </Text>
+      <TextInput
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        onChangeText={setEmail}
+        placeholder="Email"
+        style={styles.input}
+        value={email}
+      />
+      <TextInput
+        onChangeText={setPassword}
+        placeholder="Password"
+        secureTextEntry
+        style={styles.input}
+        value={password}
+      />
+      {message && (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {message}
+        </Text>
+      )}
+      <Pressable
+        disabled={busy}
+        onPress={() => void submit()}
+        style={styles.primaryButton}
+      >
+        <Text style={styles.primaryButtonText}>
+          {busy ? "Loading…" : isSignUp ? "Create account" : "Sign in"}
+        </Text>
+      </Pressable>
+      <Pressable onPress={() => setIsSignUp((value) => !value)}>
+        <Text style={styles.link}>
+          {isSignUp
+            ? "Already have an account? Sign in"
+            : "Create a new account"}
+        </Text>
+      </Pressable>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "#f5f5f2", gap: 14, justifyContent: "center", minHeight: "100%", padding: 24 },
-  eyebrow: { color: "#2f8f7b", fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 8 },
+  container: {
+    backgroundColor: "#f5f5f2",
+    gap: 14,
+    justifyContent: "center",
+    minHeight: "100%",
+    padding: 24,
+  },
+  eyebrow: {
+    color: "#2f8f7b",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
   title: { color: "#202725", fontSize: 30, fontWeight: "700" },
   muted: { color: "#75807c", lineHeight: 20, marginTop: 4 },
-  input: { backgroundColor: "#fff", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, minHeight: 48, paddingHorizontal: 12 },
+  input: {
+    backgroundColor: "#fff",
+    borderColor: "#dee2de",
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 48,
+    paddingHorizontal: 12,
+  },
   error: { color: "#a13d3d", fontSize: 13 },
-  primaryButton: { alignItems: "center", backgroundColor: "#2f8f7b", borderRadius: 8, justifyContent: "center", minHeight: 48, paddingHorizontal: 16, width: "100%" },
+  primaryButton: {
+    alignItems: "center",
+    backgroundColor: "#2f8f7b",
+    borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 16,
+    width: "100%",
+  },
   primaryButtonText: { color: "#fff", fontWeight: "700" },
   link: { color: "#217464", fontSize: 15, fontWeight: "600" },
 });

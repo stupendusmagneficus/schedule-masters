@@ -63,8 +63,8 @@ function getDemoSlots(date: string): Slot[] {
 function isConfiguredSupabase() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project"),
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project"),
   );
 }
 
@@ -90,15 +90,20 @@ export default function HomePage() {
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<PublicBookingResult | null>(null);
+  const [confirmation, setConfirmation] = useState<PublicBookingResult | null>(
+    null,
+  );
   const supabase = useMemo(() => {
     if (!isConfiguredSupabase()) return null;
     return createSupabaseClient({
       url: process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
+      publishableKey: process.env
+        .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     });
   }, []);
-  const selectedService = context.services.find((service) => service.id === selectedServiceId);
+  const selectedService = context.services.find(
+    (service) => service.id === selectedServiceId,
+  );
 
   useEffect(() => {
     window.localStorage.setItem(localeStorageKey, locale);
@@ -109,8 +114,13 @@ export default function HomePage() {
     let cancelled = false;
     async function loadContext() {
       if (!supabase) return;
-      const slug = new URLSearchParams(window.location.search).get("slug") ?? "demo-studio";
-      const { data, error: contextError } = await supabase.rpc("get_public_booking_context", { p_slug: slug });
+      const slug =
+        new URLSearchParams(window.location.search).get("slug") ??
+        "demo-studio";
+      const { data, error: contextError } = await supabase.rpc(
+        "get_public_booking_context",
+        { p_slug: slug },
+      );
       if (!cancelled && !contextError && data) {
         const parsed = parsePublicBookingContext(data);
         setContext(parsed);
@@ -118,7 +128,9 @@ export default function HomePage() {
       }
     }
     void loadContext();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [supabase]);
 
   useEffect(() => {
@@ -126,20 +138,42 @@ export default function HomePage() {
     async function loadSlots() {
       setSelectedSlot(null);
       setError(null);
-      if (!selectedServiceId) { setSlots([]); return; }
-      if (!supabase) { setSlots(getDemoSlots(date)); return; }
-      const slug = new URLSearchParams(window.location.search).get("slug") ?? "demo-studio";
-      const { data, error: slotsError } = await supabase.rpc("get_public_available_slots", {
-        p_date: date,
-        p_service_id: selectedServiceId,
-        p_slug: slug,
-      });
+      if (!selectedServiceId) {
+        setSlots([]);
+        return;
+      }
+      if (!supabase) {
+        setSlots(getDemoSlots(date));
+        return;
+      }
+      const slug =
+        new URLSearchParams(window.location.search).get("slug") ??
+        "demo-studio";
+      const { data, error: slotsError } = await supabase.rpc(
+        "get_public_available_slots",
+        {
+          p_date: date,
+          p_service_id: selectedServiceId,
+          p_slug: slug,
+        },
+      );
       if (cancelled) return;
-      if (slotsError) { setError(slotsError.message); setSlots([]); return; }
-      setSlots((data ?? []).map((slot) => ({ startsAt: slot.starts_at, endsAt: slot.ends_at })));
+      if (slotsError) {
+        setError(slotsError.message);
+        setSlots([]);
+        return;
+      }
+      setSlots(
+        (data ?? []).map((slot) => ({
+          startsAt: slot.starts_at,
+          endsAt: slot.ends_at,
+        })),
+      );
     }
     void loadSlots();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [date, selectedServiceId, supabase]);
 
   async function submitBooking() {
@@ -160,20 +194,27 @@ export default function HomePage() {
         });
         return;
       }
-      const slug = new URLSearchParams(window.location.search).get("slug") ?? "demo-studio";
-      const { data, error: bookingError } = await supabase.rpc("create_public_booking", {
-        p_customer_note: note || undefined,
-        p_email: email,
-        p_name: name,
-        p_phone: phone,
-        p_service_id: selectedService.id,
-        p_slug: slug,
-        p_starts_at: selectedSlot.startsAt,
-      });
+      const slug =
+        new URLSearchParams(window.location.search).get("slug") ??
+        "demo-studio";
+      const { data, error: bookingError } = await supabase.rpc(
+        "create_public_booking",
+        {
+          p_customer_note: note || undefined,
+          p_email: email,
+          p_name: name,
+          p_phone: phone,
+          p_service_id: selectedService.id,
+          p_slug: slug,
+          p_starts_at: selectedSlot.startsAt,
+        },
+      );
       if (bookingError) throw new Error(bookingError.message);
       setConfirmation(data as PublicBookingResult);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : t("common.error"));
+      setError(
+        submitError instanceof Error ? submitError.message : t("common.error"),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -183,13 +224,21 @@ export default function HomePage() {
     return (
       <main className="booking-page page-shell">
         <section className="booking-panel confirmation-panel">
-          <span className="success-mark" aria-hidden="true">✓</span>
+          <span className="success-mark" aria-hidden="true">
+            ✓
+          </span>
           <p className="eyebrow">{t("booking.confirmed")}</p>
           <h1>{context.workspace.name}</h1>
           <p className="confirmation-copy">
-            {confirmation.serviceName} · {formatDate(new Date(confirmation.startsAt), locale)} · {formatTime(new Date(confirmation.startsAt), locale)}
+            {confirmation.serviceName} ·{" "}
+            {formatDate(new Date(confirmation.startsAt), locale)} ·{" "}
+            {formatTime(new Date(confirmation.startsAt), locale)}
           </p>
-          <button className="primary-button" type="button" onClick={() => setConfirmation(null)}>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => setConfirmation(null)}
+          >
             {t("common.cancel")}
           </button>
         </section>
@@ -206,11 +255,19 @@ export default function HomePage() {
             <h1>{context.workspace.name}</h1>
             <p className="muted-copy">{t("booking.description")}</p>
           </div>
-          <div className="language-picker" aria-label={t("common.language")} role="radiogroup">
+          <div
+            className="language-picker"
+            aria-label={t("common.language")}
+            role="radiogroup"
+          >
             {supportedLocales.map((item) => (
               <button
                 aria-checked={item === locale}
-                className={item === locale ? "language-button selected" : "language-button"}
+                className={
+                  item === locale
+                    ? "language-button selected"
+                    : "language-button"
+                }
                 key={item}
                 onClick={() => setLocale(item)}
                 role="radio"
@@ -227,29 +284,62 @@ export default function HomePage() {
           <div className="service-list">
             {context.services.map((service) => (
               <button
-                className={service.id === selectedServiceId ? "service-option selected" : "service-option"}
+                className={
+                  service.id === selectedServiceId
+                    ? "service-option selected"
+                    : "service-option"
+                }
                 key={service.id}
                 onClick={() => setSelectedServiceId(service.id)}
                 type="button"
               >
-                <span><strong>{service.name}</strong><small>{service.durationMinutes} min</small></span>
-                <span className="service-price">{formatCurrency(service.priceAmount, locale, service.currency)}</span>
+                <span>
+                  <strong>{service.name}</strong>
+                  <small>{service.durationMinutes} min</small>
+                </span>
+                <span className="service-price">
+                  {formatCurrency(
+                    service.priceAmount,
+                    locale,
+                    service.currency,
+                  )}
+                </span>
               </button>
             ))}
           </div>
         </div>
 
         <div className="booking-section">
-          <label htmlFor="booking-date"><h2>{t("booking.chooseDate")}</h2></label>
-          <input id="booking-date" className="date-input" min={new Date().toISOString().slice(0, 10)} onChange={(event) => setDate(event.target.value)} type="date" value={date} />
+          <label htmlFor="booking-date">
+            <h2>{t("booking.chooseDate")}</h2>
+          </label>
+          <input
+            id="booking-date"
+            className="date-input"
+            min={new Date().toISOString().slice(0, 10)}
+            onChange={(event) => setDate(event.target.value)}
+            type="date"
+            value={date}
+          />
         </div>
 
         <div className="booking-section">
           <h2>{t("booking.chooseTime")}</h2>
-          {!isLoading && slots.length === 0 && <p className="empty-state">{t("booking.noSlots")}</p>}
+          {!isLoading && slots.length === 0 && (
+            <p className="empty-state">{t("booking.noSlots")}</p>
+          )}
           <div className="slot-list">
             {slots.map((slot) => (
-              <button className={selectedSlot?.startsAt === slot.startsAt ? "slot-option selected" : "slot-option"} key={slot.startsAt} onClick={() => setSelectedSlot(slot)} type="button">
+              <button
+                className={
+                  selectedSlot?.startsAt === slot.startsAt
+                    ? "slot-option selected"
+                    : "slot-option"
+                }
+                key={slot.startsAt}
+                onClick={() => setSelectedSlot(slot)}
+                type="button"
+              >
                 {formatTime(new Date(slot.startsAt), locale)}
               </button>
             ))}
@@ -259,15 +349,50 @@ export default function HomePage() {
         <div className="booking-section details-section">
           <h2>{t("booking.yourDetails")}</h2>
           <div className="form-grid">
-            <label>{t("booking.name")}<input onChange={(event) => setName(event.target.value)} value={name} /></label>
-            <label>{t("booking.email")}<input onChange={(event) => setEmail(event.target.value)} type="email" value={email} /></label>
-            <label>{t("booking.phone")}<input onChange={(event) => setPhone(event.target.value)} type="tel" value={phone} /></label>
-            <label>{t("booking.note")}<textarea onChange={(event) => setNote(event.target.value)} value={note} /></label>
+            <label>
+              {t("booking.name")}
+              <input
+                onChange={(event) => setName(event.target.value)}
+                value={name}
+              />
+            </label>
+            <label>
+              {t("booking.email")}
+              <input
+                onChange={(event) => setEmail(event.target.value)}
+                type="email"
+                value={email}
+              />
+            </label>
+            <label>
+              {t("booking.phone")}
+              <input
+                onChange={(event) => setPhone(event.target.value)}
+                type="tel"
+                value={phone}
+              />
+            </label>
+            <label>
+              {t("booking.note")}
+              <textarea
+                onChange={(event) => setNote(event.target.value)}
+                value={note}
+              />
+            </label>
           </div>
         </div>
 
-        {error && <p className="error-state" role="alert">{error}</p>}
-        <button className="primary-button confirm-button" disabled={isLoading} onClick={() => void submitBooking()} type="button">
+        {error && (
+          <p className="error-state" role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          className="primary-button confirm-button"
+          disabled={isLoading}
+          onClick={() => void submitBooking()}
+          type="button"
+        >
           {isLoading ? t("common.loading") : t("booking.confirm")}
         </button>
       </section>

@@ -11,6 +11,7 @@ Linear task: SCH-
 - [ ] Dependencies are added only to the workspace that owns them.
 - [ ] No secrets or production credentials are committed.
 - [ ] `yarn typecheck` passes.
+- [ ] `yarn format:check` passes.
 - [ ] `yarn lint` passes.
 - [ ] `yarn test` passes.
 - [ ] `yarn build` passes.
