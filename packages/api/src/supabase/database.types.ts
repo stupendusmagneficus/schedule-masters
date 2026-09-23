@@ -538,6 +538,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_public_booking: {
+        Args: {
+          p_customer_note?: string
+          p_email: string
+          p_name: string
+          p_phone: string
+          p_service_id: string
+          p_slug: string
+          p_starts_at: string
+        }
+        Returns: Json
+      }
+      get_public_available_slots: {
+        Args: { p_date: string; p_service_id: string; p_slug: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
+      get_public_booking_context: { Args: { p_slug: string }; Returns: Json }
       is_workspace_member: {
         Args: { target_workspace_id: string }
         Returns: boolean

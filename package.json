@@ -13,11 +13,11 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
-    "supabase:start": "npx supabase start",
-    "supabase:stop": "npx supabase stop",
-    "supabase:status": "npx supabase status",
-    "supabase:reset": "npx supabase db reset",
-    "supabase:types": "npx supabase gen types typescript --local --schema public | sed '${/^$/d;}' > packages/api/src/supabase/database.types.ts"
+    "supabase:start": "npx supabase@2.117.0 start",
+    "supabase:stop": "npx supabase@2.117.0 stop",
+    "supabase:status": "npx supabase@2.117.0 status",
+    "supabase:reset": "npx supabase@2.117.0 db reset",
+    "supabase:types": "npx supabase@2.117.0 gen types typescript --local --schema public | sed '${/^$/d;}' > packages/api/src/supabase/database.types.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",

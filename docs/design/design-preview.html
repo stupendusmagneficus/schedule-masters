@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Schedule Masters — Design Preview</title>
+    <style>
+      :root { --canvas:#f5f5f2; --raised:#fff; --subtle:#fafaf8; --ink:#202725; --muted:#4f5c58; --quiet:#75807c; --line:#dee2de; --jade:#2f8f7b; --jade-dark:#217464; --jade-soft:#ddf1eb; --radius:12px; --shadow:0 6px 18px rgba(32,39,37,.06); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,sans-serif; }
+      * { box-sizing:border-box; } body { margin:0; background:var(--canvas); color:var(--ink); } .shell { max-width:1180px; margin:0 auto; padding:40px 24px 64px; } h1,h2,h3,p { margin:0; } h1 { font-size:32px; } h2 { font-size:22px; margin-bottom:16px; } .intro { display:flex; justify-content:space-between; align-items:end; gap:24px; margin-bottom:32px; } .intro p { color:var(--muted); max-width:520px; line-height:1.5; } .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; } .screen { background:var(--raised); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; } .screen-head { display:flex; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--line); } .screen-head small,.meta { color:var(--quiet); font-size:12px; } .screen-body { padding:20px; } .greeting { color:var(--muted); font-size:14px; margin-bottom:4px; } .title { font-size:24px; font-weight:700; margin-bottom:18px; } button { min-height:44px; border:0; border-radius:12px; background:var(--jade); color:#fff; padding:0 16px; font-weight:600; font-size:14px; } .summary { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:16px 0; } .stat { background:var(--subtle); border-radius:12px; padding:12px; } .stat strong { display:block; font-size:20px; margin-top:4px; } .appointment,.service,.slot { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--line); } .appointment:last-child,.service:last-child { border-bottom:0; } .avatar { display:grid; place-items:center; width:40px; height:40px; border-radius:50%; background:var(--jade-soft); color:var(--jade-dark); font-weight:700; } .person { display:flex; align-items:center; gap:10px; } .badge { border-radius:999px; background:var(--jade-soft); color:var(--jade-dark); padding:5px 8px; font-size:12px; } .calendar { display:grid; gap:8px; } .day { display:grid; grid-template-columns:48px 1fr; min-height:54px; } .time { color:var(--quiet); font-size:12px; padding-top:4px; } .track { border-left:2px solid var(--line); padding-left:12px; } .event { background:var(--jade-soft); border-left:3px solid var(--jade); border-radius:8px; padding:8px 10px; font-size:13px; } .profile { text-align:center; margin-bottom:20px; } .profile .avatar { width:64px; height:64px; margin:0 auto 10px; font-size:22px; } .service { text-align:left; } .price { font-weight:600; } .slots { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; } .slot { justify-content:center; border:1px solid var(--line); border-radius:10px; padding:10px 6px; color:var(--muted); } .slot.active { border-color:var(--jade); color:var(--jade-dark); background:var(--jade-soft); } .section-label { display:block; color:var(--quiet); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin:20px 0 8px; } @media (max-width:900px) { .grid { grid-template-columns:1fr; max-width:420px; } .intro { display:block; } .intro p { margin-top:10px; } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="intro">
+        <div><h1>Schedule Masters</h1><p>Warm Vertical: precise master workflows with a calm, welcoming booking experience.</p></div>
+        <span class="badge">MVP visual direction</span>
+      </div>
+      <div class="grid">
+        <section class="screen" aria-label="Master dashboard preview">
+          <div class="screen-head"><strong>Today</strong><small>Tue, 22 Sep</small></div>
+          <div class="screen-body"><p class="greeting">Good morning</p><div class="title">Your day</div><button>Add booking</button><div class="summary"><div class="stat"><span class="meta">Bookings</span><strong>4</strong></div><div class="stat"><span class="meta">Expected</span><strong>2 400 Kč</strong></div></div><span class="section-label">Next appointments</span><div class="appointment"><div class="person"><div class="avatar">AK</div><div><strong>Anna K.</strong><div class="meta">09:30 · Gel manicure</div></div></div><span class="badge">Confirmed</span></div><div class="appointment"><div class="person"><div class="avatar">MP</div><div><strong>Maria P.</strong><div class="meta">13:00 · Refill</div></div></div><span class="badge">Confirmed</span></div></div>
+        </section>
+        <section class="screen" aria-label="Calendar preview">
+          <div class="screen-head"><strong>Calendar</strong><small>Today</small></div>
+          <div class="screen-body"><div class="title">22 September</div><div class="calendar"><div class="day"><div class="time">09:00</div><div class="track"><div class="event"><strong>Anna K.</strong><br><span class="meta">Gel manicure · 90 min</span></div></div></div><div class="day"><div class="time">10:30</div><div class="track"></div></div><div class="day"><div class="time">12:00</div><div class="track"><div class="event" style="background:#e9ebe7;border-left-color:#9aa8a2"><strong>Break</strong><br><span class="meta">Lunch · 60 min</span></div></div></div><div class="day"><div class="time">13:00</div><div class="track"><div class="event"><strong>Maria P.</strong><br><span class="meta">Refill · 60 min</span></div></div></div></div><button style="width:100%;margin-top:18px">Add booking or break</button></div>
+        </section>
+        <section class="screen" aria-label="Public booking page preview">
+          <div class="screen-head"><strong>Book an appointment</strong><small>EN · CZ · RU</small></div>
+          <div class="screen-body"><div class="profile"><div class="avatar">E</div><h3>Elena Beauty</h3><p class="meta">Nails & beauty · Prague</p></div><span class="section-label">Choose a service</span><div class="service"><div><strong>Gel manicure</strong><div class="meta">90 min</div></div><span class="price">600 Kč</span></div><div class="service"><div><strong>Refill</strong><div class="meta">60 min</div></div><span class="price">450 Kč</span></div><span class="section-label">Choose a time</span><div class="slots"><div class="slot">09:30</div><div class="slot active">13:00</div><div class="slot">15:30</div></div><button style="width:100%;margin-top:20px">Continue</button></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

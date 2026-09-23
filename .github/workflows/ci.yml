@@ -78,7 +78,7 @@ jobs:
       - name: Apply migrations and seed
         run: yarn supabase:reset
       - name: Lint local database
-        run: npx supabase db lint --local
+        run: npx supabase@2.117.0 db lint --local
       - name: Regenerate database types
         run: yarn supabase:types
       - name: Verify generated types are committed
