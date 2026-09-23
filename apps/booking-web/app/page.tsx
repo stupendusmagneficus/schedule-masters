@@ -16,7 +16,7 @@ import {
   type SupportedLocale,
   supportedLocales,
 } from "@schedule-app/i18n";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -93,6 +93,7 @@ export default function HomePage() {
   const [confirmation, setConfirmation] = useState<PublicBookingResult | null>(
     null,
   );
+  const bookingRequestKey = useRef<string | null>(null);
   const supabase = useMemo(() => {
     if (!isConfiguredSupabase()) return null;
     return createSupabaseClient({
@@ -197,11 +198,14 @@ export default function HomePage() {
       const slug =
         new URLSearchParams(window.location.search).get("slug") ??
         "demo-studio";
+      const idempotencyKey = bookingRequestKey.current ?? crypto.randomUUID();
+      bookingRequestKey.current = idempotencyKey;
       const { data, error: bookingError } = await supabase.rpc(
         "create_public_booking",
         {
           p_customer_note: note || undefined,
           p_email: email,
+          p_idempotency_key: idempotencyKey,
           p_name: name,
           p_phone: phone,
           p_service_id: selectedService.id,
@@ -237,7 +241,10 @@ export default function HomePage() {
           <button
             className="primary-button"
             type="button"
-            onClick={() => setConfirmation(null)}
+            onClick={() => {
+              bookingRequestKey.current = null;
+              setConfirmation(null);
+            }}
           >
             {t("common.cancel")}
           </button>
