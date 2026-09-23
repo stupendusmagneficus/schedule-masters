@@ -12,6 +12,8 @@ supabase/.temp/
 .next/
 dist/
 coverage/
+playwright-report/
+test-results/
 *.tsbuildinfo
 *.log
 .env

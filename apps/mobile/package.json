@@ -7,7 +7,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "echo 'Mobile E2E is planned for a later task.'"
+    "test:e2e": "echo 'Mobile E2E is executed by the root Playwright configuration.'"
   },
   "dependencies": {
     "@schedule-app/api": "workspace:*",
