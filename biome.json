@@ -11,6 +11,7 @@
       "!**/.next",
       "!**/dist",
       "!**/coverage",
+      "!**/test-results",
       "!**/supabase/.branches",
       "!**/supabase/.temp",
       "!packages/api/src/supabase/database.types.ts",

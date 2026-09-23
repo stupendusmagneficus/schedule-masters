@@ -46,12 +46,15 @@ const demoContext: PublicBookingContext = {
 function getTomorrow() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
+  while (tomorrow.getDay() === 0) {
+    tomorrow.setDate(tomorrow.getDate() + 1);
+  }
   return tomorrow.toISOString().slice(0, 10);
 }
 
 function getDemoSlots(date: string): Slot[] {
   const day = new Date(`${date}T00:00:00`);
-  if (Number.isNaN(day.getTime()) || day.getDay() === 0) return [];
+  if (Number.isNaN(day.getTime())) return [];
 
   return ["09:30", "11:00", "13:00", "15:30"].map((time) => {
     const start = new Date(`${date}T${time}:00+02:00`);
@@ -68,16 +71,15 @@ function isConfiguredSupabase() {
   );
 }
 
-export default function HomePage() {
-  const [locale, setLocale] = useState<SupportedLocale>(() => {
-    if (typeof window === "undefined") {
-      return detectLocale();
-    }
+function isDemoBookingPage() {
+  return (
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("demo") === "1"
+  );
+}
 
-    return detectLocale(
-      window.localStorage.getItem(localeStorageKey) ?? navigator.language,
-    );
-  });
+export default function HomePage() {
+  const [locale, setLocale] = useState<SupportedLocale>(detectLocale);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const [context, setContext] = useState<PublicBookingContext>(demoContext);
   const [selectedServiceId, setSelectedServiceId] = useState(demoServiceId);
@@ -94,17 +96,26 @@ export default function HomePage() {
     null,
   );
   const bookingRequestKey = useRef<string | null>(null);
+  const demoMode = isDemoBookingPage();
   const supabase = useMemo(() => {
+    if (demoMode) return null;
     if (!isConfiguredSupabase()) return null;
     return createSupabaseClient({
       url: process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       publishableKey: process.env
         .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     });
-  }, []);
+  }, [demoMode]);
   const selectedService = context.services.find(
     (service) => service.id === selectedServiceId,
   );
+
+  useEffect(() => {
+    const storedLocale = window.localStorage.getItem(localeStorageKey);
+    if (storedLocale) {
+      setLocale(detectLocale(storedLocale));
+    }
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem(localeStorageKey, locale);
@@ -139,12 +150,16 @@ export default function HomePage() {
     async function loadSlots() {
       setSelectedSlot(null);
       setError(null);
+      if (isDemoBookingPage()) {
+        setSlots(getDemoSlots(date));
+        return;
+      }
       if (!selectedServiceId) {
         setSlots([]);
         return;
       }
       if (!supabase) {
-        setSlots(getDemoSlots(date));
+        setSlots([]);
         return;
       }
       const slug =
@@ -185,7 +200,7 @@ export default function HomePage() {
     setError(null);
     setIsLoading(true);
     try {
-      if (!supabase) {
+      if (isDemoBookingPage()) {
         setConfirmation({
           id: `demo-${Date.now()}`,
           startsAt: selectedSlot.startsAt,
@@ -194,6 +209,9 @@ export default function HomePage() {
           status: "pending",
         });
         return;
+      }
+      if (!supabase) {
+        throw new Error(t("common.error"));
       }
       const slug =
         new URLSearchParams(window.location.search).get("slug") ??

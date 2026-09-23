@@ -12,7 +12,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e",
+    "test:integration": "yarn workspace @schedule-app/api test:integration",
+    "test:e2e": "playwright test && playwright test --config=playwright.mobile.config.ts",
     "format": "biome format --write .",
     "format:check": "biome ci .",
     "biome:lint": "biome lint .",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
     "@eslint/js": "9.39.1",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.10.1",
     "@typescript-eslint/eslint-plugin": "8.70.0",
     "@typescript-eslint/parser": "8.70.0",
