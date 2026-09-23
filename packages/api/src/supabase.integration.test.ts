@@ -1,10 +1,19 @@
+import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
-
 import { createSupabaseClient } from "./supabase/client";
+import {
+  createAuthenticatedTestUser,
+  createSupabaseAdminTestClient,
+} from "./supabase.integration.helpers";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const integrationTest = supabaseUrl && supabasePublishableKey ? it : it.skip;
+const rlsIntegrationTest =
+  supabaseUrl && supabasePublishableKey && supabaseServiceRoleKey
+    ? it
+    : it.skip;
 
 const supabase =
   supabaseUrl && supabasePublishableKey
@@ -94,6 +103,108 @@ describe("Supabase public booking contract", () => {
       const secondBookingId = (secondBooking.data as { id?: string } | null)
         ?.id;
       expect(secondBookingId).not.toEqual(firstBookingId);
+    },
+  );
+
+  rlsIntegrationTest(
+    "rejects cross-workspace reads and appointment references",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceA = randomUUID();
+      const workspaceB = randomUUID();
+      const password = `Test-${suffix}-Password!`;
+      const emailA = `rls-a-${suffix}@example.test`;
+      const emailB = `rls-b-${suffix}@example.test`;
+
+      const createdWorkspaces = await admin.from("workspaces").insert([
+        { id: workspaceA, name: "RLS Workspace A", slug: `rls-a-${suffix}` },
+        { id: workspaceB, name: "RLS Workspace B", slug: `rls-b-${suffix}` },
+      ]);
+      expect(createdWorkspaces.error).toBeNull();
+
+      const userA = await createAuthenticatedTestUser({
+        admin,
+        email: emailA,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const userB = await createAuthenticatedTestUser({
+        admin,
+        email: emailB,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+
+      const memberships = await admin.from("workspace_members").insert([
+        { role: "owner", user_id: userA.user.id, workspace_id: workspaceA },
+        { role: "owner", user_id: userB.user.id, workspace_id: workspaceB },
+      ]);
+      expect(memberships.error).toBeNull();
+
+      const customerB = await admin
+        .from("customers")
+        .insert({ name: "Workspace B Customer", workspace_id: workspaceB })
+        .select("id")
+        .single();
+      const serviceB = await admin
+        .from("services")
+        .insert({
+          duration_minutes: 60,
+          name: "Workspace B Service",
+          price_amount: 500,
+          workspace_id: workspaceB,
+        })
+        .select("id")
+        .single();
+      expect(customerB.error).toBeNull();
+      expect(serviceB.error).toBeNull();
+      const customerBId = customerB.data?.id;
+      const serviceBId = serviceB.data?.id;
+      if (!customerBId || !serviceBId) {
+        throw new Error("Cross-workspace fixtures were not created");
+      }
+
+      const crossWorkspaceRead = await userA.client
+        .from("customers")
+        .select("id")
+        .eq("id", customerBId);
+      expect(crossWorkspaceRead.error).toBeNull();
+      expect(crossWorkspaceRead.data).toEqual([]);
+
+      const crossWorkspaceInsert = await userA.client
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerBId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-02-01T11:00:00.000Z",
+          occupied_range: "[2030-02-01T10:00:00.000Z,2030-02-01T11:00:00.000Z)",
+          price_amount_snapshot: 500,
+          service_id: serviceBId,
+          service_name_snapshot: "Workspace B Service",
+          source: "master_created",
+          starts_at: "2030-02-01T10:00:00.000Z",
+          workspace_id: workspaceA,
+        });
+      expect(crossWorkspaceInsert.data).toBeNull();
+      expect(crossWorkspaceInsert.error).not.toBeNull();
+
+      await admin
+        .from("workspaces")
+        .delete()
+        .in("id", [workspaceA, workspaceB]);
+      await admin.auth.admin.deleteUser(userA.user.id);
+      await admin.auth.admin.deleteUser(userB.user.id);
     },
   );
 
