@@ -10,12 +10,12 @@
     "test:e2e": "echo 'Mobile E2E is planned for a later task.'"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^3.1.1",
     "@schedule-app/api": "workspace:*",
     "@schedule-app/i18n": "workspace:*",
     "@supabase/supabase-js": "2.116.0",
     "expo": "57.0.24",
     "expo-localization": "~57.0.2",
+    "expo-secure-store": "~57.0.4",
     "expo-status-bar": "57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",

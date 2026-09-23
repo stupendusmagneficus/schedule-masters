@@ -1,10 +1,10 @@
 import "react-native-url-polyfill/auto";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSupabaseClient } from "@schedule-app/api";
 import { createTranslator, detectLocale, localeLabels, supportedLocales, type SupportedLocale } from "@schedule-app/i18n";
 import { StatusBar } from "expo-status-bar";
 import { getLocales } from "expo-localization";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Session } from "@supabase/supabase-js";
@@ -12,8 +12,13 @@ import type { Session } from "@supabase/supabase-js";
 const expoEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
 const supabaseUrl = expoEnv?.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = expoEnv?.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const secureStorage = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+};
 const supabase = supabaseUrl && supabaseAnonKey
-  ? createSupabaseClient({ url: supabaseUrl, anonKey: supabaseAnonKey, storage: AsyncStorage })
+  ? createSupabaseClient({ url: supabaseUrl, anonKey: supabaseAnonKey, storage: secureStorage })
   : null;
 
 type Workspace = { id: string; name: string; slug: string; timezone: string };

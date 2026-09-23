@@ -1858,18 +1858,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-async-storage/async-storage@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "@react-native-async-storage/async-storage@npm:3.1.1"
-  dependencies:
-    idb: "npm:8.0.3"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/20d34973b0a4d1acc133556c52daa59b9826f676abdc351f12c70feb4d557b66e279d1c880662bbfe037b7d79bf64fdee759a5217781c47cd20fd8ba0e0e1b24
-  languageName: node
-  linkType: hard
-
 "@react-native/assets-registry@npm:0.86.3":
   version: 0.86.3
   resolution: "@react-native/assets-registry@npm:0.86.3"
@@ -2184,7 +2172,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@schedule-app/mobile@workspace:apps/mobile"
   dependencies:
-    "@react-native-async-storage/async-storage": "npm:^3.1.1"
     "@schedule-app/api": "workspace:*"
     "@schedule-app/i18n": "workspace:*"
     "@supabase/supabase-js": "npm:2.116.0"
@@ -2192,6 +2179,7 @@ __metadata:
     eslint: "npm:10.11.0"
     expo: "npm:57.0.24"
     expo-localization: "npm:~57.0.2"
+    expo-secure-store: "npm:~57.0.4"
     expo-status-bar: "npm:57.0.1"
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
@@ -3811,6 +3799,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-secure-store@npm:~57.0.4":
+  version: 57.0.4
+  resolution: "expo-secure-store@npm:57.0.4"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/8f94ff747808d6a270536171bf14eaa3e75aeae31c7a20615a76d101e167d2cf7a09db6c7f9b770a587a8852362bb69ecb15b4208db0789fcd24a61a50941c0f
+  languageName: node
+  linkType: hard
+
 "expo-server@npm:^57.0.3":
   version: 57.0.3
   resolution: "expo-server@npm:57.0.3"
@@ -4270,13 +4267,6 @@ __metadata:
   version: 0.8.1
   resolution: "iceberg-js@npm:0.8.1"
   checksum: 10c0/e504da64cc26e8ad7c5344353a7203c671a740c14eb6086f20505f5e9739cab774493e616032530c962df97f2a855115cc2e89a47dd81581df5917b21a69ec48
-  languageName: node
-  linkType: hard
-
-"idb@npm:8.0.3":
-  version: 8.0.3
-  resolution: "idb@npm:8.0.3"
-  checksum: 10c0/421cd9a3281b7564528857031cc33fd9e95753f8191e483054cb25d1ceea7303a0d1462f4f69f5b41606f0f066156999e067478abf2460dfcf9cab80dae2a2b2
   languageName: node
   linkType: hard
 
