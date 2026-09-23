@@ -50,8 +50,51 @@ export type Database = {
           },
         ]
       }
+      appointment_events: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          created_by: string | null
+          event_type: Database["public"]["Enums"]["appointment_event_type"]
+          from_status: Database["public"]["Enums"]["appointment_status"] | null
+          id: string
+          reason: string | null
+          to_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          created_by?: string | null
+          event_type: Database["public"]["Enums"]["appointment_event_type"]
+          from_status?: Database["public"]["Enums"]["appointment_status"] | null
+          id?: string
+          reason?: string | null
+          to_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_type?: Database["public"]["Enums"]["appointment_event_type"]
+          from_status?: Database["public"]["Enums"]["appointment_status"] | null
+          id?: string
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["appointment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_events_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
+          buffer_after_minutes_snapshot: number
+          buffer_before_minutes_snapshot: number
           cancellation_reason: string | null
           cancelled_at: string | null
           completed_at: string | null
@@ -64,6 +107,7 @@ export type Database = {
           ends_at: string
           id: string
           master_note: string | null
+          occupied_range: unknown
           price_amount_snapshot: number
           service_id: string | null
           service_name_snapshot: string
@@ -74,6 +118,8 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
@@ -86,6 +132,7 @@ export type Database = {
           ends_at: string
           id?: string
           master_note?: string | null
+          occupied_range: unknown
           price_amount_snapshot: number
           service_id?: string | null
           service_name_snapshot: string
@@ -96,6 +143,8 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
@@ -108,6 +157,7 @@ export type Database = {
           ends_at?: string
           id?: string
           master_note?: string | null
+          occupied_range?: unknown
           price_amount_snapshot?: number
           service_id?: string | null
           service_name_snapshot?: string
@@ -412,6 +462,38 @@ export type Database = {
           },
         ]
       }
+      public_booking_requests: {
+        Row: {
+          created_at: string
+          id: string
+          idempotency_key: string
+          response: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          response?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          response?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_booking_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           archived_at: string | null
@@ -555,6 +637,7 @@ export type Database = {
         Args: {
           p_customer_note?: string
           p_email: string
+          p_idempotency_key?: string
           p_name: string
           p_phone: string
           p_service_id: string
@@ -575,9 +658,28 @@ export type Database = {
         Args: { target_workspace_id: string }
         Returns: boolean
       }
+      reschedule_appointment: {
+        Args: { p_appointment_id: string; p_starts_at: string }
+        Returns: Json
+      }
+      set_appointment_status: {
+        Args: {
+          p_appointment_id: string
+          p_reason?: string
+          p_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       access_token_purpose: "manage" | "cancel" | "reschedule"
+      appointment_event_type:
+        | "created"
+        | "confirmed"
+        | "rescheduled"
+        | "cancelled"
+        | "completed"
+        | "no_show"
       appointment_source: "public_booking" | "master_created" | "imported"
       appointment_status:
         | "pending"
@@ -729,6 +831,14 @@ export const Constants = {
   public: {
     Enums: {
       access_token_purpose: ["manage", "cancel", "reschedule"],
+      appointment_event_type: [
+        "created",
+        "confirmed",
+        "rescheduled",
+        "cancelled",
+        "completed",
+        "no_show",
+      ],
       appointment_source: ["public_booking", "master_created", "imported"],
       appointment_status: [
         "pending",
