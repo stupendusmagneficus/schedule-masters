@@ -1,0 +1,32 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "files": {
+    "includes": [
+      "**/*.{js,jsx,ts,tsx,json,jsonc}",
+      "!**/node_modules",
+      "!**/.yarn",
+      "!**/.turbo",
+      "!**/.supabase",
+      "!**/.expo",
+      "!**/.next",
+      "!**/dist",
+      "!**/coverage",
+      "!**/supabase/.branches",
+      "!**/supabase/.temp",
+      "!packages/api/src/supabase/database.types.ts",
+      "!**/*.snap"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "useSemanticElements": "off"
+      }
+    }
+  }
+}

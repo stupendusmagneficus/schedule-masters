@@ -12,6 +12,7 @@ Linear task: SCH-
 - [ ] No secrets or production credentials are committed.
 - [ ] `yarn typecheck` passes.
 - [ ] `yarn format:check` passes.
+- [ ] `yarn biome:lint` passes.
 - [ ] `yarn lint` passes.
 - [ ] `yarn test` passes.
 - [ ] `yarn build` passes.

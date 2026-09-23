@@ -25,4 +25,6 @@ These rules apply to every application and package in this repository.
 
 Before opening or updating a PR, review the change for responsibility boundaries, dependency direction, test placement, security, and unnecessary file growth. Record the result in the PR description and complete the repository PR checklist.
 
+Use Prettier as the canonical formatter and Biome as the fast JavaScript/TypeScript/JSON linter. Do not run Biome formatting in this repository because it would create a second formatting source of truth.
+
 The detailed conventions are in [Code organization and responsibility boundaries](docs/architecture/code-organization.md).

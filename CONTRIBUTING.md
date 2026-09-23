@@ -22,6 +22,7 @@ Before opening a pull request, run:
 yarn install --immutable
 yarn typecheck
 yarn format:check
+yarn biome:lint
 yarn lint
 yarn test
 yarn build
