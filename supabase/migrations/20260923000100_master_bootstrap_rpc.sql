@@ -82,7 +82,7 @@ begin
     valid_from
   )
   select v_workspace_id, day_number, p_start_local_time, p_end_local_time, current_date
-    from generate_series(1, 5) as days(day_number)
+    from generate_series(1, 7) as days(day_number)
    where not exists (
      select 1
        from public.availability_rules ar
