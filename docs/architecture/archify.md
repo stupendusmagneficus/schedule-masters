@@ -20,6 +20,7 @@ node .agents/skills/archify/bin/archify.mjs guide "Show the booking request path
 node .agents/skills/archify/bin/archify.mjs validate architecture docs/architecture/diagrams/<name>.json --quality showcase --json
 node .agents/skills/archify/bin/archify.mjs deliver architecture docs/architecture/diagrams/<name>.json docs/architecture/diagrams/<name>.html --quality showcase --json
 node .agents/skills/archify/bin/archify.mjs visual-check docs/architecture/diagrams/<name>.html --json
+yarn archify:report
 ```
 
 The JSON source is the editable source of truth. The HTML is a shareable documentation artifact and must not be used as application code.
@@ -33,3 +34,7 @@ The JSON source is the editable source of truth. The HTML is a shareable documen
 - Keep visual review claims separate from automated validation and browser evidence.
 
 The installed skill version and source hash are recorded in `skills-lock.json`. Updates are intentional and must be reviewed as dependency/tooling changes.
+
+## CI report
+
+When an Archify source changes under `docs/architecture/diagrams/`, CI runs `archify:report`. The job validates each source, delivers an HTML artifact, runs `visual-check`, writes a Markdown summary, and uploads the complete report for 14 days. Generated reports are CI artifacts and are not committed to the repository.
