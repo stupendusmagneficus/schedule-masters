@@ -26,6 +26,12 @@ Linear task: SCH-
 
 <!-- Commands and manual scenarios used to verify the change. -->
 
+## Architecture report
+
+- [ ] Archify report comment was reviewed when architecture diagram sources changed.
+- [ ] Architecture diagram changes are intentional and match the implementation.
+- [ ] Visual report findings are documented in the PR when follow-up work is needed.
+
 ## Risks and follow-ups
 
 <!-- Known limitations, migration steps, or follow-up Linear tasks. -->
