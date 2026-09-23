@@ -19,11 +19,11 @@ import {
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { analytics } from "../src/lib/analytics";
 import {
   getFollowingBookableDate,
   getNextBookableDate,
 } from "../src/utils/dates";
-import { analytics } from "../src/lib/analytics";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
