@@ -176,11 +176,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_customer_same_workspace_fkey"
+            columns: ["workspace_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["workspace_id", "id"]
+          },
+          {
             foreignKeyName: "appointments_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_same_workspace_fkey"
+            columns: ["workspace_id", "service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["workspace_id", "id"]
           },
           {
             foreignKeyName: "appointments_workspace_id_fkey"
@@ -452,6 +466,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "appointments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_jobs_appointment_same_workspace_fkey"
+            columns: ["workspace_id", "appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["workspace_id", "id"]
           },
           {
             foreignKeyName: "notification_jobs_workspace_id_fkey"

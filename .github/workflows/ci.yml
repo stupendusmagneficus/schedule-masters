@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           eval "$(npx supabase@2.117.0 status -o env)"
-          SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" yarn test:integration
+          SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" yarn test:integration
       - name: Regenerate database types
         run: yarn supabase:types
       - name: Verify generated types are committed
