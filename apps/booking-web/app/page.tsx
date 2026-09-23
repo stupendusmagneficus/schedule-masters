@@ -63,7 +63,7 @@ function getDemoSlots(date: string): Slot[] {
 function isConfiguredSupabase() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
       !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project"),
   );
 }
@@ -95,7 +95,7 @@ export default function HomePage() {
     if (!isConfiguredSupabase()) return null;
     return createSupabaseClient({
       url: process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+      publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     });
   }, []);
   const selectedService = context.services.find((service) => service.id === selectedServiceId);

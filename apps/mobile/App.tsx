@@ -11,14 +11,14 @@ import type { Session } from "@supabase/supabase-js";
 
 const expoEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
 const supabaseUrl = expoEnv?.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = expoEnv?.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabasePublishableKey = expoEnv?.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const secureStorage = {
   getItem: (key: string) => SecureStore.getItemAsync(key),
   removeItem: (key: string) => SecureStore.deleteItemAsync(key),
   setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
 };
-const supabase = supabaseUrl && supabaseAnonKey
-  ? createSupabaseClient({ url: supabaseUrl, anonKey: supabaseAnonKey, storage: secureStorage })
+const supabase = supabaseUrl && supabasePublishableKey
+  ? createSupabaseClient({ url: supabaseUrl, publishableKey: supabasePublishableKey, storage: secureStorage })
   : null;
 
 type Workspace = { id: string; name: string; slug: string; timezone: string };
@@ -104,7 +104,7 @@ function SetupScreen({ locale, onComplete }: { locale: SupportedLocale; onComple
 }
 
 function LoadingState() { return <View style={styles.center}><ActivityIndicator color="#2f8f7b" /><Text style={styles.muted}>Loading…</Text></View>; }
-function ConfigurationState() { return <View style={styles.center}><Text style={styles.title}>Mobile configuration required</Text><Text style={styles.muted}>Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to run the mobile app.</Text></View>; }
+function ConfigurationState() { return <View style={styles.center}><Text style={styles.title}>Mobile configuration required</Text><Text style={styles.muted}>Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to run the mobile app.</Text></View>; }
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "#f5f5f2", gap: 16, padding: 20 }, authContainer: { backgroundColor: "#f5f5f2", gap: 14, justifyContent: "center", minHeight: "100%", padding: 24 }, center: { alignItems: "center", backgroundColor: "#f5f5f2", flex: 1, gap: 12, justifyContent: "center", padding: 24 }, header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", width: "100%" }, eyebrow: { color: "#2f8f7b", fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }, title: { color: "#202725", fontSize: 30, fontWeight: "700" }, muted: { color: "#75807c", lineHeight: 20, marginTop: 4 }, signOut: { padding: 8 }, signOutText: { color: "#217464", fontWeight: "700" }, languagePicker: { flexDirection: "row", gap: 4 }, languageButton: { alignItems: "center", borderColor: "#dee2de", borderRadius: 999, borderWidth: 1, height: 36, justifyContent: "center", minWidth: 44, paddingHorizontal: 8 }, selectedLanguageButton: { backgroundColor: "#202725", borderColor: "#202725" }, selectedLanguageText: { color: "#fff" }, primaryButton: { alignItems: "center", backgroundColor: "#2f8f7b", borderRadius: 8, justifyContent: "center", minHeight: 48, paddingHorizontal: 16, width: "100%" }, primaryButtonText: { color: "#fff", fontWeight: "700" }, panel: { backgroundColor: "#fff", borderColor: "#dee2de", borderRadius: 12, borderWidth: 1, gap: 12, padding: 16, width: "100%" }, panelTitle: { color: "#202725", fontSize: 17, fontWeight: "700" }, summaryGrid: { flexDirection: "row", gap: 8, width: "100%" }, stat: { backgroundColor: "#fafaf8", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, flex: 1, padding: 14 }, statLabel: { color: "#75807c", fontSize: 12 }, statValue: { color: "#202725", fontSize: 21, fontWeight: "700", marginTop: 6 }, serviceRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" }, appointmentName: { color: "#202725", fontSize: 16, fontWeight: "600" }, helper: { color: "#75807c", fontSize: 12, lineHeight: 18 }, price: { color: "#217464", fontWeight: "700" }, link: { color: "#217464", fontSize: 15, fontWeight: "600" }, input: { backgroundColor: "#fff", borderColor: "#dee2de", borderRadius: 8, borderWidth: 1, minHeight: 48, paddingHorizontal: 12 }, error: { color: "#a13d3d", fontSize: 13 },

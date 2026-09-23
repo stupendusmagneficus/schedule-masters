@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 
 export type SupabaseClientConfig = {
-  readonly anonKey: string;
+  readonly publishableKey: string;
   readonly storage?: SupabaseStorage;
   readonly url: string;
 };
@@ -16,10 +16,10 @@ export type SupabaseStorage = {
 
 export function createSupabaseClient({
   url,
-  anonKey,
+  publishableKey,
   storage,
 }: SupabaseClientConfig): SupabaseClient<Database> {
-  return createClient<Database>(url, anonKey, {
+  return createClient<Database>(url, publishableKey, {
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: false,

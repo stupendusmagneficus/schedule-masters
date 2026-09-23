@@ -71,7 +71,7 @@ Add `@supabase/supabase-js` to `@schedule-app/api`. The client must accept the p
 
 - [ ] **Step 2: Create a typed browser-safe client factory**
 
-Expose a factory that requires `SUPABASE_URL` and `SUPABASE_ANON_KEY` at runtime and exports the generated `Database` type. Do not expose a service-role client to mobile or web applications.
+Expose a factory that requires `SUPABASE_URL` and the publishable key at runtime and exports the generated `Database` type. Do not expose a secret/service-role client to mobile or web applications.
 
 - [ ] **Step 3: Generate and verify types**
 
