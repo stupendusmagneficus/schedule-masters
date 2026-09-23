@@ -35,6 +35,8 @@ jobs:
         run: yarn lint
       - name: Test
         run: yarn test
+      - name: Verify Archify installation
+        run: yarn archify:doctor
       - name: Build shared packages
         run: yarn turbo run build --filter=./packages/*
 

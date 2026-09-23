@@ -12,6 +12,8 @@
       "!**/dist",
       "!**/coverage",
       "!**/test-results",
+      "!**/playwright-report",
+      "!**/.agents/skills/archify",
       "!**/supabase/.branches",
       "!**/supabase/.temp",
       "!packages/api/src/supabase/database.types.ts",
