@@ -13,6 +13,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
+    "format": "biome format --write .",
+    "format:check": "biome ci .",
+    "biome:lint": "biome lint .",
     "supabase:start": "npx supabase@2.117.0 start",
     "supabase:stop": "npx supabase@2.117.0 stop",
     "supabase:status": "npx supabase@2.117.0 status",
@@ -20,12 +23,12 @@
     "supabase:types": "npx supabase@2.117.0 gen types typescript --local --schema public | sed '${/^$/d;}' > packages/api/src/supabase/database.types.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.14",
     "@eslint/js": "9.39.1",
     "@types/node": "24.10.1",
     "@typescript-eslint/eslint-plugin": "8.70.0",
     "@typescript-eslint/parser": "8.70.0",
     "eslint": "10.11.0",
-    "prettier": "3.9.8",
     "turbo": "2.11.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.0",

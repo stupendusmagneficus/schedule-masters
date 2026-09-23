@@ -10,17 +10,22 @@ Use Conventional Commits, for example `feat(auth): add passwordless sign in` or 
 
 Use Yarn only. Add dependencies to the workspace that owns them. Shared dependencies belong at the root only when they are tooling used across the repository. Use `workspace:*` for internal package dependencies and avoid deep imports.
 
+## Code organization
+
+All applications and packages follow the repository-wide [code organization standard](docs/architecture/code-organization.md). Keep entrypoints thin, separate screens/features from reusable components, isolate integrations in `lib` or adapter modules, keep pure helpers in `utils`, and place meaningful tests next to the logic they cover. Do not merge a new monolithic screen or a file that mixes UI, data access, navigation, and business rules without documenting the exception in the PR.
+
 ## Quality gates
 
 Before opening a pull request, run:
 
-~~~bash
+```bash
 yarn install --immutable
 yarn typecheck
+yarn format:check
 yarn lint
 yarn test
 yarn build
-~~~
+```
 
 ## Pull request review protocol
 
@@ -37,6 +42,9 @@ The AI agent should perform a structured review before opening or updating a pul
 request and record the result in the pull request. CI provides deterministic gates;
 it does not automatically approve or merge code. A human review remains required
 before production-impacting changes are merged.
+
+The structured review must include responsibility boundaries, file structure,
+dependency direction, test placement, and unnecessary abstraction or file growth.
 
 The current scaffold intentionally has no product database schema, authentication, booking logic, notification provider, payment integration, or final UI library.
 

@@ -32,7 +32,9 @@ export type PublicBookingResult = {
   readonly status: string;
 };
 
-export function parsePublicBookingContext(value: unknown): PublicBookingContext {
+export function parsePublicBookingContext(
+  value: unknown,
+): PublicBookingContext {
   if (!value || typeof value !== "object") {
     throw new Error("Invalid booking context");
   }
@@ -73,7 +75,8 @@ export function parsePublicBookingContext(value: unknown): PublicBookingContext 
       return {
         id: item.id,
         name: item.name,
-        description: typeof item.description === "string" ? item.description : null,
+        description:
+          typeof item.description === "string" ? item.description : null,
         durationMinutes: item.durationMinutes,
         priceAmount: item.priceAmount,
         currency: item.currency,

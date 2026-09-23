@@ -13,6 +13,7 @@
 ### Task 1: Establish Supabase project and local CLI configuration
 
 **Files:**
+
 - Modify: `supabase/config.toml`
 - Modify: `.env.example`
 - Modify: `package.json`
@@ -38,6 +39,7 @@ Run `npx supabase --version` and `docker info`. Expected: Supabase CLI prints a 
 ### Task 2: Add the initial domain migration
 
 **Files:**
+
 - Create: `supabase/migrations/<timestamp>_create_mvp_schema.sql`
 - Modify: `supabase/seed.sql`
 
@@ -60,6 +62,7 @@ Seed only deterministic fake data for local development. Do not use real custome
 ### Task 3: Add Supabase client and generated database types
 
 **Files:**
+
 - Create: `packages/api/src/supabase/client.ts`
 - Create: `packages/api/src/supabase/database.types.ts`
 - Modify: `packages/api/package.json`
@@ -71,7 +74,7 @@ Add `@supabase/supabase-js` to `@schedule-app/api`. The client must accept the p
 
 - [ ] **Step 2: Create a typed browser-safe client factory**
 
-Expose a factory that requires `SUPABASE_URL` and `SUPABASE_ANON_KEY` at runtime and exports the generated `Database` type. Do not expose a service-role client to mobile or web applications.
+Expose a factory that requires `SUPABASE_URL` and the publishable key at runtime and exports the generated `Database` type. Do not expose a secret/service-role client to mobile or web applications.
 
 - [ ] **Step 3: Generate and verify types**
 
@@ -80,6 +83,7 @@ Generate `database.types.ts` from the local schema and document the command used
 ### Task 4: Validate migrations locally and in CI
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 - Modify: `CONTRIBUTING.md`
 - Modify: `README.md`
