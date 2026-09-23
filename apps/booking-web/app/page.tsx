@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   createSupabaseClient,
-  parsePublicBookingContext,
   type PublicBookingContext,
   type PublicBookingResult,
+  parsePublicBookingContext,
 } from "@schedule-app/api";
 import {
   createTranslator,
@@ -14,9 +13,10 @@ import {
   formatDate,
   formatTime,
   localeLabels,
-  supportedLocales,
   type SupportedLocale,
+  supportedLocales,
 } from "@schedule-app/i18n";
+import { useEffect, useMemo, useState } from "react";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -63,8 +63,8 @@ function getDemoSlots(date: string): Slot[] {
 function isConfiguredSupabase() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project"),
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project"),
   );
 }
 

@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "@schedule-app/i18n";
 import { useState } from "react";
 import {
   Pressable,
@@ -6,8 +7,6 @@ import {
   Text,
   TextInput,
 } from "react-native";
-
-import type { SupportedLocale } from "@schedule-app/i18n";
 
 import { supabase } from "../lib/supabase";
 import { normalizeBookingSlug } from "../utils/slug";

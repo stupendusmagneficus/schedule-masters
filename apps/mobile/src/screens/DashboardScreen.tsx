@@ -1,8 +1,8 @@
 import {
   createTranslator,
   localeLabels,
-  supportedLocales,
   type SupportedLocale,
+  supportedLocales,
 } from "@schedule-app/i18n";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";

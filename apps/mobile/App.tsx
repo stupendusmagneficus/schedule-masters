@@ -1,9 +1,9 @@
 import "react-native-url-polyfill/auto";
 
+import { detectLocale, type SupportedLocale } from "@schedule-app/i18n";
+import type { Session } from "@supabase/supabase-js";
 import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { type SupportedLocale, detectLocale } from "@schedule-app/i18n";
 
 import {
   ConfigurationState,
@@ -42,6 +42,7 @@ export default function App() {
     };
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadWorkspace only depends on the stable client and React state setters.
   useEffect(() => {
     if (supabase && session) void loadWorkspace(session.user.id);
     else {

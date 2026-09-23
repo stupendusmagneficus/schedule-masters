@@ -64,4 +64,4 @@ If the answer is no, either change the implementation or document the intentiona
 
 ## Tooling standard
 
-Prettier is the canonical formatter for the repository. Biome runs as a fast linter for JavaScript, TypeScript, and JSON; its formatter is intentionally disabled so the two tools do not rewrite files differently. ESLint remains enabled for React and React Native rules that are specific to the application layer.
+Biome is the canonical formatter and linter for JavaScript, TypeScript, JSX, TSX, JSON, CSS, HTML, and GraphQL. ESLint remains enabled only for React and React Native-specific rules that are not covered by the Biome configuration.
