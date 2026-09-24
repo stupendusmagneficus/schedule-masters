@@ -4,32 +4,32 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "warm-vertical",
+    "direction": "github-mobile-inspired-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#2F8F7B", "type": "color" },
-      "primaryStrong": { "value": "#217464", "type": "color" },
-      "primarySoft": { "value": "#DDF1EB", "type": "color" },
+      "primary": { "value": "#0969DA", "type": "color" },
+      "primaryStrong": { "value": "#0550AE", "type": "color" },
+      "primarySoft": { "value": "#DDF4FF", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F5F5F2", "type": "color" },
+      "canvas": { "value": "#F6F8FA", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#FAFAF8", "type": "color" },
-      "sunken": { "value": "#E9EBE7", "type": "color" }
+      "subtle": { "value": "#F6F8FA", "type": "color" },
+      "sunken": { "value": "#EAEFF3", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#202725", "type": "color" },
-      "secondary": { "value": "#4F5C58", "type": "color" },
-      "muted": { "value": "#75807C", "type": "color" },
+      "primary": { "value": "#24292F", "type": "color" },
+      "secondary": { "value": "#57606A", "type": "color" },
+      "muted": { "value": "#6E7781", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#DEE2DE", "type": "color" },
-      "strong": { "value": "#AEBBB5", "type": "color" },
-      "focus": { "value": "#2F8F7B", "type": "color" }
+      "default": { "value": "#D0D7DE", "type": "color" },
+      "strong": { "value": "#AFB8C1", "type": "color" },
+      "focus": { "value": "#0969DA", "type": "color" }
     },
     "status": {
       "success": { "value": "#2D8A62", "type": "color" },
@@ -42,10 +42,10 @@
       "infoSoft": { "value": "#E6F0F8", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#DDF1EB", "type": "color" },
-      "bookedBorder": { "value": "#2F8F7B", "type": "color" },
-      "break": { "value": "#E9EBE7", "type": "color" },
-      "breakBorder": { "value": "#9AA8A2", "type": "color" },
+      "booked": { "value": "#DDF4FF", "type": "color" },
+      "bookedBorder": { "value": "#0969DA", "type": "color" },
+      "break": { "value": "#EAEFF3", "type": "color" },
+      "breakBorder": { "value": "#8C959F", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },

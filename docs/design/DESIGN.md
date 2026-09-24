@@ -6,15 +6,19 @@
 
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
-The approved direction is **Warm Vertical**: Vertical's precise, high-contrast operational language adapted with warm surfaces and a jade/teal product accent.
+The approved direction is **GitHub Mobile-inspired operations**: calm cool-neutral
+surfaces, white information blocks, restrained blue actions and compact
+navigation adapted for a master’s daily workflow.
 
 ## Product direction
 
 Schedule Masters combines:
 
-- the calm, polished and approachable visual character associated with modern beauty and wellness products such as Fresha;
+- the calm, scan-friendly hierarchy of GitHub Mobile without reusing its brand,
+  icons, layout or proprietary copy;
 - the fast, information-dense daily workflow of Masters Pro;
-- Vertical-inspired precision for dashboards, calendars and forms;
+- the friendly, service-oriented tone needed by independent beauty and wellness
+  professionals;
 - product-specific decisions that reduce friction for independent professionals in Czechia.
 
 This is a visual reference, not a copy of Fresha. We do not reuse its logo, exact colors, typography, illustrations, icons, screen composition or proprietary copy.
@@ -24,7 +28,8 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 1. **Today first.** The first screen must help a master understand the day within seconds.
 2. **Quiet density.** Show useful information without decorative surfaces or nested cards.
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
-4. **Warm professionalism.** The interface should feel trustworthy and premium without looking corporate or clinical.
+4. **Calm operational clarity.** The interface should feel trustworthy and
+   lightweight without looking corporate or clinical.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
 6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
@@ -40,7 +45,9 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 
 ### Color
 
-The palette uses a muted jade accent with warm-cool neutral surfaces. It borrows Vertical's clarity and surface discipline while preserving a warmer, more suitable character for beauty and wellness services. It is intentionally adjacent to the Fresha visual mood, but not an exact reproduction.
+The palette uses cool-neutral application surfaces, white information blocks,
+thin blue-gray separators and a reserved blue action color. The result borrows
+GitHub Mobile’s scanning rhythm, not its visual identity or exact values.
 
 - `brand.primary` — primary actions and active states.
 - `brand.primaryStrong` — pressed states and high-emphasis links.
@@ -66,9 +73,10 @@ Use Inter when available, with a system fallback for the first MVP. Typography i
 
 Use a 4px base scale. Standard screen padding is 20px on mobile and 32px on desktop. Use 12px for compact controls, 16px for normal controls and 20px for primary surfaces. Use 8px corners for compact controls and 12px corners for cards/panels. Reserve pill shapes for status badges, segmented controls and genuinely compact choice controls; do not make every surface a pill.
 
-### Warm Vertical rules by surface
+### GitHub Mobile-inspired surface rules
 
-- **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels, jade actions, thin borders, compact metadata and no decorative gradients.
+- **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels,
+  blue actions, thin borders, compact metadata and no decorative gradients.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** warmer canvas, slightly softer panels and more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
 - **All surfaces:** use Inter/system UI for operational text. Monospace is reserved for optional technical metadata, never for client-facing booking content.
@@ -165,13 +173,19 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 ### Mobile master app
 
-Use a small bottom navigation with three primary destinations:
+Use a small fixed bottom navigation with three primary destinations:
 
 - Today
 - Calendar
 - Profile
 
 Keep settings and subscription inside Profile. Messaging is deferred from the MVP navigation.
+
+Place the primary `New booking` action as a floating button immediately above
+the bottom navigation. It must remain reachable while a master scrolls and must
+not cover a selected tab or important information. The action opens the booking
+creation flow when that flow is implemented; until then it must clearly state
+that the flow is not available rather than silently doing nothing.
 
 ### Booking web
 

@@ -4,6 +4,7 @@ import { detectLocale, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
 import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import {
   ConfigurationState,
@@ -17,6 +18,14 @@ import { SetupScreen } from "./src/screens/SetupScreen";
 import type { Service, Workspace } from "./src/types";
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
   const [locale, setLocale] = useState<SupportedLocale>(() =>
     detectLocale(getLocales()[0]?.languageTag),
   );

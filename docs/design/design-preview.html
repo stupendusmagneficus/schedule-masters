@@ -6,16 +6,16 @@
     <title>Schedule Masters — Design Preview</title>
     <style>
       :root {
-        --canvas: #f5f5f2;
+        --canvas: #f6f8fa;
         --raised: #fff;
-        --subtle: #fafaf8;
-        --ink: #202725;
-        --muted: #4f5c58;
-        --quiet: #75807c;
-        --line: #dee2de;
-        --jade: #2f8f7b;
-        --jade-dark: #217464;
-        --jade-soft: #ddf1eb;
+        --subtle: #f6f8fa;
+        --ink: #24292f;
+        --muted: #57606a;
+        --quiet: #6e7781;
+        --line: #d0d7de;
+        --jade: #0969da;
+        --jade-dark: #0550ae;
+        --jade-soft: #ddf4ff;
         --radius: 12px;
         --shadow: 0 6px 18px rgba(32, 39, 37, 0.06);
         font-family:
@@ -75,6 +75,9 @@
         border-radius: var(--radius);
         box-shadow: var(--shadow);
         overflow: hidden;
+      }
+      .phone-screen {
+        position: relative;
       }
       .screen-head {
         display: flex;
@@ -229,6 +232,45 @@
         letter-spacing: 0.08em;
         margin: 20px 0 8px;
       }
+      .floating-action {
+        position: absolute;
+        right: 16px;
+        bottom: 72px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 44px;
+        border-radius: 8px;
+        background: var(--jade);
+        color: #fff;
+        padding: 0 14px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(31, 35, 40, 0.16);
+      }
+      .bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        border-top: 1px solid var(--line);
+        background: #fff;
+        padding: 9px 14px 11px;
+      }
+      .nav-item {
+        color: var(--quiet);
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .nav-item strong {
+        display: block;
+        font-size: 19px;
+        line-height: 18px;
+        font-weight: 400;
+      }
+      .nav-item.active {
+        color: var(--jade);
+      }
       @media (max-width: 900px) {
         .grid {
           grid-template-columns: 1fr;
@@ -249,14 +291,14 @@
         <div>
           <h1>Schedule Masters</h1>
           <p>
-            Warm Vertical: precise master workflows with a calm, welcoming
-            booking experience.
+            GitHub Mobile-inspired information grouping and navigation, adapted
+            for a master’s calm daily workflow.
           </p>
         </div>
         <span class="badge">MVP visual direction</span>
       </div>
       <div class="grid">
-        <section class="screen" aria-label="Master dashboard preview">
+        <section class="screen phone-screen" aria-label="Master dashboard preview">
           <div class="screen-head">
             <strong>Today</strong><small>Tue, 22 Sep</small>
           </div>
@@ -294,6 +336,12 @@
               <span class="badge">Confirmed</span>
             </div>
           </div>
+          <div class="floating-action">＋ New booking</div>
+          <nav class="bottom-nav" aria-label="Master app navigation">
+            <span class="nav-item active"><strong>◷</strong>Today</span>
+            <span class="nav-item"><strong>□</strong>Calendar</span>
+            <span class="nav-item"><strong>◯</strong>Profile</span>
+          </nav>
         </section>
         <section class="screen" aria-label="Calendar preview">
           <div class="screen-head">

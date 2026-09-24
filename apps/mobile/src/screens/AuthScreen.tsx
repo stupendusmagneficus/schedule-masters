@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
+import { colors, radii } from "../theme/tokens";
 
 type AuthScreenProps = { readonly onAuthenticated: (session: Session) => void };
 
@@ -96,39 +97,39 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f5f5f2",
+    backgroundColor: colors.canvas,
     gap: 14,
     justifyContent: "center",
     minHeight: "100%",
     padding: 24,
   },
   eyebrow: {
-    color: "#2f8f7b",
+    color: colors.accent,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 1,
     marginBottom: 8,
   },
-  title: { color: "#202725", fontSize: 30, fontWeight: "700" },
-  muted: { color: "#75807c", lineHeight: 20, marginTop: 4 },
+  title: { color: colors.primaryText, fontSize: 30, fontWeight: "700" },
+  muted: { color: colors.secondaryText, lineHeight: 20, marginTop: 4 },
   input: {
-    backgroundColor: "#fff",
-    borderColor: "#dee2de",
-    borderRadius: 8,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radii.control,
     borderWidth: 1,
     minHeight: 48,
     paddingHorizontal: 12,
   },
-  error: { color: "#a13d3d", fontSize: 13 },
+  error: { color: colors.danger, fontSize: 13 },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#2f8f7b",
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    borderRadius: radii.control,
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 16,
     width: "100%",
   },
-  primaryButtonText: { color: "#fff", fontWeight: "700" },
-  link: { color: "#217464", fontSize: 15, fontWeight: "600" },
+  primaryButtonText: { color: colors.inverse, fontWeight: "700" },
+  link: { color: colors.accent, fontSize: 15, fontWeight: "600" },
 });
