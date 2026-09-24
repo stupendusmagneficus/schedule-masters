@@ -1,97 +1,107 @@
+import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
-import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-} from "react-native";
+import { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+
+import { AuthForm } from "../components/AuthForm";
+import { LocalePicker } from "../components/LocalePicker";
+import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
+import { type AuthMode, authenticate } from "../features/auth/authentication";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
-import { colors, radii } from "../theme/tokens";
+import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
 
-type AuthScreenProps = { readonly onAuthenticated: (session: Session) => void };
+type AuthScreenProps = {
+  readonly locale: SupportedLocale;
+  readonly onAuthenticated: (session: Session) => void;
+  readonly onLocaleChange: (locale: SupportedLocale) => void;
+  readonly sessionRestoreFailed: boolean;
+};
 
-export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
+export function AuthScreen({
+  locale,
+  onAuthenticated,
+  onLocaleChange,
+  sessionRestoreFailed,
+}: AuthScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [mode, setMode] = useState<AuthMode>("signUp");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ReadonlyArray<"email" | "password">>([]);
+  const [notice, setNotice] = useState<string | null>(null);
+  const t = useMemo(() => createTranslator(locale), [locale]);
+
+  function changeMode(nextMode: AuthMode) {
+    setErrors([]);
+    setMode(nextMode);
+    setNotice(null);
+  }
 
   async function submit() {
-    if (!supabase || !email.trim() || password.length < 6) {
-      setMessage("Enter an email and a password with at least 6 characters.");
+    if (!supabase) return;
+
+    setBusy(true);
+    setErrors([]);
+    setNotice(null);
+    const result = await authenticate(supabase, mode, { email, password });
+    setBusy(false);
+
+    if (result.kind === "validationError") {
+      setErrors(result.fields);
       return;
     }
-    setBusy(true);
-    setMessage(null);
-    const result = isSignUp
-      ? await supabase.auth.signUp({ email: email.trim(), password })
-      : await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-    setBusy(false);
-    if (result.error) setMessage(result.error.message);
-    else if (result.data.session) {
-      analytics.track(
-        isSignUp
-          ? analyticsEvents.accountSignedUp
-          : analyticsEvents.accountSignedIn,
-      );
-      onAuthenticated(result.data.session);
-    } else setMessage("Check your email to confirm the account, then sign in.");
+
+    if (result.kind === "requestError") {
+      setNotice(t(getAuthErrorMessageKey(result.error)));
+      return;
+    }
+
+    if (result.kind === "confirmationRequired") {
+      analytics.track(analyticsEvents.accountSignedUp);
+      setPassword("");
+      setMode("signIn");
+      setNotice(t("auth.confirmationRequired"));
+      return;
+    }
+
+    analytics.track(
+      mode === "signUp"
+        ? analyticsEvents.accountSignedUp
+        : analyticsEvents.accountSignedIn,
+    );
+    onAuthenticated(result.session);
   }
+
+  const title = t(mode === "signUp" ? "auth.signUpTitle" : "auth.signInTitle");
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>SCHEDULE MASTERS</Text>
-      <Text style={styles.title}>
-        {isSignUp ? "Create your workspace" : "Welcome back"}
-      </Text>
-      <Text style={styles.muted}>
-        Manage your calendar and let clients book online.
-      </Text>
-      <TextInput
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        onChangeText={setEmail}
-        placeholder="Email"
-        style={styles.input}
-        value={email}
-      />
-      <TextInput
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-        style={styles.input}
-        value={password}
-      />
-      {message && (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {message}
+      <View style={styles.languagePicker}>
+        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
+      </View>
+      <Text style={styles.eyebrow}>{t("common.appName")}</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.description}>{t("mobile.description")}</Text>
+      {sessionRestoreFailed && (
+        <Text accessibilityRole="alert" style={styles.restoreError}>
+          {t("auth.sessionRestoreFailed")}
         </Text>
       )}
-      <Pressable
-        disabled={busy}
-        onPress={() => void submit()}
-        style={styles.primaryButton}
-      >
-        <Text style={styles.primaryButtonText}>
-          {busy ? "Loading…" : isSignUp ? "Create account" : "Sign in"}
-        </Text>
-      </Pressable>
-      <Pressable onPress={() => setIsSignUp((value) => !value)}>
-        <Text style={styles.link}>
-          {isSignUp
-            ? "Already have an account? Sign in"
-            : "Create a new account"}
-        </Text>
-      </Pressable>
+      <AuthForm
+        busy={busy}
+        email={email}
+        errors={errors}
+        mode={mode}
+        notice={notice ?? undefined}
+        onEmailChange={setEmail}
+        onModeChange={changeMode}
+        onPasswordChange={setPassword}
+        onSubmit={() => void submit()}
+        password={password}
+        t={t}
+      />
     </ScrollView>
   );
 }
@@ -104,36 +114,13 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     padding: 16,
   },
-  eyebrow: {
-    color: colors.accent,
+  description: {
+    ...typography.body,
+    color: colors.secondaryText,
     marginBottom: 8,
-    ...typography.eyebrow,
   },
+  eyebrow: { ...typography.eyebrow, color: colors.accent },
+  languagePicker: { alignItems: "flex-end" },
+  restoreError: { ...typography.body, color: colors.danger },
   title: { ...typography.heading, color: colors.primaryText },
-  muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
-  input: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: 1,
-    fontSize: typography.body.fontSize,
-    minHeight: 48,
-    paddingHorizontal: 12,
-  },
-  error: { ...typography.caption, color: colors.danger },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.accent,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-    width: "100%",
-  },
-  primaryButtonText: {
-    ...typography.label,
-    color: colors.inverse,
-    fontWeight: "700",
-  },
-  link: { ...typography.label, color: colors.accent },
 });

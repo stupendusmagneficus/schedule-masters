@@ -31,6 +31,9 @@ function AppContent() {
   const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(Boolean(supabase));
+  const [sessionRestoreFailed, setSessionRestoreFailed] = useState(false);
+  const [signOutFailed, setSignOutFailed] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [service, setService] = useState<Service | null>(null);
 
@@ -43,15 +46,26 @@ function AppContent() {
   useEffect(() => {
     if (demoMode) return;
     if (!supabase) return;
+    const client = supabase;
     let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (active) {
+    async function restoreSession() {
+      try {
+        const { data, error } = await client.auth.getSession();
+        if (!active) return;
         setSession(data.session);
-        setLoading(false);
+        setSessionRestoreFailed(Boolean(error));
+      } catch {
+        if (!active) return;
+        setSessionRestoreFailed(true);
+      } finally {
+        if (active) setLoading(false);
       }
-    });
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (active) setSession(nextSession);
+    }
+    void restoreSession();
+    const { data } = client.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) return;
+      setSession(nextSession);
+      setSessionRestoreFailed(false);
     });
     return () => {
       active = false;
@@ -109,20 +123,55 @@ function AppContent() {
     setLoading(false);
   }
 
+  async function signOut() {
+    if (!supabase) return;
+
+    setSigningOut(true);
+    setSignOutFailed(false);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setSignOutFailed(true);
+        return;
+      }
+      analytics.track(analyticsEvents.accountSignedOut);
+      setSession(null);
+      setService(null);
+      setWorkspace(null);
+    } catch {
+      setSignOutFailed(true);
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
   if (demoMode)
     return (
       <DashboardScreen
         demoData={demoData}
+        isSigningOut={false}
         locale={locale}
         onLocaleChange={setLocale}
         onSignOut={() => undefined}
         service={demoData.primaryService}
+        signOutFailed={false}
         workspace={demoWorkspace}
       />
     );
   if (!supabase) return <ConfigurationState />;
-  if (loading && !session) return <LoadingState />;
-  if (!session) return <AuthScreen onAuthenticated={setSession} />;
+  if (loading) return <LoadingState />;
+  if (!session)
+    return (
+      <AuthScreen
+        locale={locale}
+        onAuthenticated={(nextSession) => {
+          setSessionRestoreFailed(false);
+          setSession(nextSession);
+        }}
+        onLocaleChange={setLocale}
+        sessionRestoreFailed={sessionRestoreFailed}
+      />
+    );
   if (!workspace)
     return (
       <SetupScreen
@@ -132,10 +181,12 @@ function AppContent() {
     );
   return (
     <DashboardScreen
+      isSigningOut={signingOut}
       locale={locale}
       onLocaleChange={setLocale}
-      onSignOut={() => void supabase?.auth.signOut()}
+      onSignOut={() => void signOut()}
       service={service}
+      signOutFailed={signOutFailed}
       workspace={workspace}
     />
   );

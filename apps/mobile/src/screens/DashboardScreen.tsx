@@ -20,19 +20,23 @@ import { ProfileTab } from "./dashboard/ProfileTab";
 import { TodayTab } from "./dashboard/TodayTab";
 
 type DashboardScreenProps = {
+  readonly isSigningOut: boolean;
   readonly locale: SupportedLocale;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
   readonly onSignOut: () => void;
   readonly service: Service | null;
+  readonly signOutFailed: boolean;
   readonly demoData?: DemoData;
   readonly workspace: Workspace;
 };
 
 export function DashboardScreen({
+  isSigningOut,
   locale,
   onLocaleChange,
   onSignOut,
   service,
+  signOutFailed,
   demoData,
   workspace,
 }: DashboardScreenProps) {
@@ -65,10 +69,12 @@ export function DashboardScreen({
         )}
         {activeTab === "profile" && (
           <ProfileTab
+            isSigningOut={isSigningOut}
             locale={locale}
             onLocaleChange={onLocaleChange}
             onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
             onSignOut={onSignOut}
+            signOutFailed={signOutFailed}
             t={t}
             bookingUrl={bookingUrl}
             workspace={workspace}

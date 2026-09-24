@@ -2300,6 +2300,7 @@ __metadata:
     "@schedule-app/analytics": "workspace:*"
     "@schedule-app/api": "workspace:*"
     "@schedule-app/i18n": "workspace:*"
+    "@schedule-app/validation": "workspace:*"
     "@supabase/supabase-js": "npm:2.116.0"
     "@types/react": "npm:19.2.7"
     eslint: "npm:10.11.0"

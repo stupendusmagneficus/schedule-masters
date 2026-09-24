@@ -17,6 +17,23 @@ export type MessageKey =
   | "common.cancel"
   | "common.loading"
   | "common.error"
+  | "auth.emailLabel"
+  | "auth.passwordLabel"
+  | "auth.passwordHint"
+  | "auth.signIn"
+  | "auth.signInTitle"
+  | "auth.signInPrompt"
+  | "auth.signUp"
+  | "auth.signUpTitle"
+  | "auth.signUpPrompt"
+  | "auth.emailInvalid"
+  | "auth.passwordTooShort"
+  | "auth.invalidCredentials"
+  | "auth.accountExists"
+  | "auth.networkError"
+  | "auth.sessionRestoreFailed"
+  | "auth.signOutFailed"
+  | "auth.confirmationRequired"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -75,6 +92,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.cancel": "Отмена",
     "common.loading": "Загрузка…",
     "common.error": "Что-то пошло не так",
+    "auth.emailLabel": "Email",
+    "auth.passwordLabel": "Пароль",
+    "auth.passwordHint": "Не менее 8 символов",
+    "auth.signIn": "Войти",
+    "auth.signInTitle": "С возвращением",
+    "auth.signInPrompt": "Нет аккаунта? Зарегистрироваться",
+    "auth.signUp": "Создать аккаунт",
+    "auth.signUpTitle": "Создайте аккаунт мастера",
+    "auth.signUpPrompt": "Уже есть аккаунт? Войти",
+    "auth.emailInvalid": "Введите корректный email.",
+    "auth.passwordTooShort": "Пароль должен содержать не менее 8 символов.",
+    "auth.invalidCredentials": "Неверный email или пароль.",
+    "auth.accountExists": "Этот email уже зарегистрирован. Попробуйте войти.",
+    "auth.networkError":
+      "Не удалось подключиться. Проверьте интернет и повторите попытку.",
+    "auth.sessionRestoreFailed":
+      "Не удалось восстановить сессию. Войдите ещё раз.",
+    "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
+    "auth.confirmationRequired":
+      "Проверьте email и подтвердите аккаунт, затем войдите.",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -133,6 +170,27 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.cancel": "Zrušit",
     "common.loading": "Načítání…",
     "common.error": "Něco se pokazilo",
+    "auth.emailLabel": "E-mail",
+    "auth.passwordLabel": "Heslo",
+    "auth.passwordHint": "Alespoň 8 znaků",
+    "auth.signIn": "Přihlásit se",
+    "auth.signInTitle": "Vítejte zpět",
+    "auth.signInPrompt": "Nemáte účet? Zaregistrujte se",
+    "auth.signUp": "Vytvořit účet",
+    "auth.signUpTitle": "Vytvořte si účet mistra",
+    "auth.signUpPrompt": "Už máte účet? Přihlaste se",
+    "auth.emailInvalid": "Zadejte platný e-mail.",
+    "auth.passwordTooShort": "Heslo musí mít alespoň 8 znaků.",
+    "auth.invalidCredentials": "Nesprávný e-mail nebo heslo.",
+    "auth.accountExists":
+      "Tento e-mail už je zaregistrovaný. Zkuste se přihlásit.",
+    "auth.networkError":
+      "Nepodařilo se připojit. Zkontrolujte internet a zkuste to znovu.",
+    "auth.sessionRestoreFailed":
+      "Relaci se nepodařilo obnovit. Přihlaste se znovu.",
+    "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
+    "auth.confirmationRequired":
+      "Zkontrolujte e-mail, potvrďte účet a poté se přihlaste.",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -191,6 +249,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.cancel": "Cancel",
     "common.loading": "Loading…",
     "common.error": "Something went wrong",
+    "auth.emailLabel": "Email",
+    "auth.passwordLabel": "Password",
+    "auth.passwordHint": "At least 8 characters",
+    "auth.signIn": "Sign in",
+    "auth.signInTitle": "Welcome back",
+    "auth.signInPrompt": "Don't have an account? Sign up",
+    "auth.signUp": "Create account",
+    "auth.signUpTitle": "Create your master account",
+    "auth.signUpPrompt": "Already have an account? Sign in",
+    "auth.emailInvalid": "Enter a valid email address.",
+    "auth.passwordTooShort": "Password must contain at least 8 characters.",
+    "auth.invalidCredentials": "Incorrect email or password.",
+    "auth.accountExists": "This email is already registered. Try signing in.",
+    "auth.networkError":
+      "Could not connect. Check your internet connection and try again.",
+    "auth.sessionRestoreFailed":
+      "Your session could not be restored. Sign in again.",
+    "auth.signOutFailed": "Could not sign out. Try again.",
+    "auth.confirmationRequired":
+      "Check your email, confirm your account, then sign in.",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",

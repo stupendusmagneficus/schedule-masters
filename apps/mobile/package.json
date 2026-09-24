@@ -14,6 +14,7 @@
     "@schedule-app/analytics": "workspace:*",
     "@schedule-app/api": "workspace:*",
     "@schedule-app/i18n": "workspace:*",
+    "@schedule-app/validation": "workspace:*",
     "@supabase/supabase-js": "2.116.0",
     "expo": "57.0.24",
     "expo-font": "~57.0.4",
