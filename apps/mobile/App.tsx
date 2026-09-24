@@ -5,8 +5,7 @@ import {
   defaultLocale,
   type SupportedLocale,
 } from "@schedule-app/i18n";
-import type { Session } from "@supabase/supabase-js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import {
@@ -16,7 +15,10 @@ import {
 } from "./src/components/StatusStates";
 import { demoData, demoWorkspace } from "./src/demo/mockData";
 import { isDemoMode } from "./src/demo/mode";
-import type { AuthMode } from "./src/features/auth/authentication";
+import {
+  initialAuthFlowState,
+  reduceAuthFlow,
+} from "./src/features/auth/authFlow";
 import { useMasterWorkspace } from "./src/features/workspace/useMasterWorkspace";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
@@ -35,12 +37,14 @@ export default function App() {
 function AppContent() {
   const demoMode = isDemoMode();
   const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
-  const [session, setSession] = useState<Session | null>(null);
+  const [authState, dispatchAuth] = useReducer(
+    reduceAuthFlow,
+    initialAuthFlowState,
+  );
+  const { authMode, session, sessionRestoreFailed } = authState;
   const [isRestoringSession, setIsRestoringSession] = useState(
     Boolean(supabase),
   );
-  const [sessionRestoreFailed, setSessionRestoreFailed] = useState(false);
-  const [authMode, setAuthMode] = useState<AuthMode>("signUp");
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { reload: reloadWorkspace, state: workspaceState } = useMasterWorkspace(
@@ -66,20 +70,26 @@ function AppContent() {
       try {
         const { data, error } = await client.auth.getSession();
         if (!active) return;
-        setSession(data.session);
-        setSessionRestoreFailed(Boolean(error));
+        dispatchAuth({
+          error: Boolean(error),
+          session: data.session,
+          type: "sessionRestored",
+        });
       } catch {
         if (!active) return;
-        setSessionRestoreFailed(true);
+        dispatchAuth({ type: "sessionRestoreFailed" });
       } finally {
         if (active) setIsRestoringSession(false);
       }
     }
     void restoreSession();
-    const { data } = client.auth.onAuthStateChange((_event, nextSession) => {
+    const { data } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
-      setSession(nextSession);
-      setSessionRestoreFailed(false);
+      dispatchAuth({
+        event,
+        session: nextSession,
+        type: "authStateChanged",
+      });
     });
     return () => {
       active = false;
@@ -99,8 +109,7 @@ function AppContent() {
         return;
       }
       analytics.track(analyticsEvents.accountSignedOut);
-      setAuthMode("signIn");
-      setSession(null);
+      dispatchAuth({ type: "signedOut" });
     } catch {
       setSignOutFailed(true);
     } finally {
@@ -129,8 +138,7 @@ function AppContent() {
         initialMode={authMode}
         locale={locale}
         onAuthenticated={(nextSession) => {
-          setSessionRestoreFailed(false);
-          setSession(nextSession);
+          dispatchAuth({ session: nextSession, type: "authenticated" });
         }}
         onLocaleChange={setLocale}
         sessionRestoreFailed={sessionRestoreFailed}

@@ -1,4 +1,8 @@
-import type { SupportedLocale } from "@schedule-app/i18n";
+import {
+  createTranslator,
+  type MessageKey,
+  type SupportedLocale,
+} from "@schedule-app/i18n";
 import { useState } from "react";
 import {
   Pressable,
@@ -7,6 +11,8 @@ import {
   Text,
   TextInput,
 } from "react-native";
+import { getSetupErrorMessageKey } from "../features/workspace/setupErrorMessage";
+import { validateSetupValues } from "../features/workspace/setupValidation";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
 import { colors, radii } from "../theme/tokens";
@@ -24,27 +30,45 @@ export function SetupScreen({ locale, onComplete }: SetupScreenProps) {
   const [serviceName, setServiceName] = useState("Gel manicure");
   const [price, setPrice] = useState("700");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [messageKey, setMessageKey] = useState<MessageKey>();
+  const t = createTranslator(locale);
 
   async function submit() {
-    if (!supabase || !name.trim() || !slug.trim() || !serviceName.trim()) {
-      setMessage("Complete the workspace, booking link, and service fields.");
+    const normalizedSlug = normalizeBookingSlug(slug);
+    const validationError = validateSetupValues({
+      name,
+      price,
+      serviceName,
+      slug: normalizedSlug,
+    });
+    if (validationError) {
+      setMessageKey(
+        validationError === "required"
+          ? "workspace.setupRequiredFields"
+          : validationError === "slug"
+            ? "workspace.setupInvalidSlug"
+            : "workspace.priceInvalid",
+      );
+      return;
+    }
+    if (!supabase) {
+      setMessageKey("workspace.setupFailed");
       return;
     }
     setBusy(true);
-    setMessage(null);
+    setMessageKey(undefined);
     const { error } = await supabase.rpc("bootstrap_master_workspace", {
       p_name: name.trim(),
-      p_slug: normalizeBookingSlug(slug),
+      p_slug: normalizedSlug,
       p_locale: locale,
       p_service_name: serviceName.trim(),
       p_duration_minutes: 60,
-      p_price_amount: Number(price) || 0,
+      p_price_amount: Number(price),
       p_start_local_time: "08:00",
       p_end_local_time: "21:00",
     });
     setBusy(false);
-    if (error) setMessage(error.message);
+    if (error) setMessageKey(getSetupErrorMessageKey(error));
     else {
       analytics.track(analyticsEvents.workspaceSetupCompleted, {
         locale,
@@ -55,41 +79,50 @@ export function SetupScreen({ locale, onComplete }: SetupScreenProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>FIRST SETUP</Text>
-      <Text style={styles.title}>Set up your workspace</Text>
-      <Text style={styles.muted}>
-        This creates Monday–Sunday availability from 08:00 to 21:00. You can
-        refine it later.
-      </Text>
+      <Text style={styles.eyebrow}>{t("workspace.setupEyebrow")}</Text>
+      <Text style={styles.title}>{t("workspace.setupTitle")}</Text>
+      <Text style={styles.muted}>{t("workspace.setupDescription")}</Text>
       <TextInput
-        onChangeText={setName}
-        placeholder="Workspace name"
+        onChangeText={(value) => {
+          setName(value);
+          setMessageKey(undefined);
+        }}
+        placeholder={t("workspace.namePlaceholder")}
         style={styles.input}
         value={name}
       />
       <TextInput
         autoCapitalize="none"
-        onChangeText={(value) => setSlug(normalizeBookingSlug(value))}
-        placeholder="Booking link, e.g. anna-nails"
+        onChangeText={(value) => {
+          setSlug(normalizeBookingSlug(value));
+          setMessageKey(undefined);
+        }}
+        placeholder={t("workspace.slugPlaceholder")}
         style={styles.input}
         value={slug}
       />
       <TextInput
-        onChangeText={setServiceName}
-        placeholder="First service"
+        onChangeText={(value) => {
+          setServiceName(value);
+          setMessageKey(undefined);
+        }}
+        placeholder={t("workspace.servicePlaceholder")}
         style={styles.input}
         value={serviceName}
       />
       <TextInput
         keyboardType="decimal-pad"
-        onChangeText={setPrice}
-        placeholder="Price in CZK"
+        onChangeText={(value) => {
+          setPrice(value);
+          setMessageKey(undefined);
+        }}
+        placeholder={t("workspace.pricePlaceholder")}
         style={styles.input}
         value={price}
       />
-      {message && (
+      {messageKey && (
         <Text accessibilityRole="alert" style={styles.error}>
-          {message}
+          {t(messageKey)}
         </Text>
       )}
       <Pressable
@@ -98,7 +131,7 @@ export function SetupScreen({ locale, onComplete }: SetupScreenProps) {
         style={styles.primaryButton}
       >
         <Text style={styles.primaryButtonText}>
-          {busy ? "Saving…" : "Save and continue"}
+          {busy ? t("workspace.setupSaving") : t("workspace.setupSave")}
         </Text>
       </Pressable>
     </ScrollView>

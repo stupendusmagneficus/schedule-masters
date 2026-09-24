@@ -40,6 +40,20 @@ export type MessageKey =
   | "auth.confirmationRequired"
   | "workspace.loadFailedTitle"
   | "workspace.loadFailedDescription"
+  | "workspace.setupEyebrow"
+  | "workspace.setupTitle"
+  | "workspace.setupDescription"
+  | "workspace.namePlaceholder"
+  | "workspace.slugPlaceholder"
+  | "workspace.servicePlaceholder"
+  | "workspace.pricePlaceholder"
+  | "workspace.setupRequiredFields"
+  | "workspace.setupFailed"
+  | "workspace.setupInvalidSlug"
+  | "workspace.setupInvalidService"
+  | "workspace.priceInvalid"
+  | "workspace.setupSaving"
+  | "workspace.setupSave"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -127,6 +141,24 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.loadFailedTitle": "Не удалось загрузить рабочее пространство",
     "workspace.loadFailedDescription":
       "Проверьте подключение к интернету и повторите попытку.",
+    "workspace.setupEyebrow": "ПЕРВОНАЧАЛЬНАЯ НАСТРОЙКА",
+    "workspace.setupTitle": "Настройте рабочее пространство",
+    "workspace.setupDescription":
+      "Будет создана доступность с понедельника по воскресенье, с 08:00 до 21:00. Позже её можно изменить.",
+    "workspace.namePlaceholder": "Название рабочего пространства",
+    "workspace.slugPlaceholder": "Ссылка на запись, например anna-nails",
+    "workspace.servicePlaceholder": "Первая услуга",
+    "workspace.pricePlaceholder": "Цена в Kč",
+    "workspace.setupRequiredFields":
+      "Заполните название, ссылку на запись и услугу.",
+    "workspace.setupFailed":
+      "Не удалось сохранить настройки. Проверьте данные и повторите попытку.",
+    "workspace.setupInvalidSlug":
+      "Ссылка должна содержать только латинские буквы, цифры и дефисы.",
+    "workspace.setupInvalidService": "Проверьте название услуги и цену.",
+    "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
+    "workspace.setupSaving": "Сохранение…",
+    "workspace.setupSave": "Сохранить и продолжить",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -215,6 +247,24 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.loadFailedTitle": "Pracovní prostor se nepodařilo načíst",
     "workspace.loadFailedDescription":
       "Zkontrolujte připojení k internetu a zkuste to znovu.",
+    "workspace.setupEyebrow": "PRVNÍ NASTAVENÍ",
+    "workspace.setupTitle": "Nastavte si pracovní prostor",
+    "workspace.setupDescription":
+      "Vytvoříme dostupnost od pondělí do neděle, od 08:00 do 21:00. Později ji můžete upravit.",
+    "workspace.namePlaceholder": "Název pracovního prostoru",
+    "workspace.slugPlaceholder": "Odkaz pro rezervace, například anna-nails",
+    "workspace.servicePlaceholder": "První služba",
+    "workspace.pricePlaceholder": "Cena v Kč",
+    "workspace.setupRequiredFields":
+      "Vyplňte název, odkaz pro rezervace a službu.",
+    "workspace.setupFailed":
+      "Nastavení se nepodařilo uložit. Zkontrolujte údaje a zkuste to znovu.",
+    "workspace.setupInvalidSlug":
+      "Odkaz může obsahovat pouze malá písmena bez diakritiky, číslice a pomlčky.",
+    "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
+    "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
+    "workspace.setupSaving": "Ukládání…",
+    "workspace.setupSave": "Uložit a pokračovat",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -302,6 +352,24 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.loadFailedTitle": "We could not load your workspace",
     "workspace.loadFailedDescription":
       "Check your internet connection and try again.",
+    "workspace.setupEyebrow": "FIRST SETUP",
+    "workspace.setupTitle": "Set up your workspace",
+    "workspace.setupDescription":
+      "This creates Monday–Sunday availability from 08:00 to 21:00. You can refine it later.",
+    "workspace.namePlaceholder": "Workspace name",
+    "workspace.slugPlaceholder": "Booking link, e.g. anna-nails",
+    "workspace.servicePlaceholder": "First service",
+    "workspace.pricePlaceholder": "Price in CZK",
+    "workspace.setupRequiredFields":
+      "Complete the workspace name, booking link, and service fields.",
+    "workspace.setupFailed":
+      "We could not save the setup. Check the details and try again.",
+    "workspace.setupInvalidSlug":
+      "The booking link can contain only lowercase letters, numbers, and hyphens.",
+    "workspace.setupInvalidService": "Check the service name and price.",
+    "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
+    "workspace.setupSaving": "Saving…",
+    "workspace.setupSave": "Save and continue",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",
