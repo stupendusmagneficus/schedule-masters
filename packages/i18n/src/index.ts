@@ -17,6 +17,12 @@ export type MessageKey =
   | "common.loading"
   | "common.error"
   | "mobile.description"
+  | "mobile.demoMode"
+  | "mobile.todaySchedule"
+  | "mobile.freeSlots"
+  | "mobile.available"
+  | "mobile.pending"
+  | "mobile.confirmed"
   | "mobile.today"
   | "mobile.calendar"
   | "mobile.profile"
@@ -67,6 +73,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Загрузка…",
     "common.error": "Что-то пошло не так",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
+    "mobile.demoMode": "Демо-режим",
+    "mobile.todaySchedule": "Расписание на сегодня",
+    "mobile.freeSlots": "Свободные окна",
+    "mobile.available": "Свободно",
+    "mobile.pending": "Ожидает подтверждения",
+    "mobile.confirmed": "Подтверждено",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
     "mobile.profile": "Профиль",
@@ -117,6 +129,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Načítání…",
     "common.error": "Něco se pokazilo",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
+    "mobile.demoMode": "Demo režim",
+    "mobile.todaySchedule": "Dnešní rozvrh",
+    "mobile.freeSlots": "Volné termíny",
+    "mobile.available": "Volno",
+    "mobile.pending": "Čeká na potvrzení",
+    "mobile.confirmed": "Potvrzeno",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
     "mobile.profile": "Profil",
@@ -167,6 +185,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Loading…",
     "common.error": "Something went wrong",
     "mobile.description": "The master mobile app is ready.",
+    "mobile.demoMode": "Demo mode",
+    "mobile.todaySchedule": "Today's schedule",
+    "mobile.freeSlots": "Free slots",
+    "mobile.available": "Available",
+    "mobile.pending": "Pending confirmation",
+    "mobile.confirmed": "Confirmed",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
     "mobile.profile": "Profile",

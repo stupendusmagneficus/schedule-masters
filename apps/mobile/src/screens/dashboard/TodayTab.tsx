@@ -2,22 +2,36 @@ import { formatCurrency, formatDate } from "@schedule-app/i18n";
 import { StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
-import { colors } from "../../theme/tokens";
+import type { DemoAppointment, DemoData } from "../../demo/types";
+import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Service, Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type TodayTabProps = DashboardTabProps & {
+  readonly demoData?: DemoData;
   readonly service: Service | null;
   readonly workspace: Workspace;
 };
 
-export function TodayTab({ locale, service, t, workspace }: TodayTabProps) {
+export function TodayTab({
+  demoData,
+  locale,
+  service,
+  t,
+  workspace,
+}: TodayTabProps) {
   const today = formatDate(new Date(), locale, {
     day: "numeric",
     month: "long",
     weekday: "long",
   });
+  const appointments = demoData?.appointments ?? [];
+  const expectedRevenue = appointments.reduce(
+    (total, appointment) => total + appointment.priceAmount,
+    0,
+  );
+  const nextAppointment = appointments[0];
 
   return (
     <View style={styles.content}>
@@ -25,23 +39,55 @@ export function TodayTab({ locale, service, t, workspace }: TodayTabProps) {
         <Text style={styles.eyebrow}>{t("mobile.today")}</Text>
         <Text style={styles.title}>{workspace.name}</Text>
         <Text style={styles.date}>{today}</Text>
+        {demoData && (
+          <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
+        )}
       </View>
 
       <View style={styles.summaryGrid}>
         <InfoCard style={styles.statCard}>
           <Text style={styles.statLabel}>{t("mobile.bookings")}</Text>
-          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statValue}>{appointments.length}</Text>
         </InfoCard>
         <InfoCard style={styles.statCard}>
           <Text style={styles.statLabel}>{t("mobile.expectedRevenue")}</Text>
-          <Text style={styles.statValue}>0 Kč</Text>
+          <Text style={styles.statValue}>
+            {formatCurrency(expectedRevenue, locale, "CZK")}
+          </Text>
         </InfoCard>
       </View>
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.nextBooking")}</Text>
-        <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
+        {nextAppointment ? (
+          <AppointmentRow appointment={nextAppointment} t={t} />
+        ) : (
+          <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
+        )}
       </InfoCard>
+
+      {demoData && (
+        <InfoCard>
+          <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
+          <View style={styles.appointmentsList}>
+            {appointments.map((appointment) => (
+              <AppointmentRow
+                appointment={appointment}
+                key={appointment.id}
+                t={t}
+              />
+            ))}
+          </View>
+          <Text style={styles.freeSlotsLabel}>{t("mobile.freeSlots")}</Text>
+          <View style={styles.freeSlots}>
+            {demoData.freeSlots.map((slot) => (
+              <Text key={slot} style={styles.freeSlot}>
+                {slot}
+              </Text>
+            ))}
+          </View>
+        </InfoCard>
+      )}
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.firstService")}</Text>
@@ -65,6 +111,16 @@ export function TodayTab({ locale, service, t, workspace }: TodayTabProps) {
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
+  demoLabel: {
+    ...typography.caption,
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentSoft,
+    borderRadius: 999,
+    color: colors.secondaryText,
+    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
   date: { ...typography.metadata, color: colors.secondaryText, marginTop: 4 },
   eyebrow: {
     color: colors.accent,
@@ -89,6 +145,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  appointmentsList: { gap: 12 },
+  appointmentDetails: { flex: 1, gap: 2 },
+  appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
+  avatar: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderRadius: 999,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  avatarText: {
+    ...typography.caption,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
+  freeSlot: {
+    ...typography.label,
+    backgroundColor: colors.subtleSurface,
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: StyleSheet.hairlineWidth,
+    color: colors.primaryText,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  freeSlots: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  freeSlotsLabel: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    marginBottom: 8,
+    marginTop: 16,
+  },
   statLabel: { ...typography.caption, color: colors.secondaryText },
   statCard: { flex: 1 },
   statValue: {
@@ -97,5 +186,40 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
   },
   summaryGrid: { flexDirection: "row", gap: 12 },
+  status: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    maxWidth: 100,
+    textAlign: "right",
+  },
   title: { ...typography.heading, color: colors.primaryText },
 });
+
+function AppointmentRow({
+  appointment,
+  t,
+}: {
+  readonly appointment: DemoAppointment;
+  readonly t: TodayTabProps["t"];
+}) {
+  const statusLabel =
+    appointment.status === "confirmed"
+      ? t("mobile.confirmed")
+      : t("mobile.pending");
+
+  return (
+    <View style={styles.appointmentRow}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{appointment.initials}</Text>
+      </View>
+      <View style={styles.appointmentDetails}>
+        <Text style={styles.serviceName}>{appointment.clientName}</Text>
+        <Text style={styles.helper}>
+          {appointment.startsAt} · {appointment.serviceName} ·{" "}
+          {appointment.durationMinutes} min
+        </Text>
+      </View>
+      <Text style={styles.status}>{statusLabel}</Text>
+    </View>
+  );
+}

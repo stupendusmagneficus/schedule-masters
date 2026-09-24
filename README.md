@@ -47,6 +47,9 @@ yarn dev
 # Run the mobile app only
 yarn workspace @schedule-app/mobile dev
 
+# Run the mobile visual demo without Supabase authentication
+EXPO_PUBLIC_DEMO_MODE=true yarn workspace @schedule-app/mobile dev
+
 # Run the booking web only
 yarn workspace @schedule-app/booking-web dev
 
@@ -58,6 +61,9 @@ yarn build
 ```
 
 The mobile app starts with Expo. The booking web starts at http://localhost:3000.
+For the web preview, open the Expo URL with `?demo=1`, for example
+http://localhost:19006/?demo=1. Demo mode uses local mock data only and never
+writes appointments or workspace data to Supabase.
 
 GitHub Actions runs the quality checks for pull requests, then builds the Expo
 mobile package and the Next.js booking web package as separate gates. The

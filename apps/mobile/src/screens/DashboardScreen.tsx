@@ -9,6 +9,7 @@ import {
   type MobileTab,
 } from "../components/BottomNavigation";
 import { FloatingBookingAction } from "../components/FloatingBookingAction";
+import type { DemoData } from "../demo/types";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
 import { CalendarTab } from "./dashboard/CalendarTab";
@@ -20,6 +21,7 @@ type DashboardScreenProps = {
   readonly onLocaleChange: (locale: SupportedLocale) => void;
   readonly onSignOut: () => void;
   readonly service: Service | null;
+  readonly demoData?: DemoData;
   readonly workspace: Workspace;
 };
 
@@ -28,6 +30,7 @@ export function DashboardScreen({
   onLocaleChange,
   onSignOut,
   service,
+  demoData,
   workspace,
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
@@ -52,11 +55,14 @@ export function DashboardScreen({
           <TodayTab
             locale={locale}
             service={service}
+            demoData={demoData}
             t={t}
             workspace={workspace}
           />
         )}
-        {activeTab === "calendar" && <CalendarTab locale={locale} t={t} />}
+        {activeTab === "calendar" && (
+          <CalendarTab demoData={demoData} locale={locale} t={t} />
+        )}
         {activeTab === "profile" && (
           <ProfileTab
             locale={locale}
