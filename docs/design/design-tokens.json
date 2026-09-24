@@ -15,20 +15,20 @@
       "onPrimary": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F6F8FA", "type": "color" },
+      "canvas": { "value": "#F7F8F5", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#F6F8FA", "type": "color" },
-      "sunken": { "value": "#EAEFF3", "type": "color" }
+      "subtle": { "value": "#F1F4F0", "type": "color" },
+      "sunken": { "value": "#E9EFEA", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#24292F", "type": "color" },
-      "secondary": { "value": "#57606A", "type": "color" },
-      "muted": { "value": "#6E7781", "type": "color" },
+      "primary": { "value": "#202A24", "type": "color" },
+      "secondary": { "value": "#5F6E65", "type": "color" },
+      "muted": { "value": "#718078", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#D0D7DE", "type": "color" },
-      "strong": { "value": "#AFB8C1", "type": "color" },
+      "default": { "value": "#D9E2DC", "type": "color" },
+      "strong": { "value": "#B8C6BC", "type": "color" },
       "focus": { "value": "#2D8A62", "type": "color" }
     },
     "status": {
@@ -36,16 +36,16 @@
       "successSoft": { "value": "#E1F3EA", "type": "color" },
       "warning": { "value": "#B7791F", "type": "color" },
       "warningSoft": { "value": "#FFF2D7", "type": "color" },
-      "danger": { "value": "#C65353", "type": "color" },
-      "dangerSoft": { "value": "#FBE5E3", "type": "color" },
-      "info": { "value": "#3D76A8", "type": "color" },
-      "infoSoft": { "value": "#E6F0F8", "type": "color" }
+      "danger": { "value": "#C43D4B", "type": "color" },
+      "dangerSoft": { "value": "#FBE7E8", "type": "color" },
+      "info": { "value": "#3F7593", "type": "color" },
+      "infoSoft": { "value": "#E8F0F4", "type": "color" }
     },
     "schedule": {
       "booked": { "value": "#E1F3EA", "type": "color" },
       "bookedBorder": { "value": "#2D8A62", "type": "color" },
-      "break": { "value": "#EAEFF3", "type": "color" },
-      "breakBorder": { "value": "#8C959F", "type": "color" },
+      "break": { "value": "#E9EFEA", "type": "color" },
+      "breakBorder": { "value": "#91A097", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
@@ -95,8 +95,8 @@
     "pill": { "value": "999px", "type": "dimension" }
   },
   "shadow": {
-    "subtle": { "value": "0 1px 2px rgba(32, 39, 37, 0.04)", "type": "shadow" },
-    "raised": { "value": "0 6px 18px rgba(32, 39, 37, 0.06)", "type": "shadow" }
+    "subtle": { "value": "0 1px 2px rgba(32, 42, 36, 0.04)", "type": "shadow" },
+    "raised": { "value": "0 6px 18px rgba(32, 42, 36, 0.06)", "type": "shadow" }
   },
   "motion": {
     "micro": { "value": "160ms", "type": "duration" },
