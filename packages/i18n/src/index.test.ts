@@ -35,6 +35,15 @@ describe("translations and formatting", () => {
     expect(translate("en", "common.language")).toBe("Language");
   });
 
+  it("uses the correct action prompt for each authentication mode", () => {
+    expect(translate("cz", "auth.signInPrompt")).toBe(
+      "Už máte účet? Přihlaste se",
+    );
+    expect(translate("cz", "auth.signUpPrompt")).toBe(
+      "Nemáte účet? Zaregistrujte se",
+    );
+  });
+
   it("formats dates, times, and Czech currency through Intl", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);
