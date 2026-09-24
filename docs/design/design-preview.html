@@ -117,18 +117,26 @@
       .summary {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        background: var(--raised);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
         margin: 16px 0;
+        overflow: hidden;
       }
       .stat {
-        background: var(--subtle);
-        border-radius: 12px;
-        padding: 12px;
+        min-width: 0;
+        padding: 14px 12px;
+      }
+      .stat + .stat {
+        border-left: 1px solid var(--line);
       }
       .stat strong {
         display: block;
         font-size: 20px;
         margin-top: 4px;
+      }
+      .expected-value {
+        color: var(--accent-dark);
       }
       .appointment,
       .service,
@@ -323,7 +331,7 @@
                 <span class="meta">Bookings</span><strong>4</strong>
               </div>
               <div class="stat">
-                <span class="meta">Expected</span><strong>2 400 Kč</strong>
+                <span class="meta">Expected</span><strong class="expected-value">2 400 Kč</strong>
               </div>
             </div>
             <span class="section-label">Next appointments</span>

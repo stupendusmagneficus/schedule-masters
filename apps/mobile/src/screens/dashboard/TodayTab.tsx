@@ -2,6 +2,7 @@ import { formatCurrency, formatDate } from "@schedule-app/i18n";
 import { StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
+import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -44,18 +45,21 @@ export function TodayTab({
         )}
       </View>
 
-      <View style={styles.summaryGrid}>
-        <InfoCard style={styles.statCard}>
-          <Text style={styles.statLabel}>{t("mobile.bookings")}</Text>
-          <Text style={styles.statValue}>{appointments.length}</Text>
-        </InfoCard>
-        <InfoCard style={styles.statCard}>
-          <Text style={styles.statLabel}>{t("mobile.expectedRevenue")}</Text>
-          <Text style={styles.statValue}>
-            {formatCurrency(expectedRevenue, locale, "CZK")}
-          </Text>
-        </InfoCard>
-      </View>
+      <SummaryMetrics
+        metrics={[
+          {
+            id: "bookings",
+            label: t("mobile.bookings"),
+            value: String(appointments.length),
+          },
+          {
+            id: "expected-revenue",
+            label: t("mobile.expectedRevenue"),
+            tone: "accent",
+            value: formatCurrency(expectedRevenue, locale, "CZK"),
+          },
+        ]}
+      />
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.nextBooking")}</Text>
@@ -178,14 +182,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 16,
   },
-  statLabel: { ...typography.caption, color: colors.secondaryText },
-  statCard: { flex: 1 },
-  statValue: {
-    marginTop: 8,
-    ...typography.metric,
-    color: colors.primaryText,
-  },
-  summaryGrid: { flexDirection: "row", gap: 12 },
   status: {
     ...typography.caption,
     color: colors.secondaryText,

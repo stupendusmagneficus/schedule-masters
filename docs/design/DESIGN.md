@@ -116,6 +116,9 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - Tapping an appointment opens its details.
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.
+- Bookings and expected revenue share one grouped summary surface. Bookings
+  stays neutral; expected revenue uses the strong green text accent without a
+  full-color background.
 - The quick-add action offers `Appointment` and `Break` as two equally clear choices.
 
 ### 2. Master Calendar
