@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  defaultLocale,
   detectLocale,
   formatCurrency,
   formatDate,
@@ -18,6 +19,10 @@ describe("locale resolution", () => {
   it("uses English as the fallback locale", () => {
     expect(resolveLocale("de-DE")).toBe("en");
     expect(detectLocale("de-DE")).toBe("en");
+  });
+
+  it("uses Russian as the product default locale", () => {
+    expect(defaultLocale).toBe("ru");
   });
 });
 

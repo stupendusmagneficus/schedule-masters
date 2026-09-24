@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -26,7 +26,7 @@ export function FloatingBookingAction({
         pressed && styles.pressed,
       ]}
     >
-      <Ionicons color={colors.inverse} name="add" size={20} />
+      <MaterialCommunityIcons color={colors.inverse} name="plus" size={20} />
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );

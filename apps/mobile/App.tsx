@@ -1,8 +1,7 @@
 import "react-native-url-polyfill/auto";
 
-import { detectLocale, type SupportedLocale } from "@schedule-app/i18n";
+import { defaultLocale, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
-import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -29,9 +28,7 @@ export default function App() {
 
 function AppContent() {
   const demoMode = isDemoMode();
-  const [locale, setLocale] = useState<SupportedLocale>(() =>
-    detectLocale(getLocales()[0]?.languageTag),
-  );
+  const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(Boolean(supabase));
   const [workspace, setWorkspace] = useState<Workspace | null>(null);

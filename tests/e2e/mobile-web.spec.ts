@@ -17,24 +17,24 @@ test.describe("mobile web smoke", () => {
   test("renders the visual demo with mock schedule data", async ({ page }) => {
     await page.goto("/?demo=1");
 
-    await expect(page.getByText("Demo mode", { exact: true })).toBeVisible();
+    await expect(page.getByText("Демо-режим", { exact: true })).toBeVisible();
     await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
     await expect(
       page.getByText("Anna K.", { exact: true }).first(),
     ).toBeVisible();
-    await expect(page.getByText("Free slots", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Свободные окна", { exact: true }),
+    ).toBeVisible();
   });
 
   test("gives visible feedback when starting a new booking", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "New booking" }).click();
+    await page.getByRole("button", { name: "Новая запись" }).click();
 
     await expect(
-      page.getByText(
-        "The booking creation form will be added in the next MVP step.",
-      ),
+      page.getByText("Форма создания записи появится в следующем шаге MVP."),
     ).toBeVisible();
   });
 
@@ -42,7 +42,7 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("tab", { name: "Profile" }).click();
+    await page.getByRole("tab", { name: "Профиль" }).click();
 
     await expect(
       page.getByRole("link", {

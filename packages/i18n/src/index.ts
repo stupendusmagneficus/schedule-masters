@@ -2,6 +2,7 @@ export const supportedLocales = ["ru", "cz", "en"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const fallbackLocale: SupportedLocale = "en";
+export const defaultLocale: SupportedLocale = "ru";
 
 const intlLocales: Record<SupportedLocale, string> = {
   ru: "ru-RU",

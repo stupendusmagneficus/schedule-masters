@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { type ComponentProps, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -22,14 +22,14 @@ type BottomNavigationProps = {
 };
 
 type NavigationItem = {
-  readonly icon: ComponentProps<typeof Ionicons>["name"];
+  readonly icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   readonly id: MobileTab;
 };
 
 const navigationItems: readonly NavigationItem[] = [
-  { icon: "today-outline", id: "today" },
-  { icon: "calendar-outline", id: "calendar" },
-  { icon: "person-circle-outline", id: "profile" },
+  { icon: "home-outline", id: "today" },
+  { icon: "calendar-month-outline", id: "calendar" },
+  { icon: "account-outline", id: "profile" },
 ];
 
 const navigationPadding = 4;
@@ -96,7 +96,7 @@ export function BottomNavigation({
             onPress={() => onTabChange(item.id)}
             style={styles.item}
           >
-            <Ionicons color={color} name={item.icon} size={20} />
+            <MaterialCommunityIcons color={color} name={item.icon} size={21} />
             <Text style={[styles.label, { color }]}>{labels[item.id]}</Text>
           </Pressable>
         );
