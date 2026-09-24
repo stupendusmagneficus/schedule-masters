@@ -44,6 +44,12 @@ describe("translations and formatting", () => {
     );
   });
 
+  it("gives an actionable Czech message when sign in fails", () => {
+    expect(translate("cz", "auth.invalidCredentials")).toBe(
+      "Přihlášení se nepodařilo. Zkontrolujte e-mail a heslo a zkuste to znovu.",
+    );
+  });
+
   it("formats dates, times, and Czech currency through Intl", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);

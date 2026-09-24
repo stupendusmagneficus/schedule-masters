@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import type { AuthMode } from "../features/auth/authentication";
+import type { AuthNotice } from "../features/auth/authNotice";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 
@@ -12,7 +13,7 @@ type AuthFormProps = {
   readonly email: string;
   readonly errors: ReadonlyArray<"email" | "password">;
   readonly mode: AuthMode;
-  readonly notice?: string;
+  readonly notice?: AuthNotice;
   readonly onEmailBlur: () => void;
   readonly onEmailChange: (value: string) => void;
   readonly onModeChange: (mode: AuthMode) => void;
@@ -123,9 +124,33 @@ export function AuthForm({
         )}
       </View>
       {notice && (
-        <Text accessibilityRole="alert" style={styles.notice}>
-          {notice}
-        </Text>
+        <View
+          accessibilityRole="alert"
+          style={[
+            styles.notice,
+            notice.tone === "error" ? styles.noticeError : styles.noticeInfo,
+          ]}
+        >
+          <MaterialCommunityIcons
+            color={notice.tone === "error" ? colors.danger : colors.accent}
+            name={
+              notice.tone === "error"
+                ? "alert-circle-outline"
+                : "information-outline"
+            }
+            size={22}
+          />
+          <Text
+            style={[
+              styles.noticeText,
+              notice.tone === "error"
+                ? styles.noticeErrorText
+                : styles.noticeInfoText,
+            ]}
+          >
+            {notice.message}
+          </Text>
+        </View>
       )}
       <Pressable
         accessibilityRole="button"
@@ -196,7 +221,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     ...typography.label,
   },
-  notice: { ...typography.body, color: colors.secondaryText },
+  notice: {
+    alignItems: "flex-start",
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 10,
+    padding: 12,
+  },
+  noticeError: { backgroundColor: colors.dangerSoft },
+  noticeErrorText: { color: colors.danger },
+  noticeInfo: { backgroundColor: colors.accentSoft },
+  noticeInfoText: { color: colors.accentPressed },
+  noticeText: { ...typography.metadata, flex: 1 },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.accent,

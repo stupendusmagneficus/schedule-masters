@@ -7,6 +7,7 @@ import { AuthForm } from "../components/AuthForm";
 import { LocalePicker } from "../components/LocalePicker";
 import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
 import { type AuthMode, authenticate } from "../features/auth/authentication";
+import type { AuthNotice } from "../features/auth/authNotice";
 import {
   type AuthField,
   type AuthFieldTouchState,
@@ -40,7 +41,7 @@ export function AuthScreen({
     email: false,
     password: false,
   });
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<AuthNotice | null>(null);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const errors = useMemo(
     () => getVisibleAuthFieldErrors({ email, password }, touchedFields),
@@ -71,7 +72,10 @@ export function AuthScreen({
     }
 
     if (result.kind === "requestError") {
-      setNotice(t(getAuthErrorMessageKey(result.error)));
+      setNotice({
+        message: t(getAuthErrorMessageKey(result.error)),
+        tone: "error",
+      });
       return;
     }
 
@@ -79,7 +83,7 @@ export function AuthScreen({
       analytics.track(analyticsEvents.accountSignedUp);
       setPassword("");
       setMode("signIn");
-      setNotice(t("auth.confirmationRequired"));
+      setNotice({ message: t("auth.confirmationRequired"), tone: "info" });
       return;
     }
 

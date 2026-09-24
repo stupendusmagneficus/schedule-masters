@@ -6,6 +6,7 @@ export const colors = {
   borderSubtle: "#E2E9E3",
   canvas: "#F7F8F5",
   danger: "#C43D4B",
+  dangerSoft: "#FCEBED",
   inverse: "#FFFFFF",
   primaryText: "#202A24",
   pendingSoft: "#FFF3D6",

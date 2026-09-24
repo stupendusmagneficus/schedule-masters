@@ -94,7 +94,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.save": "Сохранить",
     "common.cancel": "Отмена",
     "common.loading": "Загрузка…",
-    "common.error": "Что-то пошло не так",
+    "common.error":
+      "Не удалось завершить действие. Повторите попытку через несколько секунд.",
     "auth.emailLabel": "Email",
     "auth.passwordLabel": "Пароль",
     "auth.passwordHint": "Не менее 8 символов",
@@ -109,7 +110,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signUpPrompt": "Нет аккаунта? Зарегистрироваться",
     "auth.emailInvalid": "Введите корректный email.",
     "auth.passwordTooShort": "Пароль должен содержать не менее 8 символов.",
-    "auth.invalidCredentials": "Неверный email или пароль.",
+    "auth.invalidCredentials":
+      "Не удалось войти. Проверьте email и пароль, затем попробуйте ещё раз.",
     "auth.accountExists": "Этот email уже зарегистрирован. Попробуйте войти.",
     "auth.networkError":
       "Не удалось подключиться. Проверьте интернет и повторите попытку.",
@@ -175,7 +177,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.save": "Uložit",
     "common.cancel": "Zrušit",
     "common.loading": "Načítání…",
-    "common.error": "Něco se pokazilo",
+    "common.error":
+      "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
     "auth.emailLabel": "E-mail",
     "auth.passwordLabel": "Heslo",
     "auth.passwordHint": "Alespoň 8 znaků",
@@ -190,7 +193,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signUpPrompt": "Nemáte účet? Zaregistrujte se",
     "auth.emailInvalid": "Zadejte platný e-mail.",
     "auth.passwordTooShort": "Heslo musí mít alespoň 8 znaků.",
-    "auth.invalidCredentials": "Nesprávný e-mail nebo heslo.",
+    "auth.invalidCredentials":
+      "Přihlášení se nepodařilo. Zkontrolujte e-mail a heslo a zkuste to znovu.",
     "auth.accountExists":
       "Tento e-mail už je zaregistrovaný. Zkuste se přihlásit.",
     "auth.networkError":
@@ -257,7 +261,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.save": "Save",
     "common.cancel": "Cancel",
     "common.loading": "Loading…",
-    "common.error": "Something went wrong",
+    "common.error":
+      "We could not complete that action. Please try again shortly.",
     "auth.emailLabel": "Email",
     "auth.passwordLabel": "Password",
     "auth.passwordHint": "At least 8 characters",
@@ -272,7 +277,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signUpPrompt": "Don't have an account? Sign up",
     "auth.emailInvalid": "Enter a valid email address.",
     "auth.passwordTooShort": "Password must contain at least 8 characters.",
-    "auth.invalidCredentials": "Incorrect email or password.",
+    "auth.invalidCredentials":
+      "We could not sign you in. Check your email and password, then try again.",
     "auth.accountExists": "This email is already registered. Try signing in.",
     "auth.networkError":
       "Could not connect. Check your internet connection and try again.",
