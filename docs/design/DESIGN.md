@@ -98,7 +98,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 1. Compact top bar: current date, profile/settings entry and locale-independent status affordances.
 2. Greeting plus a concise date label.
-3. Primary action: `Add booking`.
+3. Primary action: floating `New booking` action above the bottom navigation.
 4. Today summary: number of bookings, expected revenue and next appointment. Expected revenue stays visible in the first viewport.
 5. Chronological appointment list with status, client name, service and time.
 6. Empty gaps/free slots affordance, with a visible action to start a booking in that gap.
@@ -106,7 +106,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 **Primary states:**
 
 - Loading: preserve the layout with lightweight skeleton rows.
-- Empty day: explain that no bookings exist and keep `Add booking` prominent.
+- Empty day: explain that no bookings exist and keep `New booking` prominent.
 - Error: show a compact retry state without hiding local navigation.
 
 **Interaction rules:**
@@ -184,11 +184,12 @@ Use a small fixed bottom navigation with three primary destinations:
 
 Keep settings and subscription inside Profile. Messaging is deferred from the MVP navigation.
 
-Place the primary `New booking` action as a floating button immediately above
-the bottom navigation. It must remain reachable while a master scrolls and must
-not cover a selected tab or important information. The action opens the booking
-creation flow when that flow is implemented; until then it must clearly state
-that the flow is not available rather than silently doing nothing.
+Place the primary `New booking` action as a compact floating button immediately
+above the bottom navigation. It must remain reachable while a master scrolls and
+must not cover a selected tab or important information. There must be no second
+`Add booking` button on the Today screen. The action opens the booking creation
+flow when that flow is implemented; until then it must clearly state that the
+flow is not available rather than silently doing nothing.
 
 ### Booking web
 

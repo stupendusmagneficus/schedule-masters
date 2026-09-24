@@ -96,7 +96,7 @@ export function BottomNavigation({
             onPress={() => onTabChange(item.id)}
             style={styles.item}
           >
-            <Ionicons color={color} name={item.icon} size={22} />
+            <Ionicons color={color} name={item.icon} size={20} />
             <Text style={[styles.label, { color }]}>{labels[item.id]}</Text>
           </Pressable>
         );
@@ -126,13 +126,13 @@ const styles = StyleSheet.create({
   item: {
     alignItems: "center",
     flex: 1,
-    gap: 4,
+    gap: 2,
     justifyContent: "center",
-    minHeight: 60,
+    minHeight: 48,
     zIndex: 1,
   },
   label: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
   },
 });
