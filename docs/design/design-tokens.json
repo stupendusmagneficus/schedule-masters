@@ -9,9 +9,9 @@
   },
   "color": {
     "brand": {
-      "primary": { "value": "#0969DA", "type": "color" },
-      "primaryStrong": { "value": "#0550AE", "type": "color" },
-      "primarySoft": { "value": "#DDF4FF", "type": "color" },
+      "primary": { "value": "#24292F", "type": "color" },
+      "primaryStrong": { "value": "#1F2328", "type": "color" },
+      "primarySoft": { "value": "#EAEFF3", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
@@ -29,7 +29,7 @@
     "border": {
       "default": { "value": "#D0D7DE", "type": "color" },
       "strong": { "value": "#AFB8C1", "type": "color" },
-      "focus": { "value": "#0969DA", "type": "color" }
+      "focus": { "value": "#24292F", "type": "color" }
     },
     "status": {
       "success": { "value": "#2D8A62", "type": "color" },

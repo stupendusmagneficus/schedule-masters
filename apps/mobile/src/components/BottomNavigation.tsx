@@ -1,8 +1,15 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  type LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { colors } from "../theme/tokens";
+import { colors, radii, shadows } from "../theme/tokens";
 
 export type MobileTab = "calendar" | "profile" | "today";
 
@@ -25,16 +32,61 @@ const navigationItems: readonly NavigationItem[] = [
   { icon: "person-circle-outline", id: "profile" },
 ];
 
+const navigationPadding = 4;
+
 export function BottomNavigation({
   activeTab,
   labels,
   onTabChange,
 }: BottomNavigationProps) {
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const activeIndex = navigationItems.findIndex(
+    (item) => item.id === activeTab,
+  );
+  const [itemWidth, setItemWidth] = useState(0);
+
+  useEffect(() => {
+    if (itemWidth === 0) {
+      return;
+    }
+
+    Animated.spring(indicatorX, {
+      damping: 18,
+      mass: 0.7,
+      stiffness: 220,
+      toValue: activeIndex * itemWidth,
+      useNativeDriver: true,
+    }).start();
+  }, [activeIndex, indicatorX, itemWidth]);
+
+  function handleLayout(event: LayoutChangeEvent) {
+    const nextItemWidth =
+      (event.nativeEvent.layout.width - navigationPadding * 2) /
+      navigationItems.length;
+
+    setItemWidth(nextItemWidth);
+    indicatorX.setValue(activeIndex * nextItemWidth);
+  }
+
   return (
-    <View accessibilityRole="tablist" style={styles.container}>
+    <View
+      accessibilityRole="tablist"
+      onLayout={handleLayout}
+      style={styles.container}
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.activeIndicator,
+          {
+            transform: [{ translateX: indicatorX }],
+            width: itemWidth,
+          },
+        ]}
+      />
       {navigationItems.map((item) => {
         const isActive = item.id === activeTab;
-        const color = isActive ? colors.accent : colors.secondaryText;
+        const color = isActive ? colors.primaryText : colors.secondaryText;
         return (
           <Pressable
             accessibilityLabel={labels[item.id]}
@@ -56,21 +108,31 @@ export function BottomNavigation({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
-    borderTopColor: colors.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    borderRadius: radii.pill,
+    borderWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
-    paddingBottom: 10,
-    paddingTop: 8,
+    padding: navigationPadding,
+    ...shadows.surface,
+  },
+  activeIndicator: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.pill,
+    bottom: 4,
+    left: 4,
+    position: "absolute",
+    top: 4,
   },
   item: {
     alignItems: "center",
     flex: 1,
-    gap: 3,
+    gap: 4,
     justifyContent: "center",
-    minHeight: 48,
+    minHeight: 60,
+    zIndex: 1,
   },
   label: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: "600",
   },
 });

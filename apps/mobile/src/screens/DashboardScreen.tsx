@@ -84,7 +84,11 @@ export function DashboardScreen({
 }
 
 const styles = StyleSheet.create({
-  bottomSafeArea: { backgroundColor: colors.surface },
+  bottomSafeArea: {
+    backgroundColor: colors.canvas,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
   content: { gap: 16, padding: 20, paddingBottom: 176 },
   screen: { backgroundColor: colors.canvas, flex: 1 },
 });

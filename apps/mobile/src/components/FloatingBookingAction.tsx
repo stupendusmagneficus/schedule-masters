@@ -21,11 +21,11 @@ export function FloatingBookingAction({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { bottom: insets.bottom + 76 },
+        { bottom: insets.bottom + 78 },
         pressed && styles.pressed,
       ]}
     >
-      <Ionicons color={colors.inverse} name="add" size={20} />
+      <Ionicons color={colors.inverse} name="add" size={22} />
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );
@@ -35,18 +35,18 @@ const styles = StyleSheet.create({
   button: {
     alignItems: "center",
     backgroundColor: colors.accent,
-    borderRadius: radii.control,
+    borderRadius: radii.pill,
     flexDirection: "row",
-    gap: 6,
-    minHeight: 48,
-    paddingHorizontal: 16,
+    gap: 8,
+    minHeight: 52,
+    paddingHorizontal: 18,
     position: "absolute",
     right: 20,
     ...shadows.floating,
   },
   label: {
     color: colors.inverse,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
   },
   pressed: {

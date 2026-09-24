@@ -7,7 +7,7 @@
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
 The approved direction is **GitHub Mobile-inspired operations**: calm cool-neutral
-surfaces, white information blocks, restrained blue actions and compact
+surfaces, white information blocks, graphite actions and compact
 navigation adapted for a master’s daily workflow.
 
 ## Product direction
@@ -46,7 +46,7 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 ### Color
 
 The palette uses cool-neutral application surfaces, white information blocks,
-thin blue-gray separators and a reserved blue action color. The result borrows
+thin neutral separators and a reserved graphite action color. The result borrows
 GitHub Mobile’s scanning rhythm, not its visual identity or exact values.
 
 - `brand.primary` — primary actions and active states.
@@ -76,7 +76,10 @@ Use a 4px base scale. Standard screen padding is 20px on mobile and 32px on desk
 ### GitHub Mobile-inspired surface rules
 
 - **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels,
-  blue actions, thin borders, compact metadata and no decorative gradients.
+  graphite actions, thin borders, compact metadata and no decorative gradients.
+- **Mobile navigation:** one white outer pill with a light-neutral pill beneath
+  the active tab. The active indicator moves with a short, functional native
+  animation; the booking CTA floats above the navigation as a graphite pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** warmer canvas, slightly softer panels and more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
 - **All surfaces:** use Inter/system UI for operational text. Monospace is reserved for optional technical metadata, never for client-facing booking content.

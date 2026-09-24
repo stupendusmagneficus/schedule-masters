@@ -1,7 +1,7 @@
 export const colors = {
-  accent: "#0969DA",
-  accentPressed: "#0550AE",
-  accentSoft: "#DDF4FF",
+  accent: "#24292F",
+  accentPressed: "#1F2328",
+  accentSoft: "#EAEFF3",
   border: "#D0D7DE",
   borderSubtle: "#D8DEE4",
   canvas: "#F6F8FA",
@@ -15,6 +15,7 @@ export const colors = {
 
 export const radii = {
   control: 8,
+  pill: 999,
   surface: 12,
 } as const;
 
