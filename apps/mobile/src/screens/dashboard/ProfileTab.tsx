@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
 import { colors, radii } from "../../theme/tokens";
+import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
@@ -73,13 +74,11 @@ const styles = StyleSheet.create({
   content: { gap: 16 },
   eyebrow: {
     color: colors.accent,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.8,
     marginBottom: 6,
     textTransform: "uppercase",
+    ...typography.eyebrow,
   },
-  helper: { color: colors.secondaryText, fontSize: 14, lineHeight: 20 },
+  helper: { ...typography.body, color: colors.secondaryText },
   languageButton: {
     alignItems: "center",
     borderColor: colors.border,
@@ -93,20 +92,19 @@ const styles = StyleSheet.create({
   languagePicker: { flexDirection: "row", gap: 8 },
   languageText: {
     color: colors.secondaryText,
-    fontSize: 13,
+    ...typography.label,
     fontWeight: "700",
   },
   link: {
     color: colors.accent,
-    fontSize: 16,
-    fontWeight: "700",
     marginBottom: 8,
+    ...typography.label,
+    fontWeight: "700",
   },
   sectionTitle: {
     color: colors.primaryText,
-    fontSize: 16,
-    fontWeight: "700",
     marginBottom: 12,
+    ...typography.section,
   },
   selectedLanguageButton: {
     backgroundColor: colors.accent,
@@ -121,6 +119,6 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: "center",
   },
-  signOutText: { color: colors.danger, fontSize: 15, fontWeight: "700" },
-  title: { color: colors.primaryText, fontSize: 30, fontWeight: "700" },
+  signOutText: { ...typography.label, color: colors.danger, fontWeight: "700" },
+  title: { ...typography.heading, color: colors.primaryText },
 });

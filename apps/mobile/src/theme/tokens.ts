@@ -16,7 +16,7 @@ export const colors = {
 export const radii = {
   control: 8,
   pill: 999,
-  surface: 12,
+  surface: 18,
 } as const;
 
 export const shadows = {

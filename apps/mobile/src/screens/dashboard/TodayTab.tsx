@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
 import { colors } from "../../theme/tokens";
+import { typography } from "../../theme/typography";
 import type { Service, Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
@@ -64,37 +65,37 @@ export function TodayTab({ locale, service, t, workspace }: TodayTabProps) {
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
-  date: { color: colors.secondaryText, fontSize: 15, marginTop: 4 },
+  date: { ...typography.metadata, color: colors.secondaryText, marginTop: 4 },
   eyebrow: {
     color: colors.accent,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.8,
     marginBottom: 6,
     textTransform: "uppercase",
+    ...typography.eyebrow,
   },
-  helper: { color: colors.secondaryText, fontSize: 14, lineHeight: 20 },
-  price: { color: colors.accent, fontSize: 15, fontWeight: "700" },
+  helper: { ...typography.body, color: colors.secondaryText },
+  price: { ...typography.label, color: colors.accent },
   sectionTitle: {
     color: colors.primaryText,
-    fontSize: 16,
-    fontWeight: "700",
     marginBottom: 10,
+    ...typography.section,
   },
-  serviceName: { color: colors.primaryText, fontSize: 16, fontWeight: "600" },
+  serviceName: {
+    ...typography.body,
+    color: colors.primaryText,
+    fontWeight: "600",
+  },
   serviceRow: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  statLabel: { color: colors.secondaryText, fontSize: 12, lineHeight: 16 },
+  statLabel: { ...typography.caption, color: colors.secondaryText },
   statCard: { flex: 1 },
   statValue: {
-    color: colors.primaryText,
-    fontSize: 24,
-    fontWeight: "700",
     marginTop: 8,
+    ...typography.metric,
+    color: colors.primaryText,
   },
   summaryGrid: { flexDirection: "row", gap: 12 },
-  title: { color: colors.primaryText, fontSize: 30, fontWeight: "700" },
+  title: { ...typography.heading, color: colors.primaryText },
 });

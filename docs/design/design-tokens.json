@@ -52,7 +52,7 @@
   "typography": {
     "fontFamily": {
       "sans": {
-        "value": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        "value": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", ui-sans-serif, system-ui, sans-serif",
         "type": "fontFamily"
       }
     },
@@ -63,12 +63,12 @@
       "bold": { "value": 700, "type": "fontWeight" }
     },
     "fontSize": {
-      "caption": { "value": "12px", "type": "dimension" },
-      "label": { "value": "14px", "type": "dimension" },
-      "body": { "value": "16px", "type": "dimension" },
-      "subtitle": { "value": "18px", "type": "dimension" },
-      "heading": { "value": "24px", "type": "dimension" },
-      "display": { "value": "32px", "type": "dimension" }
+      "caption": { "value": "13px", "type": "dimension" },
+      "label": { "value": "15px", "type": "dimension" },
+      "body": { "value": "17px", "type": "dimension" },
+      "subtitle": { "value": "20px", "type": "dimension" },
+      "heading": { "value": "28px", "type": "dimension" },
+      "display": { "value": "34px", "type": "dimension" }
     },
     "lineHeight": {
       "tight": { "value": 1.2, "type": "number" },
@@ -90,7 +90,7 @@
   },
   "radius": {
     "sm": { "value": "8px", "type": "dimension" },
-    "md": { "value": "12px", "type": "dimension" },
+    "md": { "value": "18px", "type": "dimension" },
     "lg": { "value": "16px", "type": "dimension" },
     "pill": { "value": "999px", "type": "dimension" }
   },
@@ -107,7 +107,7 @@
     }
   },
   "layout": {
-    "mobileScreenPadding": { "value": "20px", "type": "dimension" },
+    "mobileScreenPadding": { "value": "16px", "type": "dimension" },
     "desktopScreenPadding": { "value": "32px", "type": "dimension" },
     "minimumTouchTarget": { "value": "44px", "type": "dimension" },
     "bookingContentMaxWidth": { "value": "720px", "type": "dimension" }

@@ -1,6 +1,7 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "../theme/tokens";
+import { typography } from "../theme/typography";
 
 export function LoadingState() {
   return (
@@ -32,6 +33,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
   },
-  muted: { color: colors.secondaryText, lineHeight: 20, marginTop: 4 },
-  title: { color: colors.primaryText, fontSize: 30, fontWeight: "700" },
+  muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
+  title: { ...typography.heading, color: colors.primaryText },
 });

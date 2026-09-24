@@ -10,6 +10,7 @@ import {
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
 import { colors, radii } from "../theme/tokens";
+import { typography } from "../theme/typography";
 import { normalizeBookingSlug } from "../utils/slug";
 
 type SetupScreenProps = {
@@ -107,29 +108,28 @@ export function SetupScreen({ locale, onComplete }: SetupScreenProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.canvas,
-    gap: 14,
+    gap: 16,
     justifyContent: "center",
     minHeight: "100%",
-    padding: 24,
+    padding: 16,
   },
   eyebrow: {
     color: colors.accent,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1,
     marginBottom: 8,
+    ...typography.eyebrow,
   },
-  title: { color: colors.primaryText, fontSize: 30, fontWeight: "700" },
-  muted: { color: colors.secondaryText, lineHeight: 20, marginTop: 4 },
+  title: { ...typography.heading, color: colors.primaryText },
+  muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
+    fontSize: typography.body.fontSize,
     minHeight: 48,
     paddingHorizontal: 12,
   },
-  error: { color: colors.danger, fontSize: 13 },
+  error: { ...typography.caption, color: colors.danger },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.accent,
@@ -139,5 +139,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: "100%",
   },
-  primaryButtonText: { color: colors.inverse, fontWeight: "700" },
+  primaryButtonText: {
+    ...typography.label,
+    color: colors.inverse,
+    fontWeight: "700",
+  },
 });

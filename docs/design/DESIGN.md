@@ -61,17 +61,18 @@ Do not use raw hex values in screens. If a new color is needed, add it here with
 
 ### Typography
 
-Use Inter when available, with a system fallback for the first MVP. Typography is compact enough for a calendar, but headings retain a warm editorial feel through weight and spacing rather than a decorative font.
+Use the platform system font: San Francisco on iOS and the native system sans-serif on Android. Typography follows the iOS product rhythm while allowing Dynamic Type scaling. Headings retain a warm editorial feel through weight and spacing rather than a decorative font.
 
-- Display: dashboard greeting and booking profile title.
-- Heading: section and screen titles.
-- Body: descriptions and form content.
-- Label: buttons, tabs and metadata.
-- Caption: supporting information only; never use caption text for required actions.
+- Display: 34px, dashboard greeting and booking profile title.
+- Heading: 28px, section and screen titles.
+- Section: 20px, card and content-group titles.
+- Body: 17px, descriptions and form content.
+- Label: 15px, buttons and important metadata.
+- Caption: 13px, supporting information only; never use caption text for required actions.
 
 ### Spacing and shape
 
-Use a 4px base scale. Standard screen padding is 20px on mobile and 32px on desktop. Use 12px for compact controls, 16px for normal controls and 20px for primary surfaces. Use 8px corners for compact controls and 12px corners for cards/panels. Reserve pill shapes for status badges, segmented controls and genuinely compact choice controls; do not make every surface a pill.
+Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use 8px for compact controls, 16px for normal controls and 18px for grouped surfaces. Reserve pill shapes for status badges, segmented controls, bottom navigation and genuinely compact choice controls; do not make every surface a pill.
 
 ### GitHub Mobile-inspired surface rules
 
