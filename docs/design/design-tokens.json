@@ -9,9 +9,9 @@
   },
   "color": {
     "brand": {
-      "primary": { "value": "#24292F", "type": "color" },
-      "primaryStrong": { "value": "#1F2328", "type": "color" },
-      "primarySoft": { "value": "#EAEFF3", "type": "color" },
+      "primary": { "value": "#2D8A62", "type": "color" },
+      "primaryStrong": { "value": "#246B4C", "type": "color" },
+      "primarySoft": { "value": "#E1F3EA", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
@@ -29,7 +29,7 @@
     "border": {
       "default": { "value": "#D0D7DE", "type": "color" },
       "strong": { "value": "#AFB8C1", "type": "color" },
-      "focus": { "value": "#24292F", "type": "color" }
+      "focus": { "value": "#2D8A62", "type": "color" }
     },
     "status": {
       "success": { "value": "#2D8A62", "type": "color" },
@@ -42,8 +42,8 @@
       "infoSoft": { "value": "#E6F0F8", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#DDF4FF", "type": "color" },
-      "bookedBorder": { "value": "#0969DA", "type": "color" },
+      "booked": { "value": "#E1F3EA", "type": "color" },
+      "bookedBorder": { "value": "#2D8A62", "type": "color" },
       "break": { "value": "#EAEFF3", "type": "color" },
       "breakBorder": { "value": "#8C959F", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }

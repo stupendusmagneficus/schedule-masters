@@ -86,7 +86,7 @@ export function BottomNavigation({
       />
       {navigationItems.map((item) => {
         const isActive = item.id === activeTab;
-        const color = isActive ? colors.primaryText : colors.secondaryText;
+        const color = isActive ? colors.accent : colors.secondaryText;
         return (
           <Pressable
             accessibilityLabel={labels[item.id]}

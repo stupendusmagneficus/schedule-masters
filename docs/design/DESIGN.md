@@ -7,7 +7,7 @@
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
 The approved direction is **GitHub Mobile-inspired operations**: calm cool-neutral
-surfaces, white information blocks, graphite actions and compact
+surfaces, white information blocks, calm green actions and compact
 navigation adapted for a master’s daily workflow.
 
 ## Product direction
@@ -46,7 +46,7 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 ### Color
 
 The palette uses cool-neutral application surfaces, white information blocks,
-thin neutral separators and a reserved graphite action color. The result borrows
+thin neutral separators and a reserved green action color. The result borrows
 GitHub Mobile’s scanning rhythm, not its visual identity or exact values.
 
 - `brand.primary` — primary actions and active states.
@@ -77,10 +77,11 @@ Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desk
 ### GitHub Mobile-inspired surface rules
 
 - **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels,
-  graphite actions, thin borders, compact metadata and no decorative gradients.
-- **Mobile navigation:** one white outer pill with a light-neutral pill beneath
-  the active tab. The active indicator moves with a short, functional native
-  animation; the booking CTA floats above the navigation as a graphite pill.
+  calm green actions, thin borders, compact metadata and no decorative gradients.
+- **Mobile navigation:** one white outer pill with a light-green pill beneath
+  the active tab. The active icon and label use the green accent, while inactive
+  items remain neutral. The active indicator moves with a short, functional
+  native animation; the booking CTA floats above the navigation as a green pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** warmer canvas, slightly softer panels and more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
 - **All surfaces:** use Inter/system UI for operational text. Monospace is reserved for optional technical metadata, never for client-facing booking content.
@@ -183,6 +184,19 @@ Use a small fixed bottom navigation with three primary destinations:
 - Calendar
 - Profile
 
+This is an information architecture decision, not only a visual grouping:
+
+- **Today** is the default operational surface. It answers “what is happening
+  today?” with bookings, the next client, daily totals and expected revenue.
+- **Calendar** is the planning surface. It answers “when am I available?” with
+  the timeline, free slots, breaks and appointment creation.
+- **Profile** is the low-frequency configuration surface. It contains the
+  master profile, public booking link, language, subscription and settings.
+
+The destinations are intentionally ordered by frequency of use. Messages,
+Explore, Inbox and client discovery are not MVP destinations: adding them now
+would compete with the booking workflow and make the navigation less useful.
+
 Keep settings and subscription inside Profile. Messaging is deferred from the MVP navigation.
 
 Place the primary `New booking` action as a compact floating button immediately
@@ -191,6 +205,11 @@ must not cover a selected tab or important information. There must be no second
 `Add booking` button on the Today screen. The action opens the booking creation
 flow when that flow is implemented; until then it must clearly state that the
 flow is not available rather than silently doing nothing.
+
+`New booking` is a global creation action, not a fourth destination. Its role is
+to start a client appointment quickly from Today or Calendar. Calendar remains
+the place for choosing a time and for creating a break, so the two actions do
+not compete with one another.
 
 ### Booking web
 
