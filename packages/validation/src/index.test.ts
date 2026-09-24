@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { masterAuthCredentialsSchema, supportedLocaleSchema } from "./index";
+import {
+  masterAuthCredentialsSchema,
+  masterEmailSchema,
+  masterPasswordSchema,
+  supportedLocaleSchema,
+} from "./index";
 
 describe("validation scaffold", () => {
   it("accepts the supported product locales", () => {
@@ -22,5 +27,14 @@ describe("validation scaffold", () => {
         password: "short",
       }).success,
     ).toBe(false);
+  });
+
+  it("validates each authentication field independently for blur feedback", () => {
+    expect(masterEmailSchema.safeParse("master@example.com").success).toBe(
+      true,
+    );
+    expect(masterEmailSchema.safeParse("master@example").success).toBe(false);
+    expect(masterPasswordSchema.safeParse("12345678").success).toBe(true);
+    expect(masterPasswordSchema.safeParse("1234567").success).toBe(false);
   });
 });

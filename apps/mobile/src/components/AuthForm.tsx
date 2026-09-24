@@ -1,4 +1,6 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { MessageKey } from "@schedule-app/i18n";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import type { AuthMode } from "../features/auth/authentication";
@@ -11,9 +13,11 @@ type AuthFormProps = {
   readonly errors: ReadonlyArray<"email" | "password">;
   readonly mode: AuthMode;
   readonly notice?: string;
+  readonly onEmailBlur: () => void;
   readonly onEmailChange: (value: string) => void;
   readonly onModeChange: (mode: AuthMode) => void;
   readonly onPasswordChange: (value: string) => void;
+  readonly onPasswordBlur: () => void;
   readonly onSubmit: () => void;
   readonly password: string;
   readonly t: (key: MessageKey) => string;
@@ -25,19 +29,25 @@ export function AuthForm({
   errors,
   mode,
   notice,
+  onEmailBlur,
   onEmailChange,
   onModeChange,
   onPasswordChange,
+  onPasswordBlur,
   onSubmit,
   password,
   t,
 }: AuthFormProps) {
   const isSignUp = mode === "signUp";
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
     <View style={styles.form}>
+      <Text style={styles.requiredHint}>{t("auth.requiredHint")}</Text>
       <View style={styles.field}>
-        <Text style={styles.label}>{t("auth.emailLabel")}</Text>
+        <Text style={styles.label}>
+          {t("auth.emailLabel")} <Text style={styles.required}>*</Text>
+        </Text>
         <TextInput
           accessibilityHint={
             errors.includes("email") ? t("auth.emailInvalid") : undefined
@@ -46,6 +56,7 @@ export function AuthForm({
           autoCapitalize="none"
           autoComplete="email"
           keyboardType="email-address"
+          onBlur={onEmailBlur}
           onChangeText={onEmailChange}
           placeholder={t("auth.emailLabel")}
           style={[styles.input, errors.includes("email") && styles.inputError]}
@@ -59,24 +70,51 @@ export function AuthForm({
         )}
       </View>
       <View style={styles.field}>
-        <Text style={styles.label}>{t("auth.passwordLabel")}</Text>
-        <TextInput
-          accessibilityHint={
-            errors.includes("password") ? t("auth.passwordTooShort") : undefined
-          }
-          accessibilityLabel={t("auth.passwordLabel")}
-          autoCapitalize="none"
-          autoComplete={isSignUp ? "new-password" : "current-password"}
-          onChangeText={onPasswordChange}
-          placeholder={t("auth.passwordLabel")}
-          secureTextEntry
+        <Text style={styles.label}>
+          {t("auth.passwordLabel")} <Text style={styles.required}>*</Text>
+        </Text>
+        <View
           style={[
-            styles.input,
+            styles.passwordInput,
             errors.includes("password") && styles.inputError,
           ]}
-          textContentType={isSignUp ? "newPassword" : "password"}
-          value={password}
-        />
+        >
+          <TextInput
+            accessibilityHint={
+              errors.includes("password")
+                ? t("auth.passwordTooShort")
+                : undefined
+            }
+            accessibilityLabel={t("auth.passwordLabel")}
+            autoCapitalize="none"
+            autoComplete={isSignUp ? "new-password" : "current-password"}
+            onBlur={onPasswordBlur}
+            onChangeText={onPasswordChange}
+            placeholder={t("auth.passwordLabel")}
+            secureTextEntry={!isPasswordVisible}
+            style={styles.passwordTextInput}
+            textContentType={isSignUp ? "newPassword" : "password"}
+            value={password}
+          />
+          <Pressable
+            accessibilityLabel={
+              isPasswordVisible
+                ? t("auth.hidePassword")
+                : t("auth.showPassword")
+            }
+            accessibilityRole="button"
+            accessibilityState={{ selected: isPasswordVisible }}
+            hitSlop={8}
+            onPress={() => setIsPasswordVisible((current) => !current)}
+            style={styles.passwordVisibilityButton}
+          >
+            <MaterialCommunityIcons
+              color={colors.secondaryText}
+              name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+              size={22}
+            />
+          </Pressable>
+        </View>
         <Text style={styles.hint}>{t("auth.passwordHint")}</Text>
         {errors.includes("password") && (
           <Text accessibilityRole="alert" style={styles.error}>
@@ -132,6 +170,27 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: colors.danger },
   label: { ...typography.label, color: colors.primaryText },
+  passwordInput: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 48,
+  },
+  passwordTextInput: {
+    flex: 1,
+    fontSize: typography.body.fontSize,
+    minHeight: 48,
+    paddingHorizontal: 12,
+  },
+  passwordVisibilityButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 44,
+    minWidth: 44,
+  },
   link: {
     color: colors.accent,
     textAlign: "center",
@@ -152,4 +211,6 @@ const styles = StyleSheet.create({
     color: colors.inverse,
     fontWeight: "700",
   },
+  required: { color: colors.danger },
+  requiredHint: { ...typography.caption, color: colors.secondaryText },
 });

@@ -20,6 +20,9 @@ export type MessageKey =
   | "auth.emailLabel"
   | "auth.passwordLabel"
   | "auth.passwordHint"
+  | "auth.requiredHint"
+  | "auth.showPassword"
+  | "auth.hidePassword"
   | "auth.signIn"
   | "auth.signInTitle"
   | "auth.signInPrompt"
@@ -95,6 +98,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.emailLabel": "Email",
     "auth.passwordLabel": "Пароль",
     "auth.passwordHint": "Не менее 8 символов",
+    "auth.requiredHint": "Поля со знаком * обязательны.",
+    "auth.showPassword": "Показать пароль",
+    "auth.hidePassword": "Скрыть пароль",
     "auth.signIn": "Войти",
     "auth.signInTitle": "С возвращением",
     "auth.signInPrompt": "Уже есть аккаунт? Войти",
@@ -173,6 +179,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.emailLabel": "E-mail",
     "auth.passwordLabel": "Heslo",
     "auth.passwordHint": "Alespoň 8 znaků",
+    "auth.requiredHint": "Pole označená * jsou povinná.",
+    "auth.showPassword": "Zobrazit heslo",
+    "auth.hidePassword": "Skrýt heslo",
     "auth.signIn": "Přihlásit se",
     "auth.signInTitle": "Vítejte zpět",
     "auth.signInPrompt": "Už máte účet? Přihlaste se",
@@ -252,6 +261,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.emailLabel": "Email",
     "auth.passwordLabel": "Password",
     "auth.passwordHint": "At least 8 characters",
+    "auth.requiredHint": "Fields marked with * are required.",
+    "auth.showPassword": "Show password",
+    "auth.hidePassword": "Hide password",
     "auth.signIn": "Sign in",
     "auth.signInTitle": "Welcome back",
     "auth.signInPrompt": "Already have an account? Sign in",

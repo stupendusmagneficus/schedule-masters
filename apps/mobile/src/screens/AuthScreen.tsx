@@ -1,4 +1,8 @@
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
+import {
+  masterEmailSchema,
+  masterPasswordSchema,
+} from "@schedule-app/validation";
 import type { Session } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -20,6 +24,8 @@ type AuthScreenProps = {
   readonly sessionRestoreFailed: boolean;
 };
 
+type AuthField = "email" | "password";
+
 export function AuthScreen({
   initialMode,
   locale,
@@ -39,6 +45,33 @@ export function AuthScreen({
     setErrors([]);
     setMode(nextMode);
     setNotice(null);
+  }
+
+  function setFieldError(field: AuthField, isInvalid: boolean) {
+    setErrors((currentErrors) => {
+      const remainingErrors = currentErrors.filter(
+        (currentField) => currentField !== field,
+      );
+      return isInvalid ? [...remainingErrors, field] : remainingErrors;
+    });
+  }
+
+  function validateEmail(value = email) {
+    setFieldError("email", !masterEmailSchema.safeParse(value).success);
+  }
+
+  function validatePassword(value = password) {
+    setFieldError("password", !masterPasswordSchema.safeParse(value).success);
+  }
+
+  function changeEmail(value: string) {
+    setEmail(value);
+    if (errors.includes("email")) validateEmail(value);
+  }
+
+  function changePassword(value: string) {
+    setPassword(value);
+    if (errors.includes("password")) validatePassword(value);
   }
 
   async function submit() {
@@ -97,9 +130,11 @@ export function AuthScreen({
         errors={errors}
         mode={mode}
         notice={notice ?? undefined}
-        onEmailChange={setEmail}
+        onEmailBlur={validateEmail}
+        onEmailChange={changeEmail}
         onModeChange={changeMode}
-        onPasswordChange={setPassword}
+        onPasswordBlur={validatePassword}
+        onPasswordChange={changePassword}
         onSubmit={() => void submit()}
         password={password}
         t={t}
