@@ -300,14 +300,14 @@ export default function HomePage() {
             {formatTime(new Date(confirmation.startsAt), locale)}
           </p>
           <button
-            className="primary-button"
+            className="secondary-button confirmation-close-button"
             type="button"
             onClick={() => {
               bookingRequestKey.current = null;
               setConfirmation(null);
             }}
           >
-            {t("common.cancel")}
+            {t("booking.close")}
           </button>
         </section>
       </main>

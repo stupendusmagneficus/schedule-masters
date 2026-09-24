@@ -1,7 +1,7 @@
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { Linking, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -9,9 +9,12 @@ import {
   type MobileTab,
 } from "../components/BottomNavigation";
 import { FloatingBookingAction } from "../components/FloatingBookingAction";
+import { NewBookingNotice } from "../components/NewBookingNotice";
+import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
+import { buildBookingUrl } from "../utils/bookingUrl";
 import { CalendarTab } from "./dashboard/CalendarTab";
 import { ProfileTab } from "./dashboard/ProfileTab";
 import { TodayTab } from "./dashboard/TodayTab";
@@ -34,6 +37,8 @@ export function DashboardScreen({
   workspace,
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
+  const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
+    useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const navigationLabels = {
     calendar: t("mobile.calendar"),
@@ -41,12 +46,7 @@ export function DashboardScreen({
     today: t("mobile.today"),
   };
 
-  function showNewBookingNotice() {
-    Alert.alert(
-      t("mobile.newBookingNoticeTitle"),
-      t("mobile.newBookingNoticeDescription"),
-    );
-  }
+  const bookingUrl = buildBookingUrl(mobileEnv.bookingWebUrl, workspace.slug);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
@@ -67,15 +67,17 @@ export function DashboardScreen({
           <ProfileTab
             locale={locale}
             onLocaleChange={onLocaleChange}
+            onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
             onSignOut={onSignOut}
             t={t}
+            bookingUrl={bookingUrl}
             workspace={workspace}
           />
         )}
       </ScrollView>
       <FloatingBookingAction
         label={t("mobile.newBooking")}
-        onPress={showNewBookingNotice}
+        onPress={() => setNewBookingNoticeVisible(true)}
       />
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
         <BottomNavigation
@@ -84,6 +86,13 @@ export function DashboardScreen({
           onTabChange={setActiveTab}
         />
       </SafeAreaView>
+      <NewBookingNotice
+        closeLabel={t("mobile.newBookingNoticeClose")}
+        description={t("mobile.newBookingNoticeDescription")}
+        onClose={() => setNewBookingNoticeVisible(false)}
+        title={t("mobile.newBookingNoticeTitle")}
+        visible={isNewBookingNoticeVisible}
+      />
       <StatusBar style="dark" />
     </SafeAreaView>
   );

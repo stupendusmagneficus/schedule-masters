@@ -8,6 +8,8 @@ export const colors = {
   danger: "#C43D4B",
   inverse: "#FFFFFF",
   primaryText: "#202A24",
+  pendingSoft: "#FFF3D6",
+  pendingText: "#8A5A00",
   secondaryText: "#5F6E65",
   subtleSurface: "#F1F4F0",
   surface: "#FFFFFF",

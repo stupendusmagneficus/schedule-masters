@@ -1,6 +1,7 @@
 import { formatCurrency, formatDate } from "@schedule-app/i18n";
 import { StyleSheet, Text, View } from "react-native";
 
+import { AppointmentStatusBadge } from "../../components/AppointmentStatusBadge";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
@@ -182,12 +183,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 16,
   },
-  status: {
-    ...typography.caption,
-    color: colors.secondaryText,
-    maxWidth: 100,
-    textAlign: "right",
-  },
   title: { ...typography.heading, color: colors.primaryText },
 });
 
@@ -215,7 +210,7 @@ function AppointmentRow({
           {appointment.durationMinutes} min
         </Text>
       </View>
-      <Text style={styles.status}>{statusLabel}</Text>
+      <AppointmentStatusBadge label={statusLabel} status={appointment.status} />
     </View>
   );
 }
