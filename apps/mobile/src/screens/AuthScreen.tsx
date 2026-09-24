@@ -13,6 +13,7 @@ import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
 
 type AuthScreenProps = {
+  readonly initialMode: AuthMode;
   readonly locale: SupportedLocale;
   readonly onAuthenticated: (session: Session) => void;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
@@ -20,6 +21,7 @@ type AuthScreenProps = {
 };
 
 export function AuthScreen({
+  initialMode,
   locale,
   onAuthenticated,
   onLocaleChange,
@@ -27,7 +29,7 @@ export function AuthScreen({
 }: AuthScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<AuthMode>("signUp");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<ReadonlyArray<"email" | "password">>([]);
   const [notice, setNotice] = useState<string | null>(null);

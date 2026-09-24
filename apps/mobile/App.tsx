@@ -11,6 +11,7 @@ import {
 } from "./src/components/StatusStates";
 import { demoData, demoWorkspace } from "./src/demo/mockData";
 import { isDemoMode } from "./src/demo/mode";
+import type { AuthMode } from "./src/features/auth/authentication";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
 import { AuthScreen } from "./src/screens/AuthScreen";
@@ -32,6 +33,7 @@ function AppContent() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(Boolean(supabase));
   const [sessionRestoreFailed, setSessionRestoreFailed] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>("signUp");
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -135,6 +137,7 @@ function AppContent() {
         return;
       }
       analytics.track(analyticsEvents.accountSignedOut);
+      setAuthMode("signIn");
       setSession(null);
       setService(null);
       setWorkspace(null);
@@ -163,6 +166,7 @@ function AppContent() {
   if (!session)
     return (
       <AuthScreen
+        initialMode={authMode}
         locale={locale}
         onAuthenticated={(nextSession) => {
           setSessionRestoreFailed(false);
