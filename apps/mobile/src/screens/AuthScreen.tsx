@@ -1,8 +1,4 @@
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
-import {
-  masterEmailSchema,
-  masterPasswordSchema,
-} from "@schedule-app/validation";
 import type { Session } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -11,6 +7,11 @@ import { AuthForm } from "../components/AuthForm";
 import { LocalePicker } from "../components/LocalePicker";
 import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
 import { type AuthMode, authenticate } from "../features/auth/authentication";
+import {
+  type AuthField,
+  type AuthFieldTouchState,
+  getVisibleAuthFieldErrors,
+} from "../features/auth/fieldValidation";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { supabase } from "../lib/supabase";
 import { colors } from "../theme/tokens";
@@ -24,8 +25,6 @@ type AuthScreenProps = {
   readonly sessionRestoreFailed: boolean;
 };
 
-type AuthField = "email" | "password";
-
 export function AuthScreen({
   initialMode,
   locale,
@@ -37,54 +36,37 @@ export function AuthScreen({
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<ReadonlyArray<"email" | "password">>([]);
+  const [touchedFields, setTouchedFields] = useState<AuthFieldTouchState>({
+    email: false,
+    password: false,
+  });
   const [notice, setNotice] = useState<string | null>(null);
   const t = useMemo(() => createTranslator(locale), [locale]);
+  const errors = useMemo(
+    () => getVisibleAuthFieldErrors({ email, password }, touchedFields),
+    [email, password, touchedFields],
+  );
 
   function changeMode(nextMode: AuthMode) {
-    setErrors([]);
     setMode(nextMode);
     setNotice(null);
+    setTouchedFields({ email: false, password: false });
   }
 
-  function setFieldError(field: AuthField, isInvalid: boolean) {
-    setErrors((currentErrors) => {
-      const remainingErrors = currentErrors.filter(
-        (currentField) => currentField !== field,
-      );
-      return isInvalid ? [...remainingErrors, field] : remainingErrors;
-    });
-  }
-
-  function validateEmail(value = email) {
-    setFieldError("email", !masterEmailSchema.safeParse(value).success);
-  }
-
-  function validatePassword(value = password) {
-    setFieldError("password", !masterPasswordSchema.safeParse(value).success);
-  }
-
-  function changeEmail(value: string) {
-    setEmail(value);
-    if (errors.includes("email")) validateEmail(value);
-  }
-
-  function changePassword(value: string) {
-    setPassword(value);
-    if (errors.includes("password")) validatePassword(value);
+  function touchField(field: AuthField) {
+    setTouchedFields((current) => ({ ...current, [field]: true }));
   }
 
   async function submit() {
     if (!supabase) return;
 
     setBusy(true);
-    setErrors([]);
+    setTouchedFields({ email: true, password: true });
     setNotice(null);
     const result = await authenticate(supabase, mode, { email, password });
     setBusy(false);
 
     if (result.kind === "validationError") {
-      setErrors(result.fields);
       return;
     }
 
@@ -130,11 +112,11 @@ export function AuthScreen({
         errors={errors}
         mode={mode}
         notice={notice ?? undefined}
-        onEmailBlur={validateEmail}
-        onEmailChange={changeEmail}
+        onEmailBlur={() => touchField("email")}
+        onEmailChange={setEmail}
         onModeChange={changeMode}
-        onPasswordBlur={validatePassword}
-        onPasswordChange={changePassword}
+        onPasswordBlur={() => touchField("password")}
+        onPasswordChange={setPassword}
         onSubmit={() => void submit()}
         password={password}
         t={t}
