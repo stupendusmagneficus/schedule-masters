@@ -19,7 +19,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "corepack yarn turbo dev --filter=@schedule-app/mobile -- --web --port 19006",
+      "EXPO_PUBLIC_SUPABASE_URL= EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY= corepack yarn turbo dev --filter=@schedule-app/mobile -- --web --port 19006",
     url: "http://127.0.0.1:19006",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

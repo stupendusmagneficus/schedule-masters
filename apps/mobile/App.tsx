@@ -4,11 +4,14 @@ import { detectLocale, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
 import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import {
   ConfigurationState,
   LoadingState,
 } from "./src/components/StatusStates";
+import { demoData, demoWorkspace } from "./src/demo/mockData";
+import { isDemoMode } from "./src/demo/mode";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
 import { AuthScreen } from "./src/screens/AuthScreen";
@@ -17,6 +20,15 @@ import { SetupScreen } from "./src/screens/SetupScreen";
 import type { Service, Workspace } from "./src/types";
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
+  const demoMode = isDemoMode();
   const [locale, setLocale] = useState<SupportedLocale>(() =>
     detectLocale(getLocales()[0]?.languageTag),
   );
@@ -26,11 +38,13 @@ export default function App() {
   const [service, setService] = useState<Service | null>(null);
 
   useEffect(() => {
+    if (demoMode) return;
     void analytics.init();
     analytics.track(analyticsEvents.appOpened);
-  }, []);
+  }, [demoMode]);
 
   useEffect(() => {
+    if (demoMode) return;
     if (!supabase) return;
     let active = true;
     void supabase.auth.getSession().then(({ data }) => {
@@ -46,16 +60,17 @@ export default function App() {
       active = false;
       data.subscription.unsubscribe();
     };
-  }, []);
+  }, [demoMode]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: loadWorkspace only depends on the stable client and React state setters.
   useEffect(() => {
+    if (demoMode) return;
     if (supabase && session) void loadWorkspace(session.user.id);
     else {
       setWorkspace(null);
       setService(null);
     }
-  }, [session]);
+  }, [demoMode, session]);
 
   async function loadWorkspace(userId: string) {
     if (!supabase) return;
@@ -97,6 +112,17 @@ export default function App() {
     setLoading(false);
   }
 
+  if (demoMode)
+    return (
+      <DashboardScreen
+        demoData={demoData}
+        locale={locale}
+        onLocaleChange={setLocale}
+        onSignOut={() => undefined}
+        service={demoData.primaryService}
+        workspace={demoWorkspace}
+      />
+    );
   if (!supabase) return <ConfigurationState />;
   if (loading && !session) return <LoadingState />;
   if (!session) return <AuthScreen onAuthenticated={setSession} />;

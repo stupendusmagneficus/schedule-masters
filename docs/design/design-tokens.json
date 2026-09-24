@@ -4,32 +4,32 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "warm-vertical",
+    "direction": "github-mobile-inspired-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#2F8F7B", "type": "color" },
-      "primaryStrong": { "value": "#217464", "type": "color" },
-      "primarySoft": { "value": "#DDF1EB", "type": "color" },
+      "primary": { "value": "#2D8A62", "type": "color" },
+      "primaryStrong": { "value": "#246B4C", "type": "color" },
+      "primarySoft": { "value": "#E1F3EA", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F5F5F2", "type": "color" },
+      "canvas": { "value": "#F6F8FA", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#FAFAF8", "type": "color" },
-      "sunken": { "value": "#E9EBE7", "type": "color" }
+      "subtle": { "value": "#F6F8FA", "type": "color" },
+      "sunken": { "value": "#EAEFF3", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#202725", "type": "color" },
-      "secondary": { "value": "#4F5C58", "type": "color" },
-      "muted": { "value": "#75807C", "type": "color" },
+      "primary": { "value": "#24292F", "type": "color" },
+      "secondary": { "value": "#57606A", "type": "color" },
+      "muted": { "value": "#6E7781", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#DEE2DE", "type": "color" },
-      "strong": { "value": "#AEBBB5", "type": "color" },
-      "focus": { "value": "#2F8F7B", "type": "color" }
+      "default": { "value": "#D0D7DE", "type": "color" },
+      "strong": { "value": "#AFB8C1", "type": "color" },
+      "focus": { "value": "#2D8A62", "type": "color" }
     },
     "status": {
       "success": { "value": "#2D8A62", "type": "color" },
@@ -42,17 +42,17 @@
       "infoSoft": { "value": "#E6F0F8", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#DDF1EB", "type": "color" },
-      "bookedBorder": { "value": "#2F8F7B", "type": "color" },
-      "break": { "value": "#E9EBE7", "type": "color" },
-      "breakBorder": { "value": "#9AA8A2", "type": "color" },
+      "booked": { "value": "#E1F3EA", "type": "color" },
+      "bookedBorder": { "value": "#2D8A62", "type": "color" },
+      "break": { "value": "#EAEFF3", "type": "color" },
+      "breakBorder": { "value": "#8C959F", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
   "typography": {
     "fontFamily": {
       "sans": {
-        "value": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        "value": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", ui-sans-serif, system-ui, sans-serif",
         "type": "fontFamily"
       }
     },
@@ -63,12 +63,12 @@
       "bold": { "value": 700, "type": "fontWeight" }
     },
     "fontSize": {
-      "caption": { "value": "12px", "type": "dimension" },
-      "label": { "value": "14px", "type": "dimension" },
-      "body": { "value": "16px", "type": "dimension" },
-      "subtitle": { "value": "18px", "type": "dimension" },
-      "heading": { "value": "24px", "type": "dimension" },
-      "display": { "value": "32px", "type": "dimension" }
+      "caption": { "value": "13px", "type": "dimension" },
+      "label": { "value": "15px", "type": "dimension" },
+      "body": { "value": "17px", "type": "dimension" },
+      "subtitle": { "value": "20px", "type": "dimension" },
+      "heading": { "value": "28px", "type": "dimension" },
+      "display": { "value": "34px", "type": "dimension" }
     },
     "lineHeight": {
       "tight": { "value": 1.2, "type": "number" },
@@ -90,7 +90,7 @@
   },
   "radius": {
     "sm": { "value": "8px", "type": "dimension" },
-    "md": { "value": "12px", "type": "dimension" },
+    "md": { "value": "18px", "type": "dimension" },
     "lg": { "value": "16px", "type": "dimension" },
     "pill": { "value": "999px", "type": "dimension" }
   },
@@ -107,7 +107,7 @@
     }
   },
   "layout": {
-    "mobileScreenPadding": { "value": "20px", "type": "dimension" },
+    "mobileScreenPadding": { "value": "16px", "type": "dimension" },
     "desktopScreenPadding": { "value": "32px", "type": "dimension" },
     "minimumTouchTarget": { "value": "44px", "type": "dimension" },
     "bookingContentMaxWidth": { "value": "720px", "type": "dimension" }

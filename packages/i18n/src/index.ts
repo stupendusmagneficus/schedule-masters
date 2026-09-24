@@ -17,6 +17,28 @@ export type MessageKey =
   | "common.loading"
   | "common.error"
   | "mobile.description"
+  | "mobile.demoMode"
+  | "mobile.todaySchedule"
+  | "mobile.freeSlots"
+  | "mobile.available"
+  | "mobile.pending"
+  | "mobile.confirmed"
+  | "mobile.today"
+  | "mobile.calendar"
+  | "mobile.profile"
+  | "mobile.newBooking"
+  | "mobile.newBookingNoticeTitle"
+  | "mobile.newBookingNoticeDescription"
+  | "mobile.bookings"
+  | "mobile.expectedRevenue"
+  | "mobile.nextBooking"
+  | "mobile.noBookingsToday"
+  | "mobile.firstService"
+  | "mobile.noServices"
+  | "mobile.workingHours"
+  | "mobile.publicBookingLink"
+  | "mobile.publicBookingDescription"
+  | "mobile.signOut"
   | "booking.description"
   | "booking.chooseService"
   | "booking.chooseDate"
@@ -51,6 +73,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Загрузка…",
     "common.error": "Что-то пошло не так",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
+    "mobile.demoMode": "Демо-режим",
+    "mobile.todaySchedule": "Расписание на сегодня",
+    "mobile.freeSlots": "Свободные окна",
+    "mobile.available": "Свободно",
+    "mobile.pending": "Ожидает подтверждения",
+    "mobile.confirmed": "Подтверждено",
+    "mobile.today": "Сегодня",
+    "mobile.calendar": "Календарь",
+    "mobile.profile": "Профиль",
+    "mobile.newBooking": "Новая запись",
+    "mobile.newBookingNoticeTitle": "Новая запись",
+    "mobile.newBookingNoticeDescription":
+      "Форма создания записи появится в следующем шаге MVP.",
+    "mobile.bookings": "Записи",
+    "mobile.expectedRevenue": "Ожидаемая выручка",
+    "mobile.nextBooking": "Следующая запись",
+    "mobile.noBookingsToday": "На сегодня записей нет.",
+    "mobile.firstService": "Первая услуга",
+    "mobile.noServices": "Активных услуг пока нет.",
+    "mobile.workingHours": "Рабочие часы",
+    "mobile.publicBookingLink": "Публичная ссылка на запись",
+    "mobile.publicBookingDescription":
+      "Клиенты могут выбрать услугу и свободное время.",
+    "mobile.signOut": "Выйти",
     "booking.description": "Страница онлайн-записи готова к работе.",
     "booking.chooseService": "Выберите услугу",
     "booking.chooseDate": "Выберите дату",
@@ -83,6 +129,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Načítání…",
     "common.error": "Něco se pokazilo",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
+    "mobile.demoMode": "Demo režim",
+    "mobile.todaySchedule": "Dnešní rozvrh",
+    "mobile.freeSlots": "Volné termíny",
+    "mobile.available": "Volno",
+    "mobile.pending": "Čeká na potvrzení",
+    "mobile.confirmed": "Potvrzeno",
+    "mobile.today": "Dnes",
+    "mobile.calendar": "Kalendář",
+    "mobile.profile": "Profil",
+    "mobile.newBooking": "Nová rezervace",
+    "mobile.newBookingNoticeTitle": "Nová rezervace",
+    "mobile.newBookingNoticeDescription":
+      "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+    "mobile.bookings": "Rezervace",
+    "mobile.expectedRevenue": "Očekávané tržby",
+    "mobile.nextBooking": "Další rezervace",
+    "mobile.noBookingsToday": "Na dnešek nemáte žádné rezervace.",
+    "mobile.firstService": "První služba",
+    "mobile.noServices": "Zatím nemáte žádné aktivní služby.",
+    "mobile.workingHours": "Pracovní doba",
+    "mobile.publicBookingLink": "Veřejný odkaz pro rezervace",
+    "mobile.publicBookingDescription":
+      "Klienti si mohou vybrat službu a volný termín.",
+    "mobile.signOut": "Odhlásit se",
     "booking.description": "Stránka online rezervací je připravena.",
     "booking.chooseService": "Vyberte službu",
     "booking.chooseDate": "Vyberte datum",
@@ -115,6 +185,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Loading…",
     "common.error": "Something went wrong",
     "mobile.description": "The master mobile app is ready.",
+    "mobile.demoMode": "Demo mode",
+    "mobile.todaySchedule": "Today's schedule",
+    "mobile.freeSlots": "Free slots",
+    "mobile.available": "Available",
+    "mobile.pending": "Pending confirmation",
+    "mobile.confirmed": "Confirmed",
+    "mobile.today": "Today",
+    "mobile.calendar": "Calendar",
+    "mobile.profile": "Profile",
+    "mobile.newBooking": "New booking",
+    "mobile.newBookingNoticeTitle": "New booking",
+    "mobile.newBookingNoticeDescription":
+      "The booking creation form will be added in the next MVP step.",
+    "mobile.bookings": "Bookings",
+    "mobile.expectedRevenue": "Expected revenue",
+    "mobile.nextBooking": "Next booking",
+    "mobile.noBookingsToday": "There are no bookings today.",
+    "mobile.firstService": "Your first service",
+    "mobile.noServices": "No active services yet.",
+    "mobile.workingHours": "Working hours",
+    "mobile.publicBookingLink": "Public booking link",
+    "mobile.publicBookingDescription":
+      "Clients can choose a service and available time.",
+    "mobile.signOut": "Sign out",
     "booking.description": "The online booking page is ready.",
     "booking.chooseService": "Choose a service",
     "booking.chooseDate": "Choose a date",

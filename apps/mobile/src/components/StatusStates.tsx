@@ -1,9 +1,12 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
+import { colors } from "../theme/tokens";
+import { typography } from "../theme/typography";
+
 export function LoadingState() {
   return (
     <View style={styles.center}>
-      <ActivityIndicator color="#2f8f7b" />
+      <ActivityIndicator color={colors.accent} />
       <Text style={styles.muted}>Loading…</Text>
     </View>
   );
@@ -24,12 +27,12 @@ export function ConfigurationState() {
 const styles = StyleSheet.create({
   center: {
     alignItems: "center",
-    backgroundColor: "#f5f5f2",
+    backgroundColor: colors.canvas,
     flex: 1,
     gap: 12,
     justifyContent: "center",
     padding: 24,
   },
-  muted: { color: "#75807c", lineHeight: 20, marginTop: 4 },
-  title: { color: "#202725", fontSize: 30, fontWeight: "700" },
+  muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
+  title: { ...typography.heading, color: colors.primaryText },
 });

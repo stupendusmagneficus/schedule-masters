@@ -6,15 +6,19 @@
 
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
-The approved direction is **Warm Vertical**: Vertical's precise, high-contrast operational language adapted with warm surfaces and a jade/teal product accent.
+The approved direction is **GitHub Mobile-inspired operations**: calm cool-neutral
+surfaces, white information blocks, calm green actions and compact
+navigation adapted for a master’s daily workflow.
 
 ## Product direction
 
 Schedule Masters combines:
 
-- the calm, polished and approachable visual character associated with modern beauty and wellness products such as Fresha;
+- the calm, scan-friendly hierarchy of GitHub Mobile without reusing its brand,
+  icons, layout or proprietary copy;
 - the fast, information-dense daily workflow of Masters Pro;
-- Vertical-inspired precision for dashboards, calendars and forms;
+- the friendly, service-oriented tone needed by independent beauty and wellness
+  professionals;
 - product-specific decisions that reduce friction for independent professionals in Czechia.
 
 This is a visual reference, not a copy of Fresha. We do not reuse its logo, exact colors, typography, illustrations, icons, screen composition or proprietary copy.
@@ -24,7 +28,8 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 1. **Today first.** The first screen must help a master understand the day within seconds.
 2. **Quiet density.** Show useful information without decorative surfaces or nested cards.
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
-4. **Warm professionalism.** The interface should feel trustworthy and premium without looking corporate or clinical.
+4. **Calm operational clarity.** The interface should feel trustworthy and
+   lightweight without looking corporate or clinical.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
 6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
@@ -40,7 +45,9 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 
 ### Color
 
-The palette uses a muted jade accent with warm-cool neutral surfaces. It borrows Vertical's clarity and surface discipline while preserving a warmer, more suitable character for beauty and wellness services. It is intentionally adjacent to the Fresha visual mood, but not an exact reproduction.
+The palette uses cool-neutral application surfaces, white information blocks,
+thin neutral separators and a reserved green action color. The result borrows
+GitHub Mobile’s scanning rhythm, not its visual identity or exact values.
 
 - `brand.primary` — primary actions and active states.
 - `brand.primaryStrong` — pressed states and high-emphasis links.
@@ -54,21 +61,27 @@ Do not use raw hex values in screens. If a new color is needed, add it here with
 
 ### Typography
 
-Use Inter when available, with a system fallback for the first MVP. Typography is compact enough for a calendar, but headings retain a warm editorial feel through weight and spacing rather than a decorative font.
+Use the platform system font: San Francisco on iOS and the native system sans-serif on Android. Typography follows the iOS product rhythm while allowing Dynamic Type scaling. Headings retain a warm editorial feel through weight and spacing rather than a decorative font.
 
-- Display: dashboard greeting and booking profile title.
-- Heading: section and screen titles.
-- Body: descriptions and form content.
-- Label: buttons, tabs and metadata.
-- Caption: supporting information only; never use caption text for required actions.
+- Display: 34px, dashboard greeting and booking profile title.
+- Heading: 28px, section and screen titles.
+- Section: 20px, card and content-group titles.
+- Body: 17px, descriptions and form content.
+- Label: 15px, buttons and important metadata.
+- Caption: 13px, supporting information only; never use caption text for required actions.
 
 ### Spacing and shape
 
-Use a 4px base scale. Standard screen padding is 20px on mobile and 32px on desktop. Use 12px for compact controls, 16px for normal controls and 20px for primary surfaces. Use 8px corners for compact controls and 12px corners for cards/panels. Reserve pill shapes for status badges, segmented controls and genuinely compact choice controls; do not make every surface a pill.
+Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use 8px for compact controls, 16px for normal controls and 18px for grouped surfaces. Reserve pill shapes for status badges, segmented controls, bottom navigation and genuinely compact choice controls; do not make every surface a pill.
 
-### Warm Vertical rules by surface
+### GitHub Mobile-inspired surface rules
 
-- **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels, jade actions, thin borders, compact metadata and no decorative gradients.
+- **Master Dashboard and Calendar:** cool-neutral canvas, white raised panels,
+  calm green actions, thin borders, compact metadata and no decorative gradients.
+- **Mobile navigation:** one white outer pill with a light-green pill beneath
+  the active tab. The active icon and label use the green accent, while inactive
+  items remain neutral. The active indicator moves with a short, functional
+  native animation; the booking CTA floats above the navigation as a green pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** warmer canvas, slightly softer panels and more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
 - **All surfaces:** use Inter/system UI for operational text. Monospace is reserved for optional technical metadata, never for client-facing booking content.
@@ -87,7 +100,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 1. Compact top bar: current date, profile/settings entry and locale-independent status affordances.
 2. Greeting plus a concise date label.
-3. Primary action: `Add booking`.
+3. Primary action: floating `New booking` action above the bottom navigation.
 4. Today summary: number of bookings, expected revenue and next appointment. Expected revenue stays visible in the first viewport.
 5. Chronological appointment list with status, client name, service and time.
 6. Empty gaps/free slots affordance, with a visible action to start a booking in that gap.
@@ -95,7 +108,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 **Primary states:**
 
 - Loading: preserve the layout with lightweight skeleton rows.
-- Empty day: explain that no bookings exist and keep `Add booking` prominent.
+- Empty day: explain that no bookings exist and keep `New booking` prominent.
 - Error: show a compact retry state without hiding local navigation.
 
 **Interaction rules:**
@@ -103,6 +116,9 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - Tapping an appointment opens its details.
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.
+- Bookings and expected revenue share one grouped summary surface. Bookings
+  stays neutral; expected revenue uses the strong green text accent without a
+  full-color background.
 - The quick-add action offers `Appointment` and `Break` as two equally clear choices.
 
 ### 2. Master Calendar
@@ -165,13 +181,38 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 ### Mobile master app
 
-Use a small bottom navigation with three primary destinations:
+Use a small fixed bottom navigation with three primary destinations:
 
 - Today
 - Calendar
 - Profile
 
+This is an information architecture decision, not only a visual grouping:
+
+- **Today** is the default operational surface. It answers “what is happening
+  today?” with bookings, the next client, daily totals and expected revenue.
+- **Calendar** is the planning surface. It answers “when am I available?” with
+  the timeline, free slots, breaks and appointment creation.
+- **Profile** is the low-frequency configuration surface. It contains the
+  master profile, public booking link, language, subscription and settings.
+
+The destinations are intentionally ordered by frequency of use. Messages,
+Explore, Inbox and client discovery are not MVP destinations: adding them now
+would compete with the booking workflow and make the navigation less useful.
+
 Keep settings and subscription inside Profile. Messaging is deferred from the MVP navigation.
+
+Place the primary `New booking` action as a compact floating button immediately
+above the bottom navigation. It must remain reachable while a master scrolls and
+must not cover a selected tab or important information. There must be no second
+`Add booking` button on the Today screen. The action opens the booking creation
+flow when that flow is implemented; until then it must clearly state that the
+flow is not available rather than silently doing nothing.
+
+`New booking` is a global creation action, not a fourth destination. Its role is
+to start a client appointment quickly from Today or Calendar. Calendar remains
+the place for choosing a time and for creating a break, so the two actions do
+not compete with one another.
 
 ### Booking web
 

@@ -1459,6 +1459,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/vector-icons@npm:^15.1.1":
+  version: 15.1.1
+  resolution: "@expo/vector-icons@npm:15.1.1"
+  peerDependencies:
+    expo-font: ">=14.0.4"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/fdd50c90484934204b90d345904fa69ca788a5de704d62b3cb580c52aa4cf4bffe1c05c509d043cf2b6842f1bdad6b78585524f3c6ae5f77e36385d83c0aa577
+  languageName: node
+  linkType: hard
+
 "@expo/ws-tunnel@npm:^2.0.0":
   version: 2.0.0
   resolution: "@expo/ws-tunnel@npm:2.0.0"
@@ -2285,6 +2296,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@schedule-app/mobile@workspace:apps/mobile"
   dependencies:
+    "@expo/vector-icons": "npm:^15.1.1"
     "@schedule-app/analytics": "workspace:*"
     "@schedule-app/api": "workspace:*"
     "@schedule-app/i18n": "workspace:*"
@@ -2292,12 +2304,14 @@ __metadata:
     "@types/react": "npm:19.2.7"
     eslint: "npm:10.11.0"
     expo: "npm:57.0.24"
+    expo-font: "npm:~57.0.4"
     expo-localization: "npm:~57.0.2"
     expo-secure-store: "npm:~57.0.4"
     expo-status-bar: "npm:57.0.1"
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
     react-native: "npm:0.86.3"
+    react-native-safe-area-context: "npm:~5.7.0"
     react-native-url-polyfill: "npm:^4.0.0"
     react-native-web: "npm:0.21.2"
     typescript: "npm:~6.0.3"
@@ -6022,6 +6036,16 @@ __metadata:
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
   checksum: 10c0/f2f1e60010c683479e74c63f96b09fb41603527cd131a9959e2aee1e5a8b0caf270b365e5ca77d4a6b18aae659b60a86150bb3979073528877029b35aecd2072
+  languageName: node
+  linkType: hard
+
+"react-native-safe-area-context@npm:~5.7.0":
+  version: 5.7.0
+  resolution: "react-native-safe-area-context@npm:5.7.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/c3799e17321b41df1e0a10492c98472f8f8225ef0bbaf8146c4a9acb9519aae9ac11429059143c215e4402c2808e8445274850a339f8477522ded2461e18da80
   languageName: node
   linkType: hard
 
