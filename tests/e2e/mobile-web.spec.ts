@@ -17,13 +17,13 @@ test.describe("mobile web smoke", () => {
   test("renders the visual demo with mock schedule data", async ({ page }) => {
     await page.goto("/?demo=1");
 
-    await expect(page.getByText("Демо-режим", { exact: true })).toBeVisible();
+    await expect(page.getByText("Demo režim", { exact: true })).toBeVisible();
     await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
     await expect(
       page.getByText("Anna K.", { exact: true }).first(),
     ).toBeVisible();
     await expect(
-      page.getByText("Свободные окна", { exact: true }),
+      page.getByText("Volné termíny", { exact: true }),
     ).toBeVisible();
   });
 
@@ -31,10 +31,12 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Новая запись" }).click();
+    await page.getByRole("button", { name: "Nová rezervace" }).click();
 
     await expect(
-      page.getByText("Форма создания записи появится в следующем шаге MVP."),
+      page.getByText(
+        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+      ),
     ).toBeVisible();
   });
 
@@ -42,7 +44,7 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("tab", { name: "Профиль" }).click();
+    await page.getByRole("tab", { name: "Profil" }).click();
 
     await expect(
       page.getByRole("link", {

@@ -21,8 +21,8 @@ describe("locale resolution", () => {
     expect(detectLocale("de-DE")).toBe("en");
   });
 
-  it("uses Russian as the product default locale", () => {
-    expect(defaultLocale).toBe("ru");
+  it("uses Czech as the product default locale", () => {
+    expect(defaultLocale).toBe("cz");
   });
 });
 
