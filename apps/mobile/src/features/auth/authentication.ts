@@ -51,10 +51,18 @@ export async function authenticate(
     };
   }
 
-  const result =
-    mode === "signUp"
-      ? await client.auth.signUp(parsed.data)
-      : await client.auth.signInWithPassword(parsed.data);
+  let result: AuthResponse;
+  try {
+    result =
+      mode === "signUp"
+        ? await client.auth.signUp(parsed.data)
+        : await client.auth.signInWithPassword(parsed.data);
+  } catch {
+    return {
+      error: { message: "Authentication request failed" },
+      kind: "requestError",
+    };
+  }
 
   if (result.error) return { kind: "requestError", error: result.error };
   if (result.data.session) {

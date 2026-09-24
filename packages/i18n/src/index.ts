@@ -15,6 +15,7 @@ export type MessageKey =
   | "common.language"
   | "common.save"
   | "common.cancel"
+  | "common.retry"
   | "common.loading"
   | "common.error"
   | "auth.emailLabel"
@@ -37,6 +38,8 @@ export type MessageKey =
   | "auth.sessionRestoreFailed"
   | "auth.signOutFailed"
   | "auth.confirmationRequired"
+  | "workspace.loadFailedTitle"
+  | "workspace.loadFailedDescription"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -93,6 +96,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Язык",
     "common.save": "Сохранить",
     "common.cancel": "Отмена",
+    "common.retry": "Повторить",
     "common.loading": "Загрузка…",
     "common.error":
       "Не удалось завершить действие. Повторите попытку через несколько секунд.",
@@ -120,6 +124,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
     "auth.confirmationRequired":
       "Проверьте email и подтвердите аккаунт, затем войдите.",
+    "workspace.loadFailedTitle": "Не удалось загрузить рабочее пространство",
+    "workspace.loadFailedDescription":
+      "Проверьте подключение к интернету и повторите попытку.",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -176,6 +183,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Jazyk",
     "common.save": "Uložit",
     "common.cancel": "Zrušit",
+    "common.retry": "Zkusit znovu",
     "common.loading": "Načítání…",
     "common.error":
       "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
@@ -204,6 +212,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
     "auth.confirmationRequired":
       "Zkontrolujte e-mail, potvrďte účet a poté se přihlaste.",
+    "workspace.loadFailedTitle": "Pracovní prostor se nepodařilo načíst",
+    "workspace.loadFailedDescription":
+      "Zkontrolujte připojení k internetu a zkuste to znovu.",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -260,6 +271,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Language",
     "common.save": "Save",
     "common.cancel": "Cancel",
+    "common.retry": "Try again",
     "common.loading": "Loading…",
     "common.error":
       "We could not complete that action. Please try again shortly.",
@@ -287,6 +299,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Could not sign out. Try again.",
     "auth.confirmationRequired":
       "Check your email, confirm your account, then sign in.",
+    "workspace.loadFailedTitle": "We could not load your workspace",
+    "workspace.loadFailedDescription":
+      "Check your internet connection and try again.",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",

@@ -80,4 +80,20 @@ describe("authenticate", () => {
       kind: "requestError",
     });
   });
+
+  it("returns a safe request error when the authentication client rejects", async () => {
+    const client = createClient({
+      signInWithPassword: vi.fn().mockRejectedValue(new Error("Network down")),
+    });
+
+    await expect(
+      authenticate(client, "signIn", {
+        email: "master@example.com",
+        password: "secure-password",
+      }),
+    ).resolves.toEqual({
+      error: { message: "Authentication request failed" },
+      kind: "requestError",
+    });
+  });
 });
