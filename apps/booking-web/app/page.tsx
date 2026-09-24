@@ -20,6 +20,11 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { analytics } from "../src/lib/analytics";
+import {
+  getFollowingBookableDate,
+  getNextBookableDate,
+  parseDateInput,
+} from "../src/utils/dates";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -46,18 +51,11 @@ const demoContext: PublicBookingContext = {
   ],
 };
 
-function getTomorrow() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  while (tomorrow.getDay() === 0) {
-    tomorrow.setDate(tomorrow.getDate() + 1);
-  }
-  return tomorrow.toISOString().slice(0, 10);
-}
-
 function getDemoSlots(date: string): Slot[] {
   const day = new Date(`${date}T00:00:00`);
-  if (Number.isNaN(day.getTime())) return [];
+  if (Number.isNaN(day.getTime()) || day.getDay() === 0 || day.getDay() === 6) {
+    return [];
+  }
 
   return ["09:30", "11:00", "13:00", "15:30"].map((time) => {
     const start = new Date(`${date}T${time}:00+02:00`);
@@ -86,7 +84,7 @@ export default function HomePage() {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const [context, setContext] = useState<PublicBookingContext>(demoContext);
   const [selectedServiceId, setSelectedServiceId] = useState(demoServiceId);
-  const [date, setDate] = useState(getTomorrow);
+  const [date, setDate] = useState(getNextBookableDate);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [name, setName] = useState("");
@@ -94,6 +92,7 @@ export default function HomePage() {
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<PublicBookingResult | null>(
     null,
@@ -111,6 +110,18 @@ export default function HomePage() {
   }, [demoMode]);
   const selectedService = context.services.find(
     (service) => service.id === selectedServiceId,
+  );
+  const selectedDateLabel = formatDate(parseDateInput(date), locale, {
+    day: "numeric",
+    month: "long",
+    weekday: "long",
+  });
+  const availabilityForSelectedDate = t(
+    "booking.availableTimesForDate",
+  ).replace("{date}", selectedDateLabel);
+  const noSlotsForSelectedDate = t("booking.noSlotsForDate").replace(
+    "{date}",
+    selectedDateLabel,
   );
 
   useEffect(() => {
@@ -158,16 +169,20 @@ export default function HomePage() {
     async function loadSlots() {
       setSelectedSlot(null);
       setError(null);
+      setIsLoadingSlots(true);
       if (isDemoBookingPage()) {
         setSlots(getDemoSlots(date));
+        setIsLoadingSlots(false);
         return;
       }
       if (!selectedServiceId) {
         setSlots([]);
+        setIsLoadingSlots(false);
         return;
       }
       if (!supabase) {
         setSlots([]);
+        setIsLoadingSlots(false);
         return;
       }
       const slug =
@@ -185,6 +200,7 @@ export default function HomePage() {
       if (slotsError) {
         setError(slotsError.message);
         setSlots([]);
+        setIsLoadingSlots(false);
         return;
       }
       setSlots(
@@ -193,6 +209,7 @@ export default function HomePage() {
           endsAt: slot.ends_at,
         })),
       );
+      setIsLoadingSlots(false);
     }
     void loadSlots();
     return () => {
@@ -201,8 +218,16 @@ export default function HomePage() {
   }, [date, selectedServiceId, supabase]);
 
   async function submitBooking() {
-    if (!selectedService || !selectedSlot || !name.trim()) {
-      setError(t("booking.required"));
+    if (!selectedService) {
+      setError(t("booking.selectService"));
+      return;
+    }
+    if (!selectedSlot) {
+      setError(t("booking.selectTime"));
+      return;
+    }
+    if (!name.trim()) {
+      setError(t("booking.nameRequired"));
       return;
     }
     setError(null);
@@ -323,7 +348,12 @@ export default function HomePage() {
         </div>
 
         <div className="booking-section">
-          <h2>{t("booking.chooseService")}</h2>
+          <h2>
+            {t("booking.chooseService")}
+            <span className="required-marker" aria-hidden="true">
+              *
+            </span>
+          </h2>
           <div className="service-list">
             {context.services.map((service) => (
               <button
@@ -354,7 +384,12 @@ export default function HomePage() {
 
         <div className="booking-section">
           <label htmlFor="booking-date">
-            <h2>{t("booking.chooseDate")}</h2>
+            <h2>
+              {t("booking.chooseDate")}
+              <span className="required-marker" aria-hidden="true">
+                *
+              </span>
+            </h2>
           </label>
           <input
             id="booking-date"
@@ -364,12 +399,34 @@ export default function HomePage() {
             type="date"
             value={date}
           />
+          <p className="date-context" aria-live="polite">
+            {availabilityForSelectedDate}
+          </p>
         </div>
 
         <div className="booking-section">
-          <h2>{t("booking.chooseTime")}</h2>
-          {!isLoading && slots.length === 0 && (
-            <p className="empty-state">{t("booking.noSlots")}</p>
+          <h2>
+            {t("booking.chooseTime")}
+            <span className="required-marker" aria-hidden="true">
+              *
+            </span>
+          </h2>
+          {isLoadingSlots && (
+            <p className="empty-state" role="status">
+              {t("booking.loadingSlots")}
+            </p>
+          )}
+          {!isLoadingSlots && slots.length === 0 && (
+            <div className="empty-state">
+              <p>{noSlotsForSelectedDate}</p>
+              <button
+                className="secondary-button"
+                onClick={() => setDate(getFollowingBookableDate(date))}
+                type="button"
+              >
+                {t("booking.chooseAnotherDate")}
+              </button>
+            </div>
           )}
           <div className="slot-list">
             {slots.map((slot) => (
@@ -396,32 +453,57 @@ export default function HomePage() {
 
         <div className="booking-section details-section">
           <h2>{t("booking.yourDetails")}</h2>
+          <p className="required-hint">{t("booking.requiredHint")}</p>
           <div className="form-grid">
             <label>
-              {t("booking.name")}
+              <span>
+                {t("booking.name")}
+                <span className="required-marker" aria-hidden="true">
+                  *
+                </span>
+              </span>
               <input
+                aria-required="true"
                 onChange={(event) => setName(event.target.value)}
+                required
                 value={name}
               />
             </label>
             <label>
-              {t("booking.email")}
+              <span>
+                {t("booking.email")}{" "}
+                <span className="optional-label">
+                  ({t("booking.optional")})
+                </span>
+              </span>
               <input
+                aria-label={`${t("booking.email")} (${t("booking.optional")})`}
                 onChange={(event) => setEmail(event.target.value)}
                 type="email"
                 value={email}
               />
             </label>
             <label>
-              {t("booking.phone")}
+              <span>
+                {t("booking.phone")}{" "}
+                <span className="optional-label">
+                  ({t("booking.optional")})
+                </span>
+              </span>
               <input
+                aria-label={`${t("booking.phone")} (${t("booking.optional")})`}
                 onChange={(event) => setPhone(event.target.value)}
                 type="tel"
                 value={phone}
               />
             </label>
             <label>
-              {t("booking.note")}
+              <span>
+                {t("booking.note")}{" "}
+                <span className="optional-label">
+                  ({t("booking.optional")})
+                </span>
+              </span>
               <textarea
                 onChange={(event) => setNote(event.target.value)}
                 value={note}

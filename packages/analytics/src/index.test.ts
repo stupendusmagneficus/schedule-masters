@@ -11,6 +11,23 @@ function createMemoryStorage() {
 }
 
 describe("analytics client", () => {
+  it("defers storage access until analytics is used", async () => {
+    const getItem = vi.fn().mockReturnValue(null);
+    const setItem = vi.fn();
+    const analytics = createAnalytics({
+      platform: "web",
+      storage: { getItem, setItem },
+    });
+
+    expect(getItem).not.toHaveBeenCalled();
+    expect(setItem).not.toHaveBeenCalled();
+
+    await analytics.init();
+
+    expect(getItem).toHaveBeenCalledOnce();
+    expect(setItem).toHaveBeenCalledOnce();
+  });
+
   it("sends only explicit events with a pseudonymous id", async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: true });
     const analytics = createAnalytics({

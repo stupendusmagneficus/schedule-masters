@@ -85,21 +85,29 @@ export function createAnalytics({
   storage,
 }: CreateAnalyticsOptions): AnalyticsClient {
   let distinctId: string | null = null;
-  const initialized = (async () => {
-    distinctId = await storage.getItem(distinctIdKey);
-    if (!distinctId) {
-      distinctId = createDistinctId();
-      await storage.setItem(distinctIdKey, distinctId);
-    }
-  })();
+  let initialization: Promise<void> | null = null;
+
+  function initialize() {
+    if (initialization) return initialization;
+
+    initialization = (async () => {
+      distinctId = await storage.getItem(distinctIdKey);
+      if (!distinctId) {
+        distinctId = createDistinctId();
+        await storage.setItem(distinctIdKey, distinctId);
+      }
+    })();
+
+    return initialization;
+  }
 
   return {
     async init() {
-      await initialized;
+      await initialize();
     },
     track(event, properties = {}) {
       if (!apiKey || !fetcher) return;
-      void initialized.then(() => {
+      void initialize().then(() => {
         if (!distinctId) return;
         const payload = {
           api_key: apiKey,
