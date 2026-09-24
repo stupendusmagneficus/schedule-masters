@@ -18,6 +18,7 @@ export function FloatingBookingAction({
   return (
     <Pressable
       accessibilityLabel={label}
+      accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,

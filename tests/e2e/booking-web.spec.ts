@@ -18,6 +18,11 @@ test.describe("public booking web", () => {
     await expect(
       page.getByText("Booking confirmed", { exact: true }),
     ).toBeVisible();
+
+    const closeButton = page.getByRole("button", { name: "Close" });
+    await expect(closeButton).toBeVisible();
+    const closeButtonBox = await closeButton.boundingBox();
+    expect(closeButtonBox?.width).toBeLessThan(200);
   });
 
   test("switches the booking page locale", async ({ page }) => {

@@ -207,6 +207,12 @@ textarea {
 .secondary-button:hover {
   background: #ddf1eb;
 }
+.confirmation-close-button {
+  justify-self: center;
+  margin-top: 0;
+  min-width: 96px;
+  width: auto;
+}
 .confirm-button {
   width: 100%;
   margin-top: 24px;

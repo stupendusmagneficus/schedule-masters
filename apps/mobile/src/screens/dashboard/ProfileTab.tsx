@@ -9,14 +9,18 @@ import type { DashboardTabProps } from "./types";
 
 type ProfileTabProps = DashboardTabProps & {
   readonly onLocaleChange: (locale: DashboardTabProps["locale"]) => void;
+  readonly onOpenBookingLink: () => void;
   readonly onSignOut: () => void;
+  readonly bookingUrl: string;
   readonly workspace: Workspace;
 };
 
 export function ProfileTab({
   locale,
   onLocaleChange,
+  onOpenBookingLink,
   onSignOut,
+  bookingUrl,
   t,
   workspace,
 }: ProfileTabProps) {
@@ -58,7 +62,13 @@ export function ProfileTab({
       </InfoCard>
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
-        <Text style={styles.link}>/{workspace.slug}</Text>
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={bookingUrl}
+          onPress={onOpenBookingLink}
+        >
+          <Text style={styles.link}>{bookingUrl}</Text>
+        </Pressable>
         <Text style={styles.helper}>
           {t("mobile.publicBookingDescription")}
         </Text>

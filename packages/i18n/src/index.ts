@@ -29,6 +29,7 @@ export type MessageKey =
   | "mobile.newBooking"
   | "mobile.newBookingNoticeTitle"
   | "mobile.newBookingNoticeDescription"
+  | "mobile.newBookingNoticeClose"
   | "mobile.bookings"
   | "mobile.expectedRevenue"
   | "mobile.nextBooking"
@@ -50,6 +51,7 @@ export type MessageKey =
   | "booking.note"
   | "booking.confirm"
   | "booking.confirmed"
+  | "booking.close"
   | "booking.noSlots"
   | "booking.selectService"
   | "booking.selectTime"
@@ -86,6 +88,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeTitle": "Новая запись",
     "mobile.newBookingNoticeDescription":
       "Форма создания записи появится в следующем шаге MVP.",
+    "mobile.newBookingNoticeClose": "Закрыть",
     "mobile.bookings": "Записи",
     "mobile.expectedRevenue": "Ожидаемая выручка",
     "mobile.nextBooking": "Следующая запись",
@@ -108,6 +111,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Комментарий",
     "booking.confirm": "Подтвердить запись",
     "booking.confirmed": "Запись подтверждена",
+    "booking.close": "Закрыть",
     "booking.noSlots": "На эту дату нет свободного времени.",
     "booking.selectService": "Выберите услугу, чтобы увидеть свободное время.",
     "booking.selectTime": "Выберите свободное время.",
@@ -142,6 +146,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeTitle": "Nová rezervace",
     "mobile.newBookingNoticeDescription":
       "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+    "mobile.newBookingNoticeClose": "Zavřít",
     "mobile.bookings": "Rezervace",
     "mobile.expectedRevenue": "Očekávané tržby",
     "mobile.nextBooking": "Další rezervace",
@@ -164,6 +169,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Poznámka",
     "booking.confirm": "Potvrdit rezervaci",
     "booking.confirmed": "Rezervace potvrzena",
+    "booking.close": "Zavřít",
     "booking.noSlots": "Pro toto datum nejsou volné termíny.",
     "booking.selectService": "Vyberte službu a zobrazí se volné termíny.",
     "booking.selectTime": "Vyberte volný termín.",
@@ -198,6 +204,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeTitle": "New booking",
     "mobile.newBookingNoticeDescription":
       "The booking creation form will be added in the next MVP step.",
+    "mobile.newBookingNoticeClose": "Close",
     "mobile.bookings": "Bookings",
     "mobile.expectedRevenue": "Expected revenue",
     "mobile.nextBooking": "Next booking",
@@ -220,6 +227,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Note",
     "booking.confirm": "Confirm booking",
     "booking.confirmed": "Booking confirmed",
+    "booking.close": "Close",
     "booking.noSlots": "There are no available times on this date.",
     "booking.selectService": "Choose a service to see available times.",
     "booking.selectTime": "Choose an available time.",
