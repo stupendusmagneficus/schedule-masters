@@ -69,5 +69,12 @@ export async function authenticate(
     return { kind: "authenticated", session: result.data.session };
   }
 
-  return { kind: "confirmationRequired" };
+  if (mode === "signUp") {
+    return { kind: "confirmationRequired" };
+  }
+
+  return {
+    error: { message: "Authentication session was not returned" },
+    kind: "requestError",
+  };
 }

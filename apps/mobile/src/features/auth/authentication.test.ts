@@ -12,9 +12,10 @@ function createClient(overrides: Partial<AuthenticationClient["auth"]> = {}) {
         data: { session },
         error: null,
       }),
-      signUp: vi
-        .fn()
-        .mockResolvedValue({ data: { session: null }, error: null }),
+      signUp: vi.fn().mockResolvedValue({
+        data: { session: null, user: { id: "master-1" } },
+        error: null,
+      }),
       ...overrides,
     },
   } satisfies AuthenticationClient;
@@ -60,6 +61,25 @@ describe("authenticate", () => {
         password: "secure-password",
       }),
     ).resolves.toEqual({ kind: "confirmationRequired" });
+  });
+
+  it("keeps a missing sign-in session separate from confirmation", async () => {
+    const client = createClient({
+      signInWithPassword: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: null,
+      }),
+    });
+
+    await expect(
+      authenticate(client, "signIn", {
+        email: "master@example.com",
+        password: "secure-password",
+      }),
+    ).resolves.toEqual({
+      error: { message: "Authentication session was not returned" },
+      kind: "requestError",
+    });
   });
 
   it("keeps a request error separate from validation", async () => {

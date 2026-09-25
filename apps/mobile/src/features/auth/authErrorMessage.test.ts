@@ -12,6 +12,15 @@ describe("getAuthErrorMessageKey", () => {
     ).toBe("auth.invalidCredentials");
   });
 
+  it("maps unconfirmed accounts to a recovery message", () => {
+    expect(
+      getAuthErrorMessageKey({
+        code: "email_not_confirmed",
+        message: "Email not confirmed",
+      }),
+    ).toBe("auth.emailNotConfirmed");
+  });
+
   it("maps transport failures without displaying their raw message", () => {
     expect(
       getAuthErrorMessageKey({ message: "TypeError: Network request failed" }),
