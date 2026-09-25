@@ -240,7 +240,7 @@ export type Database = {
           ends_at: string
           id: string
           kind: Database["public"]["Enums"]["availability_exception_kind"]
-          reason: string
+          reason: string | null
           starts_at: string
           updated_at: string
           workspace_id: string
