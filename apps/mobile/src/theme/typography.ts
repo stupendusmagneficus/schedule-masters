@@ -12,6 +12,18 @@ export const typography = {
     fontWeight: "700",
     lineHeight: 41,
   },
+  editorialHeading: {
+    fontFamily: "Georgia",
+    fontSize: 30,
+    fontWeight: "700",
+    lineHeight: 37,
+  },
+  editorialSection: {
+    fontFamily: "Georgia",
+    fontSize: 22,
+    fontWeight: "700",
+    lineHeight: 28,
+  },
   eyebrow: {
     fontSize: 12,
     fontWeight: "700",

@@ -4,7 +4,14 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { mobileEnv } from "../config/env";
 import {
   clearOnboardingDraft,
@@ -154,14 +161,24 @@ export function SetupScreen({ locale, onComplete, userId }: SetupScreenProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>{t("workspace.setupEyebrow")}</Text>
-      <Text style={styles.title}>{t("workspace.setupTitle")}</Text>
-      {step < 4 && (
-        <Text style={styles.muted}>{t("workspace.setupDescription")}</Text>
-      )}
-      {step < 4 && (
-        <ProgressIndicator step={step as Exclude<SetupStep, 4>} t={t} />
-      )}
+      <View style={styles.hero}>
+        <Text style={styles.eyebrow}>{t("workspace.setupEyebrow")}</Text>
+        <Text style={styles.title}>
+          {t(
+            step === 4
+              ? "workspace.setupCompleteTitle"
+              : "workspace.setupTitle",
+          )}
+        </Text>
+        {step < 4 && (
+          <Text style={styles.heroDescription}>
+            {t("workspace.setupDescription")}
+          </Text>
+        )}
+        {step < 4 && (
+          <ProgressIndicator step={step as Exclude<SetupStep, 4>} t={t} />
+        )}
+      </View>
       {step === 1 && (
         <MasterInfoStep
           draft={draft}
@@ -234,9 +251,11 @@ function ProgressIndicator({
     "workspace.setupStepSchedule",
   ];
   return (
-    <Text accessibilityRole="header" style={styles.progress}>
-      {step}/3 · {t(labels[step - 1])}
-    </Text>
+    <View style={styles.progressPill}>
+      <Text accessibilityRole="header" style={styles.progress}>
+        {step}/3 · {t(labels[step - 1])}
+      </Text>
+    </View>
   );
 }
 
@@ -288,18 +307,24 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: colors.canvas,
-    gap: 16,
+    gap: 18,
     justifyContent: "center",
     minHeight: "100%",
-    padding: 16,
+    padding: 20,
   },
   disabledButton: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
-  eyebrow: { color: colors.accent, marginBottom: 8, ...typography.eyebrow },
-  muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
+  eyebrow: { color: colors.action, ...typography.eyebrow },
+  hero: {
+    backgroundColor: colors.accent,
+    borderRadius: radii.surface,
+    gap: 12,
+    padding: 24,
+  },
+  heroDescription: { ...typography.body, color: colors.heroMuted },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     minHeight: 48,
@@ -308,13 +333,20 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.label,
-    color: colors.inverse,
+    color: colors.actionText,
     fontWeight: "700",
   },
   progress: {
-    color: colors.accent,
-    ...typography.label,
+    ...typography.caption,
+    color: colors.heroMuted,
     fontWeight: "700",
   },
-  title: { ...typography.heading, color: colors.primaryText },
+  progressPill: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  title: { ...typography.editorialHeading, color: colors.inverse },
 });

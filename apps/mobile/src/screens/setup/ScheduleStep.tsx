@@ -109,10 +109,15 @@ export function ScheduleStep({
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 16 },
+  content: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.surface,
+    gap: 16,
+    padding: 20,
+  },
   dayButton: {
     alignItems: "center",
-    borderColor: colors.border,
+    borderColor: colors.borderSubtle,
     borderRadius: radii.control,
     borderWidth: 1,
     minWidth: 44,
@@ -143,5 +148,5 @@ const styles = StyleSheet.create({
   },
   sectionLabel: { ...typography.label, color: colors.primaryText },
   stepDescription: { ...typography.body, color: colors.secondaryText },
-  stepTitle: { ...typography.section, color: colors.primaryText },
+  stepTitle: { ...typography.editorialSection, color: colors.primaryText },
 });

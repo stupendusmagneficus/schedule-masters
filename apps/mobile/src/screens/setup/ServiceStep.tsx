@@ -71,11 +71,16 @@ export function ServiceStep({
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 16 },
+  content: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.surface,
+    gap: 16,
+    padding: 20,
+  },
   error: { ...typography.caption, color: colors.danger },
   input: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
+    borderColor: colors.borderSubtle,
     borderRadius: radii.control,
     borderWidth: 1,
     fontSize: typography.body.fontSize,
@@ -88,5 +93,5 @@ const styles = StyleSheet.create({
     marginBottom: -8,
   },
   stepDescription: { ...typography.body, color: colors.secondaryText },
-  stepTitle: { ...typography.section, color: colors.primaryText },
+  stepTitle: { ...typography.editorialSection, color: colors.primaryText },
 });

@@ -64,17 +64,17 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     marginTop: 20,
     minHeight: 44,
     paddingHorizontal: 16,
   },
-  closeButtonPressed: { backgroundColor: colors.accentPressed },
+  closeButtonPressed: { backgroundColor: colors.actionPressed },
   closeButtonText: {
     ...typography.label,
-    color: colors.inverse,
+    color: colors.actionText,
     fontWeight: "700",
   },
   description: {

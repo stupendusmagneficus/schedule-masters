@@ -58,12 +58,17 @@ export function SetupCompleteStep({
 
 const styles = StyleSheet.create({
   bookingUrl: { ...typography.caption, color: colors.secondaryText },
-  content: { gap: 16 },
+  content: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.surface,
+    gap: 16,
+    padding: 20,
+  },
   description: { ...typography.body, color: colors.secondaryText },
   eyebrow: { color: colors.accent, fontSize: 48, fontWeight: "700" },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     minHeight: 48,
@@ -71,12 +76,12 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.label,
-    color: colors.inverse,
+    color: colors.actionText,
     fontWeight: "700",
   },
   secondaryButton: {
     alignItems: "center",
-    borderColor: colors.border,
+    borderColor: colors.borderSubtle,
     borderRadius: radii.control,
     borderWidth: 1,
     justifyContent: "center",
@@ -89,14 +94,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   summary: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.surface,
-    borderWidth: 1,
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
     gap: 4,
     padding: 16,
   },
   summaryText: { ...typography.body, color: colors.secondaryText },
-  summaryTitle: { ...typography.section, color: colors.primaryText },
-  title: { ...typography.heading, color: colors.primaryText },
+  summaryTitle: { ...typography.editorialSection, color: colors.primaryText },
+  title: { ...typography.editorialHeading, color: colors.primaryText },
 });

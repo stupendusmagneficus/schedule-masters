@@ -72,13 +72,13 @@ const styles = StyleSheet.create({
   muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
   retry: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     marginTop: 8,
     minHeight: 48,
     paddingHorizontal: 16,
   },
-  retryText: { ...typography.label, color: colors.inverse },
+  retryText: { ...typography.label, color: colors.actionText },
   title: { ...typography.heading, color: colors.primaryText },
 });
