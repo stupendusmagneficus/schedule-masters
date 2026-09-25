@@ -1,26 +1,30 @@
-import { localeLabels, supportedLocales } from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
+import { LocalePicker } from "../../components/LocalePicker";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type ProfileTabProps = DashboardTabProps & {
+  readonly isSigningOut: boolean;
   readonly onLocaleChange: (locale: DashboardTabProps["locale"]) => void;
   readonly onOpenBookingLink: () => void;
   readonly onSignOut: () => void;
   readonly bookingUrl: string;
+  readonly signOutFailed: boolean;
   readonly workspace: Workspace;
 };
 
 export function ProfileTab({
+  isSigningOut,
   locale,
   onLocaleChange,
   onOpenBookingLink,
   onSignOut,
   bookingUrl,
+  signOutFailed,
   t,
   workspace,
 }: ProfileTabProps) {
@@ -33,32 +37,7 @@ export function ProfileTab({
       </View>
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("common.language")}</Text>
-        <View accessibilityRole="radiogroup" style={styles.languagePicker}>
-          {supportedLocales.map((item) => {
-            const isSelected = item === locale;
-            return (
-              <Pressable
-                accessibilityRole="radio"
-                accessibilityState={{ selected: isSelected }}
-                key={item}
-                onPress={() => onLocaleChange(item)}
-                style={[
-                  styles.languageButton,
-                  isSelected && styles.selectedLanguageButton,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.languageText,
-                    isSelected && styles.selectedLanguageText,
-                  ]}
-                >
-                  {localeLabels[item]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
       </InfoCard>
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
@@ -73,8 +52,21 @@ export function ProfileTab({
           {t("mobile.publicBookingDescription")}
         </Text>
       </InfoCard>
-      <Pressable onPress={onSignOut} style={styles.signOutButton}>
-        <Text style={styles.signOutText}>{t("mobile.signOut")}</Text>
+      {signOutFailed && (
+        <Text accessibilityRole="alert" style={styles.signOutError}>
+          {t("auth.signOutFailed")}
+        </Text>
+      )}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isSigningOut }}
+        disabled={isSigningOut}
+        onPress={onSignOut}
+        style={[styles.signOutButton, isSigningOut && styles.disabledButton]}
+      >
+        <Text style={styles.signOutText}>
+          {isSigningOut ? t("common.loading") : t("mobile.signOut")}
+        </Text>
       </Pressable>
     </View>
   );
@@ -82,6 +74,7 @@ export function ProfileTab({
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
+  disabledButton: { opacity: 0.6 },
   eyebrow: {
     color: colors.accent,
     marginBottom: 6,
@@ -89,22 +82,6 @@ const styles = StyleSheet.create({
     ...typography.eyebrow,
   },
   helper: { ...typography.body, color: colors.secondaryText },
-  languageButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 44,
-    minWidth: 52,
-    paddingHorizontal: 10,
-  },
-  languagePicker: { flexDirection: "row", gap: 8 },
-  languageText: {
-    color: colors.secondaryText,
-    ...typography.label,
-    fontWeight: "700",
-  },
   link: {
     color: colors.accent,
     marginBottom: 8,
@@ -116,11 +93,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...typography.section,
   },
-  selectedLanguageButton: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  selectedLanguageText: { color: colors.inverse },
   signOutButton: {
     alignItems: "center",
     borderColor: colors.border,
@@ -129,6 +101,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: "center",
   },
+  signOutError: { ...typography.body, color: colors.danger },
   signOutText: { ...typography.label, color: colors.danger, fontWeight: "700" },
   title: { ...typography.heading, color: colors.primaryText },
 });

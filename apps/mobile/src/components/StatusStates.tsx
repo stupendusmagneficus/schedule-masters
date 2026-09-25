@@ -1,6 +1,12 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { colors } from "../theme/tokens";
+import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 
 export function LoadingState() {
@@ -24,6 +30,36 @@ export function ConfigurationState() {
   );
 }
 
+type RecoverableErrorStateProps = {
+  readonly description: string;
+  readonly onRetry: () => void;
+  readonly retryLabel: string;
+  readonly title: string;
+};
+
+export function RecoverableErrorState({
+  description,
+  onRetry,
+  retryLabel,
+  title,
+}: RecoverableErrorStateProps) {
+  return (
+    <View style={styles.center}>
+      <Text accessibilityRole="alert" style={styles.title}>
+        {title}
+      </Text>
+      <Text style={styles.muted}>{description}</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onRetry}
+        style={styles.retry}
+      >
+        <Text style={styles.retryText}>{retryLabel}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   center: {
     alignItems: "center",
@@ -34,5 +70,15 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   muted: { ...typography.body, color: colors.secondaryText, marginTop: 4 },
+  retry: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: radii.control,
+    justifyContent: "center",
+    marginTop: 8,
+    minHeight: 48,
+    paddingHorizontal: 16,
+  },
+  retryText: { ...typography.label, color: colors.inverse },
   title: { ...typography.heading, color: colors.primaryText },
 });

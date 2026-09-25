@@ -3,6 +3,7 @@ export const analyticsEvents = {
   appointmentCreated: "appointment_created",
   appointmentRescheduled: "appointment_rescheduled",
   accountSignedIn: "account_signed_in",
+  accountSignedOut: "account_signed_out",
   accountSignedUp: "account_signed_up",
   appOpened: "app_opened",
   bookingLinkCreated: "booking_link_created",

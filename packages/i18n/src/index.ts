@@ -15,8 +15,45 @@ export type MessageKey =
   | "common.language"
   | "common.save"
   | "common.cancel"
+  | "common.retry"
   | "common.loading"
   | "common.error"
+  | "auth.emailLabel"
+  | "auth.passwordLabel"
+  | "auth.passwordHint"
+  | "auth.requiredHint"
+  | "auth.showPassword"
+  | "auth.hidePassword"
+  | "auth.signIn"
+  | "auth.signInTitle"
+  | "auth.signInPrompt"
+  | "auth.signUp"
+  | "auth.signUpTitle"
+  | "auth.signUpPrompt"
+  | "auth.emailInvalid"
+  | "auth.passwordTooShort"
+  | "auth.invalidCredentials"
+  | "auth.accountExists"
+  | "auth.networkError"
+  | "auth.sessionRestoreFailed"
+  | "auth.signOutFailed"
+  | "auth.confirmationRequired"
+  | "workspace.loadFailedTitle"
+  | "workspace.loadFailedDescription"
+  | "workspace.setupEyebrow"
+  | "workspace.setupTitle"
+  | "workspace.setupDescription"
+  | "workspace.namePlaceholder"
+  | "workspace.slugPlaceholder"
+  | "workspace.servicePlaceholder"
+  | "workspace.pricePlaceholder"
+  | "workspace.setupRequiredFields"
+  | "workspace.setupFailed"
+  | "workspace.setupInvalidSlug"
+  | "workspace.setupInvalidService"
+  | "workspace.priceInvalid"
+  | "workspace.setupSaving"
+  | "workspace.setupSave"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -73,8 +110,55 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Язык",
     "common.save": "Сохранить",
     "common.cancel": "Отмена",
+    "common.retry": "Повторить",
     "common.loading": "Загрузка…",
-    "common.error": "Что-то пошло не так",
+    "common.error":
+      "Не удалось завершить действие. Повторите попытку через несколько секунд.",
+    "auth.emailLabel": "Email",
+    "auth.passwordLabel": "Пароль",
+    "auth.passwordHint": "Не менее 8 символов",
+    "auth.requiredHint": "Поля со знаком * обязательны.",
+    "auth.showPassword": "Показать пароль",
+    "auth.hidePassword": "Скрыть пароль",
+    "auth.signIn": "Войти",
+    "auth.signInTitle": "С возвращением",
+    "auth.signInPrompt": "Уже есть аккаунт? Войти",
+    "auth.signUp": "Создать аккаунт",
+    "auth.signUpTitle": "Создайте аккаунт мастера",
+    "auth.signUpPrompt": "Нет аккаунта? Зарегистрироваться",
+    "auth.emailInvalid": "Введите корректный email.",
+    "auth.passwordTooShort": "Пароль должен содержать не менее 8 символов.",
+    "auth.invalidCredentials":
+      "Не удалось войти. Проверьте email и пароль, затем попробуйте ещё раз.",
+    "auth.accountExists": "Этот email уже зарегистрирован. Попробуйте войти.",
+    "auth.networkError":
+      "Не удалось подключиться. Проверьте интернет и повторите попытку.",
+    "auth.sessionRestoreFailed":
+      "Не удалось восстановить сессию. Войдите ещё раз.",
+    "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
+    "auth.confirmationRequired":
+      "Проверьте email и подтвердите аккаунт, затем войдите.",
+    "workspace.loadFailedTitle": "Не удалось загрузить рабочее пространство",
+    "workspace.loadFailedDescription":
+      "Проверьте подключение к интернету и повторите попытку.",
+    "workspace.setupEyebrow": "ПЕРВОНАЧАЛЬНАЯ НАСТРОЙКА",
+    "workspace.setupTitle": "Настройте рабочее пространство",
+    "workspace.setupDescription":
+      "Будет создана доступность с понедельника по воскресенье, с 08:00 до 21:00. Позже её можно изменить.",
+    "workspace.namePlaceholder": "Название рабочего пространства",
+    "workspace.slugPlaceholder": "Ссылка на запись, например anna-nails",
+    "workspace.servicePlaceholder": "Первая услуга",
+    "workspace.pricePlaceholder": "Цена в Kč",
+    "workspace.setupRequiredFields":
+      "Заполните название, ссылку на запись и услугу.",
+    "workspace.setupFailed":
+      "Не удалось сохранить настройки. Проверьте данные и повторите попытку.",
+    "workspace.setupInvalidSlug":
+      "Ссылка должна содержать только латинские буквы, цифры и дефисы.",
+    "workspace.setupInvalidService": "Проверьте название услуги и цену.",
+    "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
+    "workspace.setupSaving": "Сохранение…",
+    "workspace.setupSave": "Сохранить и продолжить",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -131,8 +215,56 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Jazyk",
     "common.save": "Uložit",
     "common.cancel": "Zrušit",
+    "common.retry": "Zkusit znovu",
     "common.loading": "Načítání…",
-    "common.error": "Něco se pokazilo",
+    "common.error":
+      "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
+    "auth.emailLabel": "E-mail",
+    "auth.passwordLabel": "Heslo",
+    "auth.passwordHint": "Alespoň 8 znaků",
+    "auth.requiredHint": "Pole označená * jsou povinná.",
+    "auth.showPassword": "Zobrazit heslo",
+    "auth.hidePassword": "Skrýt heslo",
+    "auth.signIn": "Přihlásit se",
+    "auth.signInTitle": "Vítejte zpět",
+    "auth.signInPrompt": "Už máte účet? Přihlaste se",
+    "auth.signUp": "Vytvořit účet",
+    "auth.signUpTitle": "Vytvořte si účet mistra",
+    "auth.signUpPrompt": "Nemáte účet? Zaregistrujte se",
+    "auth.emailInvalid": "Zadejte platný e-mail.",
+    "auth.passwordTooShort": "Heslo musí mít alespoň 8 znaků.",
+    "auth.invalidCredentials":
+      "Přihlášení se nepodařilo. Zkontrolujte e-mail a heslo a zkuste to znovu.",
+    "auth.accountExists":
+      "Tento e-mail už je zaregistrovaný. Zkuste se přihlásit.",
+    "auth.networkError":
+      "Nepodařilo se připojit. Zkontrolujte internet a zkuste to znovu.",
+    "auth.sessionRestoreFailed":
+      "Relaci se nepodařilo obnovit. Přihlaste se znovu.",
+    "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
+    "auth.confirmationRequired":
+      "Zkontrolujte e-mail, potvrďte účet a poté se přihlaste.",
+    "workspace.loadFailedTitle": "Pracovní prostor se nepodařilo načíst",
+    "workspace.loadFailedDescription":
+      "Zkontrolujte připojení k internetu a zkuste to znovu.",
+    "workspace.setupEyebrow": "PRVNÍ NASTAVENÍ",
+    "workspace.setupTitle": "Nastavte si pracovní prostor",
+    "workspace.setupDescription":
+      "Vytvoříme dostupnost od pondělí do neděle, od 08:00 do 21:00. Později ji můžete upravit.",
+    "workspace.namePlaceholder": "Název pracovního prostoru",
+    "workspace.slugPlaceholder": "Odkaz pro rezervace, například anna-nails",
+    "workspace.servicePlaceholder": "První služba",
+    "workspace.pricePlaceholder": "Cena v Kč",
+    "workspace.setupRequiredFields":
+      "Vyplňte název, odkaz pro rezervace a službu.",
+    "workspace.setupFailed":
+      "Nastavení se nepodařilo uložit. Zkontrolujte údaje a zkuste to znovu.",
+    "workspace.setupInvalidSlug":
+      "Odkaz může obsahovat pouze malá písmena bez diakritiky, číslice a pomlčky.",
+    "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
+    "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
+    "workspace.setupSaving": "Ukládání…",
+    "workspace.setupSave": "Uložit a pokračovat",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -189,8 +321,55 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Language",
     "common.save": "Save",
     "common.cancel": "Cancel",
+    "common.retry": "Try again",
     "common.loading": "Loading…",
-    "common.error": "Something went wrong",
+    "common.error":
+      "We could not complete that action. Please try again shortly.",
+    "auth.emailLabel": "Email",
+    "auth.passwordLabel": "Password",
+    "auth.passwordHint": "At least 8 characters",
+    "auth.requiredHint": "Fields marked with * are required.",
+    "auth.showPassword": "Show password",
+    "auth.hidePassword": "Hide password",
+    "auth.signIn": "Sign in",
+    "auth.signInTitle": "Welcome back",
+    "auth.signInPrompt": "Already have an account? Sign in",
+    "auth.signUp": "Create account",
+    "auth.signUpTitle": "Create your master account",
+    "auth.signUpPrompt": "Don't have an account? Sign up",
+    "auth.emailInvalid": "Enter a valid email address.",
+    "auth.passwordTooShort": "Password must contain at least 8 characters.",
+    "auth.invalidCredentials":
+      "We could not sign you in. Check your email and password, then try again.",
+    "auth.accountExists": "This email is already registered. Try signing in.",
+    "auth.networkError":
+      "Could not connect. Check your internet connection and try again.",
+    "auth.sessionRestoreFailed":
+      "Your session could not be restored. Sign in again.",
+    "auth.signOutFailed": "Could not sign out. Try again.",
+    "auth.confirmationRequired":
+      "Check your email, confirm your account, then sign in.",
+    "workspace.loadFailedTitle": "We could not load your workspace",
+    "workspace.loadFailedDescription":
+      "Check your internet connection and try again.",
+    "workspace.setupEyebrow": "FIRST SETUP",
+    "workspace.setupTitle": "Set up your workspace",
+    "workspace.setupDescription":
+      "This creates Monday–Sunday availability from 08:00 to 21:00. You can refine it later.",
+    "workspace.namePlaceholder": "Workspace name",
+    "workspace.slugPlaceholder": "Booking link, e.g. anna-nails",
+    "workspace.servicePlaceholder": "First service",
+    "workspace.pricePlaceholder": "Price in CZK",
+    "workspace.setupRequiredFields":
+      "Complete the workspace name, booking link, and service fields.",
+    "workspace.setupFailed":
+      "We could not save the setup. Check the details and try again.",
+    "workspace.setupInvalidSlug":
+      "The booking link can contain only lowercase letters, numbers, and hyphens.",
+    "workspace.setupInvalidService": "Check the service name and price.",
+    "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
+    "workspace.setupSaving": "Saving…",
+    "workspace.setupSave": "Save and continue",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",
