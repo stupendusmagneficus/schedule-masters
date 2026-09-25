@@ -68,6 +68,19 @@ export type MessageKey =
   | "workspace.scheduleInvalid"
   | "workspace.setupSaving"
   | "workspace.setupSave"
+  | "workspace.setupStepMaster"
+  | "workspace.setupStepMasterDescription"
+  | "workspace.setupStepService"
+  | "workspace.setupStepServiceDescription"
+  | "workspace.setupStepSchedule"
+  | "workspace.setupStepScheduleDescription"
+  | "workspace.setupCompleteTitle"
+  | "workspace.setupCompleteDescription"
+  | "workspace.setupOpenDashboard"
+  | "workspace.setupOpenBooking"
+  | "workspace.setupNext"
+  | "workspace.setupBack"
+  | "workspace.setupFinish"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -189,6 +202,23 @@ const messages: Record<SupportedLocale, Messages> = {
       "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
     "workspace.setupSaving": "Сохранение…",
     "workspace.setupSave": "Сохранить и продолжить",
+    "workspace.setupStepMaster": "Информация о мастере",
+    "workspace.setupStepMasterDescription":
+      "Настройте имя рабочего пространства и ссылку, по которой клиенты будут записываться.",
+    "workspace.setupStepService": "Первая услуга",
+    "workspace.setupStepServiceDescription":
+      "Добавьте услугу, которую клиенты смогут выбрать при записи.",
+    "workspace.setupStepSchedule": "Рабочие дни и часы",
+    "workspace.setupStepScheduleDescription":
+      "Выберите дни и общий интервал, когда вы принимаете клиентов.",
+    "workspace.setupCompleteTitle": "Всё готово",
+    "workspace.setupCompleteDescription":
+      "Рабочее пространство, первая услуга и расписание созданы. Можно начинать работу.",
+    "workspace.setupOpenDashboard": "Открыть Dashboard",
+    "workspace.setupOpenBooking": "Открыть страницу записи",
+    "workspace.setupNext": "Продолжить",
+    "workspace.setupBack": "Назад",
+    "workspace.setupFinish": "Перейти к Dashboard",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -310,6 +340,23 @@ const messages: Record<SupportedLocale, Messages> = {
       "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
     "workspace.setupSaving": "Ukládání…",
     "workspace.setupSave": "Uložit a pokračovat",
+    "workspace.setupStepMaster": "Informace o mistrovi",
+    "workspace.setupStepMasterDescription":
+      "Nastavte název pracovního prostoru a odkaz, přes který se klienti objednají.",
+    "workspace.setupStepService": "První služba",
+    "workspace.setupStepServiceDescription":
+      "Přidejte službu, kterou si klienti vyberou při rezervaci.",
+    "workspace.setupStepSchedule": "Pracovní dny a hodiny",
+    "workspace.setupStepScheduleDescription":
+      "Vyberte dny a časový interval, kdy přijímáte klienty.",
+    "workspace.setupCompleteTitle": "Vše je připraveno",
+    "workspace.setupCompleteDescription":
+      "Pracovní prostor, první služba a rozvrh byly vytvořeny. Můžete začít pracovat.",
+    "workspace.setupOpenDashboard": "Otevřít Dashboard",
+    "workspace.setupOpenBooking": "Otevřít rezervační stránku",
+    "workspace.setupNext": "Pokračovat",
+    "workspace.setupBack": "Zpět",
+    "workspace.setupFinish": "Přejít na Dashboard",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -431,6 +478,23 @@ const messages: Record<SupportedLocale, Messages> = {
       "Enter time in HH:MM format. The end must be after the start.",
     "workspace.setupSaving": "Saving…",
     "workspace.setupSave": "Save and continue",
+    "workspace.setupStepMaster": "Master details",
+    "workspace.setupStepMasterDescription":
+      "Set the workspace name and the link clients will use to book.",
+    "workspace.setupStepService": "First service",
+    "workspace.setupStepServiceDescription":
+      "Add the service clients will be able to choose when booking.",
+    "workspace.setupStepSchedule": "Working days and hours",
+    "workspace.setupStepScheduleDescription":
+      "Choose the days and time range when you accept clients.",
+    "workspace.setupCompleteTitle": "You're all set",
+    "workspace.setupCompleteDescription":
+      "Your workspace, first service, and schedule are ready. You can start working.",
+    "workspace.setupOpenDashboard": "Open Dashboard",
+    "workspace.setupOpenBooking": "Open booking page",
+    "workspace.setupNext": "Continue",
+    "workspace.setupBack": "Back",
+    "workspace.setupFinish": "Go to Dashboard",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",

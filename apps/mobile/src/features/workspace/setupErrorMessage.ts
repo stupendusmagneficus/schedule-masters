@@ -1,6 +1,21 @@
 import type { MessageKey } from "@schedule-app/i18n";
+import type { SetupValidationError } from "./setupValidation";
 
 type SetupError = { readonly message?: string };
+
+export function getSetupValidationMessageKey(
+  error: SetupValidationError,
+): MessageKey {
+  const messages: Record<SetupValidationError, MessageKey> = {
+    required: "workspace.setupRequiredFields",
+    slug: "workspace.setupInvalidSlug",
+    price: "workspace.priceInvalid",
+    duration: "workspace.durationInvalid",
+    workingDays: "workspace.workingDaysInvalid",
+    schedule: "workspace.scheduleInvalid",
+  };
+  return messages[error];
+}
 
 export function getSetupErrorMessageKey(error: SetupError): MessageKey {
   const message = error.message?.toLowerCase() ?? "";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { validateSetupValues } from "./setupValidation";
+import { validateSetupStep, validateSetupValues } from "./setupValidation";
 
 const validValues = {
   name: "Anna Nails",
@@ -57,5 +57,22 @@ describe("validateSetupValues", () => {
     ["end before start", { startTime: "21:00", endTime: "08:00" }],
   ])("rejects %s", (_label, values) => {
     expect(validateSetupValues({ ...validValues, ...values })).toBe("schedule");
+  });
+});
+
+describe("validateSetupStep", () => {
+  it("validates only the fields owned by the current step", () => {
+    expect(
+      validateSetupStep({ ...validValues, serviceName: "" }, 1),
+    ).toBeNull();
+    expect(validateSetupStep({ ...validValues, serviceName: "" }, 2)).toBe(
+      "required",
+    );
+    expect(
+      validateSetupStep(
+        { ...validValues, startTime: "21:00", endTime: "08:00" },
+        3,
+      ),
+    ).toBe("schedule");
   });
 });
