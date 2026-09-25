@@ -20,7 +20,11 @@ export function SummaryMetrics({ metrics }: SummaryMetricsProps) {
       {metrics.map((metric, index) => (
         <View
           key={metric.id}
-          style={[styles.metric, index > 0 && styles.metricWithDivider]}
+          style={[
+            styles.metric,
+            index > 0 && styles.metricWithDivider,
+            metric.tone === "accent" && styles.accentMetric,
+          ]}
         >
           <Text style={styles.label}>{metric.label}</Text>
           <Text
@@ -38,6 +42,12 @@ export function SummaryMetrics({ metrics }: SummaryMetricsProps) {
 }
 
 const styles = StyleSheet.create({
+  accentMetric: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.surface,
+    margin: -8,
+    padding: 8,
+  },
   accentValue: { color: colors.accentPressed },
   container: {
     backgroundColor: colors.surface,

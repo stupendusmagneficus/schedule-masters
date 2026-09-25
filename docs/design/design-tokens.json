@@ -4,51 +4,55 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "essential-operations",
+    "direction": "executive-product-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#2563EB", "type": "color" },
-      "primaryStrong": { "value": "#1D4ED8", "type": "color" },
-      "primarySoft": { "value": "#EAF2FF", "type": "color" },
-      "action": { "value": "#2563EB", "type": "color" },
-      "actionPressed": { "value": "#1D4ED8", "type": "color" },
+      "primary": { "value": "#334155", "type": "color" },
+      "primaryStrong": { "value": "#1E293B", "type": "color" },
+      "primarySoft": { "value": "#F3E8FF", "type": "color" },
+      "action": { "value": "#1E293B", "type": "color" },
+      "actionPressed": { "value": "#0F172A", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" },
-      "onAction": { "value": "#FFFFFF", "type": "color" }
+      "onAction": { "value": "#FFFFFF", "type": "color" },
+      "pastelLavender": { "value": "#F3E8FF", "type": "color" },
+      "pastelYellow": { "value": "#FEF3C7", "type": "color" },
+      "pastelCyan": { "value": "#CFFAFE", "type": "color" },
+      "pastelPink": { "value": "#FCE7F3", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F3F4F6", "type": "color" },
+      "canvas": { "value": "#F8FAFC", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#EEF1F5", "type": "color" },
-      "sunken": { "value": "#E5E7EB", "type": "color" }
+      "subtle": { "value": "#F1F5F9", "type": "color" },
+      "sunken": { "value": "#E2E8F0", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#111827", "type": "color" },
-      "secondary": { "value": "#667085", "type": "color" },
-      "muted": { "value": "#98A2B3", "type": "color" },
+      "primary": { "value": "#1E293B", "type": "color" },
+      "secondary": { "value": "#64748B", "type": "color" },
+      "muted": { "value": "#94A3B8", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#D8DCE5", "type": "color" },
-      "strong": { "value": "#B8C0CC", "type": "color" },
-      "focus": { "value": "#2563EB", "type": "color" }
+      "default": { "value": "#E2E8F0", "type": "color" },
+      "strong": { "value": "#CBD5E1", "type": "color" },
+      "focus": { "value": "#334155", "type": "color" }
     },
     "status": {
       "success": { "value": "#16803C", "type": "color" },
       "successSoft": { "value": "#E8F6ED", "type": "color" },
       "warning": { "value": "#B7791F", "type": "color" },
       "warningSoft": { "value": "#FFF2D7", "type": "color" },
-      "danger": { "value": "#C43D4B", "type": "color" },
-      "dangerSoft": { "value": "#FBE7E8", "type": "color" },
-      "info": { "value": "#3B82F6", "type": "color" },
-      "infoSoft": { "value": "#EAF2FF", "type": "color" }
+      "danger": { "value": "#B42318", "type": "color" },
+      "dangerSoft": { "value": "#FEE4E2", "type": "color" },
+      "info": { "value": "#334155", "type": "color" },
+      "infoSoft": { "value": "#F3E8FF", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#EAF2FF", "type": "color" },
-      "bookedBorder": { "value": "#2563EB", "type": "color" },
-      "break": { "value": "#EEF1F5", "type": "color" },
-      "breakBorder": { "value": "#B8C0CC", "type": "color" },
+      "booked": { "value": "#F3E8FF", "type": "color" },
+      "bookedBorder": { "value": "#334155", "type": "color" },
+      "break": { "value": "#F1F5F9", "type": "color" },
+      "breakBorder": { "value": "#CBD5E1", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
@@ -94,13 +98,13 @@
   "radius": {
     "sm": { "value": "8px", "type": "dimension" },
     "md": { "value": "999px", "type": "dimension" },
-    "lg": { "value": "20px", "type": "dimension" },
+    "lg": { "value": "16px", "type": "dimension" },
     "pill": { "value": "999px", "type": "dimension" }
   },
   "shadow": {
-    "subtle": { "value": "0 2px 5px rgba(17, 24, 39, 0.04)", "type": "shadow" },
+    "subtle": { "value": "0 2px 5px rgba(15, 23, 42, 0.03)", "type": "shadow" },
     "raised": {
-      "value": "0 8px 24px rgba(17, 24, 39, 0.07), 0 2px 5px rgba(17, 24, 39, 0.04)",
+      "value": "0 12px 28px rgba(15, 23, 42, 0.06), 0 2px 5px rgba(15, 23, 42, 0.03)",
       "type": "shadow"
     }
   },
