@@ -100,6 +100,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   summaryText: { ...typography.body, color: colors.secondaryText },
-  summaryTitle: { ...typography.editorialSection, color: colors.primaryText },
-  title: { ...typography.editorialHeading, color: colors.primaryText },
+  summaryTitle: { ...typography.section, color: colors.primaryText },
+  title: { ...typography.heading, color: colors.primaryText },
 });

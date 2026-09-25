@@ -4,55 +4,58 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "github-mobile-inspired-operations",
+    "direction": "premium-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#2D8A62", "type": "color" },
-      "primaryStrong": { "value": "#246B4C", "type": "color" },
-      "primarySoft": { "value": "#E1F3EA", "type": "color" },
-      "onPrimary": { "value": "#FFFFFF", "type": "color" }
+      "primary": { "value": "#C9284B", "type": "color" },
+      "primaryStrong": { "value": "#9F1F3B", "type": "color" },
+      "primarySoft": { "value": "#FBE8EC", "type": "color" },
+      "action": { "value": "#1A1B20", "type": "color" },
+      "actionPressed": { "value": "#3A3B42", "type": "color" },
+      "onPrimary": { "value": "#FFFFFF", "type": "color" },
+      "onAction": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F7F8F5", "type": "color" },
+      "canvas": { "value": "#F5F5F7", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#F1F4F0", "type": "color" },
-      "sunken": { "value": "#E9EFEA", "type": "color" }
+      "subtle": { "value": "#F0F0F3", "type": "color" },
+      "sunken": { "value": "#E9E9EE", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#202A24", "type": "color" },
-      "secondary": { "value": "#5F6E65", "type": "color" },
-      "muted": { "value": "#718078", "type": "color" },
+      "primary": { "value": "#1A1B20", "type": "color" },
+      "secondary": { "value": "#71727A", "type": "color" },
+      "muted": { "value": "#8A8B93", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#D9E2DC", "type": "color" },
-      "strong": { "value": "#B8C6BC", "type": "color" },
-      "focus": { "value": "#2D8A62", "type": "color" }
+      "default": { "value": "#D9D9E0", "type": "color" },
+      "strong": { "value": "#BFC0C8", "type": "color" },
+      "focus": { "value": "#C9284B", "type": "color" }
     },
     "status": {
-      "success": { "value": "#2D8A62", "type": "color" },
-      "successSoft": { "value": "#E1F3EA", "type": "color" },
+      "success": { "value": "#16803C", "type": "color" },
+      "successSoft": { "value": "#E8F6ED", "type": "color" },
       "warning": { "value": "#B7791F", "type": "color" },
       "warningSoft": { "value": "#FFF2D7", "type": "color" },
       "danger": { "value": "#C43D4B", "type": "color" },
       "dangerSoft": { "value": "#FBE7E8", "type": "color" },
-      "info": { "value": "#3F7593", "type": "color" },
-      "infoSoft": { "value": "#E8F0F4", "type": "color" }
+      "info": { "value": "#3B82F6", "type": "color" },
+      "infoSoft": { "value": "#EAF2FF", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#E1F3EA", "type": "color" },
-      "bookedBorder": { "value": "#2D8A62", "type": "color" },
-      "break": { "value": "#E9EFEA", "type": "color" },
-      "breakBorder": { "value": "#91A097", "type": "color" },
+      "booked": { "value": "#FBE8EC", "type": "color" },
+      "bookedBorder": { "value": "#C9284B", "type": "color" },
+      "break": { "value": "#F0F0F3", "type": "color" },
+      "breakBorder": { "value": "#BFC0C8", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
   "typography": {
     "fontFamily": {
       "sans": {
-        "value": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", ui-sans-serif, system-ui, sans-serif",
+        "value": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", Inter, ui-sans-serif, system-ui, sans-serif",
         "type": "fontFamily"
       }
     },
@@ -63,12 +66,12 @@
       "bold": { "value": 700, "type": "fontWeight" }
     },
     "fontSize": {
-      "caption": { "value": "13px", "type": "dimension" },
-      "label": { "value": "15px", "type": "dimension" },
-      "body": { "value": "17px", "type": "dimension" },
+      "caption": { "value": "12px", "type": "dimension" },
+      "label": { "value": "14px", "type": "dimension" },
+      "body": { "value": "16px", "type": "dimension" },
       "subtitle": { "value": "20px", "type": "dimension" },
-      "heading": { "value": "28px", "type": "dimension" },
-      "display": { "value": "34px", "type": "dimension" }
+      "heading": { "value": "30px", "type": "dimension" },
+      "display": { "value": "36px", "type": "dimension" }
     },
     "lineHeight": {
       "tight": { "value": 1.2, "type": "number" },
@@ -90,13 +93,13 @@
   },
   "radius": {
     "sm": { "value": "8px", "type": "dimension" },
-    "md": { "value": "18px", "type": "dimension" },
+    "md": { "value": "10px", "type": "dimension" },
     "lg": { "value": "16px", "type": "dimension" },
     "pill": { "value": "999px", "type": "dimension" }
   },
   "shadow": {
-    "subtle": { "value": "0 1px 2px rgba(32, 42, 36, 0.04)", "type": "shadow" },
-    "raised": { "value": "0 6px 18px rgba(32, 42, 36, 0.06)", "type": "shadow" }
+    "subtle": { "value": "0 1px 2px rgba(26, 27, 32, 0.04)", "type": "shadow" },
+    "raised": { "value": "0 6px 18px rgba(26, 27, 32, 0.06)", "type": "shadow" }
   },
   "motion": {
     "micro": { "value": "160ms", "type": "duration" },

@@ -148,5 +148,5 @@ const styles = StyleSheet.create({
   },
   sectionLabel: { ...typography.label, color: colors.primaryText },
   stepDescription: { ...typography.body, color: colors.secondaryText },
-  stepTitle: { ...typography.editorialSection, color: colors.primaryText },
+  stepTitle: { ...typography.section, color: colors.primaryText },
 });

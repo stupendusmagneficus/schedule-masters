@@ -161,7 +161,7 @@ export function SetupScreen({ locale, onComplete, userId }: SetupScreenProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.hero}>
+      <View style={styles.header}>
         <Text style={styles.eyebrow}>{t("workspace.setupEyebrow")}</Text>
         <Text style={styles.title}>
           {t(
@@ -171,7 +171,7 @@ export function SetupScreen({ locale, onComplete, userId }: SetupScreenProps) {
           )}
         </Text>
         {step < 4 && (
-          <Text style={styles.heroDescription}>
+          <Text style={styles.description}>
             {t("workspace.setupDescription")}
           </Text>
         )}
@@ -314,14 +314,9 @@ const styles = StyleSheet.create({
   },
   disabledButton: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
-  eyebrow: { color: colors.action, ...typography.eyebrow },
-  hero: {
-    backgroundColor: colors.accent,
-    borderRadius: radii.surface,
-    gap: 12,
-    padding: 24,
-  },
-  heroDescription: { ...typography.body, color: colors.heroMuted },
+  description: { ...typography.body, color: colors.secondaryText },
+  eyebrow: { color: colors.accent, ...typography.eyebrow },
+  header: { gap: 12, paddingHorizontal: 4 },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.action,
@@ -338,15 +333,15 @@ const styles = StyleSheet.create({
   },
   progress: {
     ...typography.caption,
-    color: colors.heroMuted,
+    color: colors.primaryText,
     fontWeight: "700",
   },
   progressPill: {
     alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.subtleSurface,
     borderRadius: radii.pill,
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  title: { ...typography.editorialHeading, color: colors.inverse },
+  title: { ...typography.display, color: colors.primaryText },
 });

@@ -1,6 +1,6 @@
 :root {
-  color: #202725;
-  background: #f5f5f2;
+  color: #1a1b20;
+  background: #f5f5f7;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     sans-serif;
@@ -32,9 +32,9 @@ button {
 .booking-panel {
   width: min(100%, 720px);
   background: #fff;
-  border: 1px solid #dee2de;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(32, 39, 37, 0.06);
+  border: 1px solid #d9d9e0;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(26, 27, 32, 0.06);
   padding: 28px;
 }
 .booking-header {
@@ -43,10 +43,10 @@ button {
   justify-content: space-between;
   gap: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid #dee2de;
+  border-bottom: 1px solid #d9d9e0;
 }
 .eyebrow {
-  color: #2f8f7b;
+  color: #c9284b;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -72,7 +72,7 @@ h2 {
 }
 .required-hint,
 .optional-label {
-  color: #75807c;
+  color: #71727a;
   font-size: 12px;
   font-weight: 400;
 }
@@ -80,13 +80,13 @@ h2 {
   margin: -4px 0 14px;
 }
 .muted-copy {
-  color: #75807c;
+  color: #71727a;
   line-height: 1.5;
   margin-top: 8px;
 }
 .booking-section {
   padding: 24px 0;
-  border-bottom: 1px solid #dee2de;
+  border-bottom: 1px solid #d9d9e0;
 }
 .service-list,
 .slot-list {
@@ -97,10 +97,10 @@ h2 {
 .slot-option {
   min-height: 52px;
   text-align: left;
-  border: 1px solid #dee2de;
-  border-radius: 8px;
+  border: 1px solid #d9d9e0;
+  border-radius: 10px;
   background: #fff;
-  color: #202725;
+  color: #1a1b20;
   padding: 12px 14px;
 }
 .service-option {
@@ -112,16 +112,16 @@ h2 {
 .service-option:hover,
 .slot-option:hover,
 .language-button:hover {
-  border-color: #2f8f7b;
+  border-color: #c9284b;
 }
 .service-option.selected,
 .slot-option.selected {
-  border-color: #2f8f7b;
-  background: #ddf1eb;
+  border-color: #c9284b;
+  background: #fbe8ec;
 }
 .service-option small {
   display: block;
-  color: #75807c;
+  color: #71727a;
   margin-top: 4px;
 }
 .service-price {
@@ -132,10 +132,10 @@ h2 {
 input,
 textarea {
   width: 100%;
-  border: 1px solid #dee2de;
-  border-radius: 8px;
-  background: #fafaf8;
-  color: #202725;
+  border: 1px solid #d9d9e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #1a1b20;
   min-height: 44px;
   padding: 10px 12px;
 }
@@ -143,7 +143,7 @@ textarea {
   max-width: 240px;
 }
 .date-context {
-  color: #4f5c58;
+  color: #555761;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.45;
@@ -152,9 +152,9 @@ textarea {
 input:focus,
 textarea:focus,
 button:focus-visible {
-  outline: 3px solid rgba(47, 143, 123, 0.25);
+  outline: 3px solid rgba(201, 40, 75, 0.2);
   outline-offset: 2px;
-  border-color: #2f8f7b;
+  border-color: #c9284b;
 }
 .slot-list {
   grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
@@ -169,7 +169,7 @@ button:focus-visible {
 .form-grid label {
   display: grid;
   gap: 6px;
-  color: #4f5c58;
+  color: #555761;
   font-size: 14px;
   font-weight: 600;
 }
@@ -181,13 +181,13 @@ textarea {
   min-height: 48px;
   border: 0;
   border-radius: 8px;
-  background: #2f8f7b;
+  background: #1a1b20;
   color: #fff;
   font-weight: 700;
   padding: 0 18px;
 }
 .primary-button:hover {
-  background: #217464;
+  background: #3a3b42;
 }
 .primary-button:disabled {
   cursor: wait;
@@ -196,16 +196,16 @@ textarea {
 .secondary-button {
   min-height: 40px;
   margin-top: 10px;
-  border: 1px solid #2f8f7b;
-  border-radius: 8px;
+  border: 1px solid #c9284b;
+  border-radius: 10px;
   background: #fff;
-  color: #217464;
+  color: #c9284b;
   font-size: 14px;
   font-weight: 700;
   padding: 0 12px;
 }
 .secondary-button:hover {
-  background: #ddf1eb;
+  background: #fbe8ec;
 }
 .confirmation-close-button {
   justify-self: center;
@@ -224,16 +224,16 @@ textarea {
 .language-button {
   min-width: 44px;
   min-height: 36px;
-  border: 1px solid #dee2de;
+  border: 1px solid #d9d9e0;
   border-radius: 999px;
   background: #fff;
-  color: #4f5c58;
+  color: #555761;
   font-size: 12px;
   font-weight: 700;
 }
 .language-button.selected {
-  background: #202725;
-  border-color: #202725;
+  background: #1a1b20;
+  border-color: #1a1b20;
   color: #fff;
 }
 .empty-state,
@@ -242,15 +242,15 @@ textarea {
   padding: 12px;
 }
 .empty-state {
-  background: #fafaf8;
-  color: #75807c;
+  background: #f0f0f3;
+  color: #71727a;
 }
 .empty-state p {
   line-height: 1.45;
 }
 .error-state {
-  background: #fbe5e3;
-  color: #8d3636;
+  background: #fbe8ec;
+  color: #9f1f3b;
   margin-top: 18px;
 }
 .confirmation-panel {
@@ -265,14 +265,14 @@ textarea {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #ddf1eb;
-  color: #217464;
+  background: #fbe8ec;
+  color: #c9284b;
   font-size: 30px;
   font-weight: 700;
   margin-bottom: 20px;
 }
 .confirmation-copy {
-  color: #4f5c58;
+  color: #71727a;
   margin: 12px 0 24px;
 }
 @media (max-width: 560px) {
