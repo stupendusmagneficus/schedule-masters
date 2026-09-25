@@ -11,6 +11,10 @@ export function getAuthErrorMessageKey(error: AuthError): MessageKey {
     return "auth.accountExists";
   }
 
+  if (error.code === "email_not_confirmed") {
+    return "auth.emailNotConfirmed";
+  }
+
   const message = error.message.toLowerCase();
   if (message.includes("network") || message.includes("fetch")) {
     return "auth.networkError";

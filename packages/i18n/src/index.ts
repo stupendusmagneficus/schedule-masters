@@ -37,7 +37,11 @@ export type MessageKey =
   | "auth.networkError"
   | "auth.sessionRestoreFailed"
   | "auth.signOutFailed"
-  | "auth.confirmationRequired"
+  | "auth.confirmationTitle"
+  | "auth.confirmationDescription"
+  | "auth.confirmationEmailLabel"
+  | "auth.confirmationBackToSignIn"
+  | "auth.emailNotConfirmed"
   | "workspace.loadFailedTitle"
   | "workspace.loadFailedDescription"
   | "workspace.setupEyebrow"
@@ -163,8 +167,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.sessionRestoreFailed":
       "Не удалось восстановить сессию. Войдите ещё раз.",
     "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
-    "auth.confirmationRequired":
-      "Проверьте email и подтвердите аккаунт, затем войдите.",
+    "auth.confirmationTitle": "Подтвердите ваш email",
+    "auth.confirmationDescription":
+      "Мы отправили ссылку для подтверждения. Откройте письмо, подтвердите аккаунт и вернитесь в приложение.",
+    "auth.confirmationEmailLabel": "Письмо отправлено на",
+    "auth.confirmationBackToSignIn": "Перейти ко входу",
+    "auth.emailNotConfirmed":
+      "Email ещё не подтверждён. Откройте ссылку из письма и попробуйте войти снова.",
     "workspace.loadFailedTitle": "Не удалось загрузить рабочее пространство",
     "workspace.loadFailedDescription":
       "Проверьте подключение к интернету и повторите попытку.",
@@ -302,8 +311,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.sessionRestoreFailed":
       "Relaci se nepodařilo obnovit. Přihlaste se znovu.",
     "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
-    "auth.confirmationRequired":
-      "Zkontrolujte e-mail, potvrďte účet a poté se přihlaste.",
+    "auth.confirmationTitle": "Potvrďte svůj e-mail",
+    "auth.confirmationDescription":
+      "Odeslali jsme vám potvrzovací odkaz. Otevřete e-mail, potvrďte účet a vraťte se do aplikace.",
+    "auth.confirmationEmailLabel": "E-mail byl odeslán na",
+    "auth.confirmationBackToSignIn": "Přejít k přihlášení",
+    "auth.emailNotConfirmed":
+      "E-mail ještě není potvrzený. Otevřete odkaz z e-mailu a zkuste se přihlásit znovu.",
     "workspace.loadFailedTitle": "Pracovní prostor se nepodařilo načíst",
     "workspace.loadFailedDescription":
       "Zkontrolujte připojení k internetu a zkuste to znovu.",
@@ -439,8 +453,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.sessionRestoreFailed":
       "Your session could not be restored. Sign in again.",
     "auth.signOutFailed": "Could not sign out. Try again.",
-    "auth.confirmationRequired":
-      "Check your email, confirm your account, then sign in.",
+    "auth.confirmationTitle": "Confirm your email",
+    "auth.confirmationDescription":
+      "We sent you a confirmation link. Open the email, confirm your account, then return to the app.",
+    "auth.confirmationEmailLabel": "Confirmation email sent to",
+    "auth.confirmationBackToSignIn": "Go to sign in",
+    "auth.emailNotConfirmed":
+      "Your email is not confirmed yet. Open the link in the email and try signing in again.",
     "workspace.loadFailedTitle": "We could not load your workspace",
     "workspace.loadFailedDescription":
       "Check your internet connection and try again.",

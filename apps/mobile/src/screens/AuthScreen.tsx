@@ -4,10 +4,12 @@ import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AuthForm } from "../components/AuthForm";
+import { EmailConfirmationScreen } from "../components/EmailConfirmationScreen";
 import { LocalePicker } from "../components/LocalePicker";
 import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
 import { type AuthMode, authenticate } from "../features/auth/authentication";
 import type { AuthNotice } from "../features/auth/authNotice";
+import { isEmailConfirmationRequired } from "../features/auth/emailConfirmation";
 import {
   type AuthField,
   type AuthFieldTouchState,
@@ -26,6 +28,13 @@ type AuthScreenProps = {
   readonly sessionRestoreFailed: boolean;
 };
 
+type ConfirmationState = {
+  readonly descriptionKey:
+    | "auth.confirmationDescription"
+    | "auth.emailNotConfirmed";
+  readonly email: string;
+};
+
 export function AuthScreen({
   initialMode,
   locale,
@@ -41,6 +50,9 @@ export function AuthScreen({
     email: false,
     password: false,
   });
+  const [confirmation, setConfirmation] = useState<ConfirmationState | null>(
+    null,
+  );
   const [notice, setNotice] = useState<AuthNotice | null>(null);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const errors = useMemo(
@@ -50,6 +62,7 @@ export function AuthScreen({
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
+    setConfirmation(null);
     setNotice(null);
     setTouchedFields({ email: false, password: false });
   }
@@ -72,6 +85,16 @@ export function AuthScreen({
     }
 
     if (result.kind === "requestError") {
+      if (isEmailConfirmationRequired(result.error)) {
+        setPassword("");
+        setMode("signIn");
+        setConfirmation({
+          descriptionKey: "auth.emailNotConfirmed",
+          email: email.trim(),
+        });
+        return;
+      }
+
       setNotice({
         message: t(getAuthErrorMessageKey(result.error)),
         tone: "error",
@@ -83,7 +106,10 @@ export function AuthScreen({
       analytics.track(analyticsEvents.accountSignedUp);
       setPassword("");
       setMode("signIn");
-      setNotice({ message: t("auth.confirmationRequired"), tone: "info" });
+      setConfirmation({
+        descriptionKey: "auth.confirmationDescription",
+        email: email.trim(),
+      });
       return;
     }
 
@@ -103,28 +129,44 @@ export function AuthScreen({
         <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
       </View>
       <Text style={styles.eyebrow}>{t("common.appName")}</Text>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{t("mobile.description")}</Text>
-      {sessionRestoreFailed && (
-        <Text accessibilityRole="alert" style={styles.restoreError}>
-          {t("auth.sessionRestoreFailed")}
-        </Text>
+      {confirmation ? (
+        <EmailConfirmationScreen
+          descriptionKey={confirmation.descriptionKey}
+          email={confirmation.email}
+          onBackToSignIn={() => {
+            setConfirmation(null);
+            setMode("signIn");
+            setNotice(null);
+            setTouchedFields({ email: false, password: false });
+          }}
+          t={t}
+        />
+      ) : (
+        <>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.description}>{t("mobile.description")}</Text>
+          {sessionRestoreFailed && (
+            <Text accessibilityRole="alert" style={styles.restoreError}>
+              {t("auth.sessionRestoreFailed")}
+            </Text>
+          )}
+          <AuthForm
+            busy={busy}
+            email={email}
+            errors={errors}
+            mode={mode}
+            notice={notice ?? undefined}
+            onEmailBlur={() => touchField("email")}
+            onEmailChange={setEmail}
+            onModeChange={changeMode}
+            onPasswordBlur={() => touchField("password")}
+            onPasswordChange={setPassword}
+            onSubmit={() => void submit()}
+            password={password}
+            t={t}
+          />
+        </>
       )}
-      <AuthForm
-        busy={busy}
-        email={email}
-        errors={errors}
-        mode={mode}
-        notice={notice ?? undefined}
-        onEmailBlur={() => touchField("email")}
-        onEmailChange={setEmail}
-        onModeChange={changeMode}
-        onPasswordBlur={() => touchField("password")}
-        onPasswordChange={setPassword}
-        onSubmit={() => void submit()}
-        password={password}
-        t={t}
-      />
     </ScrollView>
   );
 }
