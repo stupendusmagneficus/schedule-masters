@@ -1,5 +1,7 @@
-import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { type ComponentProps, type ComponentType, useState } from "react";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { type ComponentProps, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -23,19 +25,6 @@ type DateTimePickerFieldProps = {
 type WebPickerInputProps = ComponentProps<typeof TextInput> & {
   type: "date" | "time";
 };
-
-type NativeDateTimePickerProps = {
-  display: "spinner";
-  mode: "date" | "time";
-  onChange: (event: DateTimePickerEvent, selectedDate?: Date) => void;
-  value: Date;
-};
-
-const NativeDateTimePicker =
-  Platform.OS === "web"
-    ? null
-    : (require("@react-native-community/datetimepicker")
-        .default as ComponentType<NativeDateTimePickerProps>);
 
 export function DateTimePickerField({
   label,
@@ -84,8 +73,8 @@ export function DateTimePickerField({
           {value || placeholder}
         </Text>
       </Pressable>
-      {isOpen && NativeDateTimePicker ? (
-        <NativeDateTimePicker
+      {isOpen ? (
+        <DateTimePicker
           display="spinner"
           mode={mode}
           onChange={handleChange}
