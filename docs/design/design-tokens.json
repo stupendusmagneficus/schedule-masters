@@ -4,35 +4,35 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "premium-operations",
+    "direction": "essential-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#C9284B", "type": "color" },
-      "primaryStrong": { "value": "#9F1F3B", "type": "color" },
-      "primarySoft": { "value": "#FBE8EC", "type": "color" },
-      "action": { "value": "#1A1B20", "type": "color" },
-      "actionPressed": { "value": "#3A3B42", "type": "color" },
+      "primary": { "value": "#2563EB", "type": "color" },
+      "primaryStrong": { "value": "#1D4ED8", "type": "color" },
+      "primarySoft": { "value": "#EAF2FF", "type": "color" },
+      "action": { "value": "#2563EB", "type": "color" },
+      "actionPressed": { "value": "#1D4ED8", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" },
       "onAction": { "value": "#FFFFFF", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F5F5F7", "type": "color" },
+      "canvas": { "value": "#F3F4F6", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#F0F0F3", "type": "color" },
-      "sunken": { "value": "#E9E9EE", "type": "color" }
+      "subtle": { "value": "#EEF1F5", "type": "color" },
+      "sunken": { "value": "#E5E7EB", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#1A1B20", "type": "color" },
-      "secondary": { "value": "#71727A", "type": "color" },
-      "muted": { "value": "#8A8B93", "type": "color" },
+      "primary": { "value": "#111827", "type": "color" },
+      "secondary": { "value": "#667085", "type": "color" },
+      "muted": { "value": "#98A2B3", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#D9D9E0", "type": "color" },
-      "strong": { "value": "#BFC0C8", "type": "color" },
-      "focus": { "value": "#C9284B", "type": "color" }
+      "default": { "value": "#D8DCE5", "type": "color" },
+      "strong": { "value": "#B8C0CC", "type": "color" },
+      "focus": { "value": "#2563EB", "type": "color" }
     },
     "status": {
       "success": { "value": "#16803C", "type": "color" },
@@ -45,10 +45,10 @@
       "infoSoft": { "value": "#EAF2FF", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#FBE8EC", "type": "color" },
-      "bookedBorder": { "value": "#C9284B", "type": "color" },
-      "break": { "value": "#F0F0F3", "type": "color" },
-      "breakBorder": { "value": "#BFC0C8", "type": "color" },
+      "booked": { "value": "#EAF2FF", "type": "color" },
+      "bookedBorder": { "value": "#2563EB", "type": "color" },
+      "break": { "value": "#EEF1F5", "type": "color" },
+      "breakBorder": { "value": "#B8C0CC", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
@@ -93,13 +93,16 @@
   },
   "radius": {
     "sm": { "value": "8px", "type": "dimension" },
-    "md": { "value": "10px", "type": "dimension" },
-    "lg": { "value": "16px", "type": "dimension" },
+    "md": { "value": "999px", "type": "dimension" },
+    "lg": { "value": "20px", "type": "dimension" },
     "pill": { "value": "999px", "type": "dimension" }
   },
   "shadow": {
-    "subtle": { "value": "0 1px 2px rgba(26, 27, 32, 0.04)", "type": "shadow" },
-    "raised": { "value": "0 6px 18px rgba(26, 27, 32, 0.06)", "type": "shadow" }
+    "subtle": { "value": "0 2px 5px rgba(17, 24, 39, 0.04)", "type": "shadow" },
+    "raised": {
+      "value": "0 8px 24px rgba(17, 24, 39, 0.07), 0 2px 5px rgba(17, 24, 39, 0.04)",
+      "type": "shadow"
+    }
   },
   "motion": {
     "micro": { "value": "160ms", "type": "duration" },
