@@ -9,13 +9,13 @@ import {
   TextInput,
   View,
 } from "react-native";
-
 import {
   type PersonalBlockDraft,
   validatePersonalBlockDraft,
 } from "../features/availability/personalBlocks";
 import { colors, radii, shadows } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { DateTimePickerField } from "./DateTimePickerField";
 
 type PersonalBlockModalProps = {
   readonly error: string | null;
@@ -79,19 +79,19 @@ export function PersonalBlockModal({
             {t("mobile.personalBlockDescription")}
           </Text>
 
-          <Field
+          <DateTimePickerField
             label={t("mobile.personalBlockDate")}
-            onChangeText={(date) =>
-              setDraft((current) => ({ ...current, date }))
-            }
+            mode="date"
+            onChange={(date) => setDraft((current) => ({ ...current, date }))}
             placeholder={t("mobile.personalBlockDatePlaceholder")}
             value={draft.date}
           />
           <View style={styles.timeRow}>
             <View style={styles.timeField}>
-              <Field
+              <DateTimePickerField
                 label={t("mobile.personalBlockStart")}
-                onChangeText={(startTime) =>
+                mode="time"
+                onChange={(startTime) =>
                   setDraft((current) => ({ ...current, startTime }))
                 }
                 placeholder={t("mobile.personalBlockTimePlaceholder")}
@@ -99,9 +99,10 @@ export function PersonalBlockModal({
               />
             </View>
             <View style={styles.timeField}>
-              <Field
+              <DateTimePickerField
                 label={t("mobile.personalBlockEnd")}
-                onChangeText={(endTime) =>
+                mode="time"
+                onChange={(endTime) =>
                   setDraft((current) => ({ ...current, endTime }))
                 }
                 placeholder={t("mobile.personalBlockTimePlaceholder")}
