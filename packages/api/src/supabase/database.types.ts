@@ -651,6 +651,7 @@ export type Database = {
           p_service_name: string
           p_slug: string
           p_start_local_time: string
+          p_working_days: number[]
         }
         Returns: Json
       }

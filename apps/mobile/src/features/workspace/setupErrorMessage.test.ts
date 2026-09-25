@@ -9,7 +9,20 @@ describe("getSetupErrorMessageKey", () => {
     ).toBe("workspace.setupInvalidSlug");
     expect(
       getSetupErrorMessageKey({ message: "Service duration is invalid" }),
-    ).toBe("workspace.setupInvalidService");
+    ).toBe("workspace.durationInvalid");
+  });
+
+  it("maps schedule errors", () => {
+    expect(
+      getSetupErrorMessageKey({
+        message: "Working day end must be after start",
+      }),
+    ).toBe("workspace.scheduleInvalid");
+    expect(
+      getSetupErrorMessageKey({
+        message: "At least one working day is required",
+      }),
+    ).toBe("workspace.workingDaysInvalid");
   });
 
   it("hides unknown provider errors behind a safe message", () => {
