@@ -104,6 +104,24 @@ export type MessageKey =
   | "mobile.workingHours"
   | "mobile.publicBookingLink"
   | "mobile.publicBookingDescription"
+  | "mobile.personalBlocks"
+  | "mobile.personalBlockEmpty"
+  | "mobile.personalBlockTitle"
+  | "mobile.personalBlockDescription"
+  | "mobile.personalBlockDate"
+  | "mobile.personalBlockDatePlaceholder"
+  | "mobile.personalBlockDateInvalid"
+  | "mobile.personalBlockStart"
+  | "mobile.personalBlockEnd"
+  | "mobile.personalBlockTimePlaceholder"
+  | "mobile.personalBlockTimeInvalid"
+  | "mobile.personalBlockEndBeforeStart"
+  | "mobile.personalBlockReason"
+  | "mobile.personalBlockReasonPlaceholder"
+  | "mobile.personalBlockCreate"
+  | "mobile.personalBlockAdd"
+  | "mobile.personalBlockDelete"
+  | "mobile.personalBlockOverlap"
   | "mobile.signOut"
   | "booking.description"
   | "booking.chooseService"
@@ -244,6 +262,27 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingLink": "Публичная ссылка на запись",
     "mobile.publicBookingDescription":
       "Клиенты могут выбрать услугу и свободное время.",
+    "mobile.personalBlocks": "Личные блоки",
+    "mobile.personalBlockEmpty": "Личных блоков на ближайшие дни нет.",
+    "mobile.personalBlockTitle": "Закрыть время",
+    "mobile.personalBlockDescription":
+      "Добавьте перерыв или личное дело. Это время исчезнет из доступных окон.",
+    "mobile.personalBlockDate": "Дата",
+    "mobile.personalBlockDatePlaceholder": "ГГГГ-ММ-ДД",
+    "mobile.personalBlockDateInvalid": "Укажите дату в формате ГГГГ-ММ-ДД.",
+    "mobile.personalBlockStart": "Начало",
+    "mobile.personalBlockEnd": "Конец",
+    "mobile.personalBlockTimePlaceholder": "ЧЧ:ММ",
+    "mobile.personalBlockTimeInvalid": "Укажите время в формате ЧЧ:ММ.",
+    "mobile.personalBlockEndBeforeStart":
+      "Время окончания должно быть позже начала.",
+    "mobile.personalBlockReason": "Название или причина",
+    "mobile.personalBlockReasonPlaceholder": "Например, обед",
+    "mobile.personalBlockCreate": "Закрыть время",
+    "mobile.personalBlockAdd": "Добавить перерыв",
+    "mobile.personalBlockDelete": "Удалить",
+    "mobile.personalBlockOverlap":
+      "Это время пересекается с существующей записью или блоком.",
     "mobile.signOut": "Выйти",
     "booking.description": "Страница онлайн-записи готова к работе.",
     "booking.chooseService": "Выберите услугу",
@@ -382,6 +421,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingLink": "Veřejný odkaz pro rezervace",
     "mobile.publicBookingDescription":
       "Klienti si mohou vybrat službu a volný termín.",
+    "mobile.personalBlocks": "Osobní bloky",
+    "mobile.personalBlockEmpty": "Na nejbližší dny nemáte žádné osobní bloky.",
+    "mobile.personalBlockTitle": "Uzavřít čas",
+    "mobile.personalBlockDescription":
+      "Přidejte pauzu nebo osobní záležitost. Čas zmizí z volných termínů.",
+    "mobile.personalBlockDate": "Datum",
+    "mobile.personalBlockDatePlaceholder": "RRRR-MM-DD",
+    "mobile.personalBlockDateInvalid": "Zadejte datum ve formátu RRRR-MM-DD.",
+    "mobile.personalBlockStart": "Začátek",
+    "mobile.personalBlockEnd": "Konec",
+    "mobile.personalBlockTimePlaceholder": "HH:MM",
+    "mobile.personalBlockTimeInvalid": "Zadejte čas ve formátu HH:MM.",
+    "mobile.personalBlockEndBeforeStart": "Konec musí být později než začátek.",
+    "mobile.personalBlockReason": "Název nebo důvod",
+    "mobile.personalBlockReasonPlaceholder": "Například oběd",
+    "mobile.personalBlockCreate": "Uzavřít čas",
+    "mobile.personalBlockAdd": "Přidat pauzu",
+    "mobile.personalBlockDelete": "Smazat",
+    "mobile.personalBlockOverlap":
+      "Čas se překrývá s existující rezervací nebo blokem.",
     "mobile.signOut": "Odhlásit se",
     "booking.description": "Stránka online rezervací je připravena.",
     "booking.chooseService": "Vyberte službu",
@@ -520,6 +579,28 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingLink": "Public booking link",
     "mobile.publicBookingDescription":
       "Clients can choose a service and available time.",
+    "mobile.personalBlocks": "Personal blocks",
+    "mobile.personalBlockEmpty":
+      "There are no personal blocks in the next few days.",
+    "mobile.personalBlockTitle": "Block time",
+    "mobile.personalBlockDescription":
+      "Add a break or personal task. This time will disappear from available slots.",
+    "mobile.personalBlockDate": "Date",
+    "mobile.personalBlockDatePlaceholder": "YYYY-MM-DD",
+    "mobile.personalBlockDateInvalid": "Enter a date in YYYY-MM-DD format.",
+    "mobile.personalBlockStart": "Start",
+    "mobile.personalBlockEnd": "End",
+    "mobile.personalBlockTimePlaceholder": "HH:MM",
+    "mobile.personalBlockTimeInvalid": "Enter time in HH:MM format.",
+    "mobile.personalBlockEndBeforeStart":
+      "End time must be later than start time.",
+    "mobile.personalBlockReason": "Name or reason",
+    "mobile.personalBlockReasonPlaceholder": "For example, lunch",
+    "mobile.personalBlockCreate": "Block time",
+    "mobile.personalBlockAdd": "Add break",
+    "mobile.personalBlockDelete": "Delete",
+    "mobile.personalBlockOverlap":
+      "This time overlaps an existing booking or block.",
     "mobile.signOut": "Sign out",
     "booking.description": "The online booking page is ready.",
     "booking.chooseService": "Choose a service",
