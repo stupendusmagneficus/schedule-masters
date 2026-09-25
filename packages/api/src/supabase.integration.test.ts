@@ -174,6 +174,68 @@ describe("Supabase public booking contract", () => {
         throw new Error("Cross-workspace fixtures were not created");
       }
 
+      const block = await userA.client.rpc("create_master_availability_block", {
+        p_date: "2030-02-05",
+        p_end_local_time: "13:00",
+        p_reason: "Lunch",
+        p_start_local_time: "12:00",
+        p_workspace_id: workspaceA,
+      });
+      expect(block.error).toBeNull();
+
+      const blockId = (block.data as { id?: string } | null)?.id;
+      expect(blockId).toEqual(expect.any(String));
+
+      const listedBlocks = await userA.client.rpc(
+        "list_master_availability_blocks",
+        {
+          p_from_date: "2030-02-05",
+          p_to_date: "2030-02-05",
+          p_workspace_id: workspaceA,
+        },
+      );
+      expect(listedBlocks.error).toBeNull();
+      expect(listedBlocks.data).toHaveLength(1);
+      expect(listedBlocks.data?.[0]).toMatchObject({
+        id: blockId,
+        reason: "Lunch",
+      });
+
+      const duplicateBlock = await userA.client.rpc(
+        "create_master_availability_block",
+        {
+          p_date: "2030-02-05",
+          p_end_local_time: "13:30",
+          p_reason: "Overlapping lunch",
+          p_start_local_time: "12:30",
+          p_workspace_id: workspaceA,
+        },
+      );
+      expect(duplicateBlock.error?.message).toContain(
+        "overlaps an existing block",
+      );
+
+      const crossWorkspaceBlock = await userB.client.rpc(
+        "create_master_availability_block",
+        {
+          p_date: "2030-02-05",
+          p_end_local_time: "14:00",
+          p_reason: "Cross-workspace attempt",
+          p_start_local_time: "13:00",
+          p_workspace_id: workspaceA,
+        },
+      );
+      expect(crossWorkspaceBlock.data).toBeNull();
+      expect(crossWorkspaceBlock.error?.message).toContain(
+        "Workspace access denied",
+      );
+
+      const deletedBlock = await userA.client.rpc(
+        "delete_master_availability_block",
+        { p_block_id: blockId as string, p_workspace_id: workspaceA },
+      );
+      expect(deletedBlock.error).toBeNull();
+
       const crossWorkspaceRead = await userA.client
         .from("customers")
         .select("id")

@@ -120,6 +120,7 @@ function AppContent() {
   if (demoMode)
     return (
       <DashboardScreen
+        client={null}
         demoData={demoData}
         isSigningOut={false}
         locale={locale}
@@ -170,6 +171,7 @@ function AppContent() {
     );
   return (
     <DashboardScreen
+      client={supabase}
       isSigningOut={signingOut}
       locale={locale}
       onLocaleChange={setLocale}

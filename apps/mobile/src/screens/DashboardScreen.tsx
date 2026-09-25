@@ -1,4 +1,6 @@
+import type { Database } from "@schedule-app/api";
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
 import { Linking, ScrollView, StyleSheet } from "react-native";
@@ -20,6 +22,7 @@ import { ProfileTab } from "./dashboard/ProfileTab";
 import { TodayTab } from "./dashboard/TodayTab";
 
 type DashboardScreenProps = {
+  readonly client: SupabaseClient<Database> | null;
   readonly isSigningOut: boolean;
   readonly locale: SupportedLocale;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
@@ -31,6 +34,7 @@ type DashboardScreenProps = {
 };
 
 export function DashboardScreen({
+  client,
   isSigningOut,
   locale,
   onLocaleChange,
@@ -65,7 +69,13 @@ export function DashboardScreen({
           />
         )}
         {activeTab === "calendar" && (
-          <CalendarTab demoData={demoData} locale={locale} t={t} />
+          <CalendarTab
+            client={client}
+            demoData={demoData}
+            locale={locale}
+            t={t}
+            workspace={workspace}
+          />
         )}
         {activeTab === "profile" && (
           <ProfileTab

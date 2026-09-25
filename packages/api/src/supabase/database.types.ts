@@ -656,6 +656,16 @@ export type Database = {
         Returns: Json
       }
       check_public_booking_request: { Args: never; Returns: undefined }
+      create_master_availability_block: {
+        Args: {
+          p_date: string
+          p_end_local_time: string
+          p_reason?: string
+          p_start_local_time: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       create_public_booking: {
         Args: {
           p_customer_note?: string
@@ -667,6 +677,10 @@ export type Database = {
           p_slug: string
           p_starts_at: string
         }
+        Returns: Json
+      }
+      delete_master_availability_block: {
+        Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
       }
       enforce_public_booking_quota: {
@@ -684,6 +698,15 @@ export type Database = {
       is_workspace_member: {
         Args: { target_workspace_id: string }
         Returns: boolean
+      }
+      list_master_availability_blocks: {
+        Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
+        Returns: {
+          ends_at: string
+          id: string
+          reason: string
+          starts_at: string
+        }[]
       }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }
