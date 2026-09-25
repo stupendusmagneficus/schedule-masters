@@ -687,6 +687,13 @@ export type Database = {
         Args: { p_workspace_id: string }
         Returns: undefined
       }
+      get_master_available_slots: {
+        Args: { p_date: string; p_service_id: string; p_workspace_id: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string; p_slug: string }
         Returns: {

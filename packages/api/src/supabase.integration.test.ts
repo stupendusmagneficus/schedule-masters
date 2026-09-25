@@ -270,6 +270,211 @@ describe("Supabase public booking contract", () => {
     },
   );
 
+  rlsIntegrationTest(
+    "uses one tenant-scoped availability contract for master and public booking",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const userEmail = `availability-${suffix}@example.test`;
+      const outsiderEmail = `availability-outsider-${suffix}@example.test`;
+      const password = `Test-${suffix}-Password!`;
+      const serviceId = randomUUID();
+
+      const workspace = await admin.from("workspaces").insert({
+        id: workspaceId,
+        name: "Availability Workspace",
+        slug: `availability-${suffix}`,
+        timezone: "Europe/Prague",
+      });
+      expect(workspace.error).toBeNull();
+
+      const user = await createAuthenticatedTestUser({
+        admin,
+        email: userEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const outsider = await createAuthenticatedTestUser({
+        admin,
+        email: outsiderEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+
+      const membership = await admin.from("workspace_members").insert({
+        role: "owner",
+        user_id: user.user.id,
+        workspace_id: workspaceId,
+      });
+      expect(membership.error).toBeNull();
+
+      const bookingLink = await admin.from("booking_links").insert({
+        slug: `availability-${suffix}`,
+        workspace_id: workspaceId,
+      });
+      expect(bookingLink.error).toBeNull();
+
+      const service = await admin
+        .from("services")
+        .insert({
+          buffer_after_minutes: 30,
+          duration_minutes: 60,
+          id: serviceId,
+          name: "Availability service",
+          price_amount: 700,
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      expect(service.error).toBeNull();
+
+      const weekdayRule = await admin
+        .from("availability_rules")
+        .insert({
+          day_of_week: 4,
+          end_local_time: "17:00",
+          start_local_time: "09:00",
+          valid_from: "2030-01-01",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      const dstRule = await admin
+        .from("availability_rules")
+        .insert({
+          day_of_week: 7,
+          end_local_time: "05:00",
+          start_local_time: "00:00",
+          valid_from: "2030-01-01",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      expect(weekdayRule.error).toBeNull();
+      expect(dstRule.error).toBeNull();
+      const weekdayRuleId = weekdayRule.data?.id;
+      if (!weekdayRuleId) {
+        throw new Error("Weekday availability rule was not created");
+      }
+
+      const availabilityBreak = await admin.from("availability_breaks").insert({
+        availability_rule_id: weekdayRuleId,
+        end_local_time: "13:00",
+        start_local_time: "12:00",
+      });
+      expect(availabilityBreak.error).toBeNull();
+
+      const customer = await admin
+        .from("customers")
+        .insert({ name: "Booked customer", workspace_id: workspaceId })
+        .select("id")
+        .single();
+      expect(customer.error).toBeNull();
+      const customerId = customer.data?.id;
+      if (!customerId) {
+        throw new Error("Customer fixture was not created");
+      }
+
+      const appointment = await admin.from("appointments").insert({
+        currency_snapshot: "CZK",
+        customer_id: customerId,
+        duration_minutes_snapshot: 60,
+        ends_at: "2030-03-28T14:00:00.000Z",
+        occupied_range: "[2030-03-28T13:00:00.000Z,2030-03-28T14:00:00.000Z)",
+        price_amount_snapshot: 700,
+        service_id: serviceId,
+        service_name_snapshot: "Availability service",
+        source: "master_created",
+        starts_at: "2030-03-28T13:00:00.000Z",
+        status: "confirmed",
+        workspace_id: workspaceId,
+      });
+      expect(appointment.error).toBeNull();
+
+      const block = await user.client.rpc("create_master_availability_block", {
+        p_date: "2030-03-28",
+        p_end_local_time: "16:00",
+        p_reason: "Personal task",
+        p_start_local_time: "15:00",
+        p_workspace_id: workspaceId,
+      });
+      expect(block.error).toBeNull();
+
+      const masterSlots = await user.client.rpc("get_master_available_slots", {
+        p_date: "2030-03-28",
+        p_service_id: serviceId,
+        p_workspace_id: workspaceId,
+      });
+      expect(masterSlots.error).toBeNull();
+      expect(masterSlots.data?.map((slot) => slot.starts_at)).toContain(
+        "2030-03-28T08:00:00+00:00",
+      );
+      expect(masterSlots.data?.map((slot) => slot.starts_at)).not.toContain(
+        "2030-03-28T11:30:00+00:00",
+      );
+      expect(masterSlots.data?.map((slot) => slot.starts_at)).not.toContain(
+        "2030-03-28T12:30:00+00:00",
+      );
+
+      if (!supabase) {
+        throw new Error("Supabase client is not configured");
+      }
+      const publicSlots = await supabase.rpc("get_public_available_slots", {
+        p_date: "2030-03-28",
+        p_service_id: serviceId,
+        p_slug: `availability-${suffix}`,
+      });
+      expect(publicSlots.error).toBeNull();
+      expect(publicSlots.data).toEqual(masterSlots.data);
+      expect(Object.keys(publicSlots.data?.[0] ?? {}).sort()).toEqual([
+        "ends_at",
+        "starts_at",
+      ]);
+
+      const dstSlots = await user.client.rpc("get_master_available_slots", {
+        p_date: "2030-03-31",
+        p_service_id: serviceId,
+        p_workspace_id: workspaceId,
+      });
+      expect(dstSlots.error).toBeNull();
+      const dstStartTimes = (dstSlots.data ?? []).map((slot) =>
+        new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit",
+          hourCycle: "h23",
+          minute: "2-digit",
+          timeZone: "Europe/Prague",
+        }).format(new Date(slot.starts_at)),
+      );
+      expect(dstStartTimes).not.toContain("02:00");
+
+      const outsiderSlots = await outsider.client.rpc(
+        "get_master_available_slots",
+        {
+          p_date: "2030-03-28",
+          p_service_id: serviceId,
+          p_workspace_id: workspaceId,
+        },
+      );
+      expect(outsiderSlots.data).toBeNull();
+      expect(outsiderSlots.error?.message).toContain("Workspace access denied");
+
+      await admin.from("workspaces").delete().eq("id", workspaceId);
+      await admin.auth.admin.deleteUser(user.user.id);
+      await admin.auth.admin.deleteUser(outsider.user.id);
+    },
+    30_000,
+  );
+
   integrationTest(
     "rejects direct anonymous access to appointments",
     async () => {
