@@ -6,18 +6,19 @@
     <title>Schedule Masters — Design Preview</title>
     <style>
       :root {
-        --canvas: #f7f8f5;
+        --canvas: #f8fafc;
         --raised: #fff;
-        --subtle: #f1f4f0;
-        --ink: #202a24;
-        --muted: #5f6e65;
-        --quiet: #718078;
-        --line: #d9e2dc;
-        --accent: #2d8a62;
-        --accent-dark: #246b4c;
-        --accent-soft: #e1f3ea;
-        --radius: 18px;
-        --shadow: 0 6px 18px rgba(32, 42, 36, 0.06);
+        --subtle: #f1f5f9;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --quiet: #94a3b8;
+        --line: #e2e8f0;
+        --accent: #334155;
+        --accent-dark: #1e293b;
+        --accent-soft: #f3e8ff;
+        --action: #1e293b;
+        --radius: 16px;
+        --shadow: 0 12px 28px rgba(15, 23, 42, 0.06), 0 2px 5px rgba(15, 23, 42, 0.03);
         font-family:
           -apple-system,
           BlinkMacSystemFont,
@@ -107,8 +108,8 @@
       button {
         min-height: 44px;
         border: 0;
-        border-radius: 12px;
-        background: var(--accent);
+        border-radius: 999px;
+        background: var(--action);
         color: #fff;
         padding: 0 16px;
         font-weight: 600;
@@ -250,12 +251,12 @@
         gap: 7px;
         min-height: 44px;
         border-radius: 999px;
-        background: var(--accent);
+        background: var(--action);
         color: #fff;
         padding: 0 14px;
         font-size: 14px;
         font-weight: 700;
-        box-shadow: 0 2px 6px rgba(31, 35, 40, 0.16);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
       }
       .bottom-nav {
         position: absolute;
@@ -269,7 +270,7 @@
         border-radius: 999px;
         background: #fff;
         padding: 4px;
-        box-shadow: 0 2px 6px rgba(31, 35, 40, 0.08);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
       }
       .nav-item {
         display: grid;
@@ -312,8 +313,8 @@
         <div>
           <h1>Schedule Masters</h1>
           <p>
-            GitHub Mobile-inspired information grouping and navigation, adapted
-            for a master’s calm daily workflow.
+            Executive product operations direction with crisp white surfaces,
+            deep slate actions and warm pastel grouping for a master’s daily workflow.
           </p>
         </div>
         <span class="badge">MVP visual direction</span>
@@ -415,7 +416,7 @@
                 <div class="track">
                   <div
                     class="event"
-                    style="background: #e9ebe7; border-left-color: #9aa8a2"
+                    style="background: var(--subtle); border-left-color: var(--line)"
                   >
                     <strong>Break</strong><br /><span class="meta"
                       >Lunch · 60 min</span

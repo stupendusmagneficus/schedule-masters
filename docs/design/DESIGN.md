@@ -6,16 +6,16 @@
 
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
-The approved direction is **GitHub Mobile-inspired operations**: warm-neutral
-surfaces, white information blocks, calm green actions and compact
-navigation adapted for a master’s daily workflow.
+The approved direction is **Executive product operations**: bright white
+surfaces, deep slate actions, softly colorful information sections, pill
+controls and spacious layouts adapted for a master's daily workflow.
 
 ## Product direction
 
 Schedule Masters combines:
 
-- the calm, scan-friendly hierarchy of GitHub Mobile without reusing its brand,
-  icons, layout or proprietary copy;
+- the calm, scan-friendly hierarchy of Executive interfaces without reusing
+  another product's brand, icons, layout or proprietary copy;
 - the fast, information-dense daily workflow of Masters Pro;
 - the friendly, service-oriented tone needed by independent beauty and wellness
   professionals;
@@ -26,18 +26,22 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 ## Design principles
 
 1. **Today first.** The first screen must help a master understand the day within seconds.
-2. **Quiet density.** Show useful information without decorative surfaces or nested cards.
+2. **Spacious scanning.** Show useful information in clear white surfaces with enough room for quick reading.
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
-4. **Calm operational clarity.** The interface should feel trustworthy and
-   lightweight without looking corporate or clinical.
+4. **Approachable authority.** Deep slate actions create trust while restrained pastel sections add warmth without visual noise.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
 6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
 8. **Calendar actions stay close.** Creating an appointment and creating a break must be available from the same calendar action, without navigating through settings.
+9. **Executive simplicity.** Use deep slate actions, pill controls, 16px cards,
+   soft pastel section accents and a 4px spacing rhythm. Do not add gradients,
+   decorative blobs or competing accent colors.
 
 ## Tone
 
-Calm, clear, warm, practical and modern. The master app should feel precise rather than decorative. The booking page may be more editorial and welcoming, but it must remain focused on completing a booking.
+Bright, clear, confident and approachable. The master app should feel polished
+and trustworthy rather than clinical. The booking page may be welcoming, but it
+must remain focused on completing a booking.
 
 ## Tokens
 
@@ -45,13 +49,16 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 
 ### Color
 
-The palette uses warm-neutral application surfaces, white information blocks,
-thin neutral separators and a reserved green action color. The result borrows
-GitHub Mobile’s scanning rhythm, not its visual identity or exact values.
+The palette uses an off-white canvas, crisp white information blocks, deep slate
+actions and a controlled pastel accent rhythm. Soft shadows and rounded geometry
+provide hierarchy without heavy chrome.
 
-- `brand.primary` — primary actions and active states.
+- `brand.primary` — links, active states and selected controls.
 - `brand.primaryStrong` — pressed states and high-emphasis links.
-- `surface.canvas` — warm application background.
+- `brand.action` — deep slate primary action surfaces.
+- `brand.pastelLavender`, `brand.pastelYellow`, `brand.pastelCyan` and
+  `brand.pastelPink` — restrained section accents used to aid scanning.
+- `surface.canvas` — warm off-white application background.
 - `surface.raised` — cards, sheets and booking panels.
 - `surface.subtle` — input backgrounds and secondary regions.
 - `content.primary` / `content.secondary` / `content.muted` — hierarchy.
@@ -61,29 +68,34 @@ Do not use raw hex values in screens. If a new color is needed, add it here with
 
 ### Typography
 
-Use the platform system font: San Francisco on iOS and the native system sans-serif on Android. Typography follows the iOS product rhythm while allowing Dynamic Type scaling. Headings retain a warm editorial feel through weight and spacing rather than a decorative font.
+Use the platform system font: San Francisco on iOS and the native system
+sans-serif on Android. Executive uses one disciplined sans-serif family, medium
+UI weights and heavier weights only for screen-level hierarchy. Do not introduce
+decorative serif typography into operational screens.
 
-- Display: 34px, dashboard greeting and booking profile title.
-- Heading: 28px, section and screen titles.
-- Section: 20px, card and content-group titles.
-- Body: 17px, descriptions and form content.
-- Label: 15px, buttons and important metadata.
-- Caption: 13px, supporting information only; never use caption text for required actions.
+- Display: 36px, high-emphasis screen titles.
+- Heading: 30px, screen and primary section titles.
+- Section: 24px, card and content-group titles.
+- Body: 16px, descriptions and form content.
+- Label: 14px, buttons and important metadata.
+- Caption: 12px, supporting information only; never use caption text for required actions.
 
 ### Spacing and shape
 
-Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use 8px for compact controls, 16px for normal controls and 18px for grouped surfaces. Reserve pill shapes for status badges, segmented controls, bottom navigation and genuinely compact choice controls; do not make every surface a pill.
+Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use pill shapes for buttons, inputs, language selectors, status badges and bottom navigation. Use 16px rounded cards and restrained layered shadows for grouped surfaces.
 
-### GitHub Mobile-inspired surface rules
+### Executive surface rules
 
-- **Master Dashboard and Calendar:** warm-neutral canvas, white raised panels,
-  calm green actions, thin borders, compact metadata and no decorative gradients.
-- **Mobile navigation:** one white outer pill with a light-green pill beneath
-  the active tab. The active icon and label use the green accent, while inactive
-  items remain neutral. The active indicator moves with a short, functional
-  native animation; the booking CTA floats above the navigation as a green pill.
+- **Master Dashboard and Calendar:** off-white canvas, crisp white panels,
+  deep slate actions, pastel section accents, thin borders, comfortable metadata
+  and no decorative gradients.
+- **Mobile navigation:** one white outer pill with a soft lavender pill beneath
+  the active tab. The active icon and label use deep slate, while inactive items
+  remain neutral. The active indicator moves with a short, functional native
+  animation; the booking CTA floats above the navigation as a deep slate pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
-- **Public Booking Page:** warmer canvas, slightly softer panels and more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
+- **Public Booking Page:** the same off-white canvas with crisp white panels and
+  more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
 - **All surfaces:** use Inter/system UI for operational text. Monospace is reserved for optional technical metadata, never for client-facing booking content.
 
 ### Motion
@@ -117,8 +129,8 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.
 - Bookings and expected revenue share one grouped summary surface. Bookings
-  stays neutral; expected revenue uses the strong green text accent without a
-  full-color background.
+  stays neutral; expected revenue uses a deep slate value with a pastel section
+  accent without turning the entire summary into a high-saturation block.
 - The quick-add action offers `Appointment` and `Break` as two equally clear choices.
 
 ### 2. Master Calendar

@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   noticeText: { ...typography.metadata, flex: 1 },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     minHeight: 48,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.label,
-    color: colors.inverse,
+    color: colors.actionText,
     fontWeight: "700",
   },
   required: { color: colors.danger },

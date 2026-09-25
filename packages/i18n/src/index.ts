@@ -47,13 +47,40 @@ export type MessageKey =
   | "workspace.slugPlaceholder"
   | "workspace.servicePlaceholder"
   | "workspace.pricePlaceholder"
+  | "workspace.durationPlaceholder"
+  | "workspace.startTimeLabel"
+  | "workspace.endTimeLabel"
+  | "workspace.workingDaysLabel"
+  | "workspace.dayMonday"
+  | "workspace.dayTuesday"
+  | "workspace.dayWednesday"
+  | "workspace.dayThursday"
+  | "workspace.dayFriday"
+  | "workspace.daySaturday"
+  | "workspace.daySunday"
   | "workspace.setupRequiredFields"
   | "workspace.setupFailed"
   | "workspace.setupInvalidSlug"
   | "workspace.setupInvalidService"
   | "workspace.priceInvalid"
+  | "workspace.durationInvalid"
+  | "workspace.workingDaysInvalid"
+  | "workspace.scheduleInvalid"
   | "workspace.setupSaving"
   | "workspace.setupSave"
+  | "workspace.setupStepMaster"
+  | "workspace.setupStepMasterDescription"
+  | "workspace.setupStepService"
+  | "workspace.setupStepServiceDescription"
+  | "workspace.setupStepSchedule"
+  | "workspace.setupStepScheduleDescription"
+  | "workspace.setupCompleteTitle"
+  | "workspace.setupCompleteDescription"
+  | "workspace.setupOpenDashboard"
+  | "workspace.setupOpenBooking"
+  | "workspace.setupNext"
+  | "workspace.setupBack"
+  | "workspace.setupFinish"
   | "mobile.description"
   | "mobile.demoMode"
   | "mobile.todaySchedule"
@@ -144,11 +171,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupEyebrow": "ПЕРВОНАЧАЛЬНАЯ НАСТРОЙКА",
     "workspace.setupTitle": "Настройте рабочее пространство",
     "workspace.setupDescription":
-      "Будет создана доступность с понедельника по воскресенье, с 08:00 до 21:00. Позже её можно изменить.",
+      "Укажите данные, первую услугу и базовое расписание. Позже настройки можно изменить.",
     "workspace.namePlaceholder": "Название рабочего пространства",
     "workspace.slugPlaceholder": "Ссылка на запись, например anna-nails",
     "workspace.servicePlaceholder": "Первая услуга",
     "workspace.pricePlaceholder": "Цена в Kč",
+    "workspace.durationPlaceholder": "Длительность, минут",
+    "workspace.startTimeLabel": "Начало рабочего дня",
+    "workspace.endTimeLabel": "Конец рабочего дня",
+    "workspace.workingDaysLabel": "Рабочие дни",
+    "workspace.dayMonday": "Пн",
+    "workspace.dayTuesday": "Вт",
+    "workspace.dayWednesday": "Ср",
+    "workspace.dayThursday": "Чт",
+    "workspace.dayFriday": "Пт",
+    "workspace.daySaturday": "Сб",
+    "workspace.daySunday": "Вс",
     "workspace.setupRequiredFields":
       "Заполните название, ссылку на запись и услугу.",
     "workspace.setupFailed":
@@ -157,8 +195,30 @@ const messages: Record<SupportedLocale, Messages> = {
       "Ссылка должна содержать только латинские буквы, цифры и дефисы.",
     "workspace.setupInvalidService": "Проверьте название услуги и цену.",
     "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
+    "workspace.durationInvalid":
+      "Введите целую длительность услуги от 1 до 1440 минут.",
+    "workspace.workingDaysInvalid": "Выберите хотя бы один рабочий день.",
+    "workspace.scheduleInvalid":
+      "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
     "workspace.setupSaving": "Сохранение…",
     "workspace.setupSave": "Сохранить и продолжить",
+    "workspace.setupStepMaster": "Информация о мастере",
+    "workspace.setupStepMasterDescription":
+      "Настройте имя рабочего пространства и ссылку, по которой клиенты будут записываться.",
+    "workspace.setupStepService": "Первая услуга",
+    "workspace.setupStepServiceDescription":
+      "Добавьте услугу, которую клиенты смогут выбрать при записи.",
+    "workspace.setupStepSchedule": "Рабочие дни и часы",
+    "workspace.setupStepScheduleDescription":
+      "Выберите дни и общий интервал, когда вы принимаете клиентов.",
+    "workspace.setupCompleteTitle": "Всё готово",
+    "workspace.setupCompleteDescription":
+      "Рабочее пространство, первая услуга и расписание созданы. Можно начинать работу.",
+    "workspace.setupOpenDashboard": "Открыть Dashboard",
+    "workspace.setupOpenBooking": "Открыть страницу записи",
+    "workspace.setupNext": "Продолжить",
+    "workspace.setupBack": "Назад",
+    "workspace.setupFinish": "Перейти к Dashboard",
     "mobile.description": "Мобильное приложение мастера готово к работе.",
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
@@ -250,11 +310,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupEyebrow": "PRVNÍ NASTAVENÍ",
     "workspace.setupTitle": "Nastavte si pracovní prostor",
     "workspace.setupDescription":
-      "Vytvoříme dostupnost od pondělí do neděle, od 08:00 do 21:00. Později ji můžete upravit.",
+      "Zadejte údaje, první službu a základní pracovní dobu. Nastavení můžete později upravit.",
     "workspace.namePlaceholder": "Název pracovního prostoru",
     "workspace.slugPlaceholder": "Odkaz pro rezervace, například anna-nails",
     "workspace.servicePlaceholder": "První služba",
     "workspace.pricePlaceholder": "Cena v Kč",
+    "workspace.durationPlaceholder": "Délka, minuty",
+    "workspace.startTimeLabel": "Začátek pracovní doby",
+    "workspace.endTimeLabel": "Konec pracovní doby",
+    "workspace.workingDaysLabel": "Pracovní dny",
+    "workspace.dayMonday": "Po",
+    "workspace.dayTuesday": "Út",
+    "workspace.dayWednesday": "St",
+    "workspace.dayThursday": "Čt",
+    "workspace.dayFriday": "Pá",
+    "workspace.daySaturday": "So",
+    "workspace.daySunday": "Ne",
     "workspace.setupRequiredFields":
       "Vyplňte název, odkaz pro rezervace a službu.",
     "workspace.setupFailed":
@@ -263,8 +334,29 @@ const messages: Record<SupportedLocale, Messages> = {
       "Odkaz může obsahovat pouze malá písmena bez diakritiky, číslice a pomlčky.",
     "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
     "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
+    "workspace.durationInvalid": "Zadejte celé číslo od 1 do 1440 minut.",
+    "workspace.workingDaysInvalid": "Vyberte alespoň jeden pracovní den.",
+    "workspace.scheduleInvalid":
+      "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
     "workspace.setupSaving": "Ukládání…",
     "workspace.setupSave": "Uložit a pokračovat",
+    "workspace.setupStepMaster": "Informace o mistrovi",
+    "workspace.setupStepMasterDescription":
+      "Nastavte název pracovního prostoru a odkaz, přes který se klienti objednají.",
+    "workspace.setupStepService": "První služba",
+    "workspace.setupStepServiceDescription":
+      "Přidejte službu, kterou si klienti vyberou při rezervaci.",
+    "workspace.setupStepSchedule": "Pracovní dny a hodiny",
+    "workspace.setupStepScheduleDescription":
+      "Vyberte dny a časový interval, kdy přijímáte klienty.",
+    "workspace.setupCompleteTitle": "Vše je připraveno",
+    "workspace.setupCompleteDescription":
+      "Pracovní prostor, první služba a rozvrh byly vytvořeny. Můžete začít pracovat.",
+    "workspace.setupOpenDashboard": "Otevřít Dashboard",
+    "workspace.setupOpenBooking": "Otevřít rezervační stránku",
+    "workspace.setupNext": "Pokračovat",
+    "workspace.setupBack": "Zpět",
+    "workspace.setupFinish": "Přejít na Dashboard",
     "mobile.description": "Mobilní aplikace pro mistra je připravena.",
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
@@ -355,11 +447,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupEyebrow": "FIRST SETUP",
     "workspace.setupTitle": "Set up your workspace",
     "workspace.setupDescription":
-      "This creates Monday–Sunday availability from 08:00 to 21:00. You can refine it later.",
+      "Add your details, first service, and basic working hours. You can change them later.",
     "workspace.namePlaceholder": "Workspace name",
     "workspace.slugPlaceholder": "Booking link, e.g. anna-nails",
     "workspace.servicePlaceholder": "First service",
     "workspace.pricePlaceholder": "Price in CZK",
+    "workspace.durationPlaceholder": "Duration in minutes",
+    "workspace.startTimeLabel": "Workday starts",
+    "workspace.endTimeLabel": "Workday ends",
+    "workspace.workingDaysLabel": "Working days",
+    "workspace.dayMonday": "Mon",
+    "workspace.dayTuesday": "Tue",
+    "workspace.dayWednesday": "Wed",
+    "workspace.dayThursday": "Thu",
+    "workspace.dayFriday": "Fri",
+    "workspace.daySaturday": "Sat",
+    "workspace.daySunday": "Sun",
     "workspace.setupRequiredFields":
       "Complete the workspace name, booking link, and service fields.",
     "workspace.setupFailed":
@@ -368,8 +471,30 @@ const messages: Record<SupportedLocale, Messages> = {
       "The booking link can contain only lowercase letters, numbers, and hyphens.",
     "workspace.setupInvalidService": "Check the service name and price.",
     "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
+    "workspace.durationInvalid":
+      "Enter a whole number between 1 and 1440 minutes.",
+    "workspace.workingDaysInvalid": "Choose at least one working day.",
+    "workspace.scheduleInvalid":
+      "Enter time in HH:MM format. The end must be after the start.",
     "workspace.setupSaving": "Saving…",
     "workspace.setupSave": "Save and continue",
+    "workspace.setupStepMaster": "Master details",
+    "workspace.setupStepMasterDescription":
+      "Set the workspace name and the link clients will use to book.",
+    "workspace.setupStepService": "First service",
+    "workspace.setupStepServiceDescription":
+      "Add the service clients will be able to choose when booking.",
+    "workspace.setupStepSchedule": "Working days and hours",
+    "workspace.setupStepScheduleDescription":
+      "Choose the days and time range when you accept clients.",
+    "workspace.setupCompleteTitle": "You're all set",
+    "workspace.setupCompleteDescription":
+      "Your workspace, first service, and schedule are ready. You can start working.",
+    "workspace.setupOpenDashboard": "Open Dashboard",
+    "workspace.setupOpenBooking": "Open booking page",
+    "workspace.setupNext": "Continue",
+    "workspace.setupBack": "Back",
+    "workspace.setupFinish": "Go to Dashboard",
     "mobile.description": "The master mobile app is ready.",
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",

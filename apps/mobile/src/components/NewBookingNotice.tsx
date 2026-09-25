@@ -49,7 +49,7 @@ export function NewBookingNotice({
 const styles = StyleSheet.create({
   backdrop: {
     alignItems: "center",
-    backgroundColor: "rgba(32, 42, 36, 0.28)",
+    backgroundColor: "rgba(17, 24, 39, 0.28)",
     flex: 1,
     justifyContent: "center",
     padding: 24,
@@ -64,17 +64,17 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.control,
     justifyContent: "center",
     marginTop: 20,
     minHeight: 44,
     paddingHorizontal: 16,
   },
-  closeButtonPressed: { backgroundColor: colors.accentPressed },
+  closeButtonPressed: { backgroundColor: colors.actionPressed },
   closeButtonText: {
     ...typography.label,
-    color: colors.inverse,
+    color: colors.actionText,
     fontWeight: "700",
   },
   description: {

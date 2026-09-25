@@ -1,16 +1,16 @@
 export const typography = {
   body: {
-    fontSize: 17,
+    fontSize: 16,
     lineHeight: 24,
   },
   caption: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
   },
   display: {
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: "700",
-    lineHeight: 41,
+    lineHeight: 43,
   },
   eyebrow: {
     fontSize: 12,
@@ -19,14 +19,14 @@ export const typography = {
     lineHeight: 16,
   },
   heading: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "700",
-    lineHeight: 34,
+    lineHeight: 36,
   },
   label: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
-    lineHeight: 20,
+    lineHeight: 18,
   },
   metric: {
     fontSize: 24,
@@ -38,8 +38,8 @@ export const typography = {
     lineHeight: 20,
   },
   section: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "700",
-    lineHeight: 25,
+    lineHeight: 29,
   },
 } as const;

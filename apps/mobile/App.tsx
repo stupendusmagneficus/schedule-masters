@@ -161,7 +161,13 @@ function AppContent() {
     );
   }
   if (workspaceState.kind === "setupRequired")
-    return <SetupScreen locale={locale} onComplete={reloadWorkspace} />;
+    return (
+      <SetupScreen
+        locale={locale}
+        onComplete={reloadWorkspace}
+        userId={session.user.id}
+      />
+    );
   return (
     <DashboardScreen
       isSigningOut={signingOut}

@@ -26,7 +26,7 @@ export function FloatingBookingAction({
         pressed && styles.pressed,
       ]}
     >
-      <MaterialCommunityIcons color={colors.inverse} name="plus" size={20} />
+      <MaterialCommunityIcons color={colors.actionText} name="plus" size={20} />
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );
@@ -35,7 +35,7 @@ export function FloatingBookingAction({
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    backgroundColor: colors.accent,
+    backgroundColor: colors.action,
     borderRadius: radii.pill,
     flexDirection: "row",
     gap: 6,
@@ -46,11 +46,11 @@ const styles = StyleSheet.create({
     ...shadows.floating,
   },
   label: {
-    color: colors.inverse,
+    color: colors.actionText,
     fontSize: 14,
     fontWeight: "700",
   },
   pressed: {
-    backgroundColor: colors.accentPressed,
+    backgroundColor: colors.actionPressed,
   },
 });
