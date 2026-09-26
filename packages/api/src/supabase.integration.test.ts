@@ -486,6 +486,140 @@ describe("Supabase public booking contract", () => {
     },
   );
 
+  rlsIntegrationTest(
+    "creates an idempotent confirmed master booking for a tenant",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const serviceId = randomUUID();
+      const email = `manual-booking-${suffix}@example.test`;
+      const password = `Test-${suffix}-Password!`;
+
+      expect(
+        (
+          await admin.from("workspaces").insert({
+            id: workspaceId,
+            name: "Manual Booking Workspace",
+            slug: `manual-booking-${suffix}`,
+            timezone: "Europe/Prague",
+          })
+        ).error,
+      ).toBeNull();
+
+      const user = await createAuthenticatedTestUser({
+        admin,
+        email,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      expect(
+        (
+          await admin.from("workspace_members").insert({
+            role: "owner",
+            user_id: user.user.id,
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+      expect(
+        (
+          await admin.from("services").insert({
+            duration_minutes: 60,
+            id: serviceId,
+            name: "Manual booking service",
+            price_amount: 700,
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+      expect(
+        (
+          await admin.from("availability_rules").insert({
+            day_of_week: 4,
+            end_local_time: "17:00",
+            start_local_time: "09:00",
+            valid_from: "2030-01-01",
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+
+      const slots = await user.client.rpc("get_master_available_slots", {
+        p_date: "2030-01-03",
+        p_service_id: serviceId,
+        p_workspace_id: workspaceId,
+      });
+      expect(slots.error).toBeNull();
+      const selectedSlot = slots.data?.[0];
+      expect(selectedSlot).toBeDefined();
+
+      const idempotencyKey = `manual-${suffix}`;
+      const first = await user.client.rpc("create_master_booking", {
+        p_duration_minutes: 60,
+        p_email: undefined,
+        p_idempotency_key: idempotencyKey,
+        p_name: "Manual customer",
+        p_phone: undefined,
+        p_price_amount: 700,
+        p_service_id: serviceId,
+        p_starts_at: selectedSlot?.starts_at as string,
+        p_workspace_id: workspaceId,
+      });
+      expect(first.error).toBeNull();
+      expect(first.data).toMatchObject({
+        source: "master_created",
+        status: "confirmed",
+      });
+
+      const retry = await user.client.rpc("create_master_booking", {
+        p_idempotency_key: idempotencyKey,
+        p_name: "Retry customer",
+        p_service_id: serviceId,
+        p_starts_at: selectedSlot?.starts_at as string,
+        p_workspace_id: workspaceId,
+      });
+      expect(retry.error).toBeNull();
+      expect(retry.data).toEqual(first.data);
+
+      const customers = await user.client.rpc("list_master_customers", {
+        p_workspace_id: workspaceId,
+      });
+      expect(customers.error).toBeNull();
+      expect(customers.data).toHaveLength(1);
+      expect(customers.data?.[0]).toMatchObject({
+        email: null,
+        name: "Manual customer",
+        phone: null,
+      });
+
+      const appointments = await user.client.rpc("list_master_appointments", {
+        p_from_date: "2030-01-03",
+        p_to_date: "2030-01-03",
+        p_workspace_id: workspaceId,
+      });
+      expect(appointments.error).toBeNull();
+      expect(appointments.data).toHaveLength(1);
+      expect(appointments.data?.[0]).toMatchObject({
+        customer_name: "Manual customer",
+        source: "master_created",
+        status: "confirmed",
+      });
+
+      await admin.from("workspaces").delete().eq("id", workspaceId);
+      await admin.auth.admin.deleteUser(user.user.id);
+    },
+    30_000,
+  );
+
   integrationTest("limits new public booking attempts", async () => {
     if (!supabase) return;
 

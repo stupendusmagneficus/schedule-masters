@@ -11,9 +11,13 @@ import {
   type MobileTab,
 } from "../components/BottomNavigation";
 import { FloatingBookingAction } from "../components/FloatingBookingAction";
+import { ManualBookingModal } from "../components/ManualBookingModal";
 import { NewBookingNotice } from "../components/NewBookingNotice";
 import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
+import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
+import { formatDateInTimeZone } from "../features/availability/personalBlocks";
+import { analytics, analyticsEvents } from "../lib/analytics";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
 import { buildBookingUrl } from "../utils/bookingUrl";
@@ -47,7 +51,13 @@ export function DashboardScreen({
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
+  const [isManualBookingVisible, setManualBookingVisible] = useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
+  const { appointments, reload: reloadAppointments } = useMasterAppointments({
+    client,
+    timezone: workspace.timezone,
+    workspaceId: workspace.id,
+  });
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     profile: t("mobile.profile"),
@@ -64,6 +74,7 @@ export function DashboardScreen({
             locale={locale}
             service={service}
             demoData={demoData}
+            masterAppointments={appointments}
             t={t}
             workspace={workspace}
           />
@@ -73,6 +84,7 @@ export function DashboardScreen({
             client={client}
             demoData={demoData}
             locale={locale}
+            masterAppointments={appointments}
             t={t}
             workspace={workspace}
           />
@@ -93,7 +105,11 @@ export function DashboardScreen({
       </ScrollView>
       <FloatingBookingAction
         label={t("mobile.newBooking")}
-        onPress={() => setNewBookingNoticeVisible(true)}
+        onPress={() =>
+          client
+            ? setManualBookingVisible(true)
+            : setNewBookingNoticeVisible(true)
+        }
       />
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
         <BottomNavigation
@@ -109,6 +125,24 @@ export function DashboardScreen({
         title={t("mobile.newBookingNoticeTitle")}
         visible={isNewBookingNoticeVisible}
       />
+      {client ? (
+        <ManualBookingModal
+          client={client}
+          initialDate={formatDateInTimeZone(new Date(), workspace.timezone)}
+          locale={locale}
+          onClose={() => setManualBookingVisible(false)}
+          onCreated={async () => {
+            await reloadAppointments();
+            analytics.track(analyticsEvents.appointmentCreated, {
+              source: "master_created",
+            });
+          }}
+          service={service}
+          t={t}
+          visible={isManualBookingVisible}
+          workspace={workspace}
+        />
+      ) : null}
       <StatusBar style="dark" />
     </SafeAreaView>
   );

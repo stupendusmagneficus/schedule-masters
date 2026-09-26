@@ -99,6 +99,33 @@ export type MessageKey =
   | "mobile.newBookingNoticeTitle"
   | "mobile.newBookingNoticeDescription"
   | "mobile.newBookingNoticeClose"
+  | "mobile.manualBookingTitle"
+  | "mobile.manualBookingDescription"
+  | "mobile.manualBookingExistingCustomer"
+  | "mobile.manualBookingNewCustomer"
+  | "mobile.manualBookingSearchCustomer"
+  | "mobile.manualBookingNoCustomers"
+  | "mobile.manualBookingCustomerName"
+  | "mobile.manualBookingCustomerEmail"
+  | "mobile.manualBookingCustomerPhone"
+  | "mobile.manualBookingService"
+  | "mobile.manualBookingDate"
+  | "mobile.manualBookingTime"
+  | "mobile.manualBookingNoSlots"
+  | "mobile.manualBookingDuration"
+  | "mobile.manualBookingPrice"
+  | "mobile.manualBookingNote"
+  | "mobile.manualBookingNotePlaceholder"
+  | "mobile.manualBookingCreate"
+  | "mobile.manualBookingCreated"
+  | "mobile.manualBookingNameRequired"
+  | "mobile.manualBookingEmailInvalid"
+  | "mobile.manualBookingDateInvalid"
+  | "mobile.manualBookingTimeRequired"
+  | "mobile.manualBookingDurationInvalid"
+  | "mobile.manualBookingPriceInvalid"
+  | "mobile.manualBookingConflict"
+  | "mobile.manualBookingLoadFailed"
   | "mobile.bookings"
   | "mobile.expectedRevenue"
   | "mobile.nextBooking"
@@ -261,6 +288,38 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeDescription":
       "Форма создания записи появится в следующем шаге MVP.",
     "mobile.newBookingNoticeClose": "Закрыть",
+    "mobile.manualBookingTitle": "Новая запись",
+    "mobile.manualBookingDescription":
+      "Создайте подтверждённую запись для клиента из календаря или мессенджера.",
+    "mobile.manualBookingExistingCustomer": "Существующий клиент",
+    "mobile.manualBookingNewCustomer": "Новый клиент",
+    "mobile.manualBookingSearchCustomer": "Поиск клиента",
+    "mobile.manualBookingNoCustomers": "Клиенты пока не добавлены.",
+    "mobile.manualBookingCustomerName": "Имя клиента *",
+    "mobile.manualBookingCustomerEmail": "Email клиента",
+    "mobile.manualBookingCustomerPhone": "Телефон клиента",
+    "mobile.manualBookingService": "Услуга",
+    "mobile.manualBookingDate": "Дата *",
+    "mobile.manualBookingTime": "Свободное время *",
+    "mobile.manualBookingNoSlots": "На эту дату нет свободных окон.",
+    "mobile.manualBookingDuration": "Длительность, минут *",
+    "mobile.manualBookingPrice": "Цена, Kč *",
+    "mobile.manualBookingNote": "Заметка мастера",
+    "mobile.manualBookingNotePlaceholder": "Например, клиент из Instagram",
+    "mobile.manualBookingCreate": "Создать запись",
+    "mobile.manualBookingCreated": "Запись создана",
+    "mobile.manualBookingNameRequired": "Укажите имя клиента.",
+    "mobile.manualBookingEmailInvalid": "Введите корректный email.",
+    "mobile.manualBookingDateInvalid": "Выберите корректную дату.",
+    "mobile.manualBookingTimeRequired": "Выберите свободное время.",
+    "mobile.manualBookingDurationInvalid":
+      "Длительность должна быть от 1 до 1440 минут.",
+    "mobile.manualBookingPriceInvalid":
+      "Цена должна быть неотрицательным числом.",
+    "mobile.manualBookingConflict":
+      "Это время уже занято. Обновите свободные окна и выберите другое.",
+    "mobile.manualBookingLoadFailed":
+      "Не удалось загрузить клиентов или свободные окна.",
     "mobile.bookings": "Записи",
     "mobile.expectedRevenue": "Ожидаемая выручка",
     "mobile.nextBooking": "Следующая запись",
@@ -425,6 +484,37 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeDescription":
       "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
     "mobile.newBookingNoticeClose": "Zavřít",
+    "mobile.manualBookingTitle": "Nová rezervace",
+    "mobile.manualBookingDescription":
+      "Vytvořte potvrzenou rezervaci pro klienta z kalendáře nebo zpráv.",
+    "mobile.manualBookingExistingCustomer": "Stávající klient",
+    "mobile.manualBookingNewCustomer": "Nový klient",
+    "mobile.manualBookingSearchCustomer": "Hledat klienta",
+    "mobile.manualBookingNoCustomers": "Zatím nemáte žádné klienty.",
+    "mobile.manualBookingCustomerName": "Jméno klienta *",
+    "mobile.manualBookingCustomerEmail": "E-mail klienta",
+    "mobile.manualBookingCustomerPhone": "Telefon klienta",
+    "mobile.manualBookingService": "Služba",
+    "mobile.manualBookingDate": "Datum *",
+    "mobile.manualBookingTime": "Volný termín *",
+    "mobile.manualBookingNoSlots": "Pro toto datum nejsou volné termíny.",
+    "mobile.manualBookingDuration": "Délka v minutách *",
+    "mobile.manualBookingPrice": "Cena, Kč *",
+    "mobile.manualBookingNote": "Poznámka mistra",
+    "mobile.manualBookingNotePlaceholder": "Například klient z Instagramu",
+    "mobile.manualBookingCreate": "Vytvořit rezervaci",
+    "mobile.manualBookingCreated": "Rezervace vytvořena",
+    "mobile.manualBookingNameRequired": "Zadejte jméno klienta.",
+    "mobile.manualBookingEmailInvalid": "Zadejte platný e-mail.",
+    "mobile.manualBookingDateInvalid": "Vyberte platné datum.",
+    "mobile.manualBookingTimeRequired": "Vyberte volný termín.",
+    "mobile.manualBookingDurationInvalid":
+      "Délka musí být mezi 1 a 1440 minutami.",
+    "mobile.manualBookingPriceInvalid": "Cena musí být nezáporné číslo.",
+    "mobile.manualBookingConflict":
+      "Tento termín je již obsazený. Obnovte termíny a vyberte jiný.",
+    "mobile.manualBookingLoadFailed":
+      "Nepodařilo se načíst klienty nebo volné termíny.",
     "mobile.bookings": "Rezervace",
     "mobile.expectedRevenue": "Očekávané tržby",
     "mobile.nextBooking": "Další rezervace",
@@ -588,6 +678,37 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.newBookingNoticeDescription":
       "The booking creation form will be added in the next MVP step.",
     "mobile.newBookingNoticeClose": "Close",
+    "mobile.manualBookingTitle": "New booking",
+    "mobile.manualBookingDescription":
+      "Create a confirmed booking for a client from your calendar or messages.",
+    "mobile.manualBookingExistingCustomer": "Existing customer",
+    "mobile.manualBookingNewCustomer": "New customer",
+    "mobile.manualBookingSearchCustomer": "Search customers",
+    "mobile.manualBookingNoCustomers": "No customers have been added yet.",
+    "mobile.manualBookingCustomerName": "Customer name *",
+    "mobile.manualBookingCustomerEmail": "Customer email",
+    "mobile.manualBookingCustomerPhone": "Customer phone",
+    "mobile.manualBookingService": "Service",
+    "mobile.manualBookingDate": "Date *",
+    "mobile.manualBookingTime": "Available time *",
+    "mobile.manualBookingNoSlots": "There are no available times on this date.",
+    "mobile.manualBookingDuration": "Duration in minutes *",
+    "mobile.manualBookingPrice": "Price, Kč *",
+    "mobile.manualBookingNote": "Master note",
+    "mobile.manualBookingNotePlaceholder": "For example, client from Instagram",
+    "mobile.manualBookingCreate": "Create booking",
+    "mobile.manualBookingCreated": "Booking created",
+    "mobile.manualBookingNameRequired": "Enter the customer name.",
+    "mobile.manualBookingEmailInvalid": "Enter a valid email.",
+    "mobile.manualBookingDateInvalid": "Choose a valid date.",
+    "mobile.manualBookingTimeRequired": "Choose an available time.",
+    "mobile.manualBookingDurationInvalid":
+      "Duration must be between 1 and 1440 minutes.",
+    "mobile.manualBookingPriceInvalid": "Price must be a non-negative number.",
+    "mobile.manualBookingConflict":
+      "This time is already taken. Refresh availability and choose another.",
+    "mobile.manualBookingLoadFailed":
+      "Customers or available times could not be loaded.",
     "mobile.bookings": "Bookings",
     "mobile.expectedRevenue": "Expected revenue",
     "mobile.nextBooking": "Next booking",

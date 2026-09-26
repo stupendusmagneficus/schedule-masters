@@ -1,10 +1,12 @@
-import { formatCurrency, formatDate } from "@schedule-app/i18n";
+import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
 import { StyleSheet, Text, View } from "react-native";
 
 import { AppointmentStatusBadge } from "../../components/AppointmentStatusBadge";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
+import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Service, Workspace } from "../../types";
@@ -12,6 +14,7 @@ import type { DashboardTabProps } from "./types";
 
 type TodayTabProps = DashboardTabProps & {
   readonly demoData?: DemoData;
+  readonly masterAppointments?: readonly MasterAppointment[];
   readonly service: Service | null;
   readonly workspace: Workspace;
 };
@@ -19,6 +22,7 @@ type TodayTabProps = DashboardTabProps & {
 export function TodayTab({
   demoData,
   locale,
+  masterAppointments = [],
   service,
   t,
   workspace,
@@ -28,12 +32,29 @@ export function TodayTab({
     month: "long",
     weekday: "long",
   });
-  const appointments = demoData?.appointments ?? [];
-  const expectedRevenue = appointments.reduce(
-    (total, appointment) => total + appointment.priceAmount,
-    0,
+  const todayInWorkspace = formatDateInTimeZone(new Date(), workspace.timezone);
+  const liveAppointments = masterAppointments.filter(
+    (appointment) =>
+      formatDateInTimeZone(
+        new Date(appointment.starts_at),
+        workspace.timezone,
+      ) === todayInWorkspace,
   );
-  const nextAppointment = appointments[0];
+  const demoAppointments = demoData?.appointments ?? [];
+  const expectedRevenue = demoData
+    ? demoAppointments.reduce(
+        (total, appointment) => total + appointment.priceAmount,
+        0,
+      )
+    : liveAppointments.reduce(
+        (total, appointment) => total + Number(appointment.price_amount),
+        0,
+      );
+  const appointmentCount = demoData
+    ? demoAppointments.length
+    : liveAppointments.length;
+  const nextDemoAppointment = demoAppointments[0];
+  const nextLiveAppointment = liveAppointments[0];
 
   return (
     <View style={styles.content}>
@@ -51,7 +72,7 @@ export function TodayTab({
           {
             id: "bookings",
             label: t("mobile.bookings"),
-            value: String(appointments.length),
+            value: String(appointmentCount),
           },
           {
             id: "expected-revenue",
@@ -64,8 +85,15 @@ export function TodayTab({
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.nextBooking")}</Text>
-        {nextAppointment ? (
-          <AppointmentRow appointment={nextAppointment} t={t} />
+        {nextDemoAppointment ? (
+          <AppointmentRow appointment={nextDemoAppointment} t={t} />
+        ) : nextLiveAppointment ? (
+          <MasterAppointmentRow
+            appointment={nextLiveAppointment}
+            locale={locale}
+            t={t}
+            timezone={workspace.timezone}
+          />
         ) : (
           <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
         )}
@@ -75,7 +103,7 @@ export function TodayTab({
         <InfoCard>
           <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
           <View style={styles.appointmentsList}>
-            {appointments.map((appointment) => (
+            {demoAppointments.map((appointment) => (
               <AppointmentRow
                 appointment={appointment}
                 key={appointment.id}
@@ -93,6 +121,27 @@ export function TodayTab({
           </View>
         </InfoCard>
       )}
+
+      {!demoData ? (
+        <InfoCard>
+          <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
+          {liveAppointments.length ? (
+            <View style={styles.appointmentsList}>
+              {liveAppointments.map((appointment) => (
+                <MasterAppointmentRow
+                  appointment={appointment}
+                  key={appointment.id}
+                  locale={locale}
+                  t={t}
+                  timezone={workspace.timezone}
+                />
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
+          )}
+        </InfoCard>
+      ) : null}
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.firstService")}</Text>
@@ -211,6 +260,48 @@ function AppointmentRow({
         </Text>
       </View>
       <AppointmentStatusBadge label={statusLabel} status={appointment.status} />
+    </View>
+  );
+}
+
+function MasterAppointmentRow({
+  appointment,
+  locale,
+  t,
+  timezone,
+}: {
+  readonly appointment: MasterAppointment;
+  readonly locale: TodayTabProps["locale"];
+  readonly t: TodayTabProps["t"];
+  readonly timezone: string;
+}) {
+  const status = appointment.status === "pending" ? "pending" : "confirmed";
+  const statusLabel =
+    status === "confirmed" ? t("mobile.confirmed") : t("mobile.pending");
+  const initials = appointment.customer_name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <View style={styles.appointmentRow}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{initials}</Text>
+      </View>
+      <View style={styles.appointmentDetails}>
+        <Text style={styles.serviceName}>{appointment.customer_name}</Text>
+        <Text style={styles.helper}>
+          {formatTime(new Date(appointment.starts_at), locale, {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: timezone,
+          })}{" "}
+          · {appointment.service_name} · {appointment.duration_minutes} min
+        </Text>
+      </View>
+      <AppointmentStatusBadge label={statusLabel} status={status} />
     </View>
   );
 }

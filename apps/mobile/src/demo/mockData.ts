@@ -9,7 +9,9 @@ export const demoWorkspace: Workspace = {
 };
 
 const demoService: Service = {
+  currency: "CZK",
   duration_minutes: 90,
+  id: "demo-service",
   name: "Gel manicure",
   price_amount: 700,
 };
