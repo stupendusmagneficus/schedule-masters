@@ -2,20 +2,23 @@ import type { MessageKey } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
-  Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+
 import {
   type PersonalBlockDraft,
   validatePersonalBlockDraft,
 } from "../features/availability/personalBlocks";
-import { colors, radii, shadows } from "../theme/tokens";
+import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import { DateTimePickerField } from "./DateTimePickerField";
+import { FullscreenModal } from "./FullscreenModal";
 
 type PersonalBlockModalProps = {
   readonly error: string | null;
@@ -65,20 +68,47 @@ export function PersonalBlockModal({
     : error && serverErrorMessage(error, t);
 
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
+    <FullscreenModal
+      closeLabel={t("common.cancel")}
+      closeDisabled={isSaving}
+      onClose={onClose}
+      title={t("mobile.personalBlockTitle")}
       visible={visible}
+      footer={
+        <View style={styles.actions}>
+          {errorMessage ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {errorMessage}
+            </Text>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            disabled={isSaving}
+            onPress={() => void handleSave()}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && styles.primaryButtonPressed,
+              isSaving && styles.disabled,
+            ]}
+          >
+            <Text style={styles.primaryButtonText}>
+              {isSaving ? t("common.loading") : t("mobile.personalBlockCreate")}
+            </Text>
+          </Pressable>
+        </View>
+      }
     >
-      <KeyboardAvoidingView behavior="padding" style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{t("mobile.personalBlockTitle")}</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.body}
+      >
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.description}>
             {t("mobile.personalBlockDescription")}
           </Text>
-
           <DateTimePickerField
             label={t("mobile.personalBlockDate")}
             mode="date"
@@ -118,42 +148,9 @@ export function PersonalBlockModal({
             placeholder={t("mobile.personalBlockReasonPlaceholder")}
             value={draft.reason}
           />
-
-          {errorMessage ? (
-            <Text style={styles.error}>{errorMessage}</Text>
-          ) : null}
-
-          <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              disabled={isSaving}
-              onPress={onClose}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("common.cancel")}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              disabled={isSaving}
-              onPress={() => void handleSave()}
-              style={({ pressed }) => [
-                styles.primaryButton,
-                pressed && styles.primaryButtonPressed,
-                isSaving && styles.disabled,
-              ]}
-            >
-              <Text style={styles.primaryButtonText}>
-                {isSaving
-                  ? t("common.loading")
-                  : t("mobile.personalBlockCreate")}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </Modal>
+    </FullscreenModal>
   );
 }
 
@@ -206,30 +203,17 @@ function serverErrorMessage(error: string, t: PersonalBlockModalProps["t"]) {
 }
 
 const styles = StyleSheet.create({
-  actions: { flexDirection: "row", gap: 8, marginTop: 20 },
-  backdrop: {
-    alignItems: "center",
-    backgroundColor: colors.overlay,
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.surface,
-    maxWidth: 400,
-    padding: 20,
-    width: "100%",
-    ...shadows.surface,
-  },
+  actions: { gap: 8 },
+  body: { flex: 1 },
   description: {
     ...typography.body,
     color: colors.secondaryText,
-    marginTop: 8,
+    marginBottom: 8,
   },
   disabled: { opacity: 0.6 },
-  error: { ...typography.caption, color: colors.danger, marginTop: 12 },
-  field: { gap: 6, marginTop: 14 },
+  error: { ...typography.caption, color: colors.danger, marginBottom: 8 },
+  field: { gap: 6, marginTop: 16 },
+  form: { padding: 20, paddingBottom: 32 },
   input: {
     ...typography.body,
     borderColor: colors.border,
@@ -248,24 +232,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.action,
     borderRadius: radii.control,
-    flex: 1,
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 14,
   },
   primaryButtonPressed: { backgroundColor: colors.actionPressed },
   primaryButtonText: { ...typography.label, color: colors.actionText },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  secondaryButtonText: { ...typography.label, color: colors.primaryText },
   timeField: { flex: 1 },
   timeRow: { flexDirection: "row", gap: 8 },
-  title: { ...typography.section, color: colors.primaryText },
 });

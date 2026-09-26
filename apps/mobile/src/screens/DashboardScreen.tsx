@@ -150,7 +150,9 @@ export function DashboardScreen({
               source: "master_created",
             });
           }}
-          service={service}
+          services={
+            demoData ? [demoData.primaryService] : serviceCatalog.activeServices
+          }
           t={t}
           visible={isManualBookingVisible}
           workspace={workspace}
