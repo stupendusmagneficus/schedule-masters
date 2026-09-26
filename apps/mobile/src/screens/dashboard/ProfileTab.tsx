@@ -2,22 +2,27 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
 import { LocalePicker } from "../../components/LocalePicker";
+import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
+import type { ServiceCatalogController } from "../../features/services/useServiceCatalog";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type ProfileTabProps = DashboardTabProps & {
+  readonly canManageServices: boolean;
   readonly isSigningOut: boolean;
   readonly onLocaleChange: (locale: DashboardTabProps["locale"]) => void;
   readonly onOpenBookingLink: () => void;
   readonly onSignOut: () => void;
   readonly bookingUrl: string;
   readonly signOutFailed: boolean;
+  readonly serviceCatalog: ServiceCatalogController;
   readonly workspace: Workspace;
 };
 
 export function ProfileTab({
+  canManageServices,
   isSigningOut,
   locale,
   onLocaleChange,
@@ -25,6 +30,7 @@ export function ProfileTab({
   onSignOut,
   bookingUrl,
   signOutFailed,
+  serviceCatalog,
   t,
   workspace,
 }: ProfileTabProps) {
@@ -39,6 +45,12 @@ export function ProfileTab({
         <Text style={styles.sectionTitle}>{t("common.language")}</Text>
         <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
       </InfoCard>
+      <ServiceCatalogCard
+        controller={serviceCatalog}
+        editable={canManageServices}
+        locale={locale}
+        t={t}
+      />
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
         <Pressable

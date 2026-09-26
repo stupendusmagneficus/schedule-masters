@@ -8,7 +8,8 @@ export type WorkspaceLoadResult =
   | { readonly kind: "setupRequired" }
   | {
       readonly kind: "ready";
-      readonly service: Service | null;
+      readonly memberRole: "admin" | "member" | "owner";
+      readonly services: readonly Service[];
       readonly workspace: Workspace;
     };
 
@@ -18,7 +19,7 @@ export async function loadMasterWorkspace(
 ): Promise<WorkspaceLoadResult> {
   const { data: member, error: memberError } = await client
     .from("workspace_members")
-    .select("workspace_id")
+    .select("role, workspace_id")
     .eq("user_id", userId)
     .order("created_at", { ascending: true })
     .limit(1)
@@ -27,29 +28,33 @@ export async function loadMasterWorkspace(
   if (memberError) return { kind: "error" };
   if (!member) return { kind: "setupRequired" };
 
-  const [workspaceResult, serviceResult] = await Promise.all([
-    client
-      .from("workspaces")
-      .select("id, name, slug, timezone")
-      .eq("id", member.workspace_id)
-      .single(),
-    client
-      .from("services")
-      .select("id, name, duration_minutes, price_amount, currency")
-      .eq("workspace_id", member.workspace_id)
-      .eq("is_active", true)
-      .order("sort_order")
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const workspaceResult = await client
+    .from("workspaces")
+    .select("id, name, slug, timezone")
+    .eq("id", member.workspace_id)
+    .single();
 
-  if (workspaceResult.error || serviceResult.error || !workspaceResult.data) {
+  if (workspaceResult.error || !workspaceResult.data) {
     return { kind: "error" };
   }
 
+  const serviceResult = await client
+    .from("services")
+    .select(
+      "id, name, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at",
+    )
+    .eq("workspace_id", member.workspace_id)
+    .eq("is_active", true)
+    .is("archived_at", null)
+    .order("sort_order")
+    .order("name");
+
+  if (serviceResult.error) return { kind: "error" };
+
   return {
     kind: "ready",
-    service: serviceResult.data,
+    memberRole: member.role,
+    services: serviceResult.data ?? [],
     workspace: workspaceResult.data,
   };
 }

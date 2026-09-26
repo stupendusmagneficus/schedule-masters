@@ -126,8 +126,9 @@ function AppContent() {
         locale={locale}
         onLocaleChange={setLocale}
         onSignOut={() => undefined}
-        service={demoData.primaryService}
         signOutFailed={false}
+        canManageServices={false}
+        services={[demoData.primaryService]}
         workspace={demoWorkspace}
       />
     );
@@ -176,8 +177,12 @@ function AppContent() {
       locale={locale}
       onLocaleChange={setLocale}
       onSignOut={() => void signOut()}
-      service={workspaceState.service}
       signOutFailed={signOutFailed}
+      canManageServices={
+        workspaceState.memberRole === "owner" ||
+        workspaceState.memberRole === "admin"
+      }
+      services={workspaceState.services}
       workspace={workspaceState.workspace}
     />
   );

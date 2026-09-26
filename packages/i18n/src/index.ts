@@ -153,6 +153,34 @@ export type MessageKey =
   | "mobile.personalBlockAdd"
   | "mobile.personalBlockDelete"
   | "mobile.personalBlockOverlap"
+  | "mobile.services"
+  | "mobile.servicesDescription"
+  | "mobile.serviceAdd"
+  | "mobile.serviceEdit"
+  | "mobile.serviceArchive"
+  | "mobile.serviceRestore"
+  | "mobile.serviceEmpty"
+  | "mobile.serviceActive"
+  | "mobile.serviceArchived"
+  | "mobile.serviceName"
+  | "mobile.serviceDescription"
+  | "mobile.serviceDuration"
+  | "mobile.servicePrice"
+  | "mobile.serviceCurrency"
+  | "mobile.serviceBufferBefore"
+  | "mobile.serviceBufferAfter"
+  | "mobile.serviceSortOrder"
+  | "mobile.serviceSave"
+  | "mobile.serviceCreate"
+  | "mobile.serviceArchiveConfirm"
+  | "mobile.serviceLoadFailed"
+  | "mobile.serviceNameInvalid"
+  | "mobile.serviceDurationInvalid"
+  | "mobile.servicePriceInvalid"
+  | "mobile.serviceCurrencyInvalid"
+  | "mobile.serviceBufferInvalid"
+  | "mobile.serviceDescriptionInvalid"
+  | "mobile.serviceSortOrderInvalid"
   | "mobile.signOut"
   | "booking.description"
   | "booking.chooseService"
@@ -351,6 +379,40 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Удалить",
     "mobile.personalBlockOverlap":
       "Это время пересекается с существующей записью или блоком.",
+    "mobile.services": "Услуги",
+    "mobile.servicesDescription":
+      "Управляйте услугами, ценами и длительностью записей.",
+    "mobile.serviceAdd": "Добавить услугу",
+    "mobile.serviceEdit": "Изменить",
+    "mobile.serviceArchive": "Архивировать",
+    "mobile.serviceRestore": "Восстановить",
+    "mobile.serviceEmpty": "Услуг пока нет.",
+    "mobile.serviceActive": "Активные",
+    "mobile.serviceArchived": "Архив",
+    "mobile.serviceName": "Название услуги *",
+    "mobile.serviceDescription": "Описание",
+    "mobile.serviceDuration": "Длительность, минут *",
+    "mobile.servicePrice": "Цена *",
+    "mobile.serviceCurrency": "Валюта *",
+    "mobile.serviceBufferBefore": "Перерыв до, минут",
+    "mobile.serviceBufferAfter": "Перерыв после, минут",
+    "mobile.serviceSortOrder": "Порядок",
+    "mobile.serviceSave": "Сохранить услугу",
+    "mobile.serviceCreate": "Создать услугу",
+    "mobile.serviceArchiveConfirm":
+      "Услуга исчезнет из новых записей, но старые записи сохранятся.",
+    "mobile.serviceLoadFailed": "Не удалось загрузить услуги.",
+    "mobile.serviceNameInvalid": "Введите название до 120 символов.",
+    "mobile.serviceDurationInvalid":
+      "Длительность должна быть от 1 до 1440 минут.",
+    "mobile.servicePriceInvalid": "Цена должна быть числом от 0 до 1 000 000.",
+    "mobile.serviceCurrencyInvalid": "Используйте код валюты из 3 букв.",
+    "mobile.serviceBufferInvalid":
+      "Перерыв должен быть целым числом от 0 до 240 минут.",
+    "mobile.serviceDescriptionInvalid":
+      "Описание не должно быть длиннее 1000 символов.",
+    "mobile.serviceSortOrderInvalid":
+      "Порядок должен быть целым числом от 0 до 100 000.",
     "mobile.signOut": "Выйти",
     "booking.description": "Страница онлайн-записи готова к работе.",
     "booking.chooseService": "Выберите услугу",
@@ -545,6 +607,37 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Smazat",
     "mobile.personalBlockOverlap":
       "Čas se překrývá s existující rezervací nebo blokem.",
+    "mobile.services": "Služby",
+    "mobile.servicesDescription": "Spravujte služby, ceny a délku rezervací.",
+    "mobile.serviceAdd": "Přidat službu",
+    "mobile.serviceEdit": "Upravit",
+    "mobile.serviceArchive": "Archivovat",
+    "mobile.serviceRestore": "Obnovit",
+    "mobile.serviceEmpty": "Zatím nemáte žádné služby.",
+    "mobile.serviceActive": "Aktivní",
+    "mobile.serviceArchived": "Archiv",
+    "mobile.serviceName": "Název služby *",
+    "mobile.serviceDescription": "Popis",
+    "mobile.serviceDuration": "Délka v minutách *",
+    "mobile.servicePrice": "Cena *",
+    "mobile.serviceCurrency": "Měna *",
+    "mobile.serviceBufferBefore": "Pauza před, minuty",
+    "mobile.serviceBufferAfter": "Pauza po, minuty",
+    "mobile.serviceSortOrder": "Pořadí",
+    "mobile.serviceSave": "Uložit službu",
+    "mobile.serviceCreate": "Vytvořit službu",
+    "mobile.serviceArchiveConfirm":
+      "Služba zmizí z nových rezervací, ale staré rezervace zůstanou.",
+    "mobile.serviceLoadFailed": "Nepodařilo se načíst služby.",
+    "mobile.serviceNameInvalid": "Zadejte název do 120 znaků.",
+    "mobile.serviceDurationInvalid": "Délka musí být mezi 1 a 1440 minutami.",
+    "mobile.servicePriceInvalid": "Cena musí být číslo od 0 do 1 000 000.",
+    "mobile.serviceCurrencyInvalid": "Použijte třípísmenný kód měny.",
+    "mobile.serviceBufferInvalid":
+      "Pauza musí být celé číslo od 0 do 240 minut.",
+    "mobile.serviceDescriptionInvalid": "Popis nesmí být delší než 1000 znaků.",
+    "mobile.serviceSortOrderInvalid":
+      "Pořadí musí být celé číslo od 0 do 100 000.",
     "mobile.signOut": "Odhlásit se",
     "booking.description": "Stránka online rezervací je připravena.",
     "booking.chooseService": "Vyberte službu",
@@ -741,6 +834,41 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Delete",
     "mobile.personalBlockOverlap":
       "This time overlaps an existing booking or block.",
+    "mobile.services": "Services",
+    "mobile.servicesDescription":
+      "Manage the services, prices, and booking durations you offer.",
+    "mobile.serviceAdd": "Add service",
+    "mobile.serviceEdit": "Edit",
+    "mobile.serviceArchive": "Archive",
+    "mobile.serviceRestore": "Restore",
+    "mobile.serviceEmpty": "No services have been added yet.",
+    "mobile.serviceActive": "Active",
+    "mobile.serviceArchived": "Archived",
+    "mobile.serviceName": "Service name *",
+    "mobile.serviceDescription": "Description",
+    "mobile.serviceDuration": "Duration in minutes *",
+    "mobile.servicePrice": "Price *",
+    "mobile.serviceCurrency": "Currency *",
+    "mobile.serviceBufferBefore": "Buffer before, minutes",
+    "mobile.serviceBufferAfter": "Buffer after, minutes",
+    "mobile.serviceSortOrder": "Sort order",
+    "mobile.serviceSave": "Save service",
+    "mobile.serviceCreate": "Create service",
+    "mobile.serviceArchiveConfirm":
+      "The service will disappear from new bookings, but existing bookings will remain.",
+    "mobile.serviceLoadFailed": "Services could not be loaded.",
+    "mobile.serviceNameInvalid": "Enter a name up to 120 characters.",
+    "mobile.serviceDurationInvalid":
+      "Duration must be between 1 and 1440 minutes.",
+    "mobile.servicePriceInvalid":
+      "Price must be a number between 0 and 1,000,000.",
+    "mobile.serviceCurrencyInvalid": "Use a three-letter currency code.",
+    "mobile.serviceBufferInvalid":
+      "Buffer must be a whole number between 0 and 240 minutes.",
+    "mobile.serviceDescriptionInvalid":
+      "Description must be 1,000 characters or fewer.",
+    "mobile.serviceSortOrderInvalid":
+      "Sort order must be a whole number between 0 and 100,000.",
     "mobile.signOut": "Sign out",
     "booking.description": "The online booking page is ready.",
     "booking.chooseService": "Choose a service",

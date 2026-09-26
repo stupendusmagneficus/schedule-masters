@@ -9,11 +9,17 @@ export const demoWorkspace: Workspace = {
 };
 
 const demoService: Service = {
+  archived_at: null,
+  buffer_after_minutes: 0,
+  buffer_before_minutes: 0,
   currency: "CZK",
+  description: "A complete gel manicure with a clean finish.",
   duration_minutes: 90,
   id: "demo-service",
+  is_active: true,
   name: "Gel manicure",
   price_amount: 700,
+  sort_order: 0,
 };
 
 export const demoData: DemoData = {
