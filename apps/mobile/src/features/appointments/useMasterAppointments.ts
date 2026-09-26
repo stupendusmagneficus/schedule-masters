@@ -1,7 +1,7 @@
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
-import { formatDateInTimeZone } from "../availability/personalBlocks";
+import { addCalendarDays, getTodayCalendarDate } from "../calendar/calendar";
 import {
   listMasterAppointments,
   type MasterAppointment,
@@ -32,8 +32,8 @@ export function useMasterAppointments({
     setLoading(true);
     setError(null);
     try {
-      const fromDate = formatDateInTimeZone(new Date(), timezone);
-      const toDate = addDays(fromDate, 7);
+      const fromDate = getTodayCalendarDate(timezone);
+      const toDate = addCalendarDays(fromDate, 7);
       setAppointments(
         await listMasterAppointments(client, workspaceId, fromDate, toDate),
       );
@@ -51,10 +51,4 @@ export function useMasterAppointments({
   }, [reload]);
 
   return { appointments, error, isLoading, reload };
-}
-
-function addDays(value: string, days: number): string {
-  const date = new Date(`${value}T00:00:00.000Z`);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
 }

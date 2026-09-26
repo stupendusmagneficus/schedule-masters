@@ -39,6 +39,15 @@ export async function listPersonalBlocks(
 ): Promise<PersonalBlock[]> {
   const fromDate = formatDateInTimeZone(now, timezone);
   const toDate = addDays(fromDate, 7);
+  return listPersonalBlocksInRange(client, workspaceId, fromDate, toDate);
+}
+
+export async function listPersonalBlocksInRange(
+  client: PersonalBlockClient,
+  workspaceId: string,
+  fromDate: string,
+  toDate: string,
+): Promise<PersonalBlock[]> {
   const { data, error } = await client.rpc("list_master_availability_blocks", {
     p_from_date: fromDate,
     p_to_date: toDate,
