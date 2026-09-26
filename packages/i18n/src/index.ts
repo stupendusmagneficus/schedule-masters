@@ -94,6 +94,22 @@ export type MessageKey =
   | "mobile.available"
   | "mobile.pending"
   | "mobile.confirmed"
+  | "mobile.statusCancelledByCustomer"
+  | "mobile.statusCancelledByMaster"
+  | "mobile.statusCompleted"
+  | "mobile.statusNoShow"
+  | "mobile.appointmentDetails"
+  | "mobile.appointmentStatus"
+  | "mobile.appointmentDate"
+  | "mobile.appointmentTime"
+  | "mobile.appointmentService"
+  | "mobile.appointmentPrice"
+  | "mobile.confirmBooking"
+  | "mobile.cancelBooking"
+  | "mobile.completeBooking"
+  | "mobile.markNoShow"
+  | "mobile.noStatusActions"
+  | "mobile.statusUpdateFailed"
   | "mobile.today"
   | "mobile.calendar"
   | "mobile.profile"
@@ -318,6 +334,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.available": "Свободно",
     "mobile.pending": "Ожидает подтверждения",
     "mobile.confirmed": "Подтверждено",
+    "mobile.statusCancelledByCustomer": "Отменено клиентом",
+    "mobile.statusCancelledByMaster": "Отменено мастером",
+    "mobile.statusCompleted": "Завершено",
+    "mobile.statusNoShow": "Клиент не пришёл",
+    "mobile.appointmentDetails": "Детали записи",
+    "mobile.appointmentStatus": "Статус",
+    "mobile.appointmentDate": "Дата",
+    "mobile.appointmentTime": "Время",
+    "mobile.appointmentService": "Услуга",
+    "mobile.appointmentPrice": "Стоимость",
+    "mobile.confirmBooking": "Подтвердить запись",
+    "mobile.cancelBooking": "Отменить запись",
+    "mobile.completeBooking": "Завершить запись",
+    "mobile.markNoShow": "Отметить неявку",
+    "mobile.noStatusActions": "Для этого статуса нет доступных действий.",
+    "mobile.statusUpdateFailed": "Не удалось изменить статус записи.",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
     "mobile.profile": "Профиль",
@@ -559,6 +591,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.available": "Volno",
     "mobile.pending": "Čeká na potvrzení",
     "mobile.confirmed": "Potvrzeno",
+    "mobile.statusCancelledByCustomer": "Zrušeno klientem",
+    "mobile.statusCancelledByMaster": "Zrušeno mistrem",
+    "mobile.statusCompleted": "Dokončeno",
+    "mobile.statusNoShow": "Klient nepřišel",
+    "mobile.appointmentDetails": "Detail rezervace",
+    "mobile.appointmentStatus": "Stav",
+    "mobile.appointmentDate": "Datum",
+    "mobile.appointmentTime": "Čas",
+    "mobile.appointmentService": "Služba",
+    "mobile.appointmentPrice": "Cena",
+    "mobile.confirmBooking": "Potvrdit rezervaci",
+    "mobile.cancelBooking": "Zrušit rezervaci",
+    "mobile.completeBooking": "Označit jako dokončenou",
+    "mobile.markNoShow": "Označit jako nedostavení",
+    "mobile.noStatusActions": "Pro tento stav nejsou dostupné žádné akce.",
+    "mobile.statusUpdateFailed": "Stav rezervace se nepodařilo změnit.",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
     "mobile.profile": "Profil",
@@ -795,6 +843,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.available": "Available",
     "mobile.pending": "Pending confirmation",
     "mobile.confirmed": "Confirmed",
+    "mobile.statusCancelledByCustomer": "Cancelled by customer",
+    "mobile.statusCancelledByMaster": "Cancelled by master",
+    "mobile.statusCompleted": "Completed",
+    "mobile.statusNoShow": "No-show",
+    "mobile.appointmentDetails": "Appointment details",
+    "mobile.appointmentStatus": "Status",
+    "mobile.appointmentDate": "Date",
+    "mobile.appointmentTime": "Time",
+    "mobile.appointmentService": "Service",
+    "mobile.appointmentPrice": "Price",
+    "mobile.confirmBooking": "Confirm booking",
+    "mobile.cancelBooking": "Cancel booking",
+    "mobile.completeBooking": "Complete booking",
+    "mobile.markNoShow": "Mark as no-show",
+    "mobile.noStatusActions": "No actions are available for this status.",
+    "mobile.statusUpdateFailed": "The booking status could not be changed.",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
     "mobile.profile": "Profile",

@@ -1,7 +1,10 @@
 import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { AppointmentStatusBadge } from "../../components/AppointmentStatusBadge";
+import {
+  AppointmentStatusBadge,
+  getAppointmentStatusLabel,
+} from "../../components/AppointmentStatusBadge";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
@@ -15,6 +18,7 @@ import type { DashboardTabProps } from "./types";
 type TodayTabProps = DashboardTabProps & {
   readonly demoData?: DemoData;
   readonly masterAppointments?: readonly MasterAppointment[];
+  readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly service: Service | null;
   readonly workspace: Workspace;
 };
@@ -23,6 +27,7 @@ export function TodayTab({
   demoData,
   locale,
   masterAppointments = [],
+  onSelectAppointment,
   service,
   t,
   workspace,
@@ -41,20 +46,35 @@ export function TodayTab({
       ) === todayInWorkspace,
   );
   const demoAppointments = demoData?.appointments ?? [];
+  const revenueAppointments = liveAppointments.filter(
+    (appointment) =>
+      appointment.status === "pending" ||
+      appointment.status === "confirmed" ||
+      appointment.status === "completed",
+  );
+  const visibleAppointments = liveAppointments.filter(
+    (appointment) =>
+      appointment.status !== "cancelled_by_customer" &&
+      appointment.status !== "cancelled_by_master",
+  );
+  const activeAppointments = liveAppointments.filter(
+    (appointment) =>
+      appointment.status === "pending" || appointment.status === "confirmed",
+  );
   const expectedRevenue = demoData
     ? demoAppointments.reduce(
         (total, appointment) => total + appointment.priceAmount,
         0,
       )
-    : liveAppointments.reduce(
+    : revenueAppointments.reduce(
         (total, appointment) => total + Number(appointment.price_amount),
         0,
       );
   const appointmentCount = demoData
     ? demoAppointments.length
-    : liveAppointments.length;
+    : visibleAppointments.length;
   const nextDemoAppointment = demoAppointments[0];
-  const nextLiveAppointment = liveAppointments[0];
+  const nextLiveAppointment = activeAppointments[0];
 
   return (
     <View style={styles.content}>
@@ -91,6 +111,7 @@ export function TodayTab({
           <MasterAppointmentRow
             appointment={nextLiveAppointment}
             locale={locale}
+            onPress={() => onSelectAppointment?.(nextLiveAppointment)}
             t={t}
             timezone={workspace.timezone}
           />
@@ -132,6 +153,7 @@ export function TodayTab({
                   appointment={appointment}
                   key={appointment.id}
                   locale={locale}
+                  onPress={() => onSelectAppointment?.(appointment)}
                   t={t}
                   timezone={workspace.timezone}
                 />
@@ -184,6 +206,7 @@ const styles = StyleSheet.create({
   },
   helper: { ...typography.body, color: colors.secondaryText },
   price: { ...typography.label, color: colors.accent },
+  pressed: { opacity: 0.78 },
   sectionTitle: {
     color: colors.primaryText,
     marginBottom: 10,
@@ -267,17 +290,18 @@ function AppointmentRow({
 function MasterAppointmentRow({
   appointment,
   locale,
+  onPress,
   t,
   timezone,
 }: {
   readonly appointment: MasterAppointment;
   readonly locale: TodayTabProps["locale"];
+  readonly onPress?: () => void;
   readonly t: TodayTabProps["t"];
   readonly timezone: string;
 }) {
-  const status = appointment.status === "pending" ? "pending" : "confirmed";
-  const statusLabel =
-    status === "confirmed" ? t("mobile.confirmed") : t("mobile.pending");
+  const status = appointment.status;
+  const statusLabel = getAppointmentStatusLabel(status, t);
   const initials = appointment.customer_name
     .split(/\s+/)
     .map((part) => part[0])
@@ -285,7 +309,7 @@ function MasterAppointmentRow({
     .slice(0, 2)
     .toUpperCase();
 
-  return (
+  const content = (
     <View style={styles.appointmentRow}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>{initials}</Text>
@@ -303,5 +327,18 @@ function MasterAppointmentRow({
       </View>
       <AppointmentStatusBadge label={statusLabel} status={status} />
     </View>
+  );
+
+  return onPress ? (
+    <Pressable
+      accessibilityLabel={`${appointment.customer_name}, ${statusLabel}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [pressed && styles.pressed]}
+    >
+      {content}
+    </Pressable>
+  ) : (
+    content
   );
 }
