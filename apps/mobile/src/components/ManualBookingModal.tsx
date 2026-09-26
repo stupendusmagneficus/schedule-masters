@@ -442,13 +442,15 @@ function TimeStep({
         <Text style={styles.helper}>{t("mobile.noServices")}</Text>
       )}
 
-      <DateTimePickerField
-        label={t("mobile.manualBookingDate")}
-        mode="date"
-        onChange={onChangeDate}
-        placeholder={t("mobile.personalBlockDatePlaceholder")}
-        value={draft.date}
-      />
+      <View style={styles.dateField}>
+        <DateTimePickerField
+          label={t("mobile.manualBookingDate")}
+          mode="date"
+          onChange={onChangeDate}
+          placeholder={t("mobile.personalBlockDatePlaceholder")}
+          value={draft.date}
+        />
+      </View>
 
       <View style={styles.field}>
         <Text style={styles.sectionTitle}>{t("mobile.manualBookingTime")}</Text>
@@ -789,6 +791,7 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   customerList: { gap: 8, marginTop: 8 },
   customerSection: { gap: 4 },
+  dateField: { marginTop: 20 },
   description: {
     ...typography.body,
     color: colors.secondaryText,
@@ -806,9 +809,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    minHeight: 48,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   inputError: { borderColor: colors.danger, borderWidth: 1 },
   label: {
@@ -829,7 +832,11 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     textAlign: "center",
   },
-  multilineInput: { minHeight: 84, textAlignVertical: "top" },
+  multilineInput: {
+    minHeight: 96,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
   optionCopy: { flex: 1, gap: 2 },
   optionList: { gap: 8, marginTop: 8 },
   optionRow: {
@@ -914,12 +921,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
-    minWidth: 76,
+    flexBasis: "22%",
+    flexGrow: 1,
+    minWidth: 0,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
   slotText: { ...typography.label, color: colors.primaryText },
-  slots: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
+  slots: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+    maxWidth: 540,
+    width: "100%",
+  },
   summary: {
     backgroundColor: colors.surface,
     borderColor: colors.borderSubtle,

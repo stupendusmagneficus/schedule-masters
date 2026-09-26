@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createIdempotencyKey,
+  deduplicateManualBookingCustomers,
   type ManualBookingDraft,
   validateManualBookingDraft,
 } from "./manualBooking";
@@ -54,5 +55,25 @@ describe("manual booking validation", () => {
 
   it("generates a non-empty idempotency key", () => {
     expect(createIdempotencyKey()).toEqual(expect.any(String));
+  });
+
+  it("removes duplicate customers by id while preserving order", () => {
+    const customer = {
+      id: "customer-id",
+      name: "Anna",
+      email: "",
+      phone: "",
+    };
+
+    expect(
+      deduplicateManualBookingCustomers([
+        customer,
+        customer,
+        { ...customer, id: "second-customer-id", name: "Marta" },
+      ]),
+    ).toEqual([
+      customer,
+      { ...customer, id: "second-customer-id", name: "Marta" },
+    ]);
   });
 });
