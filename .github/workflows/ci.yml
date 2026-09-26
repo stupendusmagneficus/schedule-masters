@@ -14,6 +14,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  design-review:
+    name: Design review
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify design review evidence
+        run: node scripts/verify-design-review.mjs
+
   quality:
     name: Quality checks
     runs-on: ubuntu-latest

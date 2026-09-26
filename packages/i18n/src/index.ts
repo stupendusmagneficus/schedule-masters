@@ -15,6 +15,8 @@ export type MessageKey =
   | "common.language"
   | "common.save"
   | "common.cancel"
+  | "common.back"
+  | "common.next"
   | "common.retry"
   | "common.loading"
   | "common.error"
@@ -101,6 +103,12 @@ export type MessageKey =
   | "mobile.newBookingNoticeClose"
   | "mobile.manualBookingTitle"
   | "mobile.manualBookingDescription"
+  | "mobile.manualBookingTimeDescription"
+  | "mobile.manualBookingCustomerDescription"
+  | "mobile.manualBookingReviewDescription"
+  | "mobile.manualBookingStepTime"
+  | "mobile.manualBookingStepCustomer"
+  | "mobile.manualBookingStepReview"
   | "mobile.manualBookingExistingCustomer"
   | "mobile.manualBookingNewCustomer"
   | "mobile.manualBookingSearchCustomer"
@@ -214,6 +222,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Язык",
     "common.save": "Сохранить",
     "common.cancel": "Отмена",
+    "common.back": "Назад",
+    "common.next": "Продолжить",
     "common.retry": "Повторить",
     "common.loading": "Загрузка…",
     "common.error":
@@ -319,6 +329,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingTitle": "Новая запись",
     "mobile.manualBookingDescription":
       "Создайте подтверждённую запись для клиента из календаря или мессенджера.",
+    "mobile.manualBookingTimeDescription":
+      "Сначала выберите услугу, дату и свободное время.",
+    "mobile.manualBookingCustomerDescription":
+      "Выберите постоянного клиента или добавьте нового.",
+    "mobile.manualBookingReviewDescription":
+      "Проверьте детали записи перед созданием.",
+    "mobile.manualBookingStepTime": "Время",
+    "mobile.manualBookingStepCustomer": "Клиент",
+    "mobile.manualBookingStepReview": "Проверка",
     "mobile.manualBookingExistingCustomer": "Существующий клиент",
     "mobile.manualBookingNewCustomer": "Новый клиент",
     "mobile.manualBookingSearchCustomer": "Поиск клиента",
@@ -444,6 +463,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Jazyk",
     "common.save": "Uložit",
     "common.cancel": "Zrušit",
+    "common.back": "Zpět",
+    "common.next": "Pokračovat",
     "common.retry": "Zkusit znovu",
     "common.loading": "Načítání…",
     "common.error":
@@ -549,6 +570,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingTitle": "Nová rezervace",
     "mobile.manualBookingDescription":
       "Vytvořte potvrzenou rezervaci pro klienta z kalendáře nebo zpráv.",
+    "mobile.manualBookingTimeDescription":
+      "Nejprve vyberte službu, datum a volný čas.",
+    "mobile.manualBookingCustomerDescription":
+      "Vyberte stávajícího klienta nebo přidejte nového.",
+    "mobile.manualBookingReviewDescription":
+      "Před vytvořením zkontrolujte podrobnosti rezervace.",
+    "mobile.manualBookingStepTime": "Čas",
+    "mobile.manualBookingStepCustomer": "Klient",
+    "mobile.manualBookingStepReview": "Kontrola",
     "mobile.manualBookingExistingCustomer": "Stávající klient",
     "mobile.manualBookingNewCustomer": "Nový klient",
     "mobile.manualBookingSearchCustomer": "Hledat klienta",
@@ -669,6 +699,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.language": "Language",
     "common.save": "Save",
     "common.cancel": "Cancel",
+    "common.back": "Back",
+    "common.next": "Continue",
     "common.retry": "Try again",
     "common.loading": "Loading…",
     "common.error":
@@ -774,6 +806,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingTitle": "New booking",
     "mobile.manualBookingDescription":
       "Create a confirmed booking for a client from your calendar or messages.",
+    "mobile.manualBookingTimeDescription":
+      "Start by choosing a service, date, and available time.",
+    "mobile.manualBookingCustomerDescription":
+      "Choose an existing customer or add a new one.",
+    "mobile.manualBookingReviewDescription":
+      "Review the booking details before creating it.",
+    "mobile.manualBookingStepTime": "Time",
+    "mobile.manualBookingStepCustomer": "Customer",
+    "mobile.manualBookingStepReview": "Review",
     "mobile.manualBookingExistingCustomer": "Existing customer",
     "mobile.manualBookingNewCustomer": "New customer",
     "mobile.manualBookingSearchCustomer": "Search customers",

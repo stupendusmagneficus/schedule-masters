@@ -63,7 +63,18 @@ export async function listMasterCustomers(
     p_workspace_id: workspaceId,
   });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return deduplicateManualBookingCustomers(data ?? []);
+}
+
+export function deduplicateManualBookingCustomers(
+  customers: readonly ManualBookingCustomer[],
+): ManualBookingCustomer[] {
+  const seenCustomerIds = new Set<string>();
+  return customers.filter((customer) => {
+    if (seenCustomerIds.has(customer.id)) return false;
+    seenCustomerIds.add(customer.id);
+    return true;
+  });
 }
 
 export async function listMasterAvailableSlots(

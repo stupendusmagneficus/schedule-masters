@@ -1,7 +1,8 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, radii, shadows } from "../theme/tokens";
+import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { FullscreenModal } from "./FullscreenModal";
 
 type NewBookingNoticeProps = {
   readonly closeLabel: string;
@@ -19,49 +20,32 @@ export function NewBookingNotice({
   visible,
 }: NewBookingNoticeProps) {
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="fade"
-      onRequestClose={onClose}
-      transparent
+    <FullscreenModal
+      closeLabel={closeLabel}
+      onClose={onClose}
+      title={title}
       visible={visible}
+      footer={
+        <Pressable
+          accessibilityRole="button"
+          onPress={onClose}
+          style={({ pressed }) => [
+            styles.closeButton,
+            pressed && styles.closeButtonPressed,
+          ]}
+        >
+          <Text style={styles.closeButtonText}>{closeLabel}</Text>
+        </Pressable>
+      }
     >
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onClose}
-            style={({ pressed }) => [
-              styles.closeButton,
-              pressed && styles.closeButtonPressed,
-            ]}
-          >
-            <Text style={styles.closeButtonText}>{closeLabel}</Text>
-          </Pressable>
-        </View>
+      <View style={styles.content}>
+        <Text style={styles.description}>{description}</Text>
       </View>
-    </Modal>
+    </FullscreenModal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    alignItems: "center",
-    backgroundColor: colors.overlay,
-    flex: 1,
-    justifyContent: "center",
-    padding: 24,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.surface,
-    maxWidth: 360,
-    padding: 24,
-    width: "100%",
-    ...shadows.surface,
-  },
   closeButton: {
     alignItems: "center",
     backgroundColor: colors.action,
@@ -80,7 +64,11 @@ const styles = StyleSheet.create({
   description: {
     ...typography.body,
     color: colors.secondaryText,
-    marginTop: 8,
   },
-  title: { ...typography.section, color: colors.primaryText },
+  content: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.surface,
+    margin: 20,
+    padding: 20,
+  },
 });

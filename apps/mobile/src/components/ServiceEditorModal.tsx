@@ -2,7 +2,6 @@ import type { MessageKey } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,9 +16,10 @@ import {
   type ServiceValidationError,
   validateServiceDraft,
 } from "../features/services/serviceCatalog";
-import { colors, radii, shadows } from "../theme/tokens";
+import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service } from "../types";
+import { FullscreenModal } from "./FullscreenModal";
 
 type ServiceEditorModalProps = {
   readonly error: string | null;
@@ -74,155 +74,138 @@ export function ServiceEditorModal({
     : error;
 
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
+    <FullscreenModal
+      closeLabel={t("common.cancel")}
+      closeDisabled={isSaving}
+      onClose={onClose}
+      title={service ? t("mobile.serviceEdit") : t("mobile.serviceCreate")}
       visible={visible}
-    >
-      <KeyboardAvoidingView behavior="padding" style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerCopy}>
-              <Text style={styles.title}>
-                {service ? t("mobile.serviceEdit") : t("mobile.serviceCreate")}
-              </Text>
-              <Text style={styles.description}>
-                {t("mobile.servicesDescription")}
-              </Text>
-            </View>
+      footer={
+        <View style={styles.actions}>
+          {errorMessage ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {errorMessage}
+            </Text>
+          ) : null}
+          <View style={styles.actionRow}>
             <Pressable
-              accessibilityLabel={t("common.cancel")}
               accessibilityRole="button"
               disabled={isSaving}
               onPress={onClose}
-              style={styles.closeButton}
+              style={styles.secondaryButton}
             >
-              <Text style={styles.closeButtonText}>×</Text>
+              <Text style={styles.secondaryButtonText}>
+                {t("common.cancel")}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              disabled={isSaving}
+              onPress={() => void handleSave()}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && styles.primaryButtonPressed,
+                isSaving && styles.disabled,
+              ]}
+            >
+              <Text style={styles.primaryButtonText}>
+                {isSaving ? t("common.loading") : t("mobile.serviceSave")}
+              </Text>
             </Pressable>
           </View>
-
-          <ScrollView
-            contentContainerStyle={styles.form}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Field
-              error={validationError === "name"}
-              label={t("mobile.serviceName")}
-              onChangeText={(name) => updateDraft({ name })}
-              value={draft.name}
-            />
-            <Field
-              error={validationError === "description"}
-              label={t("mobile.serviceDescription")}
-              multiline
-              onChangeText={(description) => updateDraft({ description })}
-              value={draft.description}
-            />
-            <View style={styles.row}>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "durationMinutes"}
-                  keyboardType="number-pad"
-                  label={t("mobile.serviceDuration")}
-                  onChangeText={(durationMinutes) =>
-                    updateDraft({ durationMinutes })
-                  }
-                  value={draft.durationMinutes}
-                />
-              </View>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "priceAmount"}
-                  keyboardType="decimal-pad"
-                  label={t("mobile.servicePrice")}
-                  onChangeText={(priceAmount) => updateDraft({ priceAmount })}
-                  value={draft.priceAmount}
-                />
-              </View>
-            </View>
-            <View style={styles.row}>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "currency"}
-                  autoCapitalize="characters"
-                  label={t("mobile.serviceCurrency")}
-                  onChangeText={(currency) => updateDraft({ currency })}
-                  value={draft.currency}
-                />
-              </View>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "sortOrder"}
-                  keyboardType="number-pad"
-                  label={t("mobile.serviceSortOrder")}
-                  onChangeText={(sortOrder) => updateDraft({ sortOrder })}
-                  value={draft.sortOrder}
-                />
-              </View>
-            </View>
-            <View style={styles.row}>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "bufferBeforeMinutes"}
-                  keyboardType="number-pad"
-                  label={t("mobile.serviceBufferBefore")}
-                  onChangeText={(bufferBeforeMinutes) =>
-                    updateDraft({ bufferBeforeMinutes })
-                  }
-                  value={draft.bufferBeforeMinutes}
-                />
-              </View>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "bufferAfterMinutes"}
-                  keyboardType="number-pad"
-                  label={t("mobile.serviceBufferAfter")}
-                  onChangeText={(bufferAfterMinutes) =>
-                    updateDraft({ bufferAfterMinutes })
-                  }
-                  value={draft.bufferAfterMinutes}
-                />
-              </View>
-            </View>
-
-            {errorMessage ? (
-              <Text accessibilityRole="alert" style={styles.error}>
-                {errorMessage}
-              </Text>
-            ) : null}
-
-            <View style={styles.actions}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isSaving}
-                onPress={onClose}
-                style={styles.secondaryButton}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("common.cancel")}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isSaving}
-                onPress={() => void handleSave()}
-                style={({ pressed }) => [
-                  styles.primaryButton,
-                  pressed && styles.primaryButtonPressed,
-                  isSaving && styles.disabled,
-                ]}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {isSaving ? t("common.loading") : t("mobile.serviceSave")}
-                </Text>
-              </Pressable>
-            </View>
-          </ScrollView>
         </View>
+      }
+    >
+      <KeyboardAvoidingView behavior="padding" style={styles.body}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.description}>
+            {t("mobile.servicesDescription")}
+          </Text>
+          <Field
+            error={validationError === "name"}
+            label={t("mobile.serviceName")}
+            onChangeText={(name) => updateDraft({ name })}
+            value={draft.name}
+          />
+          <Field
+            error={validationError === "description"}
+            label={t("mobile.serviceDescription")}
+            multiline
+            onChangeText={(description) => updateDraft({ description })}
+            value={draft.description}
+          />
+          <View style={styles.row}>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "durationMinutes"}
+                keyboardType="number-pad"
+                label={t("mobile.serviceDuration")}
+                onChangeText={(durationMinutes) =>
+                  updateDraft({ durationMinutes })
+                }
+                value={draft.durationMinutes}
+              />
+            </View>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "priceAmount"}
+                keyboardType="decimal-pad"
+                label={t("mobile.servicePrice")}
+                onChangeText={(priceAmount) => updateDraft({ priceAmount })}
+                value={draft.priceAmount}
+              />
+            </View>
+          </View>
+          <View style={styles.row}>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "currency"}
+                autoCapitalize="characters"
+                label={t("mobile.serviceCurrency")}
+                onChangeText={(currency) => updateDraft({ currency })}
+                value={draft.currency}
+              />
+            </View>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "sortOrder"}
+                keyboardType="number-pad"
+                label={t("mobile.serviceSortOrder")}
+                onChangeText={(sortOrder) => updateDraft({ sortOrder })}
+                value={draft.sortOrder}
+              />
+            </View>
+          </View>
+          <View style={styles.row}>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "bufferBeforeMinutes"}
+                keyboardType="number-pad"
+                label={t("mobile.serviceBufferBefore")}
+                onChangeText={(bufferBeforeMinutes) =>
+                  updateDraft({ bufferBeforeMinutes })
+                }
+                value={draft.bufferBeforeMinutes}
+              />
+            </View>
+            <View style={styles.rowField}>
+              <Field
+                error={validationError === "bufferAfterMinutes"}
+                keyboardType="number-pad"
+                label={t("mobile.serviceBufferAfter")}
+                onChangeText={(bufferAfterMinutes) =>
+                  updateDraft({ bufferAfterMinutes })
+                }
+                value={draft.bufferAfterMinutes}
+              />
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </Modal>
+    </FullscreenModal>
   );
 }
 
@@ -282,48 +265,27 @@ function validationMessage(
 }
 
 const styles = StyleSheet.create({
-  actions: { flexDirection: "row", gap: 8, marginTop: 20 },
-  backdrop: {
-    alignItems: "center",
-    backgroundColor: colors.overlay,
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.surface,
-    maxHeight: "90%",
-    maxWidth: 480,
-    padding: 20,
-    width: "100%",
-    ...shadows.surface,
-  },
-  closeButton: { padding: 4 },
-  closeButtonText: {
-    color: colors.secondaryText,
-    fontSize: 28,
-    lineHeight: 28,
-  },
+  actionRow: { flexDirection: "row", gap: 12 },
+  actions: { gap: 12 },
+  body: { flex: 1 },
   description: {
     ...typography.body,
     color: colors.secondaryText,
-    marginTop: 8,
+    marginBottom: 8,
   },
   disabled: { opacity: 0.6 },
-  error: { ...typography.caption, color: colors.danger, marginTop: 12 },
-  field: { flex: 1, gap: 6, marginTop: 14 },
-  form: { paddingBottom: 4 },
-  header: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
-  headerCopy: { flex: 1 },
+  error: { ...typography.caption, color: colors.danger },
+  field: { gap: 8, marginTop: 16 },
+  form: { padding: 20, paddingBottom: 40 },
   input: {
     ...typography.body,
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 44,
-    paddingHorizontal: 14,
+    minHeight: 48,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   inputError: { borderColor: colors.danger, borderWidth: 1 },
   label: {
@@ -331,28 +293,33 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     fontWeight: "600",
   },
-  multilineInput: { minHeight: 80, paddingTop: 12, textAlignVertical: "top" },
+  multilineInput: {
+    height: 96,
+    minHeight: 96,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.action,
     borderRadius: radii.control,
     flex: 1,
     justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
+    minHeight: 48,
+    paddingHorizontal: 16,
   },
   primaryButtonPressed: { backgroundColor: colors.actionPressed },
   primaryButtonText: { ...typography.label, color: colors.actionText },
-  row: { flexDirection: "row", gap: 8 },
-  rowField: { flex: 1 },
+  row: { flexDirection: "row", gap: 12 },
+  rowField: { flex: 1, minWidth: 0 },
   secondaryButton: {
     alignItems: "center",
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
+    minHeight: 48,
+    paddingHorizontal: 16,
   },
   secondaryButtonText: { ...typography.label, color: colors.primaryText },
   title: { ...typography.section, color: colors.primaryText },

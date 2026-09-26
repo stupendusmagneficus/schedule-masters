@@ -22,6 +22,17 @@ Linear task: SCH-
 - [ ] Pure helpers and important new behavior have focused tests at the appropriate level.
 - [ ] Manual testing was completed when the change affects user-visible behavior.
 
+## Design review (required for UI/UX changes)
+
+<!-- Complete every item when the PR changes screens, components, styles, tokens, copy, or interaction flows. -->
+
+- [ ] I completed the design review checklist in `docs/design/design-review.md`.
+- [ ] I checked spacing, typography, layout, and responsive behavior at the affected viewport sizes.
+- [ ] I checked accessibility, touch targets, focus/keyboard behavior, loading, error, empty, and disabled states.
+- [ ] I attached visual evidence or explained why visual evidence is not applicable.
+
+Visual evidence: <!-- screenshots, recording, local route, or N/A with explanation -->
+
 ## Test plan
 
 <!-- Commands and manual scenarios used to verify the change. -->

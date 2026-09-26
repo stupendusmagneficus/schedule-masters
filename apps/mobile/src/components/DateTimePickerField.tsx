@@ -115,14 +115,14 @@ function formatTime(value: Date) {
 }
 
 const styles = StyleSheet.create({
-  field: { gap: 6 },
+  field: { gap: 8 },
   input: {
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
+    minHeight: 48,
+    paddingHorizontal: 16,
   },
   label: {
     ...typography.caption,

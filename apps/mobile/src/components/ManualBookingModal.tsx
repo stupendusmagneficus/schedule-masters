@@ -2,10 +2,9 @@ import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -26,10 +25,17 @@ import {
   type ManualBookingValidationError,
   validateManualBookingDraft,
 } from "../features/appointments/manualBooking";
-import { colors, radii, shadows } from "../theme/tokens";
+import {
+  type ManualBookingStep,
+  manualBookingStepIndex,
+  nextManualBookingStep,
+  previousManualBookingStep,
+} from "../features/appointments/manualBookingFlow";
+import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
 import { DateTimePickerField } from "./DateTimePickerField";
+import { FullscreenModal } from "./FullscreenModal";
 
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
@@ -37,7 +43,7 @@ type ManualBookingModalProps = {
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onCreated: () => Promise<void>;
-  readonly service: Service | null;
+  readonly services: readonly Service[];
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
   readonly workspace: Workspace;
@@ -49,14 +55,15 @@ export function ManualBookingModal({
   locale,
   onClose,
   onCreated,
-  service,
+  services,
   t,
   visible,
   workspace,
 }: ManualBookingModalProps) {
   const [draft, setDraft] = useState<ManualBookingDraft>(() =>
-    createInitialDraft(service, initialDate),
+    createInitialDraft(services[0] ?? null, initialDate),
   );
+  const [step, setStep] = useState<ManualBookingStep>("time");
   const [customers, setCustomers] = useState<ManualBookingCustomer[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
   const [isExistingCustomer, setExistingCustomer] = useState(true);
@@ -68,20 +75,34 @@ export function ManualBookingModal({
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] =
     useState<ManualBookingValidationError | null>(null);
+  const initializedDate = useRef<string | null>(null);
+
+  const selectedService =
+    services.find((service) => service.id === draft.serviceId) ??
+    services[0] ??
+    null;
+  const selectedServiceId = selectedService?.id;
 
   useEffect(() => {
-    if (!visible) return;
-    setDraft(createInitialDraft(service, initialDate));
+    if (!visible) {
+      initializedDate.current = null;
+      return;
+    }
+    if (initializedDate.current === initialDate) return;
+    initializedDate.current = initialDate;
+    setDraft(createInitialDraft(services[0] ?? null, initialDate));
+    setStep("time");
     setCustomerSearch("");
     setExistingCustomer(true);
+    setCustomers([]);
     setSlots([]);
     setError(null);
     setValidationError(null);
     setIdempotencyKey(createIdempotencyKey());
-  }, [initialDate, service, visible]);
+  }, [initialDate, services, visible]);
 
   useEffect(() => {
-    if (!visible || !isExistingCustomer) return;
+    if (!visible || !isExistingCustomer || step !== "customer") return;
     let active = true;
     setLoadingCustomers(true);
     void listMasterCustomers(client, workspace.id, customerSearch)
@@ -97,15 +118,28 @@ export function ManualBookingModal({
     return () => {
       active = false;
     };
-  }, [client, customerSearch, isExistingCustomer, t, visible, workspace.id]);
+  }, [
+    client,
+    customerSearch,
+    isExistingCustomer,
+    step,
+    t,
+    visible,
+    workspace.id,
+  ]);
 
   useEffect(() => {
-    if (!visible || !service || !draft.date) return;
+    if (!visible || !selectedServiceId || !draft.date) return;
     let active = true;
     setLoadingSlots(true);
     setSlots([]);
     setDraft((current) => ({ ...current, startsAt: "" }));
-    void listMasterAvailableSlots(client, workspace.id, service.id, draft.date)
+    void listMasterAvailableSlots(
+      client,
+      workspace.id,
+      selectedServiceId,
+      draft.date,
+    )
       .then((nextSlots) => {
         if (active) setSlots(nextSlots);
       })
@@ -118,12 +152,21 @@ export function ManualBookingModal({
     return () => {
       active = false;
     };
-  }, [client, draft.date, service, t, visible, workspace.id]);
+  }, [client, draft.date, selectedServiceId, t, visible, workspace.id]);
 
   function updateDraft(patch: Partial<ManualBookingDraft>) {
     setDraft((current) => ({ ...current, ...patch }));
     setValidationError(null);
     setError(null);
+  }
+
+  function selectService(service: Service) {
+    updateDraft({
+      durationMinutes: String(service.duration_minutes),
+      priceAmount: String(service.price_amount),
+      serviceId: service.id,
+      startsAt: "",
+    });
   }
 
   function selectCustomer(customer: ManualBookingCustomer) {
@@ -135,10 +178,51 @@ export function ManualBookingModal({
     });
   }
 
+  function handleBack() {
+    if (step === "time") {
+      onClose();
+      return;
+    }
+    setStep(previousManualBookingStep(step));
+    setValidationError(null);
+    setError(null);
+  }
+
+  function handleNext() {
+    const nextValidationError = validateManualBookingDraft(draft);
+    if (step === "time") {
+      if (
+        nextValidationError === "date" ||
+        nextValidationError === "slot" ||
+        nextValidationError === "duration" ||
+        nextValidationError === "price"
+      ) {
+        setValidationError(nextValidationError);
+        return;
+      }
+    }
+    if (step === "customer") {
+      if (nextValidationError === "name" || nextValidationError === "email") {
+        setValidationError(nextValidationError);
+        return;
+      }
+    }
+    setValidationError(null);
+    setError(null);
+    setStep(nextManualBookingStep(step));
+  }
+
   async function handleSubmit() {
     const nextValidationError = validateManualBookingDraft(draft);
     setValidationError(nextValidationError);
-    if (nextValidationError) return;
+    if (nextValidationError) {
+      setStep(
+        ["date", "slot", "duration", "price"].includes(nextValidationError)
+          ? "time"
+          : "customer",
+      );
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -157,216 +241,134 @@ export function ManualBookingModal({
   const errorMessage = validationError
     ? validationMessage(validationError, t)
     : error;
+  const stepLabels = [
+    t("mobile.manualBookingStepTime"),
+    t("mobile.manualBookingStepCustomer"),
+    t("mobile.manualBookingStepReview"),
+  ];
 
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
+    <FullscreenModal
+      closeLabel={step === "time" ? t("common.cancel") : t("common.back")}
+      closeDisabled={isSaving}
+      onClose={handleBack}
+      title={t("mobile.manualBookingTitle")}
       visible={visible}
+      footer={
+        <View style={styles.footerContent}>
+          {errorMessage ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {errorMessage}
+            </Text>
+          ) : null}
+          {step === "time" ? (
+            <ActionButton
+              disabled={isLoadingSlots || !selectedService || !draft.startsAt}
+              label={t("common.next")}
+              onPress={handleNext}
+              primary
+            />
+          ) : step === "customer" ? (
+            <ActionButton
+              label={t("common.next")}
+              onPress={handleNext}
+              primary
+            />
+          ) : (
+            <ActionButton
+              disabled={isSaving}
+              label={
+                isSaving ? t("common.loading") : t("mobile.manualBookingCreate")
+              }
+              onPress={() => void handleSubmit()}
+              primary
+            />
+          )}
+        </View>
+      }
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.backdrop}
+        style={styles.body}
       >
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerCopy}>
-              <Text style={styles.title}>{t("mobile.manualBookingTitle")}</Text>
-              <Text style={styles.description}>
-                {t("mobile.manualBookingDescription")}
-              </Text>
-            </View>
-            <Pressable
-              accessibilityLabel={t("common.cancel")}
-              accessibilityRole="button"
-              disabled={isSaving}
-              onPress={onClose}
-              style={styles.closeButton}
-            >
-              <Text style={styles.closeButtonText}>×</Text>
-            </Pressable>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.progress}>
+            {stepLabels.map((label, index) => (
+              <View key={label} style={styles.progressItem}>
+                <View
+                  style={[
+                    styles.progressDot,
+                    index <= manualBookingStepIndex(step) &&
+                      styles.progressDotActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.progressNumber,
+                      index <= manualBookingStepIndex(step) &&
+                        styles.progressNumberActive,
+                    ]}
+                  >
+                    {index + 1}
+                  </Text>
+                </View>
+                <Text style={styles.progressLabel}>{label}</Text>
+              </View>
+            ))}
           </View>
 
-          <ScrollView
-            contentContainerStyle={styles.form}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.segmentedControl}>
-              <ModeButton
-                active={isExistingCustomer}
-                label={t("mobile.manualBookingExistingCustomer")}
-                onPress={() => {
-                  setExistingCustomer(true);
-                  updateDraft({ customerId: null });
-                }}
-              />
-              <ModeButton
-                active={!isExistingCustomer}
-                label={t("mobile.manualBookingNewCustomer")}
-                onPress={() => {
-                  setExistingCustomer(false);
-                  updateDraft({
-                    customerId: null,
-                    email: "",
-                    name: "",
-                    phone: "",
-                  });
-                }}
-              />
-            </View>
+          <Text style={styles.description}>
+            {step === "time"
+              ? t("mobile.manualBookingTimeDescription")
+              : step === "customer"
+                ? t("mobile.manualBookingCustomerDescription")
+                : t("mobile.manualBookingReviewDescription")}
+          </Text>
 
-            {isExistingCustomer ? (
-              <View style={styles.customerSection}>
-                <Field
-                  label={t("mobile.manualBookingSearchCustomer")}
-                  onChangeText={setCustomerSearch}
-                  placeholder={t("mobile.manualBookingSearchCustomer")}
-                  value={customerSearch}
-                />
-                {isLoadingCustomers ? (
-                  <Text style={styles.helper}>{t("common.loading")}</Text>
-                ) : customers.length ? (
-                  <View style={styles.customerList}>
-                    {customers.slice(0, 6).map((customer) => (
-                      <Pressable
-                        accessibilityRole="button"
-                        key={customer.id}
-                        onPress={() => selectCustomer(customer)}
-                        style={[
-                          styles.customerRow,
-                          selectedCustomerId === customer.id &&
-                            styles.selectedCustomerRow,
-                        ]}
-                      >
-                        <View style={styles.customerCopy}>
-                          <Text style={styles.customerName}>
-                            {customer.name}
-                          </Text>
-                          <Text style={styles.helper}>
-                            {customer.phone || customer.email || "—"}
-                          </Text>
-                        </View>
-                        {selectedCustomerId === customer.id ? (
-                          <Text style={styles.selectedMark}>✓</Text>
-                        ) : null}
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : (
-                  <Text style={styles.helper}>
-                    {t("mobile.manualBookingNoCustomers")}
-                  </Text>
-                )}
-              </View>
-            ) : null}
-
-            <Field
-              error={validationError === "name"}
-              label={t("mobile.manualBookingCustomerName")}
-              onChangeText={(name) => updateDraft({ customerId: null, name })}
-              placeholder={t("mobile.manualBookingCustomerName")}
-              value={draft.name}
+          {step === "time" ? (
+            <TimeStep
+              draft={draft}
+              isLoadingSlots={isLoadingSlots}
+              locale={locale}
+              onChangeDate={(date) => updateDraft({ date })}
+              onSelectService={selectService}
+              onSelectSlot={(startsAt) => updateDraft({ startsAt })}
+              selectedService={selectedService}
+              services={services}
+              slots={slots}
+              t={t}
+              workspace={workspace}
             />
-            <Field
-              error={validationError === "email"}
-              keyboardType="email-address"
-              label={t("mobile.manualBookingCustomerEmail")}
-              onChangeText={(email) => updateDraft({ email })}
-              placeholder={t("mobile.manualBookingCustomerEmail")}
-              value={draft.email}
+          ) : step === "customer" ? (
+            <CustomerStep
+              customers={customers}
+              customerSearch={customerSearch}
+              draft={draft}
+              isExistingCustomer={isExistingCustomer}
+              isLoadingCustomers={isLoadingCustomers}
+              onChangeSearch={setCustomerSearch}
+              onSelectCustomer={selectCustomer}
+              onSetExisting={(existing) => {
+                setExistingCustomer(existing);
+                updateDraft(
+                  existing
+                    ? { customerId: null }
+                    : { customerId: null, email: "", name: "", phone: "" },
+                );
+              }}
+              selectedCustomerId={selectedCustomerId}
+              t={t}
+              updateDraft={updateDraft}
+              validationError={validationError}
             />
-            <Field
-              label={t("mobile.manualBookingCustomerPhone")}
-              keyboardType="phone-pad"
-              onChangeText={(phone) => updateDraft({ phone })}
-              placeholder={t("mobile.manualBookingCustomerPhone")}
-              value={draft.phone}
-            />
+          ) : (
+            <ReviewStep draft={draft} selectedService={selectedService} t={t} />
+          )}
 
-            <View style={styles.serviceCard}>
-              <Text style={styles.label}>
-                {t("mobile.manualBookingService")}
-              </Text>
-              <Text style={styles.serviceName}>
-                {service?.name ?? t("mobile.noServices")}
-              </Text>
-            </View>
-
-            <DateTimePickerField
-              label={t("mobile.manualBookingDate")}
-              mode="date"
-              onChange={(date) => updateDraft({ date })}
-              placeholder={t("mobile.personalBlockDatePlaceholder")}
-              value={draft.date}
-            />
-
-            <View style={styles.field}>
-              <Text style={styles.label}>{t("mobile.manualBookingTime")}</Text>
-              {isLoadingSlots ? (
-                <Text style={styles.helper}>{t("common.loading")}</Text>
-              ) : slots.length ? (
-                <View style={styles.slots}>
-                  {slots.map((slot) => {
-                    const isSelected = draft.startsAt === slot.starts_at;
-                    return (
-                      <Pressable
-                        accessibilityRole="button"
-                        key={slot.starts_at}
-                        onPress={() =>
-                          updateDraft({ startsAt: slot.starts_at })
-                        }
-                        style={[styles.slot, isSelected && styles.selectedSlot]}
-                      >
-                        <Text
-                          style={[
-                            styles.slotText,
-                            isSelected && styles.selectedSlotText,
-                          ]}
-                        >
-                          {formatTime(new Date(slot.starts_at), locale, {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            timeZone: workspace.timezone,
-                          })}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : (
-                <Text style={styles.helper}>
-                  {t("mobile.manualBookingNoSlots")}
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "duration"}
-                  keyboardType="number-pad"
-                  label={t("mobile.manualBookingDuration")}
-                  onChangeText={(durationMinutes) =>
-                    updateDraft({ durationMinutes })
-                  }
-                  placeholder="90"
-                  value={draft.durationMinutes}
-                />
-              </View>
-              <View style={styles.rowField}>
-                <Field
-                  error={validationError === "price"}
-                  keyboardType="decimal-pad"
-                  label={t("mobile.manualBookingPrice")}
-                  onChangeText={(priceAmount) => updateDraft({ priceAmount })}
-                  placeholder="700"
-                  value={draft.priceAmount}
-                />
-              </View>
-            </View>
-
+          {step === "review" ? (
             <Field
               label={t("mobile.manualBookingNote")}
               multiline
@@ -374,45 +376,270 @@ export function ManualBookingModal({
               placeholder={t("mobile.manualBookingNotePlaceholder")}
               value={draft.masterNote}
             />
-
-            {errorMessage ? (
-              <Text accessibilityRole="alert" style={styles.error}>
-                {errorMessage}
-              </Text>
-            ) : null}
-
-            <View style={styles.actions}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isSaving}
-                onPress={onClose}
-                style={styles.secondaryButton}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("common.cancel")}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isSaving || !service}
-                onPress={() => void handleSubmit()}
-                style={({ pressed }) => [
-                  styles.primaryButton,
-                  pressed && styles.primaryButtonPressed,
-                  (isSaving || !service) && styles.disabled,
-                ]}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {isSaving
-                    ? t("common.loading")
-                    : t("mobile.manualBookingCreate")}
-                </Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-        </View>
+          ) : null}
+        </ScrollView>
       </KeyboardAvoidingView>
-    </Modal>
+    </FullscreenModal>
+  );
+}
+
+function TimeStep({
+  draft,
+  isLoadingSlots,
+  locale,
+  onChangeDate,
+  onSelectService,
+  onSelectSlot,
+  selectedService,
+  services,
+  slots,
+  t,
+  workspace,
+}: {
+  readonly draft: ManualBookingDraft;
+  readonly isLoadingSlots: boolean;
+  readonly locale: SupportedLocale;
+  readonly onChangeDate: (date: string) => void;
+  readonly onSelectService: (service: Service) => void;
+  readonly onSelectSlot: (startsAt: string) => void;
+  readonly selectedService: Service | null;
+  readonly services: readonly Service[];
+  readonly slots: readonly AvailableSlot[];
+  readonly t: (key: MessageKey) => string;
+  readonly workspace: Workspace;
+}) {
+  return (
+    <View>
+      <Text style={styles.sectionTitle}>
+        {t("mobile.manualBookingService")}
+      </Text>
+      {services.length ? (
+        <View style={styles.optionList}>
+          {services.map((service) => (
+            <Pressable
+              accessibilityRole="button"
+              key={service.id}
+              onPress={() => onSelectService(service)}
+              style={[
+                styles.optionRow,
+                selectedService?.id === service.id && styles.selectedOptionRow,
+              ]}
+            >
+              <View style={styles.optionCopy}>
+                <Text style={styles.optionTitle}>{service.name}</Text>
+                <Text style={styles.helper}>
+                  {service.duration_minutes} min · {service.price_amount}{" "}
+                  {service.currency}
+                </Text>
+              </View>
+              {selectedService?.id === service.id ? (
+                <Text style={styles.selectedMark}>✓</Text>
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.helper}>{t("mobile.noServices")}</Text>
+      )}
+
+      <View style={styles.dateField}>
+        <DateTimePickerField
+          label={t("mobile.manualBookingDate")}
+          mode="date"
+          onChange={onChangeDate}
+          placeholder={t("mobile.personalBlockDatePlaceholder")}
+          value={draft.date}
+        />
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.sectionTitle}>{t("mobile.manualBookingTime")}</Text>
+        {isLoadingSlots ? (
+          <Text style={styles.helper}>{t("common.loading")}</Text>
+        ) : slots.length ? (
+          <View style={styles.slots}>
+            {slots.map((slot) => {
+              const isSelected = draft.startsAt === slot.starts_at;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  key={slot.starts_at}
+                  onPress={() => onSelectSlot(slot.starts_at)}
+                  style={[styles.slot, isSelected && styles.selectedSlot]}
+                >
+                  <Text
+                    style={[
+                      styles.slotText,
+                      isSelected && styles.selectedSlotText,
+                    ]}
+                  >
+                    {formatTime(new Date(slot.starts_at), locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: workspace.timezone,
+                    })}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : (
+          <Text style={styles.helper}>{t("mobile.manualBookingNoSlots")}</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+function CustomerStep({
+  customers,
+  customerSearch,
+  draft,
+  isExistingCustomer,
+  isLoadingCustomers,
+  onChangeSearch,
+  onSelectCustomer,
+  onSetExisting,
+  selectedCustomerId,
+  t,
+  updateDraft,
+  validationError,
+}: {
+  readonly customers: readonly ManualBookingCustomer[];
+  readonly customerSearch: string;
+  readonly draft: ManualBookingDraft;
+  readonly isExistingCustomer: boolean;
+  readonly isLoadingCustomers: boolean;
+  readonly onChangeSearch: (value: string) => void;
+  readonly onSelectCustomer: (customer: ManualBookingCustomer) => void;
+  readonly onSetExisting: (existing: boolean) => void;
+  readonly selectedCustomerId: string | null;
+  readonly t: (key: MessageKey) => string;
+  readonly updateDraft: (patch: Partial<ManualBookingDraft>) => void;
+  readonly validationError: ManualBookingValidationError | null;
+}) {
+  return (
+    <View>
+      <View style={styles.segmentedControl}>
+        <ModeButton
+          active={isExistingCustomer}
+          label={t("mobile.manualBookingExistingCustomer")}
+          onPress={() => onSetExisting(true)}
+        />
+        <ModeButton
+          active={!isExistingCustomer}
+          label={t("mobile.manualBookingNewCustomer")}
+          onPress={() => onSetExisting(false)}
+        />
+      </View>
+
+      {isExistingCustomer ? (
+        <View style={styles.customerSection}>
+          <Field
+            label={t("mobile.manualBookingSearchCustomer")}
+            onChangeText={onChangeSearch}
+            placeholder={t("mobile.manualBookingSearchCustomer")}
+            value={customerSearch}
+          />
+          {isLoadingCustomers ? (
+            <Text style={styles.helper}>{t("common.loading")}</Text>
+          ) : customers.length ? (
+            <View style={styles.customerList}>
+              {customers.slice(0, 6).map((customer) => (
+                <Pressable
+                  accessibilityRole="button"
+                  key={customer.id}
+                  onPress={() => onSelectCustomer(customer)}
+                  style={[
+                    styles.optionRow,
+                    selectedCustomerId === customer.id &&
+                      styles.selectedOptionRow,
+                  ]}
+                >
+                  <View style={styles.optionCopy}>
+                    <Text style={styles.optionTitle}>{customer.name}</Text>
+                    <Text style={styles.helper}>
+                      {customer.phone || customer.email || "—"}
+                    </Text>
+                  </View>
+                  {selectedCustomerId === customer.id ? (
+                    <Text style={styles.selectedMark}>✓</Text>
+                  ) : null}
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.helper}>
+              {t("mobile.manualBookingNoCustomers")}
+            </Text>
+          )}
+        </View>
+      ) : null}
+
+      <Field
+        error={validationError === "name"}
+        label={t("mobile.manualBookingCustomerName")}
+        onChangeText={(name) => updateDraft({ customerId: null, name })}
+        placeholder={t("mobile.manualBookingCustomerName")}
+        value={draft.name}
+      />
+      <Field
+        error={validationError === "email"}
+        keyboardType="email-address"
+        label={t("mobile.manualBookingCustomerEmail")}
+        onChangeText={(email) => updateDraft({ email })}
+        placeholder={t("mobile.manualBookingCustomerEmail")}
+        value={draft.email}
+      />
+      <Field
+        label={t("mobile.manualBookingCustomerPhone")}
+        keyboardType="phone-pad"
+        onChangeText={(phone) => updateDraft({ phone })}
+        placeholder={t("mobile.manualBookingCustomerPhone")}
+        value={draft.phone}
+      />
+    </View>
+  );
+}
+
+function ReviewStep({
+  draft,
+  selectedService,
+  t,
+}: {
+  readonly draft: ManualBookingDraft;
+  readonly selectedService: Service | null;
+  readonly t: (key: MessageKey) => string;
+}) {
+  const rows = [
+    [
+      t("mobile.manualBookingService"),
+      selectedService?.name ?? t("mobile.noServices"),
+    ],
+    [t("mobile.manualBookingCustomerName"), draft.name],
+    [t("mobile.manualBookingDate"), draft.date],
+    [t("mobile.manualBookingTime"), draft.startsAt.slice(11, 16)],
+    [t("mobile.manualBookingDuration"), `${draft.durationMinutes} min`],
+    [
+      t("mobile.manualBookingPrice"),
+      `${draft.priceAmount} ${selectedService?.currency ?? ""}`,
+    ],
+  ];
+
+  return (
+    <View style={styles.summary}>
+      {rows.map(([label, value]) => (
+        <View key={label} style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>{label}</Text>
+          <Text style={styles.summaryValue}>{value}</Text>
+        </View>
+      ))}
+      {draft.email || draft.phone ? (
+        <Text style={styles.helper}>
+          {[draft.email, draft.phone].filter(Boolean).join(" · ")}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
@@ -483,6 +710,37 @@ function ModeButton({
   );
 }
 
+function ActionButton({
+  disabled = false,
+  label,
+  onPress,
+  primary = false,
+}: {
+  readonly disabled?: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+  readonly primary?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        primary ? styles.primaryButton : styles.secondaryButton,
+        pressed && primary && styles.primaryButtonPressed,
+        disabled && styles.disabled,
+      ]}
+    >
+      <Text
+        style={primary ? styles.primaryButtonText : styles.secondaryButtonText}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function createInitialDraft(
   service: Service | null,
   date: string,
@@ -528,56 +786,22 @@ function serverErrorMessage(
 }
 
 const styles = StyleSheet.create({
-  actions: { flexDirection: "row", gap: 8, marginTop: 20 },
   activeModeButton: { backgroundColor: colors.action },
   activeModeButtonText: { color: colors.actionText },
-  backdrop: {
-    alignItems: "center",
-    backgroundColor: colors.overlay,
-    flex: 1,
-    justifyContent: "center",
-    padding: 16,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.surface,
-    flex: 1,
-    maxHeight: "94%",
-    maxWidth: 480,
-    padding: 20,
-    width: "100%",
-    ...shadows.surface,
-  },
-  closeButton: { padding: 4 },
-  closeButtonText: {
-    color: colors.secondaryText,
-    fontSize: 28,
-    lineHeight: 28,
-  },
-  customerCopy: { flex: 1, gap: 2 },
-  customerList: { gap: 6, marginTop: 8 },
-  customerName: { ...typography.label, color: colors.primaryText },
-  customerRow: {
-    alignItems: "center",
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 8,
-    padding: 10,
-  },
+  body: { flex: 1 },
+  customerList: { gap: 8, marginTop: 8 },
   customerSection: { gap: 4 },
+  dateField: { marginTop: 20 },
   description: {
     ...typography.body,
     color: colors.secondaryText,
-    marginTop: 6,
+    marginBottom: 8,
   },
   disabled: { opacity: 0.6 },
-  error: { ...typography.caption, color: colors.danger, marginTop: 12 },
-  field: { gap: 6, marginTop: 14 },
-  form: { paddingBottom: 8 },
-  header: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
-  headerCopy: { flex: 1 },
+  error: { ...typography.caption, color: colors.danger, marginBottom: 10 },
+  field: { gap: 6, marginTop: 16 },
+  footerContent: { gap: 4 },
+  form: { gap: 4, padding: 20, paddingBottom: 32 },
   helper: { ...typography.caption, color: colors.secondaryText },
   input: {
     ...typography.body,
@@ -585,9 +809,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    minHeight: 48,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   inputError: { borderColor: colors.danger, borderWidth: 1 },
   label: {
@@ -600,7 +824,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     flex: 1,
     justifyContent: "center",
-    minHeight: 38,
+    minHeight: 40,
     paddingHorizontal: 8,
   },
   modeButtonText: {
@@ -608,67 +832,132 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     textAlign: "center",
   },
-  multilineInput: { minHeight: 76, textAlignVertical: "top" },
+  multilineInput: {
+    minHeight: 96,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
+  optionCopy: { flex: 1, gap: 2 },
+  optionList: { gap: 8, marginTop: 8 },
+  optionRow: {
+    alignItems: "center",
+    borderColor: colors.borderSubtle,
+    borderRadius: radii.control,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 8,
+    padding: 14,
+  },
+  optionTitle: { ...typography.label, color: colors.primaryText },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.action,
     borderRadius: radii.control,
-    flex: 1,
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 14,
   },
   primaryButtonPressed: { backgroundColor: colors.actionPressed },
   primaryButtonText: { ...typography.label, color: colors.actionText },
-  row: { flexDirection: "row", gap: 8 },
-  rowField: { flex: 1 },
+  progress: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 18,
+  },
+  progressDot: {
+    alignItems: "center",
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.pill,
+    height: 28,
+    justifyContent: "center",
+    width: 28,
+  },
+  progressDotActive: { backgroundColor: colors.accent },
+  progressItem: { alignItems: "center", flex: 1, gap: 6 },
+  progressLabel: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    textAlign: "center",
+  },
+  progressNumber: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    fontWeight: "700",
+  },
+  progressNumberActive: { color: colors.inverse },
   secondaryButton: {
     alignItems: "center",
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 14,
   },
   secondaryButtonText: { ...typography.label, color: colors.primaryText },
-  selectedCustomerRow: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.accent,
-  },
-  selectedMark: { color: colors.accent, fontSize: 18, fontWeight: "700" },
-  selectedSlot: { backgroundColor: colors.action, borderColor: colors.action },
-  selectedSlotText: { color: colors.actionText },
-  serviceCard: {
-    backgroundColor: colors.subtleSurface,
-    borderRadius: radii.control,
-    gap: 4,
-    marginTop: 14,
-    padding: 12,
-  },
-  serviceName: {
-    ...typography.body,
+  sectionTitle: {
+    ...typography.label,
     color: colors.primaryText,
-    fontWeight: "600",
+    fontWeight: "700",
+    marginTop: 12,
   },
-  slot: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    minWidth: 76,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  slotText: { ...typography.label, color: colors.primaryText },
-  slots: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
   segmentedControl: {
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,
     flexDirection: "row",
     gap: 4,
-    marginTop: 16,
+    marginTop: 8,
     padding: 4,
   },
-  title: { ...typography.section, color: colors.primaryText },
+  selectedMark: { color: colors.accent, fontSize: 18, fontWeight: "700" },
+  selectedOptionRow: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  selectedSlot: { backgroundColor: colors.action, borderColor: colors.action },
+  selectedSlotText: { color: colors.actionText },
+  slot: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexBasis: "22%",
+    flexGrow: 1,
+    minWidth: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  slotText: { ...typography.label, color: colors.primaryText },
+  slots: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+    maxWidth: 540,
+    width: "100%",
+  },
+  summary: {
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+    borderRadius: radii.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 0,
+    marginTop: 12,
+    paddingHorizontal: 16,
+  },
+  summaryLabel: { ...typography.caption, color: colors.secondaryText },
+  summaryRow: {
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    paddingVertical: 14,
+  },
+  summaryValue: {
+    ...typography.label,
+    color: colors.primaryText,
+    flex: 1,
+    textAlign: "right",
+  },
 });
