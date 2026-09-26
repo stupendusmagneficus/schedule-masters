@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
 import { Linking, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
 import {
   BottomNavigation,
   type MobileTab,
@@ -15,6 +15,11 @@ import { ManualBookingModal } from "../components/ManualBookingModal";
 import { NewBookingNotice } from "../components/NewBookingNotice";
 import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
+import {
+  type AppointmentStatus,
+  type MasterAppointment,
+  setMasterAppointmentStatus,
+} from "../features/appointments/manualBooking";
 import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
@@ -55,6 +60,10 @@ export function DashboardScreen({
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isManualBookingVisible, setManualBookingVisible] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<MasterAppointment | null>(null);
+  const [isUpdatingAppointment, setUpdatingAppointment] = useState(false);
+  const [appointmentActionError, setAppointmentActionError] = useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const { appointments, reload: reloadAppointments } = useMasterAppointments({
     client,
@@ -77,6 +86,22 @@ export function DashboardScreen({
 
   const bookingUrl = buildBookingUrl(mobileEnv.bookingWebUrl, workspace.slug);
 
+  async function updateAppointmentStatus(status: AppointmentStatus) {
+    if (!client || !selectedAppointment) return;
+
+    setUpdatingAppointment(true);
+    setAppointmentActionError(false);
+    try {
+      await setMasterAppointmentStatus(client, selectedAppointment.id, status);
+      await reloadAppointments();
+      setSelectedAppointment(null);
+    } catch {
+      setAppointmentActionError(true);
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
+
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -86,6 +111,7 @@ export function DashboardScreen({
             service={service}
             demoData={demoData}
             masterAppointments={appointments}
+            onSelectAppointment={client ? setSelectedAppointment : undefined}
             t={t}
             workspace={workspace}
           />
@@ -96,6 +122,7 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             masterAppointments={appointments}
+            onSelectAppointment={client ? setSelectedAppointment : undefined}
             t={t}
             workspace={workspace}
           />
@@ -158,6 +185,22 @@ export function DashboardScreen({
           workspace={workspace}
         />
       ) : null}
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        error={appointmentActionError ? t("mobile.statusUpdateFailed") : null}
+        isSaving={isUpdatingAppointment}
+        locale={locale}
+        onClose={() => {
+          if (!isUpdatingAppointment) {
+            setSelectedAppointment(null);
+            setAppointmentActionError(false);
+          }
+        }}
+        onStatusChange={updateAppointmentStatus}
+        t={t}
+        timezone={workspace.timezone}
+        visible={Boolean(selectedAppointment)}
+      />
       <StatusBar style="dark" />
     </SafeAreaView>
   );

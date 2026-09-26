@@ -7,6 +7,8 @@ export type MasterAppointment =
   Database["public"]["Functions"]["list_master_appointments"]["Returns"][number];
 export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];
+export type AppointmentStatus =
+  Database["public"]["Enums"]["appointment_status"];
 
 export type ManualBookingDraft = {
   readonly customerId: string | null;
@@ -131,6 +133,30 @@ export async function listMasterAppointments(
   });
   if (error) throw new Error(error.message);
   return data ?? [];
+}
+
+export async function setMasterAppointmentStatus(
+  client: ManualBookingClient,
+  appointmentId: string,
+  status: AppointmentStatus,
+  reason?: string,
+): Promise<{ id: string; status: AppointmentStatus }> {
+  const { data, error } = await client.rpc("set_appointment_status", {
+    p_appointment_id: appointmentId,
+    p_reason: reason?.trim() || undefined,
+    p_status: status,
+  });
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Appointment status response is invalid");
+  }
+
+  const response = data as { id?: unknown; status?: unknown };
+  if (typeof response.id !== "string" || typeof response.status !== "string") {
+    throw new Error("Appointment status response is invalid");
+  }
+
+  return { id: response.id, status: response.status as AppointmentStatus };
 }
 
 export function createIdempotencyKey(): string {

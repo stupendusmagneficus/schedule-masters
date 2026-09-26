@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
+import {
+  AppointmentStatusBadge,
+  getAppointmentStatusLabel,
+} from "../../components/AppointmentStatusBadge";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
@@ -23,6 +27,7 @@ type CalendarTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
   readonly masterAppointments?: readonly MasterAppointment[];
+  readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly workspace: Workspace;
 };
 
@@ -31,6 +36,7 @@ export function CalendarTab({
   demoData,
   locale,
   masterAppointments = [],
+  onSelectAppointment,
   t,
   workspace,
 }: CalendarTabProps) {
@@ -82,7 +88,16 @@ export function CalendarTab({
           ) : masterAppointments.length ? (
             <View style={styles.timeline}>
               {masterAppointments.map((appointment) => (
-                <View key={appointment.id} style={styles.timelineRow}>
+                <Pressable
+                  accessibilityLabel={`${appointment.customer_name}, ${getAppointmentStatusLabel(appointment.status, t)}`}
+                  accessibilityRole="button"
+                  key={appointment.id}
+                  onPress={() => onSelectAppointment?.(appointment)}
+                  style={({ pressed }) => [
+                    styles.timelineRow,
+                    pressed && styles.pressed,
+                  ]}
+                >
                   <Text style={styles.time}>
                     {formatTime(new Date(appointment.starts_at), locale, {
                       hour: "2-digit",
@@ -91,15 +106,21 @@ export function CalendarTab({
                     })}
                   </Text>
                   <View style={styles.event}>
-                    <Text style={styles.eventTitle}>
-                      {appointment.customer_name}
-                    </Text>
+                    <View style={styles.eventHeader}>
+                      <Text style={styles.eventTitle}>
+                        {appointment.customer_name}
+                      </Text>
+                      <AppointmentStatusBadge
+                        label={getAppointmentStatusLabel(appointment.status, t)}
+                        status={appointment.status}
+                      />
+                    </View>
                     <Text style={styles.helper}>
                       {appointment.service_name} ·{" "}
                       {appointment.duration_minutes} min
                     </Text>
                   </View>
-                </View>
+                </Pressable>
               ))}
             </View>
           ) : (
@@ -293,7 +314,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
+  eventHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+  },
   eventTitle: { ...typography.label, color: colors.primaryText },
+  pressed: { opacity: 0.78 },
   sectionTitle: {
     color: colors.primaryText,
     marginBottom: 10,

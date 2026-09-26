@@ -795,6 +795,165 @@ describe("Supabase public booking contract", () => {
     30_000,
   );
 
+  rlsIntegrationTest(
+    "enforces the appointment status lifecycle and records transitions",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const serviceId = randomUUID();
+      const customerId = randomUUID();
+      const email = `status-lifecycle-${suffix}@example.test`;
+      const password = `Test-${suffix}-Password!`;
+      const startsAt = "2030-04-03T09:00:00.000Z";
+
+      expect(
+        (
+          await admin.from("workspaces").insert({
+            id: workspaceId,
+            name: "Status Lifecycle Workspace",
+            slug: `status-lifecycle-${suffix}`,
+          })
+        ).error,
+      ).toBeNull();
+
+      const user = await createAuthenticatedTestUser({
+        admin,
+        email,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      expect(
+        (
+          await admin.from("workspace_members").insert({
+            role: "owner",
+            user_id: user.user.id,
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+      expect(
+        (
+          await admin.from("services").insert({
+            duration_minutes: 60,
+            id: serviceId,
+            name: "Lifecycle service",
+            price_amount: 700,
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+      expect(
+        (
+          await admin.from("customers").insert({
+            id: customerId,
+            name: "Lifecycle customer",
+            workspace_id: workspaceId,
+          })
+        ).error,
+      ).toBeNull();
+
+      const appointment = await admin
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-04-03T10:00:00.000Z",
+          occupied_range: "[2030-04-03T09:00:00.000Z,2030-04-03T10:00:00.000Z)",
+          price_amount_snapshot: 700,
+          service_id: serviceId,
+          service_name_snapshot: "Lifecycle service",
+          source: "public_booking",
+          starts_at: startsAt,
+          status: "pending",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      expect(appointment.error).toBeNull();
+      const appointmentId = appointment.data?.id;
+      if (!appointmentId)
+        throw new Error("Lifecycle appointment was not created");
+
+      const confirmed = await user.client.rpc("set_appointment_status", {
+        p_appointment_id: appointmentId,
+        p_status: "confirmed",
+      });
+      expect(confirmed.error).toBeNull();
+      expect(confirmed.data).toMatchObject({
+        id: appointmentId,
+        status: "confirmed",
+      });
+
+      const completed = await user.client.rpc("set_appointment_status", {
+        p_appointment_id: appointmentId,
+        p_status: "completed",
+      });
+      expect(completed.error).toBeNull();
+      expect(completed.data).toMatchObject({
+        id: appointmentId,
+        status: "completed",
+      });
+
+      const invalidTransition = await user.client.rpc(
+        "set_appointment_status",
+        {
+          p_appointment_id: appointmentId,
+          p_status: "confirmed",
+        },
+      );
+      expect(invalidTransition.data).toBeNull();
+      expect(invalidTransition.error?.message).toContain(
+        "Invalid appointment status transition",
+      );
+
+      const events = await user.client
+        .from("appointment_events")
+        .select("from_status, to_status, event_type")
+        .eq("appointment_id", appointmentId)
+        .order("created_at");
+      expect(events.error).toBeNull();
+      expect(events.data).toEqual(
+        expect.arrayContaining([
+          {
+            event_type: "confirmed",
+            from_status: "pending",
+            to_status: "confirmed",
+          },
+          {
+            event_type: "completed",
+            from_status: "confirmed",
+            to_status: "completed",
+          },
+        ]),
+      );
+
+      const listed = await user.client.rpc("list_master_appointments", {
+        p_from_date: "2030-04-03",
+        p_to_date: "2030-04-03",
+        p_workspace_id: workspaceId,
+      });
+      expect(listed.error).toBeNull();
+      expect(listed.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: appointmentId, status: "completed" }),
+        ]),
+      );
+
+      await admin.from("workspaces").delete().eq("id", workspaceId);
+      await admin.auth.admin.deleteUser(user.user.id);
+    },
+  );
+
   integrationTest("limits new public booking attempts", async () => {
     if (!supabase) return;
 
