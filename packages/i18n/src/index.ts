@@ -112,6 +112,8 @@ export type MessageKey =
   | "mobile.statusUpdateFailed"
   | "mobile.today"
   | "mobile.calendar"
+  | "mobile.calendarPrevious"
+  | "mobile.calendarNext"
   | "mobile.profile"
   | "mobile.newBooking"
   | "mobile.newBookingNoticeTitle"
@@ -352,6 +354,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Не удалось изменить статус записи.",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
+    "mobile.calendarPrevious": "Предыдущая дата",
+    "mobile.calendarNext": "Следующая дата",
     "mobile.profile": "Профиль",
     "mobile.newBooking": "Новая запись",
     "mobile.newBookingNoticeTitle": "Новая запись",
@@ -609,6 +613,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Stav rezervace se nepodařilo změnit.",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
+    "mobile.calendarPrevious": "Předchozí datum",
+    "mobile.calendarNext": "Následující datum",
     "mobile.profile": "Profil",
     "mobile.newBooking": "Nová rezervace",
     "mobile.newBookingNoticeTitle": "Nová rezervace",
@@ -861,6 +867,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "The booking status could not be changed.",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
+    "mobile.calendarPrevious": "Previous date",
+    "mobile.calendarNext": "Next date",
     "mobile.profile": "Profile",
     "mobile.newBooking": "New booking",
     "mobile.newBookingNoticeTitle": "New booking",

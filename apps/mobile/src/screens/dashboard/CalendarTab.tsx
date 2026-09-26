@@ -12,55 +12,85 @@ import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
-import {
-  formatDateInTimeZone,
-  type PersonalBlock,
-  type PersonalBlockDraft,
+import type {
+  PersonalBlock,
+  PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
-import { usePersonalBlocks } from "../../features/availability/usePersonalBlocks";
+import {
+  type CalendarDataController,
+  getCalendarDateLabel,
+} from "../../features/calendar/useCalendarData";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type CalendarTabProps = DashboardTabProps & {
+  readonly calendar: CalendarDataController;
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
-  readonly masterAppointments?: readonly MasterAppointment[];
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly workspace: Workspace;
 };
 
 export function CalendarTab({
+  calendar,
   client,
   demoData,
   locale,
-  masterAppointments = [],
   onSelectAppointment,
   t,
   workspace,
 }: CalendarTabProps) {
-  const { blocks, error, isLoading, isSaving, remove, save } =
-    usePersonalBlocks({
-      client,
-      timezone: workspace.timezone,
-      workspaceId: workspace.id,
-    });
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
-  const today = formatDate(new Date(), locale, {
-    day: "numeric",
-    month: "long",
-    timeZone: workspace.timezone,
-    weekday: "long",
-  });
-  const todayInWorkspace = formatDateInTimeZone(new Date(), workspace.timezone);
+  const dateLabel = getCalendarDateLabel(calendar.selectedDate, locale);
 
   return (
     <>
       <View style={styles.content}>
         <View>
           <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
-          <Text style={styles.title}>{today}</Text>
+          <Text style={styles.title}>{dateLabel}</Text>
+          <View style={styles.dateNavigation}>
+            <Pressable
+              accessibilityLabel={t("mobile.calendarPrevious")}
+              accessibilityRole="button"
+              disabled={!client}
+              onPress={calendar.goToPrevious}
+              style={({ pressed }) => [
+                styles.navigationButton,
+                !client && styles.disabled,
+                pressed && styles.navigationButtonPressed,
+              ]}
+            >
+              <Text style={styles.navigationButtonText}>‹</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              disabled={!client}
+              onPress={calendar.goToToday}
+              style={({ pressed }) => [
+                styles.todayButton,
+                !client && styles.disabled,
+                pressed && styles.navigationButtonPressed,
+              ]}
+            >
+              <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityLabel={t("mobile.calendarNext")}
+              accessibilityRole="button"
+              disabled={!client}
+              onPress={calendar.goToNext}
+              style={({ pressed }) => [
+                styles.navigationButton,
+                !client && styles.disabled,
+                pressed && styles.navigationButtonPressed,
+              ]}
+            >
+              <Text style={styles.navigationButtonText}>›</Text>
+            </Pressable>
+          </View>
         </View>
         <InfoCard>
           <Text style={styles.sectionTitle}>{t("mobile.workingHours")}</Text>
@@ -85,9 +115,11 @@ export function CalendarTab({
                 </View>
               ))}
             </View>
-          ) : masterAppointments.length ? (
+          ) : calendar.isLoading ? (
+            <Text style={styles.helper}>{t("common.loading")}</Text>
+          ) : calendar.appointments.length ? (
             <View style={styles.timeline}>
-              {masterAppointments.map((appointment) => (
+              {calendar.appointments.map((appointment) => (
                 <Pressable
                   accessibilityLabel={`${appointment.customer_name}, ${getAppointmentStatusLabel(appointment.status, t)}`}
                   accessibilityRole="button"
@@ -158,16 +190,16 @@ export function CalendarTab({
               </Text>
             </Pressable>
           </View>
-          {isLoading ? (
+          {calendar.isLoading ? (
             <Text style={styles.helper}>{t("common.loading")}</Text>
-          ) : blocks.length ? (
+          ) : calendar.blocks.length ? (
             <View style={styles.blocksList}>
-              {blocks.map((block) => (
+              {calendar.blocks.map((block) => (
                 <PersonalBlockRow
                   block={block}
                   key={block.id}
                   locale={locale}
-                  onDelete={remove}
+                  onDelete={calendar.removeBlock}
                   t={t}
                   timezone={workspace.timezone}
                 />
@@ -176,18 +208,18 @@ export function CalendarTab({
           ) : (
             <Text style={styles.helper}>{t("mobile.personalBlockEmpty")}</Text>
           )}
-          {error && !isBlockModalVisible ? (
+          {calendar.error && !isBlockModalVisible ? (
             <Text style={styles.error}>{t("common.error")}</Text>
           ) : null}
         </InfoCard>
       </View>
       <PersonalBlockModal
-        error={error}
-        initialDate={todayInWorkspace}
-        isSaving={isSaving}
+        error={calendar.error}
+        initialDate={calendar.selectedDate}
+        isSaving={calendar.isSaving}
         onClose={() => setBlockModalVisible(false)}
         onSave={async (draft: PersonalBlockDraft) => {
-          await save(draft);
+          await calendar.saveBlock(draft);
           setBlockModalVisible(false);
         }}
         t={t}
@@ -297,6 +329,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   disabled: { opacity: 0.6 },
+  dateNavigation: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+  },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
   eyebrow: {
     color: colors.accent,
@@ -322,6 +360,35 @@ const styles = StyleSheet.create({
   },
   eventTitle: { ...typography.label, color: colors.primaryText },
   pressed: { opacity: 0.78 },
+  navigationButton: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: StyleSheet.hairlineWidth,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  navigationButtonPressed: { backgroundColor: colors.subtleSurface },
+  navigationButtonText: {
+    color: colors.primaryText,
+    fontSize: 28,
+    lineHeight: 30,
+  },
+  todayButton: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.control,
+    flex: 1,
+    height: 44,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  todayButtonText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   sectionTitle: {
     color: colors.primaryText,
     marginBottom: 10,
