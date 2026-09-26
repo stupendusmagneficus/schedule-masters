@@ -127,7 +127,7 @@ function AppContent() {
         onLocaleChange={setLocale}
         onSignOut={() => undefined}
         signOutFailed={false}
-        canManageServices={false}
+        canManageServices
         services={[demoData.primaryService]}
         workspace={demoWorkspace}
       />

@@ -37,6 +37,10 @@ change has no visible output.
 The automated gate checks the PR body and only activates when the diff contains
 likely user-facing UI files. It does not replace human review: the reviewer
 should compare the evidence against the affected screen and the design tokens.
+For screens covered by mobile-web E2E, geometry assertions are also part of the
+CI gate. A passing checklist alone is not evidence that two controls cannot
+overlap; the affected screen needs a regression assertion or a documented
+reason why automation is not practical.
 
 ## Local check
 

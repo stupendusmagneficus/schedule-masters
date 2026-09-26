@@ -52,4 +52,24 @@ test.describe("mobile web smoke", () => {
       }),
     ).toBeVisible();
   });
+  test("keeps service editor fields vertically separated", async ({ page }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Profil" }).click();
+    await page.getByRole("button", { name: "Přidat službu" }).click();
+
+    await expect(
+      page.getByText("Vytvořit službu", { exact: true }),
+    ).toBeVisible();
+
+    const descriptionInput = page.getByLabel("Popis", { exact: true });
+    const durationLabel = page.getByText("Délka v minutách *", { exact: true });
+    const descriptionBox = await descriptionInput.boundingBox();
+    const durationLabelBox = await durationLabel.boundingBox();
+
+    expect(descriptionBox).not.toBeNull();
+    expect(durationLabelBox).not.toBeNull();
+    expect(durationLabelBox?.y).toBeGreaterThan(
+      (descriptionBox?.y ?? 0) + (descriptionBox?.height ?? 0) + 4,
+    );
+  });
 });

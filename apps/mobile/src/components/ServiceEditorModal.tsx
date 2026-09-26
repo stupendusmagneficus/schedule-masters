@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
-  field: { flex: 1, gap: 8, marginTop: 16 },
+  field: { gap: 8, marginTop: 16 },
   form: { padding: 20, paddingBottom: 40 },
   input: {
     ...typography.body,
@@ -293,7 +293,12 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     fontWeight: "600",
   },
-  multilineInput: { minHeight: 96, paddingTop: 14, textAlignVertical: "top" },
+  multilineInput: {
+    height: 96,
+    minHeight: 96,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
   primaryButton: {
     alignItems: "center",
     backgroundColor: colors.action,
@@ -306,7 +311,7 @@ const styles = StyleSheet.create({
   primaryButtonPressed: { backgroundColor: colors.actionPressed },
   primaryButtonText: { ...typography.label, color: colors.actionText },
   row: { flexDirection: "row", gap: 12 },
-  rowField: { flex: 1 },
+  rowField: { flex: 1, minWidth: 0 },
   secondaryButton: {
     alignItems: "center",
     borderColor: colors.border,
