@@ -21,8 +21,19 @@ test.describe("public booking web", () => {
 
     const closeButton = page.getByRole("button", { name: "Close" });
     await expect(closeButton).toBeVisible();
+    const confirmationPanel = page.locator(".confirmation-panel");
     const closeButtonBox = await closeButton.boundingBox();
-    expect(closeButtonBox?.width).toBeLessThan(200);
+    const confirmationPanelContentWidth = await confirmationPanel.evaluate(
+      (element) => {
+        const styles = window.getComputedStyle(element);
+        return (
+          element.clientWidth -
+          Number.parseFloat(styles.paddingLeft) -
+          Number.parseFloat(styles.paddingRight)
+        );
+      },
+    );
+    expect(closeButtonBox?.width).toBeCloseTo(confirmationPanelContentWidth, 0);
   });
 
   test("switches the booking page locale", async ({ page }) => {
