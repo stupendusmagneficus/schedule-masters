@@ -8,9 +8,9 @@ export const typography = {
     lineHeight: 16,
   },
   display: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "700",
-    lineHeight: 43,
+    lineHeight: 38,
   },
   eyebrow: {
     fontSize: 12,
@@ -19,9 +19,9 @@ export const typography = {
     lineHeight: 16,
   },
   heading: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "700",
-    lineHeight: 36,
+    lineHeight: 34,
   },
   label: {
     fontSize: 14,
@@ -34,12 +34,12 @@ export const typography = {
     lineHeight: 29,
   },
   metadata: {
-    fontSize: 15,
+    fontSize: 14,
     lineHeight: 20,
   },
   section: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
-    lineHeight: 29,
+    lineHeight: 26,
   },
 } as const;

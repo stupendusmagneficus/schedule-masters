@@ -6,15 +6,16 @@
 
 This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
 
-The approved direction is **Executive product operations**: bright white
-surfaces, deep slate actions, softly colorful information sections, pill
-controls and spacious layouts adapted for a master's daily workflow.
+The approved direction is **Shadcn-inspired schedule operations**: neutral
+surfaces, high-contrast graphite actions, one restrained green brand accent,
+thin borders, compact typography and pill controls adapted for a master's
+daily workflow.
 
 ## Product direction
 
 Schedule Masters combines:
 
-- the calm, scan-friendly hierarchy of Executive interfaces without reusing
+- the calm, scan-friendly hierarchy of Shadcn-style interfaces without reusing
   another product's brand, icons, layout or proprietary copy;
 - the fast, information-dense daily workflow of Masters Pro;
 - the friendly, service-oriented tone needed by independent beauty and wellness
@@ -28,14 +29,14 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 1. **Today first.** The first screen must help a master understand the day within seconds.
 2. **Spacious scanning.** Show useful information in clear white surfaces with enough room for quick reading.
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
-4. **Approachable authority.** Deep slate actions create trust while restrained pastel sections add warmth without visual noise.
+4. **Approachable authority.** Graphite actions create trust while one restrained green accent communicates availability and progress.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
 6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
 8. **Calendar actions stay close.** Creating an appointment and creating a break must be available from the same calendar action, without navigating through settings.
-9. **Executive simplicity.** Use deep slate actions, pill controls, 16px cards,
-   soft pastel section accents and a 4px spacing rhythm. Do not add gradients,
-   decorative blobs or competing accent colors.
+9. **Shadcn-inspired simplicity.** Use graphite actions, pill controls, 16px
+   cards, semantic status colors and a 4px spacing rhythm. Do not add
+   gradients, decorative blobs or competing accent colors.
 
 ## Tone
 
@@ -49,15 +50,15 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 
 ### Color
 
-The palette uses an off-white canvas, crisp white information blocks, deep slate
-actions and a controlled pastel accent rhythm. Soft shadows and rounded geometry
+The palette uses an off-white canvas, crisp white information blocks, graphite
+actions and one controlled green accent. Thin borders and minimal shadows
 provide hierarchy without heavy chrome.
 
 - `brand.primary` — links, active states and selected controls.
 - `brand.primaryStrong` — pressed states and high-emphasis links.
 - `brand.action` — deep slate primary action surfaces.
-- `brand.pastelLavender`, `brand.pastelYellow`, `brand.pastelCyan` and
-  `brand.pastelPink` — restrained section accents used to aid scanning.
+- `brand.accent` / `brand.accentSoft` — the restrained green used for available
+  time, active navigation, successful actions and progress.
 - `surface.canvas` — warm off-white application background.
 - `surface.raised` — cards, sheets and booking panels.
 - `surface.subtle` — input backgrounds and secondary regions.
@@ -69,7 +70,7 @@ Do not use raw hex values in screens. If a new color is needed, add it here with
 ### Typography
 
 Use the platform system font: San Francisco on iOS and the native system
-sans-serif on Android. Executive uses one disciplined sans-serif family, medium
+sans-serif on Android. The system uses one disciplined sans-serif family, medium
 UI weights and heavier weights only for screen-level hierarchy. Do not introduce
 decorative serif typography into operational screens.
 
@@ -82,17 +83,17 @@ decorative serif typography into operational screens.
 
 ### Spacing and shape
 
-Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use pill shapes for buttons, inputs, language selectors, status badges and bottom navigation. Use 16px rounded cards and restrained layered shadows for grouped surfaces.
+Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desktop. Use pill shapes for buttons, inputs, language selectors, status badges and bottom navigation. Use 16px rounded cards, thin borders and minimal shadows for grouped surfaces.
 
-### Executive surface rules
+### Shadcn-inspired surface rules
 
 - **Master Dashboard and Calendar:** off-white canvas, crisp white panels,
-  deep slate actions, pastel section accents, thin borders, comfortable metadata
+  graphite actions, a restrained green accent, thin borders, comfortable metadata
   and no decorative gradients.
-- **Mobile navigation:** one white outer pill with a soft lavender pill beneath
+- **Mobile navigation:** one white outer pill with a soft green pill beneath
   the active tab. The active icon and label use deep slate, while inactive items
   remain neutral. The active indicator moves with a short, functional native
-  animation; the booking CTA floats above the navigation as a deep slate pill.
+  animation; the booking CTA floats above the navigation as a graphite pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** the same off-white canvas with crisp white panels and
   more welcoming spacing, while retaining the same semantic tokens and accessibility rules.
@@ -129,7 +130,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.
 - Bookings and expected revenue share one grouped summary surface. Bookings
-  stays neutral; expected revenue uses a deep slate value with a pastel section
+  stays neutral; expected revenue uses a graphite value with a restrained green
   accent without turning the entire summary into a high-saturation block.
 - The quick-add action offers `Appointment` and `Break` as two equally clear choices.
 

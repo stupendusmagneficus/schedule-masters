@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", gap: 8, marginTop: 20 },
   backdrop: {
     alignItems: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.28)",
+    backgroundColor: colors.overlay,
     flex: 1,
     justifyContent: "center",
     padding: 20,
