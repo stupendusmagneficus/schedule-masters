@@ -4,55 +4,54 @@
     "name": "Schedule Masters",
     "version": "0.1.0",
     "status": "approved-mvp-direction",
-    "direction": "executive-product-operations",
+    "direction": "shadcn-inspired-schedule-operations",
     "source": "docs/design/DESIGN.md"
   },
   "color": {
     "brand": {
-      "primary": { "value": "#334155", "type": "color" },
-      "primaryStrong": { "value": "#1E293B", "type": "color" },
-      "primarySoft": { "value": "#F3E8FF", "type": "color" },
-      "action": { "value": "#1E293B", "type": "color" },
-      "actionPressed": { "value": "#0F172A", "type": "color" },
+      "primary": { "value": "#2F7D5C", "type": "color" },
+      "primaryStrong": { "value": "#256246", "type": "color" },
+      "primarySoft": { "value": "#E8F2ED", "type": "color" },
+      "action": { "value": "#202522", "type": "color" },
+      "actionPressed": { "value": "#151A17", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" },
       "onAction": { "value": "#FFFFFF", "type": "color" },
-      "pastelLavender": { "value": "#F3E8FF", "type": "color" },
-      "pastelYellow": { "value": "#FEF3C7", "type": "color" },
-      "pastelCyan": { "value": "#CFFAFE", "type": "color" },
-      "pastelPink": { "value": "#FCE7F3", "type": "color" }
+      "accent": { "value": "#2F7D5C", "type": "color" },
+      "accentPressed": { "value": "#256246", "type": "color" },
+      "accentSoft": { "value": "#E8F2ED", "type": "color" }
     },
     "surface": {
-      "canvas": { "value": "#F8FAFC", "type": "color" },
+      "canvas": { "value": "#F7F8F7", "type": "color" },
       "raised": { "value": "#FFFFFF", "type": "color" },
-      "subtle": { "value": "#F1F5F9", "type": "color" },
-      "sunken": { "value": "#E2E8F0", "type": "color" }
+      "subtle": { "value": "#F0F2F0", "type": "color" },
+      "sunken": { "value": "#D8DEDA", "type": "color" }
     },
     "content": {
-      "primary": { "value": "#1E293B", "type": "color" },
-      "secondary": { "value": "#64748B", "type": "color" },
-      "muted": { "value": "#94A3B8", "type": "color" },
+      "primary": { "value": "#202522", "type": "color" },
+      "secondary": { "value": "#68716C", "type": "color" },
+      "muted": { "value": "#8A938D", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#E2E8F0", "type": "color" },
-      "strong": { "value": "#CBD5E1", "type": "color" },
-      "focus": { "value": "#334155", "type": "color" }
+      "default": { "value": "#D8DEDA", "type": "color" },
+      "strong": { "value": "#B8C2BB", "type": "color" },
+      "focus": { "value": "#2F7D5C", "type": "color" }
     },
     "status": {
-      "success": { "value": "#16803C", "type": "color" },
-      "successSoft": { "value": "#E8F6ED", "type": "color" },
-      "warning": { "value": "#B7791F", "type": "color" },
-      "warningSoft": { "value": "#FFF2D7", "type": "color" },
+      "success": { "value": "#2F7D5C", "type": "color" },
+      "successSoft": { "value": "#E8F2ED", "type": "color" },
+      "warning": { "value": "#8A5A12", "type": "color" },
+      "warningSoft": { "value": "#FFF4D6", "type": "color" },
       "danger": { "value": "#B42318", "type": "color" },
       "dangerSoft": { "value": "#FEE4E2", "type": "color" },
-      "info": { "value": "#334155", "type": "color" },
-      "infoSoft": { "value": "#F3E8FF", "type": "color" }
+      "info": { "value": "#44615A", "type": "color" },
+      "infoSoft": { "value": "#EAF0EE", "type": "color" }
     },
     "schedule": {
-      "booked": { "value": "#F3E8FF", "type": "color" },
-      "bookedBorder": { "value": "#334155", "type": "color" },
-      "break": { "value": "#F1F5F9", "type": "color" },
-      "breakBorder": { "value": "#CBD5E1", "type": "color" },
+      "booked": { "value": "#EAF0EE", "type": "color" },
+      "bookedBorder": { "value": "#44615A", "type": "color" },
+      "break": { "value": "#F0F2F0", "type": "color" },
+      "breakBorder": { "value": "#B8C2BB", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },
@@ -102,9 +101,9 @@
     "pill": { "value": "999px", "type": "dimension" }
   },
   "shadow": {
-    "subtle": { "value": "0 2px 5px rgba(15, 23, 42, 0.03)", "type": "shadow" },
+    "subtle": { "value": "0 1px 2px rgba(32, 37, 34, 0.03)", "type": "shadow" },
     "raised": {
-      "value": "0 12px 28px rgba(15, 23, 42, 0.06), 0 2px 5px rgba(15, 23, 42, 0.03)",
+      "value": "0 8px 20px rgba(32, 37, 34, 0.05), 0 1px 3px rgba(32, 37, 34, 0.03)",
       "type": "shadow"
     }
   },

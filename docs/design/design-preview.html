@@ -6,19 +6,19 @@
     <title>Schedule Masters — Design Preview</title>
     <style>
       :root {
-        --canvas: #f8fafc;
+        --canvas: #f7f8f7;
         --raised: #fff;
-        --subtle: #f1f5f9;
-        --ink: #1e293b;
-        --muted: #64748b;
-        --quiet: #94a3b8;
-        --line: #e2e8f0;
-        --accent: #334155;
-        --accent-dark: #1e293b;
-        --accent-soft: #f3e8ff;
-        --action: #1e293b;
+        --subtle: #f0f2f0;
+        --ink: #202522;
+        --muted: #68716c;
+        --quiet: #8a938d;
+        --line: #d8deda;
+        --accent: #2f7d5c;
+        --accent-dark: #256246;
+        --accent-soft: #e8f2ed;
+        --action: #202522;
         --radius: 16px;
-        --shadow: 0 12px 28px rgba(15, 23, 42, 0.06), 0 2px 5px rgba(15, 23, 42, 0.03);
+        --shadow: 0 8px 20px rgba(32, 37, 34, 0.05), 0 1px 3px rgba(32, 37, 34, 0.03);
         font-family:
           -apple-system,
           BlinkMacSystemFont,
@@ -175,6 +175,10 @@
         padding: 5px 8px;
         font-size: 12px;
       }
+      .badge.pending {
+        background: #fff4d6;
+        color: #8a5a12;
+      }
       .calendar {
         display: grid;
         gap: 8px;
@@ -256,7 +260,7 @@
         padding: 0 14px;
         font-size: 14px;
         font-weight: 700;
-        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+        box-shadow: 0 4px 12px rgba(32, 37, 34, 0.1);
       }
       .bottom-nav {
         position: absolute;
@@ -270,7 +274,7 @@
         border-radius: 999px;
         background: #fff;
         padding: 4px;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 1px 2px rgba(32, 37, 34, 0.03);
       }
       .nav-item {
         display: grid;
@@ -313,8 +317,8 @@
         <div>
           <h1>Schedule Masters</h1>
           <p>
-            Executive product operations direction with crisp white surfaces,
-            deep slate actions and warm pastel grouping for a master’s daily workflow.
+            Shadcn-inspired schedule operations with neutral surfaces, graphite
+            actions and one restrained green accent for a master’s daily workflow.
           </p>
         </div>
         <span class="badge">MVP visual direction</span>
@@ -364,7 +368,7 @@
                   <div class="meta">16:00 · Gel manicure</div>
                 </div>
               </div>
-              <span class="badge">Pending</span>
+              <span class="badge pending">Pending</span>
             </div>
             <div class="appointment">
               <div class="person">

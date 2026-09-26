@@ -49,7 +49,7 @@ export function NewBookingNotice({
 const styles = StyleSheet.create({
   backdrop: {
     alignItems: "center",
-    backgroundColor: "rgba(17, 24, 39, 0.28)",
+    backgroundColor: colors.overlay,
     flex: 1,
     justifyContent: "center",
     padding: 24,

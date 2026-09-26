@@ -1,18 +1,29 @@
 :root {
-  --canvas: #f8fafc;
+  --canvas: #f7f8f7;
   --surface: #ffffff;
-  --surface-subtle: #f1f5f9;
-  --ink: #1e293b;
-  --muted: #64748b;
-  --quiet: #94a3b8;
-  --line: #e2e8f0;
-  --line-subtle: #f1f5f9;
-  --action: #1e293b;
-  --action-pressed: #0f172a;
-  --action-soft: #f3e8ff;
+  --surface-subtle: #f0f2f0;
+  --ink: #202522;
+  --muted: #68716c;
+  --quiet: #8a938d;
+  --line: #d8deda;
+  --line-subtle: #ebefec;
+  --accent: #2f7d5c;
+  --accent-pressed: #256246;
+  --action: #202522;
+  --action-pressed: #151a17;
+  --action-soft: #e8f2ed;
+  --success: #2f7d5c;
+  --success-soft: #e8f2ed;
+  --pending: #8a5a12;
+  --pending-soft: #fff4d6;
   --danger: #b42318;
   --danger-soft: #fee4e2;
-  --focus: rgba(51, 65, 85, 0.22);
+  --focus: rgba(47, 125, 92, 0.28);
+  --radius-control: 999px;
+  --radius-surface: 16px;
+  --shadow-surface: 0 1px 2px rgba(32, 37, 34, 0.03);
+  --shadow-raised:
+    0 8px 20px rgba(32, 37, 34, 0.05), 0 1px 3px rgba(32, 37, 34, 0.03);
   color: var(--ink);
   background: var(--canvas);
   font-family:
@@ -52,10 +63,8 @@ button {
   width: min(100%, 720px);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow:
-    0 12px 28px rgba(15, 23, 42, 0.06),
-    0 2px 5px rgba(15, 23, 42, 0.03);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-raised);
   padding: 32px;
 }
 
@@ -131,7 +140,7 @@ h2 {
   min-height: 52px;
   text-align: left;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-surface);
   background: var(--surface);
   color: var(--ink);
   padding: 12px 14px;
@@ -147,12 +156,12 @@ h2 {
 .service-option:hover,
 .slot-option:hover,
 .language-button:hover {
-  border-color: var(--action);
+  border-color: var(--accent);
 }
 
 .service-option.selected,
 .slot-option.selected {
-  border-color: var(--action);
+  border-color: var(--accent);
   background: var(--action-soft);
 }
 
@@ -172,7 +181,7 @@ input,
 textarea {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--ink);
   min-height: 44px;
@@ -228,7 +237,7 @@ textarea {
 .primary-button {
   min-height: 48px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--action);
   color: var(--surface);
   font-weight: 700;
@@ -248,7 +257,7 @@ textarea {
   min-height: 40px;
   margin-top: 10px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--action);
   font-size: 14px;
@@ -282,7 +291,7 @@ textarea {
   min-width: 44px;
   min-height: 36px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--muted);
   font-size: 12px;
@@ -290,14 +299,14 @@ textarea {
 }
 
 .language-button.selected {
-  background: var(--action);
-  border-color: var(--action);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--surface);
 }
 
 .empty-state,
 .error-state {
-  border-radius: 16px;
+  border-radius: var(--radius-surface);
   padding: 12px;
 }
 
@@ -329,11 +338,32 @@ textarea {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--action-soft);
-  color: var(--action);
+  background: var(--success-soft);
+  color: var(--success);
   font-size: 30px;
   font-weight: 700;
   margin-bottom: 20px;
+}
+
+button,
+input,
+textarea {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
 }
 
 .confirmation-copy {
