@@ -271,6 +271,181 @@ describe("Supabase public booking contract", () => {
   );
 
   rlsIntegrationTest(
+    "limits service catalog mutations to managers and preserves service history",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceA = randomUUID();
+      const workspaceB = randomUUID();
+      const ownerEmail = `service-owner-${suffix}@example.test`;
+      const memberEmail = `service-member-${suffix}@example.test`;
+      const password = `Test-${suffix}-Password!`;
+
+      const createdWorkspaces = await admin.from("workspaces").insert([
+        { id: workspaceA, name: "Services A", slug: `services-a-${suffix}` },
+        { id: workspaceB, name: "Services B", slug: `services-b-${suffix}` },
+      ]);
+      expect(createdWorkspaces.error).toBeNull();
+
+      const owner = await createAuthenticatedTestUser({
+        admin,
+        email: ownerEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const member = await createAuthenticatedTestUser({
+        admin,
+        email: memberEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+
+      const memberships = await admin.from("workspace_members").insert([
+        { role: "owner", user_id: owner.user.id, workspace_id: workspaceA },
+        { role: "member", user_id: member.user.id, workspace_id: workspaceA },
+      ]);
+      expect(memberships.error).toBeNull();
+
+      const service = await admin
+        .from("services")
+        .insert({
+          duration_minutes: 60,
+          name: "Initial service",
+          price_amount: 700,
+          workspace_id: workspaceA,
+        })
+        .select("id")
+        .single();
+      expect(service.error).toBeNull();
+      const serviceId = service.data?.id;
+      if (!serviceId) throw new Error("Service fixture was not created");
+
+      const ownerServices = await owner.client
+        .from("services")
+        .select("id, name, archived_at, is_active")
+        .eq("workspace_id", workspaceA);
+      expect(ownerServices.error).toBeNull();
+      expect(ownerServices.data).toHaveLength(1);
+
+      const memberServices = await member.client
+        .from("services")
+        .select("id")
+        .eq("workspace_id", workspaceA);
+      expect(memberServices.error).toBeNull();
+      expect(memberServices.data).toHaveLength(1);
+
+      const createdByOwner = await owner.client
+        .from("services")
+        .insert({
+          duration_minutes: 45,
+          name: "Created by owner",
+          price_amount: 500,
+          workspace_id: workspaceA,
+        })
+        .select("id")
+        .single();
+      expect(createdByOwner.error).toBeNull();
+
+      const createdByMember = await member.client
+        .from("services")
+        .insert({
+          duration_minutes: 45,
+          name: "Created by member",
+          price_amount: 500,
+          workspace_id: workspaceA,
+        })
+        .select("id")
+        .single();
+      expect(createdByMember.data).toBeNull();
+      expect(createdByMember.error).not.toBeNull();
+
+      const updatedByOwner = await owner.client
+        .from("services")
+        .update({ name: "Updated service" })
+        .eq("id", serviceId)
+        .eq("workspace_id", workspaceA)
+        .select("name")
+        .single();
+      expect(updatedByOwner.error).toBeNull();
+      expect(updatedByOwner.data?.name).toBe("Updated service");
+
+      const updatedByMember = await member.client
+        .from("services")
+        .update({ name: "Member update" })
+        .eq("id", serviceId)
+        .eq("workspace_id", workspaceA)
+        .select("name")
+        .single();
+      expect(updatedByMember.data).toBeNull();
+      expect(updatedByMember.error).not.toBeNull();
+
+      const archived = await owner.client
+        .from("services")
+        .update({ archived_at: new Date().toISOString(), is_active: false })
+        .eq("id", serviceId)
+        .eq("workspace_id", workspaceA)
+        .select("archived_at, is_active")
+        .single();
+      expect(archived.error).toBeNull();
+      expect(archived.data).toMatchObject({ is_active: false });
+
+      const restored = await owner.client
+        .from("services")
+        .update({ archived_at: null, is_active: true })
+        .eq("id", serviceId)
+        .eq("workspace_id", workspaceA)
+        .select("archived_at, is_active")
+        .single();
+      expect(restored.error).toBeNull();
+      expect(restored.data).toMatchObject({
+        archived_at: null,
+        is_active: true,
+      });
+
+      const deleted = await owner.client
+        .from("services")
+        .delete()
+        .eq("id", serviceId);
+      expect(deleted.data).toBeNull();
+      expect(deleted.error).toBeNull();
+
+      const afterDelete = await owner.client
+        .from("services")
+        .select("id")
+        .eq("id", serviceId)
+        .single();
+      expect(afterDelete.error).toBeNull();
+      expect(afterDelete.data?.id).toBe(serviceId);
+
+      const movedByAdmin = await admin
+        .from("services")
+        .update({ workspace_id: workspaceB })
+        .eq("id", serviceId);
+      expect(movedByAdmin.data).toBeNull();
+      expect(movedByAdmin.error?.message).toContain(
+        "Service workspace cannot be changed",
+      );
+
+      await admin
+        .from("workspaces")
+        .delete()
+        .in("id", [workspaceA, workspaceB]);
+      await admin.auth.admin.deleteUser(owner.user.id);
+      await admin.auth.admin.deleteUser(member.user.id);
+    },
+    30_000,
+  );
+
+  rlsIntegrationTest(
     "uses one tenant-scoped availability contract for master and public booking",
     async () => {
       if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {

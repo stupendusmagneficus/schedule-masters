@@ -17,6 +17,7 @@ import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
 import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
+import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
@@ -31,9 +32,10 @@ type DashboardScreenProps = {
   readonly locale: SupportedLocale;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
   readonly onSignOut: () => void;
-  readonly service: Service | null;
   readonly signOutFailed: boolean;
   readonly demoData?: DemoData;
+  readonly canManageServices: boolean;
+  readonly services: readonly Service[];
   readonly workspace: Workspace;
 };
 
@@ -43,9 +45,10 @@ export function DashboardScreen({
   locale,
   onLocaleChange,
   onSignOut,
-  service,
   signOutFailed,
   demoData,
+  canManageServices,
+  services,
   workspace,
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
@@ -58,6 +61,14 @@ export function DashboardScreen({
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
+  const serviceCatalog = useServiceCatalog({
+    client,
+    initialServices: demoData ? [demoData.primaryService] : services,
+    workspaceId: workspace.id,
+  });
+  const service = demoData
+    ? demoData.primaryService
+    : (serviceCatalog.activeServices[0] ?? null);
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     profile: t("mobile.profile"),
@@ -92,11 +103,13 @@ export function DashboardScreen({
         {activeTab === "profile" && (
           <ProfileTab
             isSigningOut={isSigningOut}
+            canManageServices={canManageServices}
             locale={locale}
             onLocaleChange={onLocaleChange}
             onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
             onSignOut={onSignOut}
             signOutFailed={signOutFailed}
+            serviceCatalog={serviceCatalog}
             t={t}
             bookingUrl={bookingUrl}
             workspace={workspace}
