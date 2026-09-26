@@ -17,6 +17,7 @@
     "format": "biome format --write .",
     "format:check": "biome ci .",
     "biome:lint": "biome lint .",
+    "design-review:check": "node scripts/verify-design-review.mjs",
     "archify:doctor": "node .agents/skills/archify/bin/archify.mjs doctor",
     "archify:report": "node scripts/archify-report.mjs",
     "supabase:start": "npx supabase@2.117.0 start",
