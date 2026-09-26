@@ -7,6 +7,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
+import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import {
   formatDateInTimeZone,
   type PersonalBlock,
@@ -21,6 +22,7 @@ import type { DashboardTabProps } from "./types";
 type CalendarTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
+  readonly masterAppointments?: readonly MasterAppointment[];
   readonly workspace: Workspace;
 };
 
@@ -28,6 +30,7 @@ export function CalendarTab({
   client,
   demoData,
   locale,
+  masterAppointments = [],
   t,
   workspace,
 }: CalendarTabProps) {
@@ -71,6 +74,29 @@ export function CalendarTab({
                     <Text style={styles.helper}>
                       {appointment.serviceName} · {appointment.durationMinutes}{" "}
                       min
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : masterAppointments.length ? (
+            <View style={styles.timeline}>
+              {masterAppointments.map((appointment) => (
+                <View key={appointment.id} style={styles.timelineRow}>
+                  <Text style={styles.time}>
+                    {formatTime(new Date(appointment.starts_at), locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: workspace.timezone,
+                    })}
+                  </Text>
+                  <View style={styles.event}>
+                    <Text style={styles.eventTitle}>
+                      {appointment.customer_name}
+                    </Text>
+                    <Text style={styles.helper}>
+                      {appointment.service_name} ·{" "}
+                      {appointment.duration_minutes} min
                     </Text>
                   </View>
                 </View>

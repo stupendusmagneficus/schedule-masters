@@ -666,6 +666,22 @@ export type Database = {
         }
         Returns: Json
       }
+      create_master_booking: {
+        Args: {
+          p_customer_id?: string
+          p_duration_minutes?: number
+          p_email?: string
+          p_idempotency_key: string
+          p_master_note?: string
+          p_name?: string
+          p_phone?: string
+          p_price_amount?: number
+          p_service_id: string
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       create_public_booking: {
         Args: {
           p_customer_note?: string
@@ -706,6 +722,22 @@ export type Database = {
         Args: { target_workspace_id: string }
         Returns: boolean
       }
+      list_master_appointments: {
+        Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          customer_id: string
+          customer_name: string
+          duration_minutes: number
+          ends_at: string
+          id: string
+          price_amount: number
+          service_name: string
+          source: Database["public"]["Enums"]["appointment_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
       list_master_availability_blocks: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
         Returns: {
@@ -713,6 +745,15 @@ export type Database = {
           id: string
           reason: string
           starts_at: string
+        }[]
+      }
+      list_master_customers: {
+        Args: { p_search?: string; p_workspace_id: string }
+        Returns: {
+          email: string
+          id: string
+          name: string
+          phone: string
         }[]
       }
       reschedule_appointment: {

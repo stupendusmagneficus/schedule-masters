@@ -6,7 +6,9 @@ export type Workspace = {
 };
 
 export type Service = {
+  readonly id: string;
   readonly name: string;
   readonly duration_minutes: number;
   readonly price_amount: number;
+  readonly currency: string;
 };

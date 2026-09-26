@@ -35,7 +35,7 @@ export async function loadMasterWorkspace(
       .single(),
     client
       .from("services")
-      .select("name, duration_minutes, price_amount")
+      .select("id, name, duration_minutes, price_amount, currency")
       .eq("workspace_id", member.workspace_id)
       .eq("is_active", true)
       .order("sort_order")
