@@ -272,9 +272,10 @@ textarea {
 
 .confirmation-close-button {
   justify-self: center;
+  height: fit-content;
   margin-top: 0;
   min-width: 96px;
-  width: auto;
+  width: 100%;
 }
 
 .confirm-button {
