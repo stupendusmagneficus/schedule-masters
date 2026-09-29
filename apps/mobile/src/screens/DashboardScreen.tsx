@@ -22,6 +22,7 @@ import {
 } from "../features/appointments/manualBooking";
 import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
+import { useCalendarData } from "../features/calendar/useCalendarData";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { colors } from "../theme/tokens";
@@ -70,6 +71,11 @@ export function DashboardScreen({
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
+  const calendar = useCalendarData({
+    client,
+    timezone: workspace.timezone,
+    workspaceId: workspace.id,
+  });
   const serviceCatalog = useServiceCatalog({
     client,
     initialServices: demoData ? [demoData.primaryService] : services,
@@ -94,6 +100,7 @@ export function DashboardScreen({
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
       await reloadAppointments();
+      await calendar.reload();
       setSelectedAppointment(null);
     } catch {
       setAppointmentActionError(true);
@@ -118,10 +125,10 @@ export function DashboardScreen({
         )}
         {activeTab === "calendar" && (
           <CalendarTab
+            calendar={calendar}
             client={client}
             demoData={demoData}
             locale={locale}
-            masterAppointments={appointments}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             t={t}
             workspace={workspace}
@@ -173,6 +180,7 @@ export function DashboardScreen({
           onClose={() => setManualBookingVisible(false)}
           onCreated={async () => {
             await reloadAppointments();
+            await calendar.reload();
             analytics.track(analyticsEvents.appointmentCreated, {
               source: "master_created",
             });
