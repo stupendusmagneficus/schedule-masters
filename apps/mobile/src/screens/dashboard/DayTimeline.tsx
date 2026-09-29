@@ -175,7 +175,6 @@ const styles = StyleSheet.create({
   closedTitle: { ...typography.label, color: colors.primaryText },
   event: {
     borderLeftWidth: 4,
-    borderRadius: radii.control,
     left: 58,
     paddingHorizontal: 10,
     paddingVertical: 6,
