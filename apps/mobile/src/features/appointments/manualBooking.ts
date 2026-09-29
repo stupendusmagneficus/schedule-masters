@@ -72,11 +72,29 @@ export function deduplicateManualBookingCustomers(
   customers: readonly ManualBookingCustomer[],
 ): ManualBookingCustomer[] {
   const seenCustomerIds = new Set<string>();
+  const seenCustomerKeys = new Set<string>();
   return customers.filter((customer) => {
     if (seenCustomerIds.has(customer.id)) return false;
+
+    const customerKeys = getCustomerIdentityKeys(customer);
+    if (customerKeys.some((key) => seenCustomerKeys.has(key))) return false;
+
     seenCustomerIds.add(customer.id);
+    for (const key of customerKeys) {
+      seenCustomerKeys.add(key);
+    }
     return true;
   });
+}
+
+function getCustomerIdentityKeys(customer: ManualBookingCustomer): string[] {
+  const email = customer.email?.trim().toLowerCase();
+  const phone = customer.phone?.replace(/\D/g, "");
+
+  return [
+    email ? `email:${email}` : null,
+    phone ? `phone:${phone}` : null,
+  ].filter((key): key is string => key !== null);
 }
 
 export async function listMasterAvailableSlots(

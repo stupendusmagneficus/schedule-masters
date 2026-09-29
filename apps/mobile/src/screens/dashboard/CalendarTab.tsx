@@ -4,10 +4,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  AppointmentStatusBadge,
-  getAppointmentStatusLabel,
-} from "../../components/AppointmentStatusBadge";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
@@ -17,12 +13,18 @@ import type {
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
 import {
+  buildDayTimeline,
+  buildDemoDayTimeline,
+  getDayTimelineSlotStart,
+} from "../../features/calendar/dayTimeline";
+import {
   type CalendarDataController,
   getCalendarDateLabel,
 } from "../../features/calendar/useCalendarData";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
+import { DayTimeline } from "./DayTimeline";
 import type { DashboardTabProps } from "./types";
 
 type CalendarTabProps = DashboardTabProps & {
@@ -30,6 +32,7 @@ type CalendarTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
+  readonly onSelectTime?: (date: string, startsAt: string) => void;
   readonly workspace: Workspace;
 };
 
@@ -39,11 +42,21 @@ export function CalendarTab({
   demoData,
   locale,
   onSelectAppointment,
+  onSelectTime,
   t,
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
   const dateLabel = getCalendarDateLabel(calendar.selectedDate, locale);
+  const timeline = demoData
+    ? buildDemoDayTimeline(demoData.appointments)
+    : buildDayTimeline({
+        appointments: calendar.appointments,
+        availabilityRules: workspace.availabilityRules,
+        blocks: calendar.blocks,
+        selectedDate: calendar.selectedDate,
+        timezone: workspace.timezone,
+      });
 
   return (
     <>
@@ -93,78 +106,30 @@ export function CalendarTab({
           </View>
         </View>
         <InfoCard>
-          <Text style={styles.sectionTitle}>{t("mobile.workingHours")}</Text>
-          <Text style={styles.hours}>08:00 – 21:00</Text>
-        </InfoCard>
-        <InfoCard>
-          <Text style={styles.sectionTitle}>{t("mobile.nextBooking")}</Text>
-          {demoData ? (
-            <View style={styles.timeline}>
-              {demoData.appointments.map((appointment) => (
-                <View key={appointment.id} style={styles.timelineRow}>
-                  <Text style={styles.time}>{appointment.startsAt}</Text>
-                  <View style={styles.event}>
-                    <Text style={styles.eventTitle}>
-                      {appointment.clientName}
-                    </Text>
-                    <Text style={styles.helper}>
-                      {appointment.serviceName} · {appointment.durationMinutes}{" "}
-                      min
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          ) : calendar.isLoading ? (
+          <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
+          {calendar.isLoading && !demoData ? (
             <Text style={styles.helper}>{t("common.loading")}</Text>
-          ) : calendar.appointments.length ? (
-            <View style={styles.timeline}>
-              {calendar.appointments.map((appointment) => (
-                <Pressable
-                  accessibilityLabel={`${appointment.customer_name}, ${getAppointmentStatusLabel(appointment.status, t)}`}
-                  accessibilityRole="button"
-                  key={appointment.id}
-                  onPress={() => onSelectAppointment?.(appointment)}
-                  style={({ pressed }) => [
-                    styles.timelineRow,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={styles.time}>
-                    {formatTime(new Date(appointment.starts_at), locale, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: workspace.timezone,
-                    })}
-                  </Text>
-                  <View style={styles.event}>
-                    <View style={styles.eventHeader}>
-                      <Text style={styles.eventTitle}>
-                        {appointment.customer_name}
-                      </Text>
-                      <AppointmentStatusBadge
-                        label={getAppointmentStatusLabel(appointment.status, t)}
-                        status={appointment.status}
-                      />
-                    </View>
-                    <Text style={styles.helper}>
-                      {appointment.service_name} ·{" "}
-                      {appointment.duration_minutes} min
-                    </Text>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
           ) : (
-            <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
+            <DayTimeline
+              onPressAppointment={onSelectAppointment}
+              onPressEmptySlot={
+                onSelectTime
+                  ? (minute) =>
+                      onSelectTime(
+                        calendar.selectedDate,
+                        getDayTimelineSlotStart(
+                          calendar.selectedDate,
+                          minute,
+                          workspace.timezone,
+                        ),
+                      )
+                  : undefined
+              }
+              t={t}
+              timeline={timeline}
+            />
           )}
         </InfoCard>
-        {demoData && (
-          <InfoCard>
-            <Text style={styles.sectionTitle}>{t("mobile.freeSlots")}</Text>
-            <Text style={styles.helper}>{demoData.freeSlots.join(" · ")}</Text>
-          </InfoCard>
-        )}
         <InfoCard>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionHeaderCopy}>
@@ -343,23 +308,6 @@ const styles = StyleSheet.create({
     ...typography.eyebrow,
   },
   helper: { ...typography.body, color: colors.secondaryText },
-  hours: { ...typography.metric, color: colors.primaryText },
-  event: {
-    backgroundColor: colors.accentSoft,
-    borderLeftColor: colors.accent,
-    borderLeftWidth: 3,
-    borderRadius: radii.control,
-    flex: 1,
-    padding: 10,
-  },
-  eventHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "space-between",
-  },
-  eventTitle: { ...typography.label, color: colors.primaryText },
-  pressed: { opacity: 0.78 },
   navigationButton: {
     alignItems: "center",
     borderColor: colors.border,
@@ -402,7 +350,4 @@ const styles = StyleSheet.create({
   },
   sectionHeaderCopy: { flex: 1 },
   title: { ...typography.heading, color: colors.primaryText },
-  time: { ...typography.caption, color: colors.secondaryText, width: 48 },
-  timeline: { gap: 8 },
-  timelineRow: { alignItems: "flex-start", flexDirection: "row", gap: 8 },
 });

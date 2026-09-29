@@ -63,6 +63,12 @@ export function DashboardScreen({
   const [isManualBookingVisible, setManualBookingVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<MasterAppointment | null>(null);
+  const [manualBookingDate, setManualBookingDate] = useState<string | null>(
+    null,
+  );
+  const [manualBookingStartAt, setManualBookingStartAt] = useState<
+    string | null
+  >(null);
   const [isUpdatingAppointment, setUpdatingAppointment] = useState(false);
   const [appointmentActionError, setAppointmentActionError] = useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
@@ -109,6 +115,12 @@ export function DashboardScreen({
     }
   }
 
+  function openManualBooking(date?: string, startsAt?: string) {
+    setManualBookingDate(date ?? null);
+    setManualBookingStartAt(startsAt ?? null);
+    setManualBookingVisible(true);
+  }
+
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -130,6 +142,11 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
+            onSelectTime={(date, startsAt) =>
+              client
+                ? openManualBooking(date, startsAt)
+                : setNewBookingNoticeVisible(true)
+            }
             t={t}
             workspace={workspace}
           />
@@ -153,9 +170,7 @@ export function DashboardScreen({
       <FloatingBookingAction
         label={t("mobile.newBooking")}
         onPress={() =>
-          client
-            ? setManualBookingVisible(true)
-            : setNewBookingNoticeVisible(true)
+          client ? openManualBooking() : setNewBookingNoticeVisible(true)
         }
       />
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
@@ -175,9 +190,17 @@ export function DashboardScreen({
       {client ? (
         <ManualBookingModal
           client={client}
-          initialDate={formatDateInTimeZone(new Date(), workspace.timezone)}
+          initialDate={
+            manualBookingDate ??
+            formatDateInTimeZone(new Date(), workspace.timezone)
+          }
+          initialStartsAt={manualBookingStartAt ?? undefined}
           locale={locale}
-          onClose={() => setManualBookingVisible(false)}
+          onClose={() => {
+            setManualBookingVisible(false);
+            setManualBookingDate(null);
+            setManualBookingStartAt(null);
+          }}
           onCreated={async () => {
             await reloadAppointments();
             await calendar.reload();

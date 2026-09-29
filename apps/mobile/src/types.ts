@@ -1,8 +1,15 @@
 export type Workspace = {
+  readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly id: string;
   readonly name: string;
   readonly slug: string;
   readonly timezone: string;
+};
+
+export type WorkspaceAvailabilityRule = {
+  readonly dayOfWeek: number;
+  readonly endLocalTime: string;
+  readonly startLocalTime: string;
 };
 
 export type Service = {

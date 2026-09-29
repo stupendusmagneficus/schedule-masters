@@ -51,10 +51,26 @@ export async function loadMasterWorkspace(
 
   if (serviceResult.error) return { kind: "error" };
 
+  const availabilityResult = await client
+    .from("availability_rules")
+    .select("day_of_week, start_local_time, end_local_time")
+    .eq("workspace_id", member.workspace_id)
+    .eq("is_active", true)
+    .order("day_of_week");
+
+  if (availabilityResult.error) return { kind: "error" };
+
   return {
     kind: "ready",
     memberRole: member.role,
     services: serviceResult.data ?? [],
-    workspace: workspaceResult.data,
+    workspace: {
+      ...workspaceResult.data,
+      availabilityRules: (availabilityResult.data ?? []).map((rule) => ({
+        dayOfWeek: rule.day_of_week,
+        endLocalTime: rule.end_local_time,
+        startLocalTime: rule.start_local_time,
+      })),
+    },
   };
 }

@@ -76,4 +76,38 @@ describe("manual booking validation", () => {
       { ...customer, id: "second-customer-id", name: "Marta" },
     ]);
   });
+
+  it("removes customers with the same normalized contact details", () => {
+    const customer = {
+      id: "customer-id",
+      name: "Yahor Dunayeu",
+      email: "",
+      phone: "+420 123 456 789",
+    };
+
+    expect(
+      deduplicateManualBookingCustomers([
+        customer,
+        {
+          ...customer,
+          id: "duplicate-customer-id",
+          phone: "420123456789",
+        },
+        {
+          ...customer,
+          id: "second-customer-id",
+          name: "Marta",
+          phone: "420987654321",
+        },
+      ]),
+    ).toEqual([
+      customer,
+      {
+        ...customer,
+        id: "second-customer-id",
+        name: "Marta",
+        phone: "420987654321",
+      },
+    ]);
+  });
 });
