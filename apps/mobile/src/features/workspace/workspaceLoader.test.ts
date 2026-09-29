@@ -33,13 +33,16 @@ function createQuery(result: QueryResult) {
 function createClient({
   member,
   services,
+  availabilityRules,
   workspace,
 }: {
+  readonly availabilityRules: QueryResult;
   readonly member: QueryResult;
   readonly services: QueryResult;
   readonly workspace: QueryResult;
 }) {
   const queries = {
+    availability_rules: createQuery(availabilityRules),
     services: createQuery(services),
     workspace_members: createQuery(member),
     workspaces: createQuery(workspace),
@@ -77,6 +80,7 @@ describe("loadMasterWorkspace", () => {
     const client = createClient({
       member: { data: null, error: null },
       services: { data: [], error: null },
+      availabilityRules: { data: [], error: null },
       workspace: { data: null, error: null },
     });
 
@@ -89,6 +93,7 @@ describe("loadMasterWorkspace", () => {
     const client = createClient({
       member: { data: null, error: { message: "Network failed" } },
       services: { data: [], error: null },
+      availabilityRules: { data: [], error: null },
       workspace: { data: null, error: null },
     });
 
@@ -104,6 +109,7 @@ describe("loadMasterWorkspace", () => {
         error: null,
       },
       services: { data: [], error: { message: "Network failed" } },
+      availabilityRules: { data: [], error: null },
       workspace: { data: workspace, error: null },
     });
 
@@ -119,6 +125,7 @@ describe("loadMasterWorkspace", () => {
         error: null,
       },
       services: { data: [], error: null },
+      availabilityRules: { data: [], error: null },
       workspace: { data: null, error: { message: "Network failed" } },
     });
 
@@ -134,6 +141,16 @@ describe("loadMasterWorkspace", () => {
         error: null,
       },
       services: { data: [service], error: null },
+      availabilityRules: {
+        data: [
+          {
+            day_of_week: 1,
+            end_local_time: "18:00",
+            start_local_time: "09:00",
+          },
+        ],
+        error: null,
+      },
       workspace: { data: workspace, error: null },
     });
 
@@ -141,7 +158,16 @@ describe("loadMasterWorkspace", () => {
       kind: "ready",
       memberRole: "owner",
       services: [service],
-      workspace,
+      workspace: {
+        ...workspace,
+        availabilityRules: [
+          {
+            dayOfWeek: 1,
+            endLocalTime: "18:00",
+            startLocalTime: "09:00",
+          },
+        ],
+      },
     });
   });
 });

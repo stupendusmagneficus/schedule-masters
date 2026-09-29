@@ -2,6 +2,11 @@ import type { Service, Workspace } from "../types";
 import type { DemoData } from "./types";
 
 export const demoWorkspace: Workspace = {
+  availabilityRules: Array.from({ length: 7 }, (_, index) => ({
+    dayOfWeek: index + 1,
+    endLocalTime: "21:00",
+    startLocalTime: "08:00",
+  })),
   id: "demo-workspace",
   name: "Elena Beauty",
   slug: "elena-beauty",

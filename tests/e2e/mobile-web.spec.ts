@@ -40,6 +40,32 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("renders the day calendar timeline and its empty-slot action", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+
+    await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", {
+        name: /08:00, Klepnutím vytvoříte rezervaci/,
+      }),
+    ).toBeVisible();
+    await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
+
+    await page
+      .getByRole("button", {
+        name: /08:00, Klepnutím vytvoříte rezervaci/,
+      })
+      .click();
+    await expect(
+      page.getByText(
+        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+      ),
+    ).toBeVisible();
+  });
+
   test("renders the public booking URL as an actionable profile link", async ({
     page,
   }) => {

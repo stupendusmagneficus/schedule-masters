@@ -40,6 +40,7 @@ import { FullscreenModal } from "./FullscreenModal";
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
   readonly initialDate: string;
+  readonly initialStartsAt?: string;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onCreated: () => Promise<void>;
@@ -52,6 +53,7 @@ type ManualBookingModalProps = {
 export function ManualBookingModal({
   client,
   initialDate,
+  initialStartsAt,
   locale,
   onClose,
   onCreated,
@@ -75,7 +77,7 @@ export function ManualBookingModal({
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] =
     useState<ManualBookingValidationError | null>(null);
-  const initializedDate = useRef<string | null>(null);
+  const initializedKey = useRef<string | null>(null);
 
   const selectedService =
     services.find((service) => service.id === draft.serviceId) ??
@@ -85,12 +87,15 @@ export function ManualBookingModal({
 
   useEffect(() => {
     if (!visible) {
-      initializedDate.current = null;
+      initializedKey.current = null;
       return;
     }
-    if (initializedDate.current === initialDate) return;
-    initializedDate.current = initialDate;
-    setDraft(createInitialDraft(services[0] ?? null, initialDate));
+    const nextKey = `${initialDate}:${initialStartsAt ?? ""}`;
+    if (initializedKey.current === nextKey) return;
+    initializedKey.current = nextKey;
+    setDraft(
+      createInitialDraft(services[0] ?? null, initialDate, initialStartsAt),
+    );
     setStep("time");
     setCustomerSearch("");
     setExistingCustomer(true);
@@ -99,7 +104,7 @@ export function ManualBookingModal({
     setError(null);
     setValidationError(null);
     setIdempotencyKey(createIdempotencyKey());
-  }, [initialDate, services, visible]);
+  }, [initialDate, initialStartsAt, services, visible]);
 
   useEffect(() => {
     if (!visible || !isExistingCustomer || step !== "customer") return;
@@ -141,7 +146,17 @@ export function ManualBookingModal({
       draft.date,
     )
       .then((nextSlots) => {
-        if (active) setSlots(nextSlots);
+        if (!active) return;
+        setSlots(nextSlots);
+        if (initialStartsAt) {
+          const matchingSlot = nextSlots.find((slot) =>
+            sameInstant(slot.starts_at, initialStartsAt),
+          );
+          setDraft((current) => ({
+            ...current,
+            startsAt: matchingSlot?.starts_at ?? current.startsAt,
+          }));
+        }
       })
       .catch(() => {
         if (active) setError(t("mobile.manualBookingLoadFailed"));
@@ -152,7 +167,15 @@ export function ManualBookingModal({
     return () => {
       active = false;
     };
-  }, [client, draft.date, selectedServiceId, t, visible, workspace.id]);
+  }, [
+    client,
+    draft.date,
+    initialStartsAt,
+    selectedServiceId,
+    t,
+    visible,
+    workspace.id,
+  ]);
 
   function updateDraft(patch: Partial<ManualBookingDraft>) {
     setDraft((current) => ({ ...current, ...patch }));
@@ -744,6 +767,7 @@ function ActionButton({
 function createInitialDraft(
   service: Service | null,
   date: string,
+  startsAt?: string,
 ): ManualBookingDraft {
   return {
     customerId: null,
@@ -755,8 +779,14 @@ function createInitialDraft(
     phone: "",
     priceAmount: service ? String(service.price_amount) : "",
     serviceId: service?.id ?? "",
-    startsAt: "",
+    startsAt: startsAt ?? "",
   };
+}
+
+function sameInstant(left: string, right: string): boolean {
+  const leftTime = new Date(left).getTime();
+  const rightTime = new Date(right).getTime();
+  return Number.isFinite(leftTime) && leftTime === rightTime;
 }
 
 function validationMessage(

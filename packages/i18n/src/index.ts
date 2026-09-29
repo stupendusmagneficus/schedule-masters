@@ -112,8 +112,11 @@ export type MessageKey =
   | "mobile.statusUpdateFailed"
   | "mobile.today"
   | "mobile.calendar"
+  | "mobile.calendarClosed"
+  | "mobile.calendarClosedDescription"
   | "mobile.calendarPrevious"
   | "mobile.calendarNext"
+  | "mobile.calendarTapToBook"
   | "mobile.profile"
   | "mobile.newBooking"
   | "mobile.newBookingNoticeTitle"
@@ -156,6 +159,7 @@ export type MessageKey =
   | "mobile.expectedRevenue"
   | "mobile.nextBooking"
   | "mobile.noBookingsToday"
+  | "mobile.daySchedule"
   | "mobile.firstService"
   | "mobile.noServices"
   | "mobile.workingHours"
@@ -354,8 +358,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Не удалось изменить статус записи.",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
+    "mobile.calendarClosed": "Нерабочий день",
+    "mobile.calendarClosedDescription":
+      "На этот день рабочие часы не настроены.",
     "mobile.calendarPrevious": "Предыдущая дата",
     "mobile.calendarNext": "Следующая дата",
+    "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
     "mobile.profile": "Профиль",
     "mobile.newBooking": "Новая запись",
     "mobile.newBookingNoticeTitle": "Новая запись",
@@ -407,6 +415,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Ожидаемая выручка",
     "mobile.nextBooking": "Следующая запись",
     "mobile.noBookingsToday": "На сегодня записей нет.",
+    "mobile.daySchedule": "Расписание дня",
     "mobile.firstService": "Первая услуга",
     "mobile.noServices": "Активных услуг пока нет.",
     "mobile.workingHours": "Рабочие часы",
@@ -613,8 +622,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Stav rezervace se nepodařilo změnit.",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
+    "mobile.calendarClosed": "Nepracovní den",
+    "mobile.calendarClosedDescription":
+      "Pro tento den nejsou nastavené pracovní hodiny.",
     "mobile.calendarPrevious": "Předchozí datum",
     "mobile.calendarNext": "Následující datum",
+    "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
     "mobile.profile": "Profil",
     "mobile.newBooking": "Nová rezervace",
     "mobile.newBookingNoticeTitle": "Nová rezervace",
@@ -665,6 +678,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Očekávané tržby",
     "mobile.nextBooking": "Další rezervace",
     "mobile.noBookingsToday": "Na dnešek nemáte žádné rezervace.",
+    "mobile.daySchedule": "Denní rozvrh",
     "mobile.firstService": "První služba",
     "mobile.noServices": "Zatím nemáte žádné aktivní služby.",
     "mobile.workingHours": "Pracovní doba",
@@ -867,8 +881,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "The booking status could not be changed.",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
+    "mobile.calendarClosed": "Closed day",
+    "mobile.calendarClosedDescription":
+      "Working hours are not configured for this day.",
     "mobile.calendarPrevious": "Previous date",
     "mobile.calendarNext": "Next date",
+    "mobile.calendarTapToBook": "Tap to create a booking",
     "mobile.profile": "Profile",
     "mobile.newBooking": "New booking",
     "mobile.newBookingNoticeTitle": "New booking",
@@ -919,6 +937,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Expected revenue",
     "mobile.nextBooking": "Next booking",
     "mobile.noBookingsToday": "There are no bookings today.",
+    "mobile.daySchedule": "Day schedule",
     "mobile.firstService": "Your first service",
     "mobile.noServices": "No active services yet.",
     "mobile.workingHours": "Working hours",
