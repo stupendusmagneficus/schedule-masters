@@ -20,12 +20,18 @@ import {
 import {
   type CalendarDataController,
   getCalendarDateLabel,
+  getCalendarWeekLabel,
 } from "../../features/calendar/useCalendarData";
+import {
+  buildDemoWeekCalendar,
+  buildWeekCalendar,
+} from "../../features/calendar/weekCalendar";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import { DayTimeline } from "./DayTimeline";
 import type { DashboardTabProps } from "./types";
+import { WeekCalendar } from "./WeekCalendar";
 
 type CalendarTabProps = DashboardTabProps & {
   readonly calendar: CalendarDataController;
@@ -47,10 +53,26 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
-  const dateLabel = getCalendarDateLabel(calendar.selectedDate, locale);
+  const dateLabel =
+    calendar.view === "week"
+      ? getCalendarWeekLabel(calendar.selectedDate, locale)
+      : getCalendarDateLabel(calendar.selectedDate, locale);
   const timeline = demoData
     ? buildDemoDayTimeline(demoData.appointments)
     : buildDayTimeline({
+        appointments: calendar.appointments,
+        availabilityRules: workspace.availabilityRules,
+        blocks: calendar.blocks,
+        selectedDate: calendar.selectedDate,
+        timezone: workspace.timezone,
+      });
+  const week = demoData
+    ? buildDemoWeekCalendar(
+        demoData.appointments,
+        calendar.selectedDate,
+        workspace.timezone,
+      )
+    : buildWeekCalendar({
         appointments: calendar.appointments,
         availabilityRules: workspace.availabilityRules,
         blocks: calendar.blocks,
@@ -64,6 +86,18 @@ export function CalendarTab({
         <View>
           <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
           <Text style={styles.title}>{dateLabel}</Text>
+          <View style={styles.viewSwitcher}>
+            <CalendarViewButton
+              active={calendar.view === "day"}
+              label={t("mobile.calendarDayView")}
+              onPress={() => calendar.setView("day")}
+            />
+            <CalendarViewButton
+              active={calendar.view === "week"}
+              label={t("mobile.calendarWeekView")}
+              onPress={() => calendar.setView("week")}
+            />
+          </View>
           <View style={styles.dateNavigation}>
             <Pressable
               accessibilityLabel={t("mobile.calendarPrevious")}
@@ -106,9 +140,26 @@ export function CalendarTab({
           </View>
         </View>
         <InfoCard>
-          <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
+          <Text style={styles.sectionTitle}>
+            {calendar.view === "week"
+              ? t("mobile.calendarWeekView")
+              : t("mobile.daySchedule")}
+          </Text>
           {calendar.isLoading && !demoData ? (
             <Text style={styles.helper}>{t("common.loading")}</Text>
+          ) : calendar.view === "week" ? (
+            <WeekCalendar
+              days={week}
+              locale={locale}
+              onPressAppointment={onSelectAppointment}
+              onPressDay={(date) => {
+                calendar.setSelectedDate(date);
+                calendar.setView("day");
+              }}
+              selectedDate={calendar.selectedDate}
+              t={t}
+              timezone={workspace.timezone}
+            />
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
@@ -191,6 +242,35 @@ export function CalendarTab({
         visible={isBlockModalVisible}
       />
     </>
+  );
+}
+
+function CalendarViewButton({
+  active,
+  label,
+  onPress,
+}: {
+  readonly active: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.viewButton,
+        active && styles.viewButtonActive,
+        pressed && styles.viewButtonPressed,
+      ]}
+    >
+      <Text
+        style={[styles.viewButtonText, active && styles.viewButtonTextActive]}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -350,4 +430,25 @@ const styles = StyleSheet.create({
   },
   sectionHeaderCopy: { flex: 1 },
   title: { ...typography.heading, color: colors.primaryText },
+  viewButton: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    flex: 1,
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  viewButtonActive: { backgroundColor: colors.surface },
+  viewButtonPressed: { opacity: 0.78 },
+  viewButtonText: { ...typography.label, color: colors.secondaryText },
+  viewButtonTextActive: { color: colors.primaryText, fontWeight: "700" },
+  viewSwitcher: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+    marginTop: 12,
+    padding: 4,
+  },
 });

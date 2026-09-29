@@ -66,6 +66,17 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("switches the calendar to a weekly schedule", async ({ page }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("button", { name: "Týden" }).click();
+
+    await expect(page.getByText("Týden", { exact: true }).last()).toBeVisible();
+    await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
+    await expect(page.getByText("Maria P.", { exact: true })).toBeVisible();
+    await expect(page.getByText("Sofia R.", { exact: true })).toBeVisible();
+  });
+
   test("renders the public booking URL as an actionable profile link", async ({
     page,
   }) => {
