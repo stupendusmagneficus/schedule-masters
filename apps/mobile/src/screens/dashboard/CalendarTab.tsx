@@ -20,12 +20,18 @@ import {
 import {
   type CalendarDataController,
   getCalendarDateLabel,
+  getCalendarWeekLabel,
 } from "../../features/calendar/useCalendarData";
+import {
+  buildDemoWeekCalendar,
+  buildWeekCalendar,
+} from "../../features/calendar/weekCalendar";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import { DayTimeline } from "./DayTimeline";
 import type { DashboardTabProps } from "./types";
+import { WeekCalendar } from "./WeekCalendar";
 
 type CalendarTabProps = DashboardTabProps & {
   readonly calendar: CalendarDataController;
@@ -47,10 +53,26 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
-  const dateLabel = getCalendarDateLabel(calendar.selectedDate, locale);
+  const dateLabel =
+    calendar.view === "week"
+      ? getCalendarWeekLabel(calendar.selectedDate, locale)
+      : getCalendarDateLabel(calendar.selectedDate, locale);
   const timeline = demoData
     ? buildDemoDayTimeline(demoData.appointments)
     : buildDayTimeline({
+        appointments: calendar.appointments,
+        availabilityRules: workspace.availabilityRules,
+        blocks: calendar.blocks,
+        selectedDate: calendar.selectedDate,
+        timezone: workspace.timezone,
+      });
+  const week = demoData
+    ? buildDemoWeekCalendar(
+        demoData.appointments,
+        calendar.selectedDate,
+        workspace.timezone,
+      )
+    : buildWeekCalendar({
         appointments: calendar.appointments,
         availabilityRules: workspace.availabilityRules,
         blocks: calendar.blocks,
@@ -63,52 +85,96 @@ export function CalendarTab({
       <View style={styles.content}>
         <View>
           <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
-          <Text style={styles.title}>{dateLabel}</Text>
-          <View style={styles.dateNavigation}>
-            <Pressable
-              accessibilityLabel={t("mobile.calendarPrevious")}
-              accessibilityRole="button"
-              disabled={!client}
-              onPress={calendar.goToPrevious}
-              style={({ pressed }) => [
-                styles.navigationButton,
-                !client && styles.disabled,
-                pressed && styles.navigationButtonPressed,
-              ]}
-            >
-              <Text style={styles.navigationButtonText}>‹</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              disabled={!client}
-              onPress={calendar.goToToday}
-              style={({ pressed }) => [
-                styles.todayButton,
-                !client && styles.disabled,
-                pressed && styles.navigationButtonPressed,
-              ]}
-            >
-              <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityLabel={t("mobile.calendarNext")}
-              accessibilityRole="button"
-              disabled={!client}
-              onPress={calendar.goToNext}
-              style={({ pressed }) => [
-                styles.navigationButton,
-                !client && styles.disabled,
-                pressed && styles.navigationButtonPressed,
-              ]}
-            >
-              <Text style={styles.navigationButtonText}>›</Text>
-            </Pressable>
+          {calendar.view === "day" ? (
+            <Text style={styles.title}>{dateLabel}</Text>
+          ) : null}
+          <View style={styles.calendarToolbar}>
+            <View style={styles.viewSwitcher}>
+              <CalendarViewButton
+                active={calendar.view === "day"}
+                label={t("mobile.calendarDayView")}
+                onPress={() => calendar.setView("day")}
+              />
+              <CalendarViewButton
+                active={calendar.view === "week"}
+                label={t("mobile.calendarWeekView")}
+                onPress={() => calendar.setView("week")}
+              />
+            </View>
+            <View style={styles.dateNavigation}>
+              <Pressable
+                accessibilityLabel={t("mobile.calendarPrevious")}
+                accessibilityRole="button"
+                disabled={!client}
+                onPress={calendar.goToPrevious}
+                style={({ pressed }) => [
+                  styles.navigationButton,
+                  !client && styles.disabled,
+                  pressed && styles.navigationButtonPressed,
+                ]}
+              >
+                <Text style={styles.navigationButtonText}>‹</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                disabled={!client}
+                onPress={calendar.goToToday}
+                style={({ pressed }) => [
+                  styles.todayButton,
+                  !client && styles.disabled,
+                  pressed && styles.navigationButtonPressed,
+                ]}
+              >
+                <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityLabel={t("mobile.calendarNext")}
+                accessibilityRole="button"
+                disabled={!client}
+                onPress={calendar.goToNext}
+                style={({ pressed }) => [
+                  styles.navigationButton,
+                  !client && styles.disabled,
+                  pressed && styles.navigationButtonPressed,
+                ]}
+              >
+                <Text style={styles.navigationButtonText}>›</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-        <InfoCard>
-          <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
+        <InfoCard style={calendar.view === "week" ? styles.weekInfoCard : null}>
+          {calendar.view === "day" ? (
+            <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
+          ) : null}
           {calendar.isLoading && !demoData ? (
             <Text style={styles.helper}>{t("common.loading")}</Text>
+          ) : calendar.view === "week" ? (
+            <WeekCalendar
+              days={week}
+              locale={locale}
+              onPressAppointment={onSelectAppointment}
+              onPressDay={(date) => {
+                calendar.setSelectedDate(date);
+                calendar.setView("day");
+              }}
+              onPressTime={
+                onSelectTime
+                  ? (date, minute) =>
+                      onSelectTime(
+                        date,
+                        getDayTimelineSlotStart(
+                          date,
+                          minute,
+                          workspace.timezone,
+                        ),
+                      )
+                  : undefined
+              }
+              selectedDate={calendar.selectedDate}
+              t={t}
+              timezone={workspace.timezone}
+            />
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
@@ -191,6 +257,35 @@ export function CalendarTab({
         visible={isBlockModalVisible}
       />
     </>
+  );
+}
+
+function CalendarViewButton({
+  active,
+  label,
+  onPress,
+}: {
+  readonly active: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.viewButton,
+        active && styles.viewButtonActive,
+        pressed && styles.viewButtonPressed,
+      ]}
+    >
+      <Text
+        style={[styles.viewButtonText, active && styles.viewButtonTextActive]}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -287,6 +382,13 @@ const styles = StyleSheet.create({
   },
   blockTitle: { ...typography.label, color: colors.primaryText },
   blocksList: { gap: 8, marginTop: 14 },
+  calendarToolbar: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
   deleteButton: { paddingHorizontal: 4, paddingVertical: 8 },
   deleteButtonText: {
     ...typography.caption,
@@ -297,8 +399,7 @@ const styles = StyleSheet.create({
   dateNavigation: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 8,
-    marginTop: 12,
+    gap: 4,
   },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
   eyebrow: {
@@ -313,24 +414,24 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
-    height: 44,
+    height: 36,
     justifyContent: "center",
-    width: 44,
+    width: 36,
   },
   navigationButtonPressed: { backgroundColor: colors.subtleSurface },
   navigationButtonText: {
     color: colors.primaryText,
-    fontSize: 28,
-    lineHeight: 30,
+    fontSize: 24,
+    lineHeight: 26,
   },
   todayButton: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,
     borderRadius: radii.control,
-    flex: 1,
-    height: 44,
+    height: 36,
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
+    width: 64,
   },
   todayButtonText: {
     ...typography.label,
@@ -350,4 +451,25 @@ const styles = StyleSheet.create({
   },
   sectionHeaderCopy: { flex: 1 },
   title: { ...typography.heading, color: colors.primaryText },
+  viewButton: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    flex: 1,
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  viewButtonActive: { backgroundColor: colors.surface },
+  viewButtonPressed: { opacity: 0.78 },
+  viewButtonText: { ...typography.label, color: colors.secondaryText },
+  viewButtonTextActive: { color: colors.primaryText, fontWeight: "700" },
+  viewSwitcher: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+    padding: 4,
+  },
+  weekInfoCard: { padding: 12 },
 });

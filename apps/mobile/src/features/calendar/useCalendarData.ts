@@ -194,6 +194,20 @@ export function getCalendarDateLabel(
   });
 }
 
+export function getCalendarWeekLabel(
+  selectedDate: string,
+  locale: SupportedLocale,
+): string {
+  const range = getCalendarDateRange(selectedDate, "week");
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric",
+  };
+  return `${formatDate(new Date(`${range.fromDate}T12:00:00.000Z`), locale, options)} – ${formatDate(new Date(`${range.toDate}T12:00:00.000Z`), locale, options)}`;
+}
+
 export function getCalendarDayCount(range: CalendarDateRange): number {
   const from = new Date(`${range.fromDate}T00:00:00.000Z`).getTime();
   const to = new Date(`${range.toDate}T00:00:00.000Z`).getTime();
