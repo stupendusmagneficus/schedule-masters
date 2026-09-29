@@ -1,4 +1,5 @@
 import type { Database } from "@schedule-app/api";
+import { formatDate, type SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -182,15 +183,15 @@ export function useCalendarData({
 
 export function getCalendarDateLabel(
   selectedDate: string,
-  locale: string,
+  locale: SupportedLocale,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return formatDate(new Date(`${selectedDate}T12:00:00.000Z`), locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: "UTC",
     weekday: "long",
-  }).format(new Date(`${selectedDate}T12:00:00.000Z`));
+  });
 }
 
 export function getCalendarDayCount(range: CalendarDateRange): number {
