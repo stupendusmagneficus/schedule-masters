@@ -1,8 +1,8 @@
-# Design review gate
+# Design review checklist
 
-Design review is required for every pull request that changes a user-facing
-screen, component, style, design token, copy, or interaction flow. This gate
-turns the visual direction in `DESIGN.md` into a repeatable review instead of
+Use this checklist during review of pull requests that change a user-facing
+screen, component, style, design token, copy, or interaction flow. It helps
+turn the visual direction in `DESIGN.md` into a repeatable review instead of
 relying on a final spot check.
 
 ## Review checklist
@@ -29,26 +29,12 @@ Before marking the PR ready for review:
 
 ## Evidence standard
 
-For a UI change, the PR body must include the checked design-review items and a
-non-empty `Visual evidence:` line. Evidence can be screenshots, a recording, a
-local route used for verification, or an explicit explanation for why the
+For a UI change, include the checked design-review items and a `Visual
+evidence:` line in the PR body when practical. Evidence can be screenshots, a
+recording, a local route used for verification, or an explanation for why the
 change has no visible output.
 
-The automated gate checks the PR body and only activates when the diff contains
-likely user-facing UI files. It does not replace human review: the reviewer
-should compare the evidence against the affected screen and the design tokens.
-For screens covered by mobile-web E2E, geometry assertions are also part of the
-CI gate. A passing checklist alone is not evidence that two controls cannot
-overlap; the affected screen needs a regression assertion or a documented
-reason why automation is not practical.
-
-## Local check
-
-Run the same check locally after completing the PR body:
-
-```text
-corepack yarn design-review:check
-```
-
-On GitHub, the `CI / Design review` check must be selected as a required status
-check in branch protection rules for `main`.
+The checklist is a review aid, not an automated CI gate. Reviewers should
+compare visual evidence against the affected screen and design tokens. A
+checklist alone does not prove that controls cannot overlap; add a regression
+assertion when layout behavior can be tested reliably.

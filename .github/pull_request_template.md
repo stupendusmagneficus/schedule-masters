@@ -22,9 +22,9 @@ Linear task: SCH-
 - [ ] Pure helpers and important new behavior have focused tests at the appropriate level.
 - [ ] Manual testing was completed when the change affects user-visible behavior.
 
-## Design review (required for UI/UX changes)
+## Design review (recommended for UI/UX changes)
 
-<!-- Complete every item when the PR changes screens, components, styles, tokens, copy, or interaction flows. -->
+<!-- Use this checklist when the PR changes screens, components, styles, tokens, copy, or interaction flows. -->
 
 - [ ] I completed the design review checklist.
 - [ ] I checked spacing, typography, layout, and responsive behavior at the affected viewport sizes.
