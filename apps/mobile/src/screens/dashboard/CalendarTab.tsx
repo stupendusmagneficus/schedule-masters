@@ -19,11 +19,17 @@ import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
+import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
   getDayTimelineSlotStart,
 } from "../../features/calendar/dayTimeline";
+import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
+import {
+  buildMonthCalendar,
+  type MonthCalendarDay,
+} from "../../features/calendar/monthCalendar";
 import {
   type CalendarDataController,
   getCalendarDateLabel,
@@ -37,6 +43,7 @@ import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import { DayTimeline } from "./DayTimeline";
+import { MonthCalendar } from "./MonthCalendar";
 import type { DashboardTabProps } from "./types";
 import { WeekCalendar } from "./WeekCalendar";
 
@@ -86,6 +93,22 @@ export function CalendarTab({
         selectedDate: calendar.selectedDate,
         timezone: workspace.timezone,
       });
+  const todayDate = getTodayCalendarDate(workspace.timezone);
+  const navigationDisabled = !client && !demoData;
+  const month: MonthCalendarDay[] = demoData
+    ? buildDemoMonthCalendar(
+        demoData.appointments,
+        calendar.selectedDate,
+        todayDate,
+      )
+    : buildMonthCalendar({
+        appointments: calendar.appointments,
+        availabilityRules: workspace.availabilityRules,
+        blocks: calendar.blocks,
+        selectedDate: calendar.selectedDate,
+        timezone: workspace.timezone,
+        todayDate,
+      });
 
   return (
     <>
@@ -107,16 +130,25 @@ export function CalendarTab({
                 label={t("mobile.calendarWeekView")}
                 onPress={() => calendar.setView("week")}
               />
+              <CalendarViewButton
+                active={calendar.view === "month"}
+                label={t("mobile.calendarMonthView")}
+                onPress={() => calendar.setView("month")}
+              />
             </View>
             <View style={styles.dateNavigation}>
               <Pressable
-                accessibilityLabel={t("mobile.calendarPrevious")}
+                accessibilityLabel={
+                  calendar.view === "month"
+                    ? t("mobile.calendarPreviousMonth")
+                    : t("mobile.calendarPrevious")
+                }
                 accessibilityRole="button"
-                disabled={!client}
+                disabled={navigationDisabled}
                 onPress={calendar.goToPrevious}
                 style={({ pressed }) => [
                   styles.navigationButton,
-                  !client && styles.disabled,
+                  navigationDisabled && styles.disabled,
                   pressed && styles.navigationButtonPressed,
                 ]}
               >
@@ -124,24 +156,28 @@ export function CalendarTab({
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                disabled={!client}
+                disabled={navigationDisabled}
                 onPress={calendar.goToToday}
                 style={({ pressed }) => [
                   styles.todayButton,
-                  !client && styles.disabled,
+                  navigationDisabled && styles.disabled,
                   pressed && styles.navigationButtonPressed,
                 ]}
               >
                 <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
               </Pressable>
               <Pressable
-                accessibilityLabel={t("mobile.calendarNext")}
+                accessibilityLabel={
+                  calendar.view === "month"
+                    ? t("mobile.calendarNextMonth")
+                    : t("mobile.calendarNext")
+                }
                 accessibilityRole="button"
-                disabled={!client}
+                disabled={navigationDisabled}
                 onPress={calendar.goToNext}
                 style={({ pressed }) => [
                   styles.navigationButton,
-                  !client && styles.disabled,
+                  navigationDisabled && styles.disabled,
                   pressed && styles.navigationButtonPressed,
                 ]}
               >
@@ -154,6 +190,7 @@ export function CalendarTab({
           style={[
             styles.calendarCard,
             calendar.view === "week" && styles.weekInfoCard,
+            calendar.view === "month" && styles.monthInfoCard,
           ]}
         >
           {calendar.view === "day" ? (
@@ -184,6 +221,15 @@ export function CalendarTab({
               selectedDate={calendar.selectedDate}
               t={t}
               timezone={workspace.timezone}
+            />
+          ) : calendar.view === "month" ? (
+            <MonthCalendar
+              days={month}
+              locale={locale}
+              onOpenSelectedDay={() => calendar.setView("day")}
+              onSelectDate={calendar.setSelectedDate}
+              selectedDate={calendar.selectedDate}
+              t={t}
             />
           ) : (
             <DayTimeline
@@ -509,4 +555,5 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   weekInfoCard: { padding: 12 },
+  monthInfoCard: { padding: 14 },
 });

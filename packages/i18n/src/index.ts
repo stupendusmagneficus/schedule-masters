@@ -119,6 +119,13 @@ export type MessageKey =
   | "mobile.calendarTapToBook"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
+  | "mobile.calendarMonthView"
+  | "mobile.calendarPreviousMonth"
+  | "mobile.calendarNextMonth"
+  | "mobile.monthBookings"
+  | "mobile.monthBlocks"
+  | "mobile.monthNoBookings"
+  | "mobile.monthOpenDay"
   | "mobile.weekBookings"
   | "mobile.weekNoBookings"
   | "mobile.profile"
@@ -370,6 +377,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
+    "mobile.calendarMonthView": "Месяц",
+    "mobile.calendarPreviousMonth": "Предыдущий месяц",
+    "mobile.calendarNextMonth": "Следующий месяц",
+    "mobile.monthBookings": "записей",
+    "mobile.monthBlocks": "блоков",
+    "mobile.monthNoBookings": "Нет записей",
+    "mobile.monthOpenDay": "Открыть день",
     "mobile.weekBookings": "записей",
     "mobile.weekNoBookings": "Нет записей",
     "mobile.profile": "Профиль",
@@ -638,6 +652,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
+    "mobile.calendarMonthView": "Měsíc",
+    "mobile.calendarPreviousMonth": "Předchozí měsíc",
+    "mobile.calendarNextMonth": "Následující měsíc",
+    "mobile.monthBookings": "rezervací",
+    "mobile.monthBlocks": "bloků",
+    "mobile.monthNoBookings": "Žádné rezervace",
+    "mobile.monthOpenDay": "Otevřít den",
     "mobile.weekBookings": "rezervací",
     "mobile.weekNoBookings": "Žádné rezervace",
     "mobile.profile": "Profil",
@@ -901,6 +922,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarTapToBook": "Tap to create a booking",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
+    "mobile.calendarMonthView": "Month",
+    "mobile.calendarPreviousMonth": "Previous month",
+    "mobile.calendarNextMonth": "Next month",
+    "mobile.monthBookings": "bookings",
+    "mobile.monthBlocks": "blocks",
+    "mobile.monthNoBookings": "No bookings",
+    "mobile.monthOpenDay": "Open day",
     "mobile.weekBookings": "bookings",
     "mobile.weekNoBookings": "No bookings",
     "mobile.profile": "Profile",
