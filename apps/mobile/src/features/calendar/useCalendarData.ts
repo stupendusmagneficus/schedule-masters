@@ -147,20 +147,26 @@ export function useCalendarData({
   );
 
   const goToPrevious = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState((current) => moveCalendarDate(current, view, -1));
-  }, [view]);
+  }, [client, view]);
   const goToNext = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState((current) => moveCalendarDate(current, view, 1));
-  }, [view]);
+  }, [client, view]);
   const goToToday = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState(getTodayCalendarDate(timezone));
-  }, [timezone]);
+  }, [client, timezone]);
   const setSelectedDate = useCallback((date: string) => {
-    if (isCalendarDate(date)) setSelectedDateState(date);
-  }, []);
+    if (!isCalendarDate(date)) return;
+    if (client && date !== selectedDate) setIsLoading(true);
+    setSelectedDateState(date);
+  }, [client, selectedDate]);
   const setView = useCallback((nextView: CalendarView) => {
+    if (client && nextView !== view) setIsLoading(true);
     setViewState(nextView);
-  }, []);
+  }, [client, view]);
 
   return {
     ...data,

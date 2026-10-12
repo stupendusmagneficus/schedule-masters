@@ -2,7 +2,14 @@ import type { Database } from "@schedule-app/api";
 import { formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
@@ -143,13 +150,16 @@ export function CalendarTab({
             </View>
           </View>
         </View>
-        <InfoCard style={calendar.view === "week" ? styles.weekInfoCard : null}>
+        <InfoCard
+          style={[
+            styles.calendarCard,
+            calendar.view === "week" && styles.weekInfoCard,
+          ]}
+        >
           {calendar.view === "day" ? (
             <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
           ) : null}
-          {calendar.isLoading && !demoData ? (
-            <Text style={styles.helper}>{t("common.loading")}</Text>
-          ) : calendar.view === "week" ? (
+          {calendar.view === "week" ? (
             <WeekCalendar
               days={week}
               locale={locale}
@@ -195,6 +205,15 @@ export function CalendarTab({
               timeline={timeline}
             />
           )}
+          {calendar.isLoading && !demoData ? (
+            <View
+              accessibilityLiveRegion="polite"
+              style={styles.calendarLoadingOverlay}
+            >
+              <ActivityIndicator color={colors.accent} size="small" />
+              <Text style={styles.calendarLoadingText}>{t("common.loading")}</Text>
+            </View>
+          ) : null}
         </InfoCard>
         <InfoCard>
           <View style={styles.sectionHeader}>
@@ -382,6 +401,22 @@ const styles = StyleSheet.create({
   },
   blockTitle: { ...typography.label, color: colors.primaryText },
   blocksList: { gap: 8, marginTop: 14 },
+  calendarCard: { position: "relative" },
+  calendarLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.78)",
+    borderRadius: radii.surface,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    zIndex: 1,
+  },
+  calendarLoadingText: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    fontWeight: "600",
+  },
   calendarToolbar: {
     alignItems: "center",
     flexDirection: "row",
