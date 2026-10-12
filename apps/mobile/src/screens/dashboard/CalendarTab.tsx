@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   blocksList: { gap: 8, marginTop: 14 },
   calendarCard: { position: "relative" },
   calendarLoadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.78)",
     borderRadius: radii.surface,
