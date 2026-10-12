@@ -111,6 +111,29 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
+  test("finds an available slot from the calendar and continues to booking", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("button", { name: "Volné termíny" }).click();
+
+    await expect(
+      page.getByText("Volné termíny", { exact: true }).last(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "11:00", exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "11:00", exact: true }).click();
+    await page.getByRole("button", { name: "Objednat klienta" }).click();
+
+    await expect(
+      page.getByText(
+        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+      ),
+    ).toBeVisible();
+  });
   test("renders the public booking URL as an actionable profile link", async ({
     page,
   }) => {

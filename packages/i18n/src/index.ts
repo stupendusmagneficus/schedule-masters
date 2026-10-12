@@ -91,6 +91,14 @@ export type MessageKey =
   | "mobile.demoMode"
   | "mobile.todaySchedule"
   | "mobile.freeSlots"
+  | "mobile.freeSlotsDescription"
+  | "mobile.freeSlotsChooseService"
+  | "mobile.freeSlotsChooseDate"
+  | "mobile.freeSlotsChooseTime"
+  | "mobile.freeSlotsNoAvailability"
+  | "mobile.freeSlotsNoSlots"
+  | "mobile.freeSlotsLoadFailed"
+  | "mobile.freeSlotsBook"
   | "mobile.available"
   | "mobile.pending"
   | "mobile.confirmed"
@@ -355,6 +363,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.demoMode": "Демо-режим",
     "mobile.todaySchedule": "Расписание на сегодня",
     "mobile.freeSlots": "Свободные окна",
+    "mobile.freeSlotsDescription": "Выберите услугу, дату и свободное время.",
+    "mobile.freeSlotsChooseService": "Выберите услугу",
+    "mobile.freeSlotsChooseDate": "Доступные дни",
+    "mobile.freeSlotsChooseTime": "Свободное время",
+    "mobile.freeSlotsNoAvailability":
+      "В этом месяце нет доступных окон для выбранной услуги.",
+    "mobile.freeSlotsNoSlots":
+      "На выбранную дату нет свободных окон. Выберите другой день.",
+    "mobile.freeSlotsLoadFailed":
+      "Не удалось загрузить свободные окна. Попробуйте ещё раз.",
+    "mobile.freeSlotsBook": "Записать клиента",
     "mobile.available": "Свободно",
     "mobile.pending": "Ожидает подтверждения",
     "mobile.confirmed": "Подтверждено",
@@ -637,6 +656,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.demoMode": "Demo režim",
     "mobile.todaySchedule": "Dnešní rozvrh",
     "mobile.freeSlots": "Volné termíny",
+    "mobile.freeSlotsDescription": "Vyberte službu, datum a volný termín.",
+    "mobile.freeSlotsChooseService": "Vyberte službu",
+    "mobile.freeSlotsChooseDate": "Dostupné dny",
+    "mobile.freeSlotsChooseTime": "Volné termíny",
+    "mobile.freeSlotsNoAvailability":
+      "Tento měsíc nejsou pro vybranou službu volné termíny.",
+    "mobile.freeSlotsNoSlots":
+      "Ve vybraný den nejsou volné termíny. Zvolte jiný den.",
+    "mobile.freeSlotsLoadFailed":
+      "Volné termíny se nepodařilo načíst. Zkuste to znovu.",
+    "mobile.freeSlotsBook": "Objednat klienta",
     "mobile.available": "Volno",
     "mobile.pending": "Čeká na potvrzení",
     "mobile.confirmed": "Potvrzeno",
@@ -916,6 +946,18 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.demoMode": "Demo mode",
     "mobile.todaySchedule": "Today's schedule",
     "mobile.freeSlots": "Free slots",
+    "mobile.freeSlotsDescription":
+      "Choose a service, date, and available time.",
+    "mobile.freeSlotsChooseService": "Choose a service",
+    "mobile.freeSlotsChooseDate": "Available days",
+    "mobile.freeSlotsChooseTime": "Available times",
+    "mobile.freeSlotsNoAvailability":
+      "No times are available for this service this month.",
+    "mobile.freeSlotsNoSlots":
+      "No times are available on this date. Choose another day.",
+    "mobile.freeSlotsLoadFailed":
+      "Couldn't load available times. Please try again.",
+    "mobile.freeSlotsBook": "Book client",
     "mobile.available": "Available",
     "mobile.pending": "Pending confirmation",
     "mobile.confirmed": "Confirmed",

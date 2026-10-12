@@ -2,7 +2,7 @@ import type { Database } from "@schedule-app/api";
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { StatusBar } from "expo-status-bar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Linking, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
@@ -11,6 +11,7 @@ import {
   type MobileTab,
 } from "../components/BottomNavigation";
 import { FloatingBookingAction } from "../components/FloatingBookingAction";
+import { FreeSlotsModal } from "../components/FreeSlotsModal";
 import { ManualBookingModal } from "../components/ManualBookingModal";
 import { NewBookingNotice } from "../components/NewBookingNotice";
 import { mobileEnv } from "../config/env";
@@ -60,6 +61,15 @@ export function DashboardScreen({
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
+  const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
+  const [manualBookingServiceId, setManualBookingServiceId] = useState<
+    string | null
+  >(null);
+  const [pendingBooking, setPendingBooking] = useState<{
+    date: string;
+    serviceId: string;
+    startsAt: string;
+  } | null>(null);
   const [isManualBookingVisible, setManualBookingVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<MasterAppointment | null>(null);
@@ -87,9 +97,12 @@ export function DashboardScreen({
     initialServices: demoData ? [demoData.primaryService] : services,
     workspaceId: workspace.id,
   });
-  const service = demoData
-    ? demoData.primaryService
-    : (serviceCatalog.activeServices[0] ?? null);
+  const bookingServices = useMemo(
+    () =>
+      demoData ? [demoData.primaryService] : serviceCatalog.activeServices,
+    [demoData, serviceCatalog.activeServices],
+  );
+  const service = bookingServices[0] ?? null;
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     profile: t("mobile.profile"),
@@ -115,11 +128,25 @@ export function DashboardScreen({
     }
   }
 
-  function openManualBooking(date?: string, startsAt?: string) {
+  function openManualBooking(
+    date?: string,
+    startsAt?: string,
+    serviceId?: string,
+  ) {
     setManualBookingDate(date ?? null);
     setManualBookingStartAt(startsAt ?? null);
+    setManualBookingServiceId(serviceId ?? null);
     setManualBookingVisible(true);
   }
+
+  useEffect(() => {
+    if (isFreeSlotsVisible || !pendingBooking) return;
+    setManualBookingDate(pendingBooking.date);
+    setManualBookingStartAt(pendingBooking.startsAt);
+    setManualBookingServiceId(pendingBooking.serviceId);
+    setManualBookingVisible(true);
+    setPendingBooking(null);
+  }, [isFreeSlotsVisible, pendingBooking]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
@@ -142,6 +169,7 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
+            onOpenFreeSlots={() => setFreeSlotsVisible(true)}
             onSelectTime={(date, startsAt) =>
               client
                 ? openManualBooking(date, startsAt)
@@ -187,6 +215,22 @@ export function DashboardScreen({
         title={t("mobile.newBookingNoticeTitle")}
         visible={isNewBookingNoticeVisible}
       />
+      <FreeSlotsModal
+        client={client}
+        demoData={demoData}
+        initialDate={calendar.selectedDate}
+        locale={locale}
+        onBook={(serviceId, date, startsAt) => {
+          setFreeSlotsVisible(false);
+          if (client) setPendingBooking({ date, serviceId, startsAt });
+          else setNewBookingNoticeVisible(true);
+        }}
+        onClose={() => setFreeSlotsVisible(false)}
+        services={bookingServices}
+        t={t}
+        visible={isFreeSlotsVisible}
+        workspace={workspace}
+      />
       {client ? (
         <ManualBookingModal
           client={client}
@@ -195,11 +239,13 @@ export function DashboardScreen({
             formatDateInTimeZone(new Date(), workspace.timezone)
           }
           initialStartsAt={manualBookingStartAt ?? undefined}
+          initialServiceId={manualBookingServiceId ?? undefined}
           locale={locale}
           onClose={() => {
             setManualBookingVisible(false);
             setManualBookingDate(null);
             setManualBookingStartAt(null);
+            setManualBookingServiceId(null);
           }}
           onCreated={async () => {
             await reloadAppointments();
@@ -208,9 +254,7 @@ export function DashboardScreen({
               source: "master_created",
             });
           }}
-          services={
-            demoData ? [demoData.primaryService] : serviceCatalog.activeServices
-          }
+          services={bookingServices}
           t={t}
           visible={isManualBookingVisible}
           workspace={workspace}

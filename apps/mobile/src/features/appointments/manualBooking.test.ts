@@ -1,8 +1,11 @@
-import { describe, expect, it } from "vitest";
+import type { Database } from "@schedule-app/api";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createIdempotencyKey,
   deduplicateManualBookingCustomers,
+  listMasterMonthAvailableSlots,
   type ManualBookingDraft,
   validateManualBookingDraft,
 } from "./manualBooking";
@@ -109,5 +112,33 @@ describe("manual booking validation", () => {
         phone: "420987654321",
       },
     ]);
+  });
+});
+
+describe("monthly manual booking availability", () => {
+  it("loads all month slots through the shared master availability RPC", async () => {
+    const rows = [
+      {
+        available_date: "2030-01-03",
+        ends_at: "2030-01-03T10:00:00.000Z",
+        starts_at: "2030-01-03T09:00:00.000Z",
+      },
+    ];
+    const rpc = vi.fn().mockResolvedValue({ data: rows, error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await expect(
+      listMasterMonthAvailableSlots(
+        client,
+        "workspace-id",
+        "service-id",
+        "2030-01-18",
+      ),
+    ).resolves.toEqual(rows);
+    expect(rpc).toHaveBeenCalledWith("get_master_month_available_slots", {
+      p_month_start: "2030-01-01",
+      p_service_id: "service-id",
+      p_workspace_id: "workspace-id",
+    });
   });
 });

@@ -44,6 +44,7 @@ type ManualBookingModalProps = {
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onCreated: () => Promise<void>;
+  readonly initialServiceId?: string;
   readonly services: readonly Service[];
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -57,13 +58,19 @@ export function ManualBookingModal({
   locale,
   onClose,
   onCreated,
+  initialServiceId,
   services,
   t,
   visible,
   workspace,
 }: ManualBookingModalProps) {
   const [draft, setDraft] = useState<ManualBookingDraft>(() =>
-    createInitialDraft(services[0] ?? null, initialDate),
+    createInitialDraft(
+      services.find((service) => service.id === initialServiceId) ??
+        services[0] ??
+        null,
+      initialDate,
+    ),
   );
   const [step, setStep] = useState<ManualBookingStep>("time");
   const [customers, setCustomers] = useState<ManualBookingCustomer[]>([]);
@@ -90,11 +97,17 @@ export function ManualBookingModal({
       initializedKey.current = null;
       return;
     }
-    const nextKey = `${initialDate}:${initialStartsAt ?? ""}`;
+    const nextKey = `${initialDate}:${initialStartsAt ?? ""}:${initialServiceId ?? ""}`;
     if (initializedKey.current === nextKey) return;
     initializedKey.current = nextKey;
     setDraft(
-      createInitialDraft(services[0] ?? null, initialDate, initialStartsAt),
+      createInitialDraft(
+        services.find((service) => service.id === initialServiceId) ??
+          services[0] ??
+          null,
+        initialDate,
+        initialStartsAt,
+      ),
     );
     setStep("time");
     setCustomerSearch("");
@@ -104,7 +117,7 @@ export function ManualBookingModal({
     setError(null);
     setValidationError(null);
     setIdempotencyKey(createIdempotencyKey());
-  }, [initialDate, initialStartsAt, services, visible]);
+  }, [initialDate, initialServiceId, initialStartsAt, services, visible]);
 
   useEffect(() => {
     if (!visible || !isExistingCustomer || step !== "customer") return;

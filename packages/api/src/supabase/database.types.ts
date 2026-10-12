@@ -710,6 +710,18 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_month_available_slots: {
+        Args: {
+          p_month_start: string
+          p_service_id: string
+          p_workspace_id: string
+        }
+        Returns: {
+          available_date: string
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string; p_slug: string }
         Returns: {
