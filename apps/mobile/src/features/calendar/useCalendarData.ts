@@ -147,20 +147,32 @@ export function useCalendarData({
   );
 
   const goToPrevious = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState((current) => moveCalendarDate(current, view, -1));
-  }, [view]);
+  }, [client, view]);
   const goToNext = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState((current) => moveCalendarDate(current, view, 1));
-  }, [view]);
+  }, [client, view]);
   const goToToday = useCallback(() => {
+    if (client) setIsLoading(true);
     setSelectedDateState(getTodayCalendarDate(timezone));
-  }, [timezone]);
-  const setSelectedDate = useCallback((date: string) => {
-    if (isCalendarDate(date)) setSelectedDateState(date);
-  }, []);
-  const setView = useCallback((nextView: CalendarView) => {
-    setViewState(nextView);
-  }, []);
+  }, [client, timezone]);
+  const setSelectedDate = useCallback(
+    (date: string) => {
+      if (!isCalendarDate(date)) return;
+      if (client && date !== selectedDate) setIsLoading(true);
+      setSelectedDateState(date);
+    },
+    [client, selectedDate],
+  );
+  const setView = useCallback(
+    (nextView: CalendarView) => {
+      if (client && nextView !== view) setIsLoading(true);
+      setViewState(nextView);
+    },
+    [client, view],
+  );
 
   return {
     ...data,
@@ -192,6 +204,20 @@ export function getCalendarDateLabel(
     timeZone: "UTC",
     weekday: "long",
   });
+}
+
+export function getCalendarWeekLabel(
+  selectedDate: string,
+  locale: SupportedLocale,
+): string {
+  const range = getCalendarDateRange(selectedDate, "week");
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric",
+  };
+  return `${formatDate(new Date(`${range.fromDate}T12:00:00.000Z`), locale, options)} – ${formatDate(new Date(`${range.toDate}T12:00:00.000Z`), locale, options)}`;
 }
 
 export function getCalendarDayCount(range: CalendarDateRange): number {

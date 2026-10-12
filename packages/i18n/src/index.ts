@@ -117,6 +117,10 @@ export type MessageKey =
   | "mobile.calendarPrevious"
   | "mobile.calendarNext"
   | "mobile.calendarTapToBook"
+  | "mobile.calendarDayView"
+  | "mobile.calendarWeekView"
+  | "mobile.weekBookings"
+  | "mobile.weekNoBookings"
   | "mobile.profile"
   | "mobile.newBooking"
   | "mobile.newBookingNoticeTitle"
@@ -364,6 +368,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPrevious": "Предыдущая дата",
     "mobile.calendarNext": "Следующая дата",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
+    "mobile.calendarDayView": "День",
+    "mobile.calendarWeekView": "Неделя",
+    "mobile.weekBookings": "записей",
+    "mobile.weekNoBookings": "Нет записей",
     "mobile.profile": "Профиль",
     "mobile.newBooking": "Новая запись",
     "mobile.newBookingNoticeTitle": "Новая запись",
@@ -628,6 +636,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPrevious": "Předchozí datum",
     "mobile.calendarNext": "Následující datum",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
+    "mobile.calendarDayView": "Den",
+    "mobile.calendarWeekView": "Týden",
+    "mobile.weekBookings": "rezervací",
+    "mobile.weekNoBookings": "Žádné rezervace",
     "mobile.profile": "Profil",
     "mobile.newBooking": "Nová rezervace",
     "mobile.newBookingNoticeTitle": "Nová rezervace",
@@ -887,6 +899,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPrevious": "Previous date",
     "mobile.calendarNext": "Next date",
     "mobile.calendarTapToBook": "Tap to create a booking",
+    "mobile.calendarDayView": "Day",
+    "mobile.calendarWeekView": "Week",
+    "mobile.weekBookings": "bookings",
+    "mobile.weekNoBookings": "No bookings",
     "mobile.profile": "Profile",
     "mobile.newBooking": "New booking",
     "mobile.newBookingNoticeTitle": "New booking",
