@@ -5,7 +5,8 @@ import type { PersonalBlock } from "../availability/personalBlocks";
 import { buildCalendarFeed, formatCalendarFeedDate } from "./calendarFeed";
 
 const appointment = (
-  overrides: Partial<MasterAppointment> & Pick<MasterAppointment, "id" | "starts_at" | "ends_at">,
+  overrides: Partial<MasterAppointment> &
+    Pick<MasterAppointment, "id" | "starts_at" | "ends_at">,
 ): MasterAppointment => ({
   currency: "CZK",
   customer_id: "customer-1",
@@ -19,7 +20,8 @@ const appointment = (
 });
 
 const block = (
-  overrides: Partial<PersonalBlock> & Pick<PersonalBlock, "id" | "starts_at" | "ends_at">,
+  overrides: Partial<PersonalBlock> &
+    Pick<PersonalBlock, "id" | "starts_at" | "ends_at">,
 ): PersonalBlock => ({
   reason: "Pauza",
   ...overrides,
@@ -93,10 +95,9 @@ describe("calendar feed", () => {
       timezone: "UTC",
     });
 
-    expect(groups.flatMap((group) => group.items.map((item) => item.id))).toEqual([
-      "future-break",
-      "upcoming",
-    ]);
+    expect(
+      groups.flatMap((group) => group.items.map((item) => item.id)),
+    ).toEqual(["future-break", "upcoming"]);
   });
 
   it("formats group dates in the selected locale", () => {

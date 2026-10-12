@@ -1,5 +1,5 @@
-import { formatDate } from "@schedule-app/i18n";
 import type { SupportedLocale } from "@schedule-app/i18n";
+import { formatDate } from "@schedule-app/i18n";
 
 import type { MasterAppointment } from "../appointments/manualBooking";
 import {

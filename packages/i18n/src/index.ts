@@ -670,8 +670,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarFeedView": "Přehled",
     "mobile.calendarFeedAll": "Vše",
     "mobile.calendarFeedFuture": "Budoucí",
-    "mobile.calendarFeedEmpty": "V tomto období nejsou žádné rezervace ani bloky.",
-    "mobile.calendarFeedEmptyFuture": "Nemáte žádné budoucí rezervace ani bloky.",
+    "mobile.calendarFeedEmpty":
+      "V tomto období nejsou žádné rezervace ani bloky.",
+    "mobile.calendarFeedEmptyFuture":
+      "Nemáte žádné budoucí rezervace ani bloky.",
     "mobile.calendarFeedError": "Rezervace a bloky se nepodařilo načíst.",
     "mobile.calendarFeedRetry": "Zkusit znovu",
     "mobile.calendarPreviousMonth": "Předchozí měsíc",
@@ -947,8 +949,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarFeedView": "Feed",
     "mobile.calendarFeedAll": "All",
     "mobile.calendarFeedFuture": "Upcoming",
-    "mobile.calendarFeedEmpty": "There are no bookings or blocks in this range.",
-    "mobile.calendarFeedEmptyFuture": "There are no upcoming bookings or blocks.",
+    "mobile.calendarFeedEmpty":
+      "There are no bookings or blocks in this range.",
+    "mobile.calendarFeedEmptyFuture":
+      "There are no upcoming bookings or blocks.",
     "mobile.calendarFeedError": "Bookings and blocks could not be loaded.",
     "mobile.calendarFeedRetry": "Try again",
     "mobile.calendarPreviousMonth": "Previous month",

@@ -1,5 +1,5 @@
-import { formatCurrency, formatTime } from "@schedule-app/i18n";
 import type { SupportedLocale } from "@schedule-app/i18n";
+import { formatCurrency, formatTime } from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
@@ -8,9 +8,9 @@ import {
 } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import {
-  formatCalendarFeedDate,
   type CalendarFeedFilter,
   type CalendarFeedGroup,
+  formatCalendarFeedDate,
 } from "../../features/calendar/calendarFeed";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -78,7 +78,9 @@ export function CalendarFeed({
                     );
                     const content = (
                       <>
-                        <Text style={styles.time}>{start} – {end}</Text>
+                        <Text style={styles.time}>
+                          {start} – {end}
+                        </Text>
                         <View style={styles.itemCopy}>
                           <View style={styles.itemHeader}>
                             <Text numberOfLines={1} style={styles.itemTitle}>
@@ -134,7 +136,9 @@ export function CalendarFeed({
                       key={`${item.kind}:${item.id}`}
                       style={[styles.item, styles.blockItem]}
                     >
-                      <Text style={styles.time}>{start} – {end}</Text>
+                      <Text style={styles.time}>
+                        {start} – {end}
+                      </Text>
                       <View style={styles.itemCopy}>
                         <Text numberOfLines={1} style={styles.itemTitle}>
                           {block?.reason || t("mobile.personalBlocks")}
@@ -184,9 +188,7 @@ function FilterButton({
         pressed && styles.filterButtonPressed,
       ]}
     >
-      <Text
-        style={[styles.filterText, active && styles.filterTextActive]}
-      >
+      <Text style={[styles.filterText, active && styles.filterTextActive]}>
         {label}
       </Text>
     </Pressable>
@@ -254,7 +256,11 @@ const styles = StyleSheet.create({
   itemSubtitle: { ...typography.caption, color: colors.secondaryText },
   itemTitle: { ...typography.label, color: colors.primaryText, flex: 1 },
   items: { gap: 8 },
-  price: { ...typography.caption, color: colors.primaryText, fontWeight: "700" },
+  price: {
+    ...typography.caption,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
   time: {
     ...typography.caption,
     color: colors.secondaryText,

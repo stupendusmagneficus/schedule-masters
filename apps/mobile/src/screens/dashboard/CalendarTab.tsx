@@ -12,7 +12,6 @@ import {
 } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
-import { CalendarFeed } from "./CalendarFeed";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
@@ -20,7 +19,14 @@ import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
-import { addCalendarDays, getTodayCalendarDate } from "../../features/calendar/calendar";
+import {
+  addCalendarDays,
+  getTodayCalendarDate,
+} from "../../features/calendar/calendar";
+import {
+  buildCalendarFeed,
+  type CalendarFeedFilter,
+} from "../../features/calendar/calendarFeed";
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
@@ -28,10 +34,6 @@ import {
   timeToMinutes,
 } from "../../features/calendar/dayTimeline";
 import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
-import {
-  buildCalendarFeed,
-  type CalendarFeedFilter,
-} from "../../features/calendar/calendarFeed";
 import {
   buildMonthCalendar,
   type MonthCalendarDay,
@@ -49,6 +51,7 @@ import {
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
+import { CalendarFeed } from "./CalendarFeed";
 import { DayTimeline } from "./DayTimeline";
 import { MonthCalendar } from "./MonthCalendar";
 import type { DashboardTabProps } from "./types";
@@ -281,13 +284,17 @@ export function CalendarTab({
           ) : calendar.view === "feed" ? (
             calendar.error && !demoData ? (
               <View style={styles.feedError}>
-                <Text style={styles.error}>{t("mobile.calendarFeedError")}</Text>
+                <Text style={styles.error}>
+                  {t("mobile.calendarFeedError")}
+                </Text>
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => void calendar.reload()}
                   style={styles.feedRetryButton}
                 >
-                  <Text style={styles.feedRetryText}>{t("mobile.calendarFeedRetry")}</Text>
+                  <Text style={styles.feedRetryText}>
+                    {t("mobile.calendarFeedRetry")}
+                  </Text>
                 </Pressable>
               </View>
             ) : (
@@ -562,7 +569,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  feedRetryText: { ...typography.label, color: colors.accent, fontWeight: "700" },
+  feedRetryText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   eyebrow: {
     color: colors.accent,
     marginBottom: 6,

@@ -84,20 +84,29 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
-  test("renders the chronological feed without horizontal overflow", async ({ page }) => {
+  test("renders the chronological feed without horizontal overflow", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("button", { name: "Přehled" }).click();
 
     await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
-    await expect(page.getByText("Gel manicure", { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Budoucí" })).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByText("Gel manicure", { exact: true }).first(),
+    ).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Budoucí" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await page.getByRole("tab", { name: "Vše" }).click();
     await expect(page.getByText("Maria P.", { exact: true })).toBeVisible();
 
     const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1,
     );
     expect(hasHorizontalOverflow).toBe(false);
   });
