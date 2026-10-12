@@ -211,7 +211,9 @@ export function CalendarTab({
               style={styles.calendarLoadingOverlay}
             >
               <ActivityIndicator color={colors.accent} size="small" />
-              <Text style={styles.calendarLoadingText}>{t("common.loading")}</Text>
+              <Text style={styles.calendarLoadingText}>
+                {t("common.loading")}
+              </Text>
             </View>
           ) : null}
         </InfoCard>

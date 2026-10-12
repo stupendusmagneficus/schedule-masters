@@ -158,15 +158,21 @@ export function useCalendarData({
     if (client) setIsLoading(true);
     setSelectedDateState(getTodayCalendarDate(timezone));
   }, [client, timezone]);
-  const setSelectedDate = useCallback((date: string) => {
-    if (!isCalendarDate(date)) return;
-    if (client && date !== selectedDate) setIsLoading(true);
-    setSelectedDateState(date);
-  }, [client, selectedDate]);
-  const setView = useCallback((nextView: CalendarView) => {
-    if (client && nextView !== view) setIsLoading(true);
-    setViewState(nextView);
-  }, [client, view]);
+  const setSelectedDate = useCallback(
+    (date: string) => {
+      if (!isCalendarDate(date)) return;
+      if (client && date !== selectedDate) setIsLoading(true);
+      setSelectedDateState(date);
+    },
+    [client, selectedDate],
+  );
+  const setView = useCallback(
+    (nextView: CalendarView) => {
+      if (client && nextView !== view) setIsLoading(true);
+      setViewState(nextView);
+    },
+    [client, view],
+  );
 
   return {
     ...data,
