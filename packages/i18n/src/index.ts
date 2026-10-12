@@ -120,6 +120,13 @@ export type MessageKey =
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
+  | "mobile.calendarFeedView"
+  | "mobile.calendarFeedAll"
+  | "mobile.calendarFeedFuture"
+  | "mobile.calendarFeedEmpty"
+  | "mobile.calendarFeedEmptyFuture"
+  | "mobile.calendarFeedError"
+  | "mobile.calendarFeedRetry"
   | "mobile.calendarPreviousMonth"
   | "mobile.calendarNextMonth"
   | "mobile.monthBookings"
@@ -378,6 +385,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
+    "mobile.calendarFeedView": "Лента",
+    "mobile.calendarFeedAll": "Все",
+    "mobile.calendarFeedFuture": "Будущие",
+    "mobile.calendarFeedEmpty": "В этом диапазоне записей и блоков нет.",
+    "mobile.calendarFeedEmptyFuture": "Будущих записей и блоков нет.",
+    "mobile.calendarFeedError": "Не удалось загрузить записи и блоки.",
+    "mobile.calendarFeedRetry": "Повторить",
     "mobile.calendarPreviousMonth": "Предыдущий месяц",
     "mobile.calendarNextMonth": "Следующий месяц",
     "mobile.monthBookings": "записей",
@@ -653,6 +667,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
+    "mobile.calendarFeedView": "Přehled",
+    "mobile.calendarFeedAll": "Vše",
+    "mobile.calendarFeedFuture": "Budoucí",
+    "mobile.calendarFeedEmpty": "V tomto období nejsou žádné rezervace ani bloky.",
+    "mobile.calendarFeedEmptyFuture": "Nemáte žádné budoucí rezervace ani bloky.",
+    "mobile.calendarFeedError": "Rezervace a bloky se nepodařilo načíst.",
+    "mobile.calendarFeedRetry": "Zkusit znovu",
     "mobile.calendarPreviousMonth": "Předchozí měsíc",
     "mobile.calendarNextMonth": "Následující měsíc",
     "mobile.monthBookings": "rezervací",
@@ -923,6 +944,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",
+    "mobile.calendarFeedView": "Feed",
+    "mobile.calendarFeedAll": "All",
+    "mobile.calendarFeedFuture": "Upcoming",
+    "mobile.calendarFeedEmpty": "There are no bookings or blocks in this range.",
+    "mobile.calendarFeedEmptyFuture": "There are no upcoming bookings or blocks.",
+    "mobile.calendarFeedError": "Bookings and blocks could not be loaded.",
+    "mobile.calendarFeedRetry": "Try again",
     "mobile.calendarPreviousMonth": "Previous month",
     "mobile.calendarNextMonth": "Next month",
     "mobile.monthBookings": "bookings",

@@ -220,6 +220,22 @@ export function getCalendarWeekLabel(
   return `${formatDate(new Date(`${range.fromDate}T12:00:00.000Z`), locale, options)} – ${formatDate(new Date(`${range.toDate}T12:00:00.000Z`), locale, options)}`;
 }
 
+export function getCalendarFeedLabel(
+  selectedDate: string,
+  locale: SupportedLocale,
+): string {
+  const { toDate } = getCalendarDateRange(selectedDate, "feed");
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric",
+  };
+  const format = (value: string) =>
+    formatDate(new Date(value.concat("T12:00:00.000Z")), locale, options);
+  return [format(selectedDate), format(toDate)].join(" – ");
+}
+
 export function getCalendarDayCount(range: CalendarDateRange): number {
   const from = new Date(`${range.fromDate}T00:00:00.000Z`).getTime();
   const to = new Date(`${range.toDate}T00:00:00.000Z`).getTime();

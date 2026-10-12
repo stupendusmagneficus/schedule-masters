@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
+import { CalendarFeed } from "./CalendarFeed";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
@@ -19,13 +20,18 @@ import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
-import { getTodayCalendarDate } from "../../features/calendar/calendar";
+import { addCalendarDays, getTodayCalendarDate } from "../../features/calendar/calendar";
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
   getDayTimelineSlotStart,
+  timeToMinutes,
 } from "../../features/calendar/dayTimeline";
 import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
+import {
+  buildCalendarFeed,
+  type CalendarFeedFilter,
+} from "../../features/calendar/calendarFeed";
 import {
   buildMonthCalendar,
   type MonthCalendarDay,
@@ -33,6 +39,7 @@ import {
 import {
   type CalendarDataController,
   getCalendarDateLabel,
+  getCalendarFeedLabel,
   getCalendarWeekLabel,
 } from "../../features/calendar/useCalendarData";
 import {
@@ -67,10 +74,13 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
+  const [feedFilter, setFeedFilter] = useState<CalendarFeedFilter>("future");
   const dateLabel =
     calendar.view === "week"
       ? getCalendarWeekLabel(calendar.selectedDate, locale)
-      : getCalendarDateLabel(calendar.selectedDate, locale);
+      : calendar.view === "feed"
+        ? getCalendarFeedLabel(calendar.selectedDate, locale)
+        : getCalendarDateLabel(calendar.selectedDate, locale);
   const timeline = demoData
     ? buildDemoDayTimeline(demoData.appointments)
     : buildDayTimeline({
@@ -110,12 +120,44 @@ export function CalendarTab({
         todayDate,
       });
 
+  const feedAppointments = demoData
+    ? demoData.appointments.map((appointment, index) => {
+        const date = addCalendarDays(calendar.selectedDate, index + 1);
+        const startsAt = getDayTimelineSlotStart(
+          date,
+          timeToMinutes(appointment.startsAt),
+          workspace.timezone,
+        );
+        return {
+          currency: demoData.primaryService.currency,
+          customer_id: appointment.id,
+          customer_name: appointment.clientName,
+          duration_minutes: appointment.durationMinutes,
+          ends_at: new Date(
+            new Date(startsAt).getTime() + appointment.durationMinutes * 60_000,
+          ).toISOString(),
+          id: appointment.id,
+          price_amount: appointment.priceAmount,
+          service_name: appointment.serviceName,
+          source: "master_created" as const,
+          starts_at: startsAt,
+          status: appointment.status,
+        };
+      })
+    : calendar.appointments;
+  const feedGroups = buildCalendarFeed({
+    appointments: feedAppointments,
+    blocks: demoData ? [] : calendar.blocks,
+    filter: feedFilter,
+    timezone: workspace.timezone,
+  });
+
   return (
     <>
       <View style={styles.content}>
         <View>
           <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
-          {calendar.view === "day" ? (
+          {calendar.view === "day" || calendar.view === "feed" ? (
             <Text style={styles.title}>{dateLabel}</Text>
           ) : null}
           <View style={styles.calendarToolbar}>
@@ -134,6 +176,11 @@ export function CalendarTab({
                 active={calendar.view === "month"}
                 label={t("mobile.calendarMonthView")}
                 onPress={() => calendar.setView("month")}
+              />
+              <CalendarViewButton
+                active={calendar.view === "feed"}
+                label={t("mobile.calendarFeedView")}
+                onPress={() => calendar.setView("feed")}
               />
             </View>
             <View style={styles.dateNavigation}>
@@ -231,6 +278,29 @@ export function CalendarTab({
               selectedDate={calendar.selectedDate}
               t={t}
             />
+          ) : calendar.view === "feed" ? (
+            calendar.error && !demoData ? (
+              <View style={styles.feedError}>
+                <Text style={styles.error}>{t("mobile.calendarFeedError")}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => void calendar.reload()}
+                  style={styles.feedRetryButton}
+                >
+                  <Text style={styles.feedRetryText}>{t("mobile.calendarFeedRetry")}</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <CalendarFeed
+                filter={feedFilter}
+                groups={feedGroups}
+                locale={locale}
+                onChangeFilter={setFeedFilter}
+                onPressAppointment={onSelectAppointment}
+                t={t}
+                timezone={workspace.timezone}
+              />
+            )
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
@@ -485,6 +555,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
+  feedError: { alignItems: "center", gap: 8, paddingVertical: 16 },
+  feedRetryButton: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.control,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  feedRetryText: { ...typography.label, color: colors.accent, fontWeight: "700" },
   eyebrow: {
     color: colors.accent,
     marginBottom: 6,
@@ -540,14 +618,15 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 36,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
   },
   viewButtonActive: { backgroundColor: colors.surface },
   viewButtonPressed: { opacity: 0.78 },
   viewButtonText: { ...typography.label, color: colors.secondaryText },
   viewButtonTextActive: { color: colors.primaryText, fontWeight: "700" },
   viewSwitcher: {
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
+    flex: 1,
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,
     flexDirection: "row",
