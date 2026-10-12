@@ -26,7 +26,7 @@ Linear task: SCH-
 
 <!-- Complete every item when the PR changes screens, components, styles, tokens, copy, or interaction flows. -->
 
-- [ ] I completed the design review checklist in `docs/design/design-review.md`.
+- [ ] I completed the design review checklist.
 - [ ] I checked spacing, typography, layout, and responsive behavior at the affected viewport sizes.
 - [ ] I checked accessibility, touch targets, focus/keyboard behavior, loading, error, empty, and disabled states.
 - [ ] I attached visual evidence or explained why visual evidence is not applicable.

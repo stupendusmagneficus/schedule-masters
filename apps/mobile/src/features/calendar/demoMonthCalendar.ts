@@ -1,0 +1,47 @@
+import type { DemoAppointment } from "../../demo/types";
+import { addCalendarDays, getCalendarDateRange } from "./calendar";
+import { buildMonthCalendar, type MonthCalendarDay } from "./monthCalendar";
+
+export function buildDemoMonthCalendar(
+  appointments: readonly DemoAppointment[],
+  selectedDate: string,
+  todayDate: string,
+): MonthCalendarDay[] {
+  const days = buildMonthCalendar({
+    appointments: [],
+    availabilityRules: Array.from({ length: 7 }, (_, index) => ({
+      dayOfWeek: index + 1,
+      endLocalTime: "21:00",
+      startLocalTime: "08:00",
+    })),
+    blocks: [],
+    selectedDate,
+    timezone: "UTC",
+    todayDate,
+  });
+  const monthStart = getCalendarDateRange(selectedDate, "month").fromDate;
+  const demoByDate = new Map<string, DemoAppointment[]>();
+
+  appointments.forEach((appointment, index) => {
+    const date = addCalendarDays(monthStart, index * 5);
+    const bookings = demoByDate.get(date) ?? [];
+    bookings.push(appointment);
+    demoByDate.set(date, bookings);
+  });
+
+  return days.map((day) => {
+    const bookings = demoByDate.get(day.date) ?? [];
+    const expectedRevenueByCurrency: Record<string, number> = {};
+    if (bookings.length) {
+      expectedRevenueByCurrency.CZK = bookings.reduce(
+        (sum, booking) => sum + booking.priceAmount,
+        0,
+      );
+    }
+    return {
+      ...day,
+      bookingCount: bookings.length,
+      expectedRevenueByCurrency,
+    };
+  });
+}
