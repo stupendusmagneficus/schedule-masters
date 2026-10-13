@@ -74,6 +74,17 @@ export type MessageKey =
   | "workspace.scheduleInvalid"
   | "workspace.setupSaving"
   | "workspace.setupSave"
+  | "workspace.settingsTitle"
+  | "workspace.settingsDescription"
+  | "workspace.settingsEdit"
+  | "workspace.settingsName"
+  | "workspace.settingsSlug"
+  | "workspace.settingsSave"
+  | "workspace.settingsSaving"
+  | "workspace.settingsNameInvalid"
+  | "workspace.settingsSlugTaken"
+  | "workspace.settingsAdvancedSchedule"
+  | "workspace.settingsSaveFailed"
   | "workspace.setupStepMaster"
   | "workspace.setupStepMasterDescription"
   | "workspace.setupStepService"
@@ -342,6 +353,22 @@ const messages: Record<SupportedLocale, Messages> = {
       "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
     "workspace.setupSaving": "Сохранение…",
     "workspace.setupSave": "Сохранить и продолжить",
+    "workspace.settingsTitle": "Рабочее пространство",
+    "workspace.settingsDescription":
+      "Измените название, ссылку для записи и обычные рабочие часы.",
+    "workspace.settingsEdit": "Изменить настройки",
+    "workspace.settingsName": "Название рабочего пространства",
+    "workspace.settingsSlug": "Ссылка для записи",
+    "workspace.settingsSave": "Сохранить настройки",
+    "workspace.settingsSaving": "Сохранение…",
+    "workspace.settingsNameInvalid":
+      "Название должно содержать от 1 до 120 символов.",
+    "workspace.settingsSlugTaken":
+      "Эта ссылка уже используется. Выберите другую.",
+    "workspace.settingsAdvancedSchedule":
+      "Расписание содержит особые часы или перерывы. Пока его нельзя изменить здесь.",
+    "workspace.settingsSaveFailed":
+      "Не удалось сохранить настройки. Попробуйте ещё раз.",
     "workspace.setupStepMaster": "Информация о мастере",
     "workspace.setupStepMasterDescription":
       "Настройте имя рабочего пространства и ссылку, по которой клиенты будут записываться.",
@@ -635,6 +662,20 @@ const messages: Record<SupportedLocale, Messages> = {
       "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
     "workspace.setupSaving": "Ukládání…",
     "workspace.setupSave": "Uložit a pokračovat",
+    "workspace.settingsTitle": "Pracovní prostor",
+    "workspace.settingsDescription":
+      "Upravte název, odkaz pro rezervace a běžnou pracovní dobu.",
+    "workspace.settingsEdit": "Upravit nastavení",
+    "workspace.settingsName": "Název pracovního prostoru",
+    "workspace.settingsSlug": "Odkaz pro rezervace",
+    "workspace.settingsSave": "Uložit nastavení",
+    "workspace.settingsSaving": "Ukládání…",
+    "workspace.settingsNameInvalid": "Název musí obsahovat 1 až 120 znaků.",
+    "workspace.settingsSlugTaken": "Tento odkaz už někdo používá. Zvolte jiný.",
+    "workspace.settingsAdvancedSchedule":
+      "Rozvrh obsahuje zvláštní pracovní dobu nebo přestávky. Zde jej zatím nelze upravit.",
+    "workspace.settingsSaveFailed":
+      "Nastavení se nepodařilo uložit. Zkuste to znovu.",
     "workspace.setupStepMaster": "Informace o mistrovi",
     "workspace.setupStepMasterDescription":
       "Nastavte název pracovního prostoru a odkaz, přes který se klienti objednají.",
@@ -925,6 +966,22 @@ const messages: Record<SupportedLocale, Messages> = {
       "Enter time in HH:MM format. The end must be after the start.",
     "workspace.setupSaving": "Saving…",
     "workspace.setupSave": "Save and continue",
+    "workspace.settingsTitle": "Workspace settings",
+    "workspace.settingsDescription":
+      "Update the workspace name, booking link, and regular working hours.",
+    "workspace.settingsEdit": "Edit settings",
+    "workspace.settingsName": "Workspace name",
+    "workspace.settingsSlug": "Booking link",
+    "workspace.settingsSave": "Save settings",
+    "workspace.settingsSaving": "Saving…",
+    "workspace.settingsNameInvalid":
+      "The name must be between 1 and 120 characters.",
+    "workspace.settingsSlugTaken":
+      "This booking link is already in use. Choose another.",
+    "workspace.settingsAdvancedSchedule":
+      "This schedule has date-specific hours or breaks and cannot be edited here yet.",
+    "workspace.settingsSaveFailed":
+      "Could not save settings. Please try again.",
     "workspace.setupStepMaster": "Master details",
     "workspace.setupStepMasterDescription":
       "Set the workspace name and the link clients will use to book.",

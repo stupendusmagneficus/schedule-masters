@@ -641,6 +641,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      update_master_workspace_settings: {
+        Args: {
+          p_end_local_time: string
+          p_name: string
+          p_slug: string
+          p_start_local_time: string
+          p_working_days: number[]
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       bootstrap_master_workspace: {
         Args: {
           p_duration_minutes: number

@@ -1011,3 +1011,121 @@ describe("Supabase public booking contract", () => {
     ).toBe(true);
   });
 });
+
+describe("workspace settings RPC", () => {
+  rlsIntegrationTest(
+    "allows only owners to update workspace settings",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey)
+        return;
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      let ownerId: string | undefined;
+      let memberId: string | undefined;
+      try {
+        const createdWorkspace = await admin.from("workspaces").insert({
+          id: workspaceId,
+          name: "Before settings",
+          slug: `settings-before-${suffix}`,
+        });
+        expect(createdWorkspace.error).toBeNull();
+        const owner = await createAuthenticatedTestUser({
+          admin,
+          email: `workspace-owner-${suffix}@example.test`,
+          password: `Test-${suffix}-Password!`,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        ownerId = owner.user.id;
+        const member = await createAuthenticatedTestUser({
+          admin,
+          email: `workspace-member-${suffix}@example.test`,
+          password: `Test-${suffix}-Password!`,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        memberId = member.user.id;
+        const memberships = await admin.from("workspace_members").insert([
+          { role: "owner", user_id: ownerId, workspace_id: workspaceId },
+          { role: "member", user_id: memberId, workspace_id: workspaceId },
+        ]);
+        expect(memberships.error).toBeNull();
+        const bookingLink = await admin.from("booking_links").insert({
+          slug: `settings-before-${suffix}`,
+          workspace_id: workspaceId,
+        });
+        expect(bookingLink.error).toBeNull();
+        const validFrom = new Date().toISOString().slice(0, 10);
+        const initialRules = await admin.from("availability_rules").insert([
+          {
+            day_of_week: 1,
+            end_local_time: "17:00",
+            start_local_time: "09:00",
+            valid_from: validFrom,
+            workspace_id: workspaceId,
+          },
+        ]);
+        expect(initialRules.error).toBeNull();
+        const args = {
+          p_end_local_time: "18:00",
+          p_name: "After settings",
+          p_slug: `settings-after-${suffix}`,
+          p_start_local_time: "08:00",
+          p_working_days: [1, 2, 5],
+          p_workspace_id: workspaceId,
+        };
+        const updated = await owner.client.rpc(
+          "update_master_workspace_settings",
+          args,
+        );
+        expect(updated.error).toBeNull();
+        const savedWorkspace = await admin
+          .from("workspaces")
+          .select("name, slug")
+          .eq("id", workspaceId)
+          .single();
+        expect(savedWorkspace.data).toEqual({
+          name: "After settings",
+          slug: `settings-after-${suffix}`,
+        });
+        const savedLink = await admin
+          .from("booking_links")
+          .select("slug")
+          .eq("workspace_id", workspaceId)
+          .single();
+        expect(savedLink.data?.slug).toBe(`settings-after-${suffix}`);
+        const activeRules = await admin
+          .from("availability_rules")
+          .select("day_of_week")
+          .eq("workspace_id", workspaceId)
+          .eq("is_active", true);
+        expect(
+          activeRules.data?.map((rule) => rule.day_of_week).sort(),
+        ).toEqual([1, 2, 5]);
+        const denied = await member.client.rpc(
+          "update_master_workspace_settings",
+          {
+            ...args,
+            p_name: "Unauthorized change",
+            p_slug: `unauthorized-${suffix}`,
+          },
+        );
+        expect(denied.error?.message).toContain("Workspace access denied");
+        const unchanged = await admin
+          .from("workspaces")
+          .select("name, slug")
+          .eq("id", workspaceId)
+          .single();
+        expect(unchanged.data).toEqual(savedWorkspace.data);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+        if (ownerId) await admin.auth.admin.deleteUser(ownerId);
+        if (memberId) await admin.auth.admin.deleteUser(memberId);
+      }
+    },
+  );
+});

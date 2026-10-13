@@ -1,20 +1,28 @@
+import type { Database } from "@schedule-app/api";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { InfoCard } from "../../components/InfoCard";
 import { LocalePicker } from "../../components/LocalePicker";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
+import { WorkspaceSettingsModal } from "../../components/WorkspaceSettingsModal";
 import type { ServiceCatalogController } from "../../features/services/useServiceCatalog";
+import type { WorkspaceSettingsDraft } from "../../features/workspace/workspaceSettings";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type ProfileTabProps = DashboardTabProps & {
+  readonly canManageWorkspace: boolean;
   readonly canManageServices: boolean;
+  readonly client: SupabaseClient<Database> | null;
   readonly isSigningOut: boolean;
   readonly onLocaleChange: (locale: DashboardTabProps["locale"]) => void;
   readonly onOpenBookingLink: () => void;
   readonly onSignOut: () => void;
+  readonly onWorkspaceSaved: (draft: WorkspaceSettingsDraft) => void;
   readonly bookingUrl: string;
   readonly signOutFailed: boolean;
   readonly serviceCatalog: ServiceCatalogController;
@@ -22,18 +30,23 @@ type ProfileTabProps = DashboardTabProps & {
 };
 
 export function ProfileTab({
+  canManageWorkspace,
   canManageServices,
+  client,
   isSigningOut,
   locale,
   onLocaleChange,
   onOpenBookingLink,
   onSignOut,
+  onWorkspaceSaved,
   bookingUrl,
   signOutFailed,
   serviceCatalog,
   t,
   workspace,
 }: ProfileTabProps) {
+  const [isWorkspaceSettingsVisible, setWorkspaceSettingsVisible] =
+    useState(false);
   return (
     <View style={styles.content}>
       <View>
@@ -41,6 +54,33 @@ export function ProfileTab({
         <Text style={styles.title}>{workspace.name}</Text>
         <Text style={styles.helper}>{workspace.timezone}</Text>
       </View>
+      {canManageWorkspace && client ? (
+        <InfoCard>
+          <Text style={styles.sectionTitle}>
+            {t("workspace.settingsTitle")}
+          </Text>
+          <Text style={styles.helper}>
+            {t("workspace.settingsDescription")}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setWorkspaceSettingsVisible(true)}
+            style={styles.settingsButton}
+          >
+            <Text style={styles.settingsButtonText}>
+              {t("workspace.settingsEdit")}
+            </Text>
+          </Pressable>
+          <WorkspaceSettingsModal
+            client={client}
+            onClose={() => setWorkspaceSettingsVisible(false)}
+            onSaved={onWorkspaceSaved}
+            t={t}
+            visible={isWorkspaceSettingsVisible}
+            workspace={workspace}
+          />
+        </InfoCard>
+      ) : null}
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("common.language")}</Text>
         <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
@@ -104,6 +144,20 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     marginBottom: 12,
     ...typography.section,
+  },
+  settingsButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: radii.control,
+    justifyContent: "center",
+    marginTop: 12,
+    minHeight: 44,
+    paddingHorizontal: 16,
+  },
+  settingsButtonText: {
+    ...typography.label,
+    color: colors.actionText,
+    fontWeight: "700",
   },
   signOutButton: {
     alignItems: "center",
