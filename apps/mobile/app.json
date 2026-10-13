@@ -2,6 +2,7 @@
   "expo": {
     "name": "Schedule Masters Mobile",
     "slug": "schedule-masters-mobile",
+    "scheme": "schedulemasters",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",

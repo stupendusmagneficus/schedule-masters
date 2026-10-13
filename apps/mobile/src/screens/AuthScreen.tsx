@@ -1,14 +1,19 @@
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AuthForm } from "../components/AuthForm";
 import { EmailConfirmationScreen } from "../components/EmailConfirmationScreen";
 import { LocalePicker } from "../components/LocalePicker";
+import { mobileEnv } from "../config/env";
 import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
 import { type AuthMode, authenticate } from "../features/auth/authentication";
 import type { AuthNotice } from "../features/auth/authNotice";
+import {
+  getCurrentWebOrigin,
+  getEmailRedirectTo,
+} from "../features/auth/authRedirect";
 import { isEmailConfirmationRequired } from "../features/auth/emailConfirmation";
 import {
   type AuthField,
@@ -21,6 +26,7 @@ import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
 
 type AuthScreenProps = {
+  readonly authCallbackFailed: boolean;
   readonly initialMode: AuthMode;
   readonly locale: SupportedLocale;
   readonly onAuthenticated: (session: Session) => void;
@@ -36,6 +42,7 @@ type ConfirmationState = {
 };
 
 export function AuthScreen({
+  authCallbackFailed,
   initialMode,
   locale,
   onAuthenticated,
@@ -77,7 +84,17 @@ export function AuthScreen({
     setBusy(true);
     setTouchedFields({ email: true, password: true });
     setNotice(null);
-    const result = await authenticate(supabase, mode, { email, password });
+    const redirectTo = getEmailRedirectTo(
+      Platform.OS === "web" ? "web" : "native",
+      Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
+      mobileEnv.authRedirectUrl,
+    );
+    const result = await authenticate(
+      supabase,
+      mode,
+      { email, password },
+      redirectTo,
+    );
     setBusy(false);
 
     if (result.kind === "validationError") {
@@ -148,6 +165,11 @@ export function AuthScreen({
           {sessionRestoreFailed && (
             <Text accessibilityRole="alert" style={styles.restoreError}>
               {t("auth.sessionRestoreFailed")}
+            </Text>
+          )}
+          {authCallbackFailed && (
+            <Text accessibilityRole="alert" style={styles.restoreError}>
+              {t("auth.confirmationCallbackFailed")}
             </Text>
           )}
           <AuthForm

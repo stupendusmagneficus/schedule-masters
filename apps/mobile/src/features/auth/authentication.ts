@@ -22,7 +22,9 @@ export type AuthenticationClient = {
       credentials: MasterAuthCredentials,
     ) => Promise<AuthResponse>;
     readonly signUp: (
-      credentials: MasterAuthCredentials,
+      credentials: MasterAuthCredentials & {
+        readonly options?: { readonly emailRedirectTo: string };
+      },
     ) => Promise<AuthResponse>;
   };
 };
@@ -40,6 +42,7 @@ export async function authenticate(
   client: AuthenticationClient,
   mode: AuthMode,
   input: MasterAuthCredentials,
+  emailRedirectTo?: string,
 ): Promise<AuthenticationResult> {
   const parsed = masterAuthCredentialsSchema.safeParse(input);
   if (!parsed.success) {
@@ -55,7 +58,10 @@ export async function authenticate(
   try {
     result =
       mode === "signUp"
-        ? await client.auth.signUp(parsed.data)
+        ? await client.auth.signUp({
+            ...parsed.data,
+            ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
+          })
         : await client.auth.signInWithPassword(parsed.data);
   } catch {
     return {

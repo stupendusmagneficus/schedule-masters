@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 
 export type SupabaseClientConfig = {
+  readonly flowType?: "implicit" | "pkce";
   readonly publishableKey: string;
   readonly storage?: SupabaseStorage;
   readonly url: string;
@@ -18,11 +19,13 @@ export function createSupabaseClient({
   url,
   publishableKey,
   storage,
+  flowType = "implicit",
 }: SupabaseClientConfig): SupabaseClient<Database> {
   return createClient<Database>(url, publishableKey, {
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: false,
+      flowType,
       persistSession: true,
       ...(storage ? { storage } : {}),
     },
