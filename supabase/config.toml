@@ -1,2 +1,15 @@
-# Local Supabase CLI configuration will be added when database work starts.
+# Local Supabase CLI auth settings for the master app confirmation flow.
 project_id = "schedule-masters-local"
+
+[auth]
+site_url = "http://localhost:8081"
+additional_redirect_urls = [
+  "http://localhost:8081/auth/callback",
+  "http://127.0.0.1:8081/auth/callback",
+  "schedulemasters://auth/callback",
+  "http://localhost:3000/**",
+]
+
+[auth.email.template.confirmation]
+subject = "Schedule Masters — potvrďte svůj e-mail"
+content_path = "./supabase/templates/confirmation.html"

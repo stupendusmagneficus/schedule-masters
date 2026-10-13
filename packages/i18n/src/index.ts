@@ -39,6 +39,7 @@ export type MessageKey =
   | "auth.networkError"
   | "auth.sessionRestoreFailed"
   | "auth.signOutFailed"
+  | "auth.confirmationCallbackFailed"
   | "auth.confirmationTitle"
   | "auth.confirmationDescription"
   | "auth.confirmationEmailLabel"
@@ -310,6 +311,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось восстановить сессию. Войдите ещё раз.",
     "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
     "auth.confirmationTitle": "Подтвердите ваш email",
+    "auth.confirmationCallbackFailed":
+      "Не удалось подтвердить email. Ссылка могла устареть или уже быть использована. Запросите новое письмо и попробуйте ещё раз.",
     "auth.confirmationDescription":
       "Мы отправили ссылку для подтверждения. Откройте письмо, подтвердите аккаунт и вернитесь в приложение.",
     "auth.confirmationEmailLabel": "Письмо отправлено на",
@@ -620,6 +623,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "Relaci se nepodařilo obnovit. Přihlaste se znovu.",
     "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
     "auth.confirmationTitle": "Potvrďte svůj e-mail",
+    "auth.confirmationCallbackFailed":
+      "E-mail se nepodařilo potvrdit. Odkaz mohl vypršet nebo už byl použit. Vyžádejte si nový e-mail a zkuste to znovu.",
     "auth.confirmationDescription":
       "Odeslali jsme vám potvrzovací odkaz. Otevřete e-mail, potvrďte účet a vraťte se do aplikace.",
     "auth.confirmationEmailLabel": "E-mail byl odeslán na",
@@ -923,6 +928,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "Your session could not be restored. Sign in again.",
     "auth.signOutFailed": "Could not sign out. Try again.",
     "auth.confirmationTitle": "Confirm your email",
+    "auth.confirmationCallbackFailed":
+      "We could not confirm your email. The link may have expired or already been used. Request a new email and try again.",
     "auth.confirmationDescription":
       "We sent you a confirmation link. Open the email, confirm your account, then return to the app.",
     "auth.confirmationEmailLabel": "Confirmation email sent to",

@@ -8,6 +8,7 @@ export const supabase =
     ? createSupabaseClient({
         url: mobileEnv.supabaseUrl,
         publishableKey: mobileEnv.supabasePublishableKey,
+        flowType: "pkce",
         storage: platformStorage,
       })
     : null;

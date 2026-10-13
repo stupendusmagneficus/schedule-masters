@@ -51,7 +51,20 @@ describe("authenticate", () => {
       password: "secure-password",
     });
   });
-
+  it("passes the configured callback only to sign-up", async () => {
+    const client = createClient();
+    await authenticate(
+      client,
+      "signUp",
+      { email: "master@example.com", password: "secure-password" },
+      "schedulemasters://auth/callback",
+    );
+    expect(client.auth.signUp).toHaveBeenCalledWith({
+      email: "master@example.com",
+      options: { emailRedirectTo: "schedulemasters://auth/callback" },
+      password: "secure-password",
+    });
+  });
   it("requires confirmation when sign up creates no session", async () => {
     const client = createClient();
 

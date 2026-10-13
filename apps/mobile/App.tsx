@@ -6,6 +6,7 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useReducer, useState } from "react";
+import { Linking, Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import {
@@ -13,12 +14,19 @@ import {
   LoadingState,
   RecoverableErrorState,
 } from "./src/components/StatusStates";
+import { mobileEnv } from "./src/config/env";
 import { demoData, demoWorkspace } from "./src/demo/mockData";
 import { isDemoMode } from "./src/demo/mode";
 import {
   initialAuthFlowState,
   reduceAuthFlow,
 } from "./src/features/auth/authFlow";
+import {
+  cleanWebCallbackUrl,
+  completeAuthCallback,
+  getCurrentWebOrigin,
+  getEmailRedirectTo,
+} from "./src/features/auth/authRedirect";
 import { useMasterWorkspace } from "./src/features/workspace/useMasterWorkspace";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
@@ -45,6 +53,7 @@ function AppContent() {
   const [isRestoringSession, setIsRestoringSession] = useState(
     Boolean(supabase),
   );
+  const [authCallbackFailed, setAuthCallbackFailed] = useState(false);
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { reload: reloadWorkspace, state: workspaceState } = useMasterWorkspace(
@@ -66,8 +75,42 @@ function AppContent() {
     if (!supabase) return;
     const client = supabase;
     let active = true;
+    const handledAuthUrls = new Set<string>();
+    const callbackRedirect = getEmailRedirectTo(
+      Platform.OS === "web" ? "web" : "native",
+      Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
+      mobileEnv.authRedirectUrl,
+    );
+    async function handleAuthUrl(url: string) {
+      if (handledAuthUrls.has(url)) return;
+      if (handledAuthUrls.size >= 16) handledAuthUrls.clear();
+      handledAuthUrls.add(url);
+      const result = await completeAuthCallback(client, url, callbackRedirect);
+      if (Platform.OS === "web") cleanWebCallbackUrl(url, callbackRedirect);
+      if (!active || result === "ignored") return;
+      setAuthCallbackFailed(result === "failed");
+      if (result === "completed") {
+        try {
+          const { data, error } = await client.auth.getSession();
+          if (!active) return;
+          if (error || !data.session) {
+            setAuthCallbackFailed(true);
+            return;
+          }
+          dispatchAuth({ session: data.session, type: "authenticated" });
+        } catch {
+          if (active) setAuthCallbackFailed(true);
+        }
+      }
+    }
+    const linkSubscription = Linking.addEventListener("url", ({ url }) => {
+      void handleAuthUrl(url);
+    });
     async function restoreSession() {
       try {
+        const initialUrl = await Linking.getInitialURL();
+        if (initialUrl) await handleAuthUrl(initialUrl);
+        if (!active) return;
         const { data, error } = await client.auth.getSession();
         if (!active) return;
         dispatchAuth({
@@ -93,6 +136,7 @@ function AppContent() {
     });
     return () => {
       active = false;
+      linkSubscription.remove();
       data.subscription.unsubscribe();
     };
   }, [demoMode]);
@@ -139,6 +183,7 @@ function AppContent() {
   if (!session)
     return (
       <AuthScreen
+        authCallbackFailed={authCallbackFailed}
         initialMode={authMode}
         locale={locale}
         onAuthenticated={(nextSession) => {
