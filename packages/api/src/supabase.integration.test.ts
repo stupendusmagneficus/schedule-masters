@@ -728,13 +728,27 @@ describe("Supabase public booking contract", () => {
         ).error,
       ).toBeNull();
 
-      const slots = await user.client.rpc("get_master_available_slots", {
-        p_date: "2030-01-03",
-        p_service_id: serviceId,
-        p_workspace_id: workspaceId,
-      });
-      expect(slots.error).toBeNull();
-      const selectedSlot = slots.data?.[0];
+      const monthSlots = await user.client.rpc(
+        "get_master_month_available_slots",
+        {
+          p_month_start: "2030-01-01",
+          p_service_id: serviceId,
+          p_workspace_id: workspaceId,
+        },
+      );
+      expect(monthSlots.error).toBeNull();
+      expect([
+        ...new Set(monthSlots.data?.map((slot) => slot.available_date)),
+      ]).toEqual([
+        "2030-01-03",
+        "2030-01-10",
+        "2030-01-17",
+        "2030-01-24",
+        "2030-01-31",
+      ]);
+      const selectedSlot = monthSlots.data?.find(
+        (slot) => slot.available_date === "2030-01-03",
+      );
       expect(selectedSlot).toBeDefined();
 
       const idempotencyKey = `manual-${suffix}`;

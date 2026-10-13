@@ -63,6 +63,7 @@ type CalendarTabProps = DashboardTabProps & {
   readonly demoData?: DemoData;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onSelectTime?: (date: string, startsAt: string) => void;
+  readonly onOpenFreeSlots?: () => void;
   readonly workspace: Workspace;
 };
 
@@ -73,6 +74,7 @@ export function CalendarTab({
   locale,
   onSelectAppointment,
   onSelectTime,
+  onOpenFreeSlots,
   t,
   workspace,
 }: CalendarTabProps) {
@@ -236,6 +238,17 @@ export function CalendarTab({
             </View>
           </View>
         </View>
+        {onOpenFreeSlots ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onOpenFreeSlots}
+            style={styles.freeSlotsButton}
+          >
+            <Text style={styles.freeSlotsButtonText}>
+              {t("mobile.freeSlots")}
+            </Text>
+          </Pressable>
+        ) : null}
         <InfoCard
           style={[
             styles.calendarCard,
@@ -550,6 +563,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   deleteButton: { paddingHorizontal: 4, paddingVertical: 8 },
+  freeSlotsButton: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.control,
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  freeSlotsButtonText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   deleteButtonText: {
     ...typography.caption,
     color: colors.danger,

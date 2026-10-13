@@ -7,6 +7,8 @@ export type MasterAppointment =
   Database["public"]["Functions"]["list_master_appointments"]["Returns"][number];
 export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];
+export type MonthAvailableSlot =
+  Database["public"]["Functions"]["get_master_month_available_slots"]["Returns"][number];
 export type AppointmentStatus =
   Database["public"]["Enums"]["appointment_status"];
 
@@ -105,6 +107,24 @@ export async function listMasterAvailableSlots(
 ): Promise<AvailableSlot[]> {
   const { data, error } = await client.rpc("get_master_available_slots", {
     p_date: date,
+    p_service_id: serviceId,
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function listMasterMonthAvailableSlots(
+  client: ManualBookingClient,
+  workspaceId: string,
+  serviceId: string,
+  dateInMonth: string,
+): Promise<MonthAvailableSlot[]> {
+  const monthStart = /^\d{4}-\d{2}-\d{2}$/.test(dateInMonth)
+    ? `${dateInMonth.slice(0, 7)}-01`
+    : dateInMonth;
+  const { data, error } = await client.rpc("get_master_month_available_slots", {
+    p_month_start: monthStart,
     p_service_id: serviceId,
     p_workspace_id: workspaceId,
   });

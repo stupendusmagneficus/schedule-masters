@@ -25,6 +25,16 @@ These rules apply to every application and package in this repository.
 
 Before opening or updating a PR, review the change for responsibility boundaries, dependency direction, test placement, security, and unnecessary file growth. Record the result in the PR description and complete the repository PR checklist.
 
+## Task delivery workflow
+
+Apply this workflow to every task, scaling checks to the scope and risk:
+
+1. Read the task/acceptance criteria and inspect the current repository state before editing. Select and read only the relevant installed skills; use skill discovery when an important capability is missing, and do not install unrelated skills just to maximize the count.
+2. Implement against the existing architecture and shared contracts. For behavior changes, write or update behavior-focused tests first, observe the failure, then implement and refactor without changing the expected behavior.
+3. Before handoff, run the applicable format, lint, typecheck, unit/integration, build, and critical-flow E2E checks. Inspect UI changes at relevant viewport sizes when feasible; report any visual verification that could not be performed.
+4. Simplify the resulting diff where that preserves clarity, then conduct a separate final review of the exact diff for correctness, edge cases, security/data access, architecture, test coverage, accessibility, and unnecessary complexity. Fix material findings and rerun affected checks.
+5. Open or update a PR only after these checks and review. Summarize test evidence, visual evidence/limitations, and review findings in the PR description. Never claim a check or review was completed without evidence.
+
 Use Biome as the canonical formatter and linter for JavaScript, TypeScript, JSX, TSX, JSON, CSS, HTML, and GraphQL. Run `yarn format` locally and `yarn format:check` in CI. Do not add another formatter without an explicit architecture decision.
 
 The detailed conventions are in [Code organization and responsibility boundaries](docs/architecture/code-organization.md).
