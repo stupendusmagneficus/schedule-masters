@@ -768,6 +768,34 @@ export type Database = {
           phone: string
         }[]
       }
+      list_master_customer_directory: {
+        Args: { p_search?: string; p_workspace_id: string }
+        Returns: {
+          completed_visits: number
+          email: string | null
+          id: string
+          last_completed_visit_at: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+        }[]
+      }
+      list_master_customer_history: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          customer_id: string
+          customer_name: string
+          duration_minutes: number
+          ends_at: string
+          id: string
+          price_amount: number
+          service_name: string
+          source: Database["public"]["Enums"]["appointment_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }
         Returns: Json
