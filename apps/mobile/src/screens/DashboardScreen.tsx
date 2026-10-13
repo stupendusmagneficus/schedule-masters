@@ -24,12 +24,14 @@ import {
 import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useCalendarData } from "../features/calendar/useCalendarData";
+import type { CustomerProfile } from "../features/customers/customerDirectory";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
 import { buildBookingUrl } from "../utils/bookingUrl";
 import { CalendarTab } from "./dashboard/CalendarTab";
+import { CustomersTab } from "./dashboard/CustomersTab";
 import { ProfileTab } from "./dashboard/ProfileTab";
 import { TodayTab } from "./dashboard/TodayTab";
 
@@ -69,6 +71,8 @@ export function DashboardScreen({
   const [manualBookingServiceId, setManualBookingServiceId] = useState<
     string | null
   >(null);
+  const [manualBookingCustomer, setManualBookingCustomer] =
+    useState<CustomerProfile | null>(null);
   const [pendingBooking, setPendingBooking] = useState<{
     date: string;
     serviceId: string;
@@ -109,6 +113,7 @@ export function DashboardScreen({
   const service = bookingServices[0] ?? null;
   const navigationLabels = {
     calendar: t("mobile.calendar"),
+    customers: t("mobile.customers"),
     profile: t("mobile.profile"),
     today: t("mobile.today"),
   };
@@ -183,6 +188,19 @@ export function DashboardScreen({
             workspace={workspace}
           />
         )}
+        {activeTab === "customers" && (
+          <CustomersTab
+            client={client}
+            locale={locale}
+            onCreateBooking={(customer) => {
+              setManualBookingCustomer(customer);
+              openManualBooking();
+            }}
+            onSelectAppointment={setSelectedAppointment}
+            t={t}
+            workspace={workspace}
+          />
+        )}
         {activeTab === "profile" && (
           <ProfileTab
             isSigningOut={isSigningOut}
@@ -247,12 +265,14 @@ export function DashboardScreen({
           }
           initialStartsAt={manualBookingStartAt ?? undefined}
           initialServiceId={manualBookingServiceId ?? undefined}
+          initialCustomer={manualBookingCustomer ?? undefined}
           locale={locale}
           onClose={() => {
             setManualBookingVisible(false);
             setManualBookingDate(null);
             setManualBookingStartAt(null);
             setManualBookingServiceId(null);
+            setManualBookingCustomer(null);
           }}
           onCreated={async () => {
             await reloadAppointments();

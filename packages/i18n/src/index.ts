@@ -132,6 +132,24 @@ export type MessageKey =
   | "mobile.statusUpdateFailed"
   | "mobile.today"
   | "mobile.calendar"
+  | "mobile.customers"
+  | "mobile.customerSearch"
+  | "mobile.customerEmpty"
+  | "mobile.customerSearchEmpty"
+  | "mobile.customerLoadFailed"
+  | "mobile.customerRetry"
+  | "mobile.customerNew"
+  | "mobile.customerReturning"
+  | "mobile.customerLongAbsent"
+  | "mobile.customerLongAbsentRule"
+  | "mobile.customerNewRule"
+  | "mobile.customerReturningRule"
+  | "mobile.customerContact"
+  | "mobile.customerHistory"
+  | "mobile.customerHistoryEmpty"
+  | "mobile.customerNote"
+  | "mobile.customerBooking"
+  | "mobile.customerVisitCount"
   | "mobile.calendarClosed"
   | "mobile.calendarClosedDescription"
   | "mobile.calendarPrevious"
@@ -433,6 +451,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Не удалось изменить статус записи.",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
+    "mobile.customers": "Клиенты",
+    "mobile.customerSearch": "Имя, телефон или email",
+    "mobile.customerEmpty": "Клиентов пока нет. Они появятся после записей.",
+    "mobile.customerSearchEmpty": "По этому запросу клиентов не найдено.",
+    "mobile.customerLoadFailed": "Не удалось загрузить клиентов или историю.",
+    "mobile.customerRetry": "Повторить",
+    "mobile.customerNew": "Новые",
+    "mobile.customerReturning": "Возвращались",
+    "mobile.customerLongAbsent": "Давно не были",
+    "mobile.customerLongAbsentRule":
+      "Последний завершённый визит был более 90 дней назад.",
+    "mobile.customerNewRule": "Ноль или один завершённый визит.",
+    "mobile.customerReturningRule":
+      "Два или больше завершённых визита; последний был не более 90 дней назад.",
+    "mobile.customerContact": "Контакты",
+    "mobile.customerHistory": "История записей",
+    "mobile.customerHistoryEmpty": "Записей пока нет.",
+    "mobile.customerNote": "Заметка мастера",
+    "mobile.customerBooking": "Создать запись",
+    "mobile.customerVisitCount": "Завершённых визитов",
     "mobile.calendarClosed": "Нерабочий день",
     "mobile.calendarClosedDescription":
       "На этот день рабочие часы не настроены.",
@@ -753,6 +791,27 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "Stav rezervace se nepodařilo změnit.",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
+    "mobile.customers": "Klienti",
+    "mobile.customerSearch": "Jméno, telefon nebo e-mail",
+    "mobile.customerEmpty":
+      "Zatím nemáte žádné klienty. Zobrazí se po vytvoření rezervace.",
+    "mobile.customerSearchEmpty": "Tomuto hledání neodpovídají žádní klienti.",
+    "mobile.customerLoadFailed": "Klienty nebo historii se nepodařilo načíst.",
+    "mobile.customerRetry": "Zkusit znovu",
+    "mobile.customerNew": "Noví",
+    "mobile.customerReturning": "Vracejí se",
+    "mobile.customerLongAbsent": "Dlouho nepřišli",
+    "mobile.customerLongAbsentRule":
+      "Poslední dokončená návštěva byla před více než 90 dny.",
+    "mobile.customerNewRule": "Nula nebo jedna dokončená návštěva.",
+    "mobile.customerReturningRule":
+      "Alespoň dvě dokončené návštěvy; poslední proběhla před nejvýše 90 dny.",
+    "mobile.customerContact": "Kontakty",
+    "mobile.customerHistory": "Historie rezervací",
+    "mobile.customerHistoryEmpty": "Zatím nemá žádné rezervace.",
+    "mobile.customerNote": "Poznámka mistra",
+    "mobile.customerBooking": "Vytvořit rezervaci",
+    "mobile.customerVisitCount": "Dokončené návštěvy",
     "mobile.calendarClosed": "Nepracovní den",
     "mobile.calendarClosedDescription":
       "Pro tento den nejsou nastavené pracovní hodiny.",
@@ -1073,6 +1132,27 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusUpdateFailed": "The booking status could not be changed.",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
+    "mobile.customers": "Customers",
+    "mobile.customerSearch": "Name, phone, or email",
+    "mobile.customerEmpty":
+      "No customers yet. They appear after a booking is made.",
+    "mobile.customerSearchEmpty": "No customers match this search.",
+    "mobile.customerLoadFailed": "Customers or history could not be loaded.",
+    "mobile.customerRetry": "Try again",
+    "mobile.customerNew": "New",
+    "mobile.customerReturning": "Returning",
+    "mobile.customerLongAbsent": "Haven't visited lately",
+    "mobile.customerLongAbsentRule":
+      "The last completed visit was more than 90 days ago.",
+    "mobile.customerNewRule": "Zero or one completed visit.",
+    "mobile.customerReturningRule":
+      "Two or more completed visits; the latest was within the last 90 days.",
+    "mobile.customerContact": "Contact",
+    "mobile.customerHistory": "Booking history",
+    "mobile.customerHistoryEmpty": "There are no bookings yet.",
+    "mobile.customerNote": "Master's note",
+    "mobile.customerBooking": "Create booking",
+    "mobile.customerVisitCount": "Completed visits",
     "mobile.calendarClosed": "Closed day",
     "mobile.calendarClosedDescription":
       "Working hours are not configured for this day.",

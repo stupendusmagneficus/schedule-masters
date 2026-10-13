@@ -759,6 +759,34 @@ export type Database = {
           starts_at: string
         }[]
       }
+      list_master_customer_directory: {
+        Args: { p_search?: string; p_workspace_id: string }
+        Returns: {
+          completed_visits: number
+          email: string | null
+          id: string
+          last_completed_visit_at: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+        }[]
+      }
+      list_master_customer_history: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          customer_id: string
+          customer_name: string
+          duration_minutes: number
+          ends_at: string
+          id: string
+          price_amount: number
+          service_name: string
+          source: Database["public"]["Enums"]["appointment_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
       list_master_customers: {
         Args: { p_search?: string; p_workspace_id: string }
         Returns: {

@@ -31,6 +31,7 @@ import {
   nextManualBookingStep,
   previousManualBookingStep,
 } from "../features/appointments/manualBookingFlow";
+import type { CustomerProfile } from "../features/customers/customerDirectory";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
@@ -45,6 +46,10 @@ type ManualBookingModalProps = {
   readonly onClose: () => void;
   readonly onCreated: () => Promise<void>;
   readonly initialServiceId?: string;
+  readonly initialCustomer?: Pick<
+    CustomerProfile,
+    "email" | "id" | "name" | "phone"
+  >;
   readonly services: readonly Service[];
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -56,6 +61,7 @@ export function ManualBookingModal({
   initialDate,
   initialStartsAt,
   locale,
+  initialCustomer,
   onClose,
   onCreated,
   initialServiceId,
@@ -97,19 +103,23 @@ export function ManualBookingModal({
       initializedKey.current = null;
       return;
     }
-    const nextKey = `${initialDate}:${initialStartsAt ?? ""}:${initialServiceId ?? ""}`;
+    const nextKey = `${initialDate}:${initialStartsAt ?? ""}:${initialServiceId ?? ""}:${initialCustomer?.id ?? ""}`;
     if (initializedKey.current === nextKey) return;
     initializedKey.current = nextKey;
-    setDraft(
-      createInitialDraft(
+    setDraft({
+      ...createInitialDraft(
         services.find((service) => service.id === initialServiceId) ??
           services[0] ??
           null,
         initialDate,
         initialStartsAt,
       ),
-    );
-    setStep("time");
+      customerId: initialCustomer?.id ?? null,
+      email: initialCustomer?.email ?? "",
+      name: initialCustomer?.name ?? "",
+      phone: initialCustomer?.phone ?? "",
+    });
+    setStep(initialCustomer ? "customer" : "time");
     setCustomerSearch("");
     setExistingCustomer(true);
     setCustomers([]);
@@ -117,7 +127,14 @@ export function ManualBookingModal({
     setError(null);
     setValidationError(null);
     setIdempotencyKey(createIdempotencyKey());
-  }, [initialDate, initialServiceId, initialStartsAt, services, visible]);
+  }, [
+    initialCustomer,
+    initialDate,
+    initialServiceId,
+    initialStartsAt,
+    services,
+    visible,
+  ]);
 
   useEffect(() => {
     if (!visible || !isExistingCustomer || step !== "customer") return;
@@ -125,7 +142,8 @@ export function ManualBookingModal({
     setLoadingCustomers(true);
     void listMasterCustomers(client, workspace.id, customerSearch)
       .then((nextCustomers) => {
-        if (active) setCustomers(nextCustomers);
+        if (!active) return;
+        setCustomers(nextCustomers);
       })
       .catch(() => {
         if (active) setError(t("mobile.manualBookingLoadFailed"));

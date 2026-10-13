@@ -27,6 +27,26 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("opens the customer directory and keeps its empty state contained on mobile", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Klienti" }).click();
+
+    await expect(page.getByRole("heading", { name: "Klienti" })).toBeVisible();
+    await expect(
+      page.getByText("Zatím nemáte žádné klienty.", { exact: false }),
+    ).toBeVisible();
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+  });
+
   test("gives visible feedback when starting a new booking", async ({
     page,
   }) => {

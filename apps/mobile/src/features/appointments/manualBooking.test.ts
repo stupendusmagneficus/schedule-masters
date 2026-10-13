@@ -80,7 +80,7 @@ describe("manual booking validation", () => {
     ]);
   });
 
-  it("removes customers with the same normalized contact details", () => {
+  it("keeps separate profiles even when contact details match", () => {
     const customer = {
       id: "customer-id",
       name: "Yahor Dunayeu",
@@ -105,6 +105,7 @@ describe("manual booking validation", () => {
       ]),
     ).toEqual([
       customer,
+      { ...customer, id: "duplicate-customer-id", phone: "420123456789" },
       {
         ...customer,
         id: "second-customer-id",

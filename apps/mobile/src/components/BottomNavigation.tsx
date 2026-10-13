@@ -11,7 +11,7 @@ import {
 
 import { colors, radii, shadows } from "../theme/tokens";
 
-export type MobileTab = "calendar" | "profile" | "today";
+export type MobileTab = "calendar" | "customers" | "profile" | "today";
 
 type NavigationLabels = Record<MobileTab, string>;
 
@@ -29,6 +29,7 @@ type NavigationItem = {
 const navigationItems: readonly NavigationItem[] = [
   { icon: "home-outline", id: "today" },
   { icon: "calendar-month-outline", id: "calendar" },
+  { icon: "account-multiple-outline", id: "customers" },
   { icon: "account-outline", id: "profile" },
 ];
 
