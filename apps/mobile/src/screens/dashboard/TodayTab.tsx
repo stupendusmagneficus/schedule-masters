@@ -81,9 +81,8 @@ export function TodayTab({
     <View style={styles.content}>
       <View style={styles.headingRow}>
         <View style={styles.headingCopy}>
-          <Text style={styles.eyebrow}>{t("mobile.today")}</Text>
           <Text accessibilityRole="header" style={styles.title}>
-            {workspace.name}
+            {t("mobile.today")}
           </Text>
           <Text style={styles.date}>{today}</Text>
           {demoData && (
@@ -131,7 +130,7 @@ export function TodayTab({
       </InfoCard>
 
       {demoData && (
-        <InfoCard>
+        <InfoCard style={styles.scheduleCard}>
           <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
           <View style={styles.appointmentsList}>
             {demoAppointments.map((appointment) => (
@@ -154,7 +153,7 @@ export function TodayTab({
       )}
 
       {!demoData ? (
-        <InfoCard>
+        <InfoCard style={styles.scheduleCard}>
           <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
           {liveAppointments.length ? (
             <View style={styles.appointmentsList}>
@@ -192,12 +191,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  eyebrow: {
-    ...typography.caption,
-    color: colors.accent,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
   date: { ...typography.metadata, color: colors.secondaryText, marginTop: 4 },
   helper: { ...typography.body, color: colors.secondaryText },
   pressed: { opacity: 0.78 },
@@ -212,6 +205,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appointmentsList: { gap: 12 },
+  scheduleCard: { marginTop: 8 },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {

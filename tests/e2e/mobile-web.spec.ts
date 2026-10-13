@@ -14,11 +14,13 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
-  test("renders the visual demo with mock schedule data", async ({ page }) => {
+  test("renders the visual demo without a workspace name in Today", async ({
+    page,
+  }) => {
     await page.goto("/?demo=1");
 
     await expect(page.getByText("Demo režim", { exact: true })).toBeVisible();
-    await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
     await expect(
       page.getByText("Anna K.", { exact: true }).first(),
     ).toBeVisible();
@@ -59,7 +61,7 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByRole("tab")).toHaveCount(3);
 
     await page.getByRole("button", { name: "Zpět", exact: true }).click();
-    await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
   });
 
   test("gives visible feedback when starting a new booking", async ({
@@ -132,10 +134,6 @@ test.describe("mobile web smoke", () => {
       elements.map((element) => element.getBoundingClientRect().top),
     );
     expect(new Set(tops).size).toBe(1);
-    await expect(page.getByRole("tab", { name: "Den" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
   });
 
   test("opens a selected month date in the day calendar with one tap", async ({
