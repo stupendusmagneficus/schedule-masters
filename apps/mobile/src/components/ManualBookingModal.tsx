@@ -26,6 +26,7 @@ import {
   validateManualBookingDraft,
 } from "../features/appointments/manualBooking";
 import {
+  getInitialManualBookingStep,
   type ManualBookingStep,
   manualBookingStepIndex,
   nextManualBookingStep,
@@ -37,6 +38,7 @@ import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
+import { ServiceAccordion } from "./ServiceAccordion";
 
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
@@ -119,7 +121,12 @@ export function ManualBookingModal({
       name: initialCustomer?.name ?? "",
       phone: initialCustomer?.phone ?? "",
     });
-    setStep(initialCustomer ? "customer" : "time");
+    setStep(
+      getInitialManualBookingStep({
+        hasCustomer: Boolean(initialCustomer),
+        hasStartsAt: Boolean(initialStartsAt),
+      }),
+    );
     setCustomerSearch("");
     setExistingCustomer(true);
     setCustomers([]);
@@ -468,30 +475,13 @@ function TimeStep({
         {t("mobile.manualBookingService")}
       </Text>
       {services.length ? (
-        <View style={styles.optionList}>
-          {services.map((service) => (
-            <Pressable
-              accessibilityRole="button"
-              key={service.id}
-              onPress={() => onSelectService(service)}
-              style={[
-                styles.optionRow,
-                selectedService?.id === service.id && styles.selectedOptionRow,
-              ]}
-            >
-              <View style={styles.optionCopy}>
-                <Text style={styles.optionTitle}>{service.name}</Text>
-                <Text style={styles.helper}>
-                  {service.duration_minutes} min · {service.price_amount}{" "}
-                  {service.currency}
-                </Text>
-              </View>
-              {selectedService?.id === service.id ? (
-                <Text style={styles.selectedMark}>✓</Text>
-              ) : null}
-            </Pressable>
-          ))}
-        </View>
+        <ServiceAccordion
+          label={t("mobile.manualBookingService")}
+          locale={locale}
+          onSelect={onSelectService}
+          selectedService={selectedService}
+          services={services}
+        />
       ) : (
         <Text style={styles.helper}>{t("mobile.noServices")}</Text>
       )}
@@ -499,9 +489,11 @@ function TimeStep({
       <View style={styles.dateField}>
         <DateTimePickerField
           label={t("mobile.manualBookingDate")}
+          locale={locale}
           mode="date"
           onChange={onChangeDate}
           placeholder={t("mobile.personalBlockDatePlaceholder")}
+          t={t}
           value={draft.date}
         />
       </View>
@@ -517,11 +509,15 @@ function TimeStep({
               return (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
                   key={slot.starts_at}
                   onPress={() => onSelectSlot(slot.starts_at)}
                   style={[styles.slot, isSelected && styles.selectedSlot]}
                 >
                   <Text
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    numberOfLines={1}
                     style={[
                       styles.slotText,
                       isSelected && styles.selectedSlotText,
@@ -870,9 +866,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 48,
+    height: 48,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 0,
+    textAlignVertical: "center",
   },
   inputError: { borderColor: colors.danger, borderWidth: 1 },
   label: {
@@ -894,6 +891,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   multilineInput: {
+    borderRadius: radii.surface,
     minHeight: 96,
     paddingTop: 14,
     textAlignVertical: "top",
@@ -982,13 +980,18 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
-    flexBasis: "22%",
-    flexGrow: 1,
+    flexGrow: 0,
     minWidth: 0,
-    paddingHorizontal: 12,
+    minHeight: 48,
     paddingVertical: 10,
+    width: "31%",
   },
-  slotText: { ...typography.label, color: colors.primaryText },
+  slotText: {
+    ...typography.label,
+    color: colors.primaryText,
+    textAlign: "center",
+    width: "100%",
+  },
   slots: {
     flexDirection: "row",
     flexWrap: "wrap",

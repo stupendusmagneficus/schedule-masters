@@ -5,7 +5,7 @@ export const colors = {
   action: "#202522",
   actionPressed: "#151A17",
   actionText: "#FFFFFF",
-  border: "#D8DEDA",
+  border: "#7E8983",
   borderSubtle: "#EBEFEC",
   canvas: "#F7F8F7",
   danger: "#B42318",

@@ -28,6 +28,11 @@ export function useCustomerDirectory({
   const [isHistoryLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(false);
   const historyRequest = useRef(0);
+  const directoryRequest = useRef(0);
+  const hasLoaded = useRef(false);
+  const loadedSearch = useRef<string | null>(null);
+  const loadedWorkspace = useRef(workspaceId);
+  const loadedClient = useRef(client);
 
   const reloadHistory = useCallback(async () => {
     if (!client || !selectedCustomer) {
@@ -58,40 +63,52 @@ export function useCustomerDirectory({
       setLoading(false);
       return;
     }
+    const request = ++directoryRequest.current;
+    hasLoaded.current = true;
     setLoading(true);
     setError(false);
     try {
-      setCustomers(await listCustomerDirectory(client, workspaceId, search));
+      const rows = await listCustomerDirectory(client, workspaceId, search);
+      if (directoryRequest.current === request) {
+        setCustomers(rows);
+        loadedSearch.current = search;
+      }
     } catch {
-      setError(true);
+      if (directoryRequest.current === request) setError(true);
     } finally {
-      setLoading(false);
+      if (directoryRequest.current === request) setLoading(false);
     }
   }, [client, search, workspaceId]);
 
   useEffect(() => {
-    let active = true;
+    if (
+      loadedWorkspace.current !== workspaceId ||
+      loadedClient.current !== client
+    ) {
+      loadedWorkspace.current = workspaceId;
+      loadedClient.current = client;
+      directoryRequest.current += 1;
+      hasLoaded.current = false;
+      loadedSearch.current = null;
+      setCustomers([]);
+    }
     if (!client) {
+      directoryRequest.current += 1;
       setCustomers([]);
       setLoading(false);
+      hasLoaded.current = false;
+      loadedSearch.current = null;
       return;
     }
-    setLoading(true);
-    setError(false);
-    void listCustomerDirectory(client, workspaceId, search)
-      .then((rows) => {
-        if (active) setCustomers(rows);
-      })
-      .catch(() => {
-        if (active) setError(true);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [client, search, workspaceId]);
+    if (!hasLoaded.current) {
+      void reload();
+      return;
+    }
+    if (loadedSearch.current === search) return;
+
+    const timeout = setTimeout(() => void reload(), 250);
+    return () => clearTimeout(timeout);
+  }, [client, reload, search, workspaceId]);
 
   useEffect(() => {
     if (!client || !selectedCustomer) {

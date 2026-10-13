@@ -1,6 +1,6 @@
 import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
+import { formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -29,6 +29,7 @@ import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
 import { FullscreenModal } from "./FullscreenModal";
+import { ServiceAccordion } from "./ServiceAccordion";
 
 type FreeSlotsModalProps = {
   readonly client: SupabaseClient<Database> | null;
@@ -180,36 +181,16 @@ export function FreeSlotsModal({
         <Text style={styles.sectionTitle}>
           {t("mobile.freeSlotsChooseService")}
         </Text>
-        <View style={styles.services}>
-          {services.map((service) => {
-            const selected = service.id === serviceId;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                key={service.id}
-                onPress={() => {
-                  setServiceId(service.id);
-                  setSelectedStart(null);
-                }}
-                style={[styles.service, selected && styles.serviceSelected]}
-              >
-                <View style={styles.serviceCopy}>
-                  <Text style={styles.serviceName}>{service.name}</Text>
-                  <Text style={styles.helper}>
-                    {service.duration_minutes} min ·{" "}
-                    {formatCurrency(
-                      service.price_amount,
-                      locale,
-                      service.currency,
-                    )}
-                  </Text>
-                </View>
-                {selected ? <Text style={styles.check}>✓</Text> : null}
-              </Pressable>
-            );
-          })}
-        </View>
+        <ServiceAccordion
+          label={t("mobile.freeSlotsChooseService")}
+          locale={locale}
+          onSelect={(service) => {
+            setServiceId(service.id);
+            setSelectedStart(null);
+          }}
+          selectedService={selectedService ?? null}
+          services={services}
+        />
 
         <View style={styles.monthHeader}>
           <Pressable
@@ -331,6 +312,15 @@ export function FreeSlotsModal({
               const selected = selectedStart === slot.starts_at;
               return (
                 <Pressable
+                  accessibilityLabel={formatTime(
+                    new Date(slot.starts_at),
+                    locale,
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: workspace.timezone,
+                    },
+                  )}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
                   key={slot.starts_at}
@@ -338,6 +328,9 @@ export function FreeSlotsModal({
                   style={[styles.slot, selected && styles.slotSelected]}
                 >
                   <Text
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    numberOfLines={1}
                     style={[
                       styles.slotText,
                       selected && styles.slotTextSelected,
@@ -432,43 +425,31 @@ const styles = StyleSheet.create({
   selectedDay: { backgroundColor: colors.accent },
   selectedDayText: { color: colors.surface, fontWeight: "700" },
   selectedDot: { backgroundColor: colors.surface },
-  service: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.surface,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 64,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  serviceCopy: { flex: 1, gap: 2 },
-  serviceName: {
-    ...typography.label,
-    color: colors.primaryText,
-    fontWeight: "700",
-  },
-  serviceSelected: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.accent,
-  },
-  services: { gap: 8 },
   slot: {
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
-    minHeight: 42,
+    minHeight: 48,
+    minWidth: 0,
     justifyContent: "center",
-    paddingHorizontal: 16,
+    width: "31%",
   },
   slotSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  slotText: { ...typography.label, color: colors.primaryText },
+  slotText: {
+    ...typography.label,
+    color: colors.primaryText,
+    textAlign: "center",
+    width: "100%",
+  },
   slotTextSelected: { color: colors.surface, fontWeight: "700" },
-  slots: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingBottom: 16 },
+  slots: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingBottom: 16,
+  },
   status: { alignItems: "center", flexDirection: "row", gap: 10 },
   weekday: {
     color: colors.secondaryText,

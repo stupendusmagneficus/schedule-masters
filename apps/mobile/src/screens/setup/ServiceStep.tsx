@@ -84,8 +84,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: 1,
     fontSize: typography.body.fontSize,
-    minHeight: 48,
+    height: 48,
     paddingHorizontal: 12,
+    paddingVertical: 0,
+    textAlignVertical: "center",
   },
   label: {
     ...typography.label,

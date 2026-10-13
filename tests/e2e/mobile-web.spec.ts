@@ -47,6 +47,21 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
+  test("keeps profile out of the bottom tabs and opens it from the header", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+
+    await expect(page.getByRole("tab")).toHaveCount(3);
+    await page.getByRole("button", { name: "Profil", exact: true }).click();
+    await expect(page.getByText("Profil", { exact: true })).toBeVisible();
+    await expect(page.getByRole("tab")).toHaveCount(3);
+
+    await page.getByRole("button", { name: "Zpět", exact: true }).click();
+    await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
+  });
+
   test("gives visible feedback when starting a new booking", async ({
     page,
   }) => {
@@ -89,7 +104,7 @@ test.describe("mobile web smoke", () => {
   test("switches the calendar to a weekly schedule", async ({ page }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
-    await page.getByRole("button", { name: "Týden" }).click();
+    await page.getByRole("tab", { name: "Týden" }).click();
 
     await expect(page.getByText("Týden", { exact: true }).last()).toBeVisible();
     await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
@@ -104,13 +119,43 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
+  test("keeps all calendar modes on one row at a narrow viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+
+    const modeTabs = page.getByRole("tablist").first().getByRole("tab");
+    await expect(modeTabs).toHaveCount(4);
+    const tops = await modeTabs.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().top),
+    );
+    expect(new Set(tops).size).toBe(1);
+    await expect(page.getByRole("tab", { name: "Den" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("opens a selected month date in the day calendar with one tap", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("tab", { name: "Měsíc" }).click();
+    await page.getByRole("button", { name: /14\. října 2026/ }).click();
+
+    await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+  });
+
   test("renders the chronological feed without horizontal overflow", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
-    await page.getByRole("button", { name: "Přehled" }).click();
+    await page.getByRole("tab", { name: "Přehled" }).click();
 
     await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
     await expect(
@@ -158,7 +203,7 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("tab", { name: "Profil" }).click();
+    await page.getByRole("button", { name: "Profil", exact: true }).click();
 
     await expect(
       page.getByRole("link", {
@@ -168,7 +213,7 @@ test.describe("mobile web smoke", () => {
   });
   test("keeps service editor fields vertically separated", async ({ page }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("tab", { name: "Profil" }).click();
+    await page.getByRole("button", { name: "Profil", exact: true }).click();
     await page.getByRole("button", { name: "Přidat službu" }).click();
 
     await expect(

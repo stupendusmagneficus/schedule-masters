@@ -5,6 +5,7 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
+import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
@@ -12,14 +13,14 @@ import type { MasterAppointment } from "../../features/appointments/manualBookin
 import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
-import type { Service, Workspace } from "../../types";
+import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
 
 type TodayTabProps = DashboardTabProps & {
   readonly demoData?: DemoData;
   readonly masterAppointments?: readonly MasterAppointment[];
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
-  readonly service: Service | null;
+  readonly onOpenProfile: () => void;
   readonly workspace: Workspace;
 };
 
@@ -28,7 +29,7 @@ export function TodayTab({
   locale,
   masterAppointments = [],
   onSelectAppointment,
-  service,
+  onOpenProfile,
   t,
   workspace,
 }: TodayTabProps) {
@@ -78,13 +79,22 @@ export function TodayTab({
 
   return (
     <View style={styles.content}>
-      <View>
-        <Text style={styles.eyebrow}>{t("mobile.today")}</Text>
-        <Text style={styles.title}>{workspace.name}</Text>
-        <Text style={styles.date}>{today}</Text>
-        {demoData && (
-          <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
-        )}
+      <View style={styles.headingRow}>
+        <View style={styles.headingCopy}>
+          <Text style={styles.eyebrow}>{t("mobile.today")}</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            {workspace.name}
+          </Text>
+          <Text style={styles.date}>{today}</Text>
+          {demoData && (
+            <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
+          )}
+        </View>
+        <DashboardHeaderAction
+          accessibilityLabel={t("mobile.profile")}
+          icon="account-circle-outline"
+          onPress={onOpenProfile}
+        />
       </View>
 
       <SummaryMetrics
@@ -164,29 +174,14 @@ export function TodayTab({
           )}
         </InfoCard>
       ) : null}
-
-      <InfoCard>
-        <Text style={styles.sectionTitle}>{t("mobile.firstService")}</Text>
-        {service ? (
-          <View style={styles.serviceRow}>
-            <View>
-              <Text style={styles.serviceName}>{service.name}</Text>
-              <Text style={styles.helper}>{service.duration_minutes} min</Text>
-            </View>
-            <Text style={styles.price}>
-              {formatCurrency(Number(service.price_amount), locale, "CZK")}
-            </Text>
-          </View>
-        ) : (
-          <Text style={styles.helper}>{t("mobile.noServices")}</Text>
-        )}
-      </InfoCard>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
+  headingCopy: { flex: 1, minWidth: 0 },
+  headingRow: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
   demoLabel: {
     ...typography.caption,
     alignSelf: "flex-start",
@@ -197,15 +192,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  date: { ...typography.metadata, color: colors.secondaryText, marginTop: 4 },
   eyebrow: {
+    ...typography.caption,
     color: colors.accent,
-    marginBottom: 6,
+    fontWeight: "700",
     textTransform: "uppercase",
-    ...typography.eyebrow,
   },
+  date: { ...typography.metadata, color: colors.secondaryText, marginTop: 4 },
   helper: { ...typography.body, color: colors.secondaryText },
-  price: { ...typography.label, color: colors.accent },
   pressed: { opacity: 0.78 },
   sectionTitle: {
     color: colors.primaryText,
@@ -216,11 +210,6 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.primaryText,
     fontWeight: "600",
-  },
-  serviceRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   appointmentsList: { gap: 12 },
   appointmentDetails: { flex: 1, gap: 2 },
