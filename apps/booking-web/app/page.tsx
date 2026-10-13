@@ -82,8 +82,10 @@ function isDemoBookingPage() {
 export default function HomePage() {
   const [locale, setLocale] = useState<SupportedLocale>(detectLocale);
   const t = useMemo(() => createTranslator(locale), [locale]);
-  const [context, setContext] = useState<PublicBookingContext>(demoContext);
-  const [selectedServiceId, setSelectedServiceId] = useState(demoServiceId);
+  const [context, setContext] = useState<PublicBookingContext | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [isLoadingContext, setIsLoadingContext] = useState(true);
+  const [contextLoadError, setContextLoadError] = useState(false);
   const [date, setDate] = useState(getNextBookableDate);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
@@ -108,7 +110,7 @@ export default function HomePage() {
         .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     });
   }, [demoMode]);
-  const selectedService = context.services.find(
+  const selectedService = context?.services.find(
     (service) => service.id === selectedServiceId,
   );
   const selectedDateLabel = formatDate(parseDateInput(date), locale, {
@@ -144,18 +146,48 @@ export default function HomePage() {
   useEffect(() => {
     let cancelled = false;
     async function loadContext() {
-      if (!supabase) return;
-      const slug =
-        new URLSearchParams(window.location.search).get("slug") ??
-        "demo-studio";
-      const { data, error: contextError } = await supabase.rpc(
-        "get_public_booking_context",
-        { p_slug: slug },
-      );
-      if (!cancelled && !contextError && data) {
+      setIsLoadingContext(true);
+      setContextLoadError(false);
+
+      if (isDemoBookingPage()) {
+        setContext(demoContext);
+        setSelectedServiceId(demoServiceId);
+        setIsLoadingContext(false);
+        return;
+      }
+
+      const slug = new URLSearchParams(window.location.search)
+        .get("slug")
+        ?.trim();
+      if (!slug || !supabase) {
+        setContext(null);
+        setContextLoadError(true);
+        setIsLoadingContext(false);
+        return;
+      }
+
+      try {
+        const { data, error: contextError } = await supabase.rpc(
+          "get_public_booking_context",
+          { p_slug: slug },
+        );
+        if (contextError || !data)
+          throw new Error("Booking context unavailable");
+
         const parsed = parsePublicBookingContext(data);
+        if (parsed.services.length === 0) {
+          throw new Error("No active services");
+        }
+        if (cancelled) return;
         setContext(parsed);
         setSelectedServiceId(parsed.services[0]?.id ?? "");
+      } catch {
+        if (!cancelled) {
+          setContext(null);
+          setContextLoadError(true);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingContext(false);
       }
     }
     void loadContext();
@@ -185,9 +217,13 @@ export default function HomePage() {
         setIsLoadingSlots(false);
         return;
       }
-      const slug =
-        new URLSearchParams(window.location.search).get("slug") ??
-        "demo-studio";
+      const slug = new URLSearchParams(window.location.search).get("slug");
+      if (!slug) {
+        setSlots([]);
+        setError(t("booking.unavailable"));
+        setIsLoadingSlots(false);
+        return;
+      }
       const { data, error: slotsError } = await supabase.rpc(
         "get_public_available_slots",
         {
@@ -198,7 +234,7 @@ export default function HomePage() {
       );
       if (cancelled) return;
       if (slotsError) {
-        setError(slotsError.message);
+        setError(t("booking.availabilityFailed"));
         setSlots([]);
         setIsLoadingSlots(false);
         return;
@@ -215,7 +251,7 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [date, selectedServiceId, supabase]);
+  }, [date, selectedServiceId, supabase, t]);
 
   async function submitBooking() {
     if (!selectedService) {
@@ -250,9 +286,8 @@ export default function HomePage() {
       if (!supabase) {
         throw new Error(t("common.error"));
       }
-      const slug =
-        new URLSearchParams(window.location.search).get("slug") ??
-        "demo-studio";
+      const slug = new URLSearchParams(window.location.search).get("slug");
+      if (!slug) throw new Error("Booking slug is missing");
       const idempotencyKey = bookingRequestKey.current ?? crypto.randomUUID();
       bookingRequestKey.current = idempotencyKey;
       analytics.track(analyticsEvents.publicBookingSubmitted, { locale });
@@ -272,17 +307,49 @@ export default function HomePage() {
       if (bookingError) throw new Error(bookingError.message);
       analytics.track(analyticsEvents.publicBookingSucceeded, { locale });
       setConfirmation(data as PublicBookingResult);
-    } catch (submitError) {
+    } catch {
       analytics.track(analyticsEvents.publicBookingFailed, {
         locale,
         reason: "request_failed",
       });
-      setError(
-        submitError instanceof Error ? submitError.message : t("common.error"),
-      );
+      setError(t("booking.submitFailed"));
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (isLoadingContext) {
+    return (
+      <main className="booking-page page-shell" aria-busy="true">
+        <section className="booking-panel">
+          <p className="empty-state" role="status">
+            {t("booking.loadingContext")}
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!context || contextLoadError) {
+    return (
+      <main className="booking-page page-shell">
+        <section className="booking-panel confirmation-panel">
+          <p className="eyebrow">{t("common.appName")}</p>
+          <h1>{t("booking.unavailableTitle")}</h1>
+          <p className="muted-copy">{t("booking.unavailableDescription")}</p>
+          <p className="error-state" role="alert">
+            {t("booking.unavailable")}
+          </p>
+          <button
+            className="secondary-button"
+            onClick={() => window.location.reload()}
+            type="button"
+          >
+            {t("common.retry")}
+          </button>
+        </section>
+      </main>
+    );
   }
 
   if (confirmation) {
@@ -292,8 +359,15 @@ export default function HomePage() {
           <span className="success-mark" aria-hidden="true">
             ✓
           </span>
-          <p className="eyebrow">{t("booking.confirmed")}</p>
+          <p className="eyebrow">
+            {confirmation.status === "confirmed"
+              ? t("booking.confirmed")
+              : t("booking.requestReceived")}
+          </p>
           <h1>{context.workspace.name}</h1>
+          {confirmation.status !== "confirmed" && (
+            <p className="muted-copy">{t("booking.pendingConfirmation")}</p>
+          )}
           <p className="confirmation-copy">
             {confirmation.serviceName} ·{" "}
             {formatDate(new Date(confirmation.startsAt), locale)} ·{" "}

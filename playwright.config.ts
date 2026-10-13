@@ -24,7 +24,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        "NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=playwright-demo-key corepack yarn turbo dev --filter=@schedule-app/booking-web -- --port 3000",
+        "NEXT_PUBLIC_SUPABASE_URL=https://schedule-masters-test.supabase.co NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=playwright-test-key corepack yarn turbo dev --filter=@schedule-app/booking-web -- --port 3000",
       url: "http://127.0.0.1:3000",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
