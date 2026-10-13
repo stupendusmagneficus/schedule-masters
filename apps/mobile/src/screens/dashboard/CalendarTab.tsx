@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-
+import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
@@ -64,6 +64,8 @@ type CalendarTabProps = DashboardTabProps & {
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onSelectTime?: (date: string, startsAt: string) => void;
   readonly onOpenFreeSlots?: () => void;
+  readonly onOpenProfile: () => void;
+  readonly onFeedback: (message: string) => void;
   readonly workspace: Workspace;
 };
 
@@ -75,6 +77,8 @@ export function CalendarTab({
   onSelectAppointment,
   onSelectTime,
   onOpenFreeSlots,
+  onOpenProfile,
+  onFeedback,
   t,
   workspace,
 }: CalendarTabProps) {
@@ -161,12 +165,21 @@ export function CalendarTab({
     <>
       <View style={styles.content}>
         <View>
-          <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
-          {calendar.view === "day" || calendar.view === "feed" ? (
-            <Text style={styles.title}>{dateLabel}</Text>
-          ) : null}
+          <View style={styles.calendarHeading}>
+            <View style={styles.calendarHeadingCopy}>
+              <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
+              <Text numberOfLines={2} style={styles.title}>
+                {dateLabel}
+              </Text>
+            </View>
+            <DashboardHeaderAction
+              accessibilityLabel={t("mobile.profile")}
+              icon="account-circle-outline"
+              onPress={onOpenProfile}
+            />
+          </View>
           <View style={styles.calendarToolbar}>
-            <View style={styles.viewSwitcher}>
+            <View accessibilityRole="tablist" style={styles.viewSwitcher}>
               <CalendarViewButton
                 active={calendar.view === "day"}
                 label={t("mobile.calendarDayView")}
@@ -207,6 +220,7 @@ export function CalendarTab({
                 <Text style={styles.navigationButtonText}>‹</Text>
               </Pressable>
               <Pressable
+                accessibilityLabel={t("mobile.today")}
                 accessibilityRole="button"
                 disabled={navigationDisabled}
                 onPress={calendar.goToToday}
@@ -387,7 +401,10 @@ export function CalendarTab({
                   block={block}
                   key={block.id}
                   locale={locale}
-                  onDelete={calendar.removeBlock}
+                  onDelete={async (blockId) => {
+                    await calendar.removeBlock(blockId);
+                    onFeedback(t("mobile.personalBlockDeleted"));
+                  }}
                   t={t}
                   timezone={workspace.timezone}
                 />
@@ -405,10 +422,12 @@ export function CalendarTab({
         error={calendar.error}
         initialDate={calendar.selectedDate}
         isSaving={calendar.isSaving}
+        locale={locale}
         onClose={() => setBlockModalVisible(false)}
         onSave={async (draft: PersonalBlockDraft) => {
           await calendar.saveBlock(draft);
           setBlockModalVisible(false);
+          onFeedback(t("mobile.personalBlockCreated"));
         }}
         t={t}
         visible={isBlockModalVisible}
@@ -428,7 +447,7 @@ function CalendarViewButton({
 }) {
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       onPress={onPress}
       style={({ pressed }) => [
@@ -556,12 +575,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   calendarToolbar: {
-    alignItems: "center",
-    flexDirection: "row",
+    alignItems: "stretch",
     gap: 8,
-    justifyContent: "space-between",
     marginTop: 8,
   },
+  calendarHeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  calendarHeadingCopy: { flex: 1, minWidth: 0 },
   deleteButton: { paddingHorizontal: 4, paddingVertical: 8 },
   freeSlotsButton: {
     alignSelf: "flex-start",
@@ -584,6 +607,7 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   dateNavigation: {
     alignItems: "center",
+    alignSelf: "flex-end",
     flexDirection: "row",
     gap: 4,
   },
@@ -612,7 +636,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
-    height: 36,
+    height: 44,
     justifyContent: "center",
     width: 36,
   },
@@ -626,10 +650,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.accentSoft,
     borderRadius: radii.control,
-    height: 36,
+    height: 44,
     justifyContent: "center",
+    minWidth: 80,
     paddingHorizontal: 10,
-    width: 64,
   },
   todayButtonText: {
     ...typography.label,
@@ -653,7 +677,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: radii.control,
     flex: 1,
-    minHeight: 36,
+    minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: 4,
   },
@@ -663,7 +687,6 @@ const styles = StyleSheet.create({
   viewButtonTextActive: { color: colors.primaryText, fontWeight: "700" },
   viewSwitcher: {
     alignSelf: "stretch",
-    flex: 1,
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,
     flexDirection: "row",

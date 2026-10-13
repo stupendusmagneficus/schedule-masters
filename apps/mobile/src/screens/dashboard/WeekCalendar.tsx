@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   weekDayDot: {
-    backgroundColor: colors.border,
+    backgroundColor: colors.borderSubtle,
     borderRadius: 999,
     height: 3,
     marginTop: 2,
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   weekDayDotClosed: { backgroundColor: colors.secondaryText },
   weekDayHeader: {
     alignItems: "center",
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.borderSubtle,
     borderBottomWidth: StyleSheet.hairlineWidth,
     flex: 1,
     minWidth: 0,

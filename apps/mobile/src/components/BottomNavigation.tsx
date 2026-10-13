@@ -11,12 +11,12 @@ import {
 
 import { colors, radii, shadows } from "../theme/tokens";
 
-export type MobileTab = "calendar" | "customers" | "profile" | "today";
+export type MobileTab = "calendar" | "customers" | "today";
 
 type NavigationLabels = Record<MobileTab, string>;
 
 type BottomNavigationProps = {
-  readonly activeTab: MobileTab;
+  readonly activeTab: MobileTab | null;
   readonly labels: NavigationLabels;
   readonly onTabChange: (tab: MobileTab) => void;
 };
@@ -30,7 +30,6 @@ const navigationItems: readonly NavigationItem[] = [
   { icon: "home-outline", id: "today" },
   { icon: "calendar-month-outline", id: "calendar" },
   { icon: "account-multiple-outline", id: "customers" },
-  { icon: "account-outline", id: "profile" },
 ];
 
 const navigationPadding = 4;
@@ -55,7 +54,7 @@ export function BottomNavigation({
       damping: 18,
       mass: 0.7,
       stiffness: 220,
-      toValue: activeIndex * itemWidth,
+      toValue: Math.max(activeIndex, 0) * itemWidth,
       useNativeDriver: true,
     }).start();
   }, [activeIndex, indicatorX, itemWidth]);
@@ -66,7 +65,7 @@ export function BottomNavigation({
       navigationItems.length;
 
     setItemWidth(nextItemWidth);
-    indicatorX.setValue(activeIndex * nextItemWidth);
+    indicatorX.setValue(Math.max(activeIndex, 0) * nextItemWidth);
   }
 
   return (
@@ -82,6 +81,7 @@ export function BottomNavigation({
           {
             transform: [{ translateX: indicatorX }],
             width: itemWidth,
+            opacity: activeIndex === -1 ? 0 : 1,
           },
         ]}
       />

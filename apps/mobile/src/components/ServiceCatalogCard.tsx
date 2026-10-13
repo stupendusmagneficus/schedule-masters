@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   nameLine: { alignItems: "center", flexDirection: "row", gap: 8 },
   row: {
     alignItems: "flex-start",
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.borderSubtle,
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     gap: 10,

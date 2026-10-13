@@ -1,5 +1,5 @@
 import type { Database } from "@schedule-app/api";
-import type { MessageKey } from "@schedule-app/i18n";
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import {
@@ -26,6 +26,7 @@ import { FullscreenModal } from "./FullscreenModal";
 
 type WorkspaceSettingsModalProps = {
   readonly client: SupabaseClient<Database>;
+  readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onSaved: (draft: WorkspaceSettingsDraft) => void;
   readonly t: (key: MessageKey) => string;
@@ -48,6 +49,7 @@ const dayOptions: ReadonlyArray<{
 
 export function WorkspaceSettingsModal({
   client,
+  locale,
   onClose,
   onSaved,
   t,
@@ -199,18 +201,22 @@ export function WorkspaceSettingsModal({
           <View style={styles.timeField}>
             <DateTimePickerField
               label={t("workspace.startTimeLabel")}
+              locale={locale}
               mode="time"
               onChange={(startTime) => change("startTime", startTime)}
               placeholder="09:00"
+              t={t}
               value={draft.startTime}
             />
           </View>
           <View style={styles.timeField}>
             <DateTimePickerField
               label={t("workspace.endTimeLabel")}
+              locale={locale}
               mode="time"
               onChange={(endTime) => change("endTime", endTime)}
               placeholder="17:00"
+              t={t}
               value={draft.endTime}
             />
           </View>
@@ -287,8 +293,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 48,
+    height: 48,
     paddingHorizontal: 14,
+    paddingVertical: 0,
+    textAlignVertical: "center",
   },
   label: { ...typography.label, color: colors.primaryText },
   saveButton: {

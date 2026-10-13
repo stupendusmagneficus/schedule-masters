@@ -2,9 +2,10 @@ import type { Database } from "@schedule-app/api";
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Linking, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ActionFeedback } from "../components/ActionFeedback";
 import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
 import {
   BottomNavigation,
@@ -50,6 +51,8 @@ type DashboardScreenProps = {
   readonly workspace: Workspace;
 };
 
+type DashboardPageTab = MobileTab | "profile";
+
 export function DashboardScreen({
   client,
   isSigningOut,
@@ -64,7 +67,8 @@ export function DashboardScreen({
   services,
   workspace,
 }: DashboardScreenProps) {
-  const [activeTab, setActiveTab] = useState<MobileTab>("today");
+  const [activeTab, setActiveTab] = useState<DashboardPageTab>("today");
+  const [profileReturnTab, setProfileReturnTab] = useState<MobileTab>("today");
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -89,6 +93,8 @@ export function DashboardScreen({
   >(null);
   const [isUpdatingAppointment, setUpdatingAppointment] = useState(false);
   const [appointmentActionError, setAppointmentActionError] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const dismissFeedback = useCallback(() => setFeedback(null), []);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const { appointments, reload: reloadAppointments } = useMasterAppointments({
     client,
@@ -110,13 +116,16 @@ export function DashboardScreen({
       demoData ? [demoData.primaryService] : serviceCatalog.activeServices,
     [demoData, serviceCatalog.activeServices],
   );
-  const service = bookingServices[0] ?? null;
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     customers: t("mobile.customers"),
-    profile: t("mobile.profile"),
     today: t("mobile.today"),
   };
+
+  function openProfile() {
+    if (activeTab !== "profile") setProfileReturnTab(activeTab);
+    setActiveTab("profile");
+  }
 
   const bookingUrl = buildBookingUrl(mobileEnv.bookingWebUrl, workspace.slug);
 
@@ -130,6 +139,7 @@ export function DashboardScreen({
       await reloadAppointments();
       await calendar.reload();
       setSelectedAppointment(null);
+      setFeedback(t("mobile.appointmentStatusUpdated"));
     } catch {
       setAppointmentActionError(true);
     } finally {
@@ -163,7 +173,7 @@ export function DashboardScreen({
         {activeTab === "today" && (
           <TodayTab
             locale={locale}
-            service={service}
+            onOpenProfile={openProfile}
             demoData={demoData}
             masterAppointments={appointments}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
@@ -179,6 +189,8 @@ export function DashboardScreen({
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             onOpenFreeSlots={() => setFreeSlotsVisible(true)}
+            onOpenProfile={openProfile}
+            onFeedback={setFeedback}
             onSelectTime={(date, startsAt) =>
               client
                 ? openManualBooking(date, startsAt)
@@ -188,19 +200,19 @@ export function DashboardScreen({
             workspace={workspace}
           />
         )}
-        {activeTab === "customers" && (
-          <CustomersTab
-            client={client}
-            locale={locale}
-            onCreateBooking={(customer) => {
-              setManualBookingCustomer(customer);
-              openManualBooking();
-            }}
-            onSelectAppointment={setSelectedAppointment}
-            t={t}
-            workspace={workspace}
-          />
-        )}
+        <CustomersTab
+          client={client}
+          locale={locale}
+          onOpenProfile={openProfile}
+          onCreateBooking={(customer) => {
+            setManualBookingCustomer(customer);
+            openManualBooking();
+          }}
+          onSelectAppointment={setSelectedAppointment}
+          t={t}
+          visible={activeTab === "customers"}
+          workspace={workspace}
+        />
         {activeTab === "profile" && (
           <ProfileTab
             isSigningOut={isSigningOut}
@@ -210,6 +222,7 @@ export function DashboardScreen({
             locale={locale}
             onLocaleChange={onLocaleChange}
             onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
+            onClose={() => setActiveTab(profileReturnTab)}
             onSignOut={onSignOut}
             onWorkspaceSaved={onWorkspaceSaved}
             signOutFailed={signOutFailed}
@@ -220,6 +233,7 @@ export function DashboardScreen({
           />
         )}
       </ScrollView>
+      <ActionFeedback message={feedback} onDismiss={dismissFeedback} />
       <FloatingBookingAction
         label={t("mobile.newBooking")}
         onPress={() =>
@@ -228,7 +242,7 @@ export function DashboardScreen({
       />
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
         <BottomNavigation
-          activeTab={activeTab}
+          activeTab={activeTab === "profile" ? null : activeTab}
           labels={navigationLabels}
           onTabChange={setActiveTab}
         />
@@ -277,6 +291,7 @@ export function DashboardScreen({
           onCreated={async () => {
             await reloadAppointments();
             await calendar.reload();
+            setFeedback(t("mobile.manualBookingCreated"));
             analytics.track(analyticsEvents.appointmentCreated, {
               source: "master_created",
             });

@@ -2,6 +2,16 @@ export const manualBookingSteps = ["time", "customer", "review"] as const;
 
 export type ManualBookingStep = (typeof manualBookingSteps)[number];
 
+export function getInitialManualBookingStep({
+  hasCustomer,
+  hasStartsAt,
+}: {
+  readonly hasCustomer: boolean;
+  readonly hasStartsAt: boolean;
+}): ManualBookingStep {
+  return hasCustomer && hasStartsAt ? "customer" : "time";
+}
+
 export function nextManualBookingStep(
   step: ManualBookingStep,
 ): ManualBookingStep {

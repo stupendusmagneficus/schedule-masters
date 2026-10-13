@@ -283,9 +283,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 48,
+    height: 48,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 0,
+    textAlignVertical: "center",
   },
   inputError: { borderColor: colors.danger, borderWidth: 1 },
   label: {
@@ -294,6 +295,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   multilineInput: {
+    borderRadius: radii.surface,
     height: 96,
     minHeight: 96,
     paddingTop: 14,
