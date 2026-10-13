@@ -42,6 +42,8 @@ type DashboardScreenProps = {
   readonly signOutFailed: boolean;
   readonly demoData?: DemoData;
   readonly canManageServices: boolean;
+  readonly canManageWorkspace: boolean;
+  readonly onWorkspaceSaved: () => void;
   readonly services: readonly Service[];
   readonly workspace: Workspace;
 };
@@ -55,6 +57,8 @@ export function DashboardScreen({
   signOutFailed,
   demoData,
   canManageServices,
+  canManageWorkspace,
+  onWorkspaceSaved,
   services,
   workspace,
 }: DashboardScreenProps) {
@@ -182,11 +186,14 @@ export function DashboardScreen({
         {activeTab === "profile" && (
           <ProfileTab
             isSigningOut={isSigningOut}
+            client={client}
+            canManageWorkspace={canManageWorkspace}
             canManageServices={canManageServices}
             locale={locale}
             onLocaleChange={onLocaleChange}
             onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
             onSignOut={onSignOut}
+            onWorkspaceSaved={onWorkspaceSaved}
             signOutFailed={signOutFailed}
             serviceCatalog={serviceCatalog}
             t={t}

@@ -128,6 +128,8 @@ function AppContent() {
         onSignOut={() => undefined}
         signOutFailed={false}
         canManageServices
+        canManageWorkspace={false}
+        onWorkspaceSaved={() => undefined}
         services={[demoData.primaryService]}
         workspace={demoWorkspace}
       />
@@ -178,6 +180,8 @@ function AppContent() {
       onLocaleChange={setLocale}
       onSignOut={() => void signOut()}
       signOutFailed={signOutFailed}
+      canManageWorkspace={workspaceState.memberRole === "owner"}
+      onWorkspaceSaved={() => void reloadWorkspace()}
       canManageServices={
         workspaceState.memberRole === "owner" ||
         workspaceState.memberRole === "admin"

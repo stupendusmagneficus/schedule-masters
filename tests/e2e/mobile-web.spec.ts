@@ -156,14 +156,20 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
 
     const descriptionInput = page.getByLabel("Popis", { exact: true });
-    const durationLabel = page.getByText("Délka v minutách *", { exact: true });
-    const descriptionBox = await descriptionInput.boundingBox();
-    const durationLabelBox = await durationLabel.boundingBox();
+    const spacing = await descriptionInput.evaluate((input) => {
+      const durationLabel = Array.from(document.querySelectorAll("*")).find(
+        (element) =>
+          element.childElementCount === 0 &&
+          element.textContent?.trim() === "Délka v minutách *",
+      );
+      if (!durationLabel) return null;
 
-    expect(descriptionBox).not.toBeNull();
-    expect(durationLabelBox).not.toBeNull();
-    expect(durationLabelBox?.y).toBeGreaterThan(
-      (descriptionBox?.y ?? 0) + (descriptionBox?.height ?? 0) + 4,
-    );
+      const descriptionRect = input.getBoundingClientRect();
+      const durationRect = durationLabel.getBoundingClientRect();
+      return durationRect.top - descriptionRect.bottom;
+    });
+
+    expect(spacing).not.toBeNull();
+    expect(spacing).toBeGreaterThan(4);
   });
 });

@@ -780,6 +780,17 @@ export type Database = {
         }
         Returns: Json
       }
+      update_master_workspace_settings: {
+        Args: {
+          p_end_local_time: string
+          p_name: string
+          p_slug: string
+          p_start_local_time: string
+          p_working_days: number[]
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       access_token_purpose: "manage" | "cancel" | "reschedule"
