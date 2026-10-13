@@ -47,6 +47,9 @@ yarn dev
 # Run the mobile app only
 yarn workspace @schedule-app/mobile dev
 
+# Run Expo Go through a tunnel if the QR code cannot reach your computer over Wi-Fi
+yarn workspace @schedule-app/mobile dev:tunnel
+
 # Run the mobile visual demo without Supabase authentication
 EXPO_PUBLIC_DEMO_MODE=true yarn workspace @schedule-app/mobile dev
 
@@ -61,6 +64,11 @@ yarn build
 ```
 
 The mobile app starts with Expo. The booking web starts at http://localhost:3000.
+For a physical device, keep the Expo terminal running while scanning its QR code.
+If Expo Go cannot connect over the local network (for example, because of router
+client isolation, a VPN, or a firewall), use `yarn workspace
+@schedule-app/mobile dev:tunnel` and scan the newly generated QR code. On iOS,
+Expo Go and the Expo CLI may also need to be signed in to the same Expo account.
 For the web preview, open the Expo URL with `?demo=1`, for example
 http://localhost:19006/?demo=1. Demo mode uses local mock data only and never
 writes appointments or workspace data to Supabase.

@@ -251,6 +251,12 @@ export type MessageKey =
   | "mobile.serviceSortOrderInvalid"
   | "mobile.signOut"
   | "booking.description"
+  | "booking.loadingContext"
+  | "booking.unavailableTitle"
+  | "booking.unavailableDescription"
+  | "booking.unavailable"
+  | "booking.availabilityFailed"
+  | "booking.submitFailed"
   | "booking.chooseService"
   | "booking.chooseDate"
   | "booking.chooseTime"
@@ -261,6 +267,8 @@ export type MessageKey =
   | "booking.note"
   | "booking.confirm"
   | "booking.confirmed"
+  | "booking.requestReceived"
+  | "booking.pendingConfirmation"
   | "booking.close"
   | "booking.noSlots"
   | "booking.selectService"
@@ -564,6 +572,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Порядок должен быть целым числом от 0 до 100 000.",
     "mobile.signOut": "Выйти",
     "booking.description": "Страница онлайн-записи готова к работе.",
+    "booking.loadingContext": "Загружаем страницу записи…",
+    "booking.unavailableTitle": "Страница записи недоступна",
+    "booking.unavailableDescription":
+      "Возможно, ссылка неполная или страница временно отключена. Попросите мастера прислать актуальную ссылку.",
+    "booking.unavailable": "Не удалось загрузить страницу записи.",
+    "booking.availabilityFailed": "Не удалось проверить свободное время.",
+    "booking.submitFailed":
+      "Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.",
     "booking.chooseService": "Выберите услугу",
     "booking.chooseDate": "Выберите дату",
     "booking.chooseTime": "Выберите время",
@@ -574,6 +590,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Комментарий",
     "booking.confirm": "Подтвердить запись",
     "booking.confirmed": "Запись подтверждена",
+    "booking.requestReceived": "Заявка на запись отправлена",
+    "booking.pendingConfirmation":
+      "Мастер должен подтвердить время. Вы получите обновление, когда запись будет подтверждена.",
     "booking.close": "Закрыть",
     "booking.noSlots": "На эту дату нет свободного времени.",
     "booking.selectService": "Выберите услугу, чтобы увидеть свободное время.",
@@ -870,6 +889,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Pořadí musí být celé číslo od 0 do 100 000.",
     "mobile.signOut": "Odhlásit se",
     "booking.description": "Stránka online rezervací je připravena.",
+    "booking.loadingContext": "Načítáme stránku rezervace…",
+    "booking.unavailableTitle": "Stránka rezervace není dostupná",
+    "booking.unavailableDescription":
+      "Odkaz může být neúplný nebo stránka dočasně vypnutá. Požádejte prosím o nový odkaz.",
+    "booking.unavailable": "Stránku rezervace se nepodařilo načíst.",
+    "booking.availabilityFailed": "Volné termíny se nepodařilo ověřit.",
+    "booking.submitFailed":
+      "Rezervaci se nepodařilo odeslat. Zkontrolujte připojení a zkuste to znovu.",
     "booking.chooseService": "Vyberte službu",
     "booking.chooseDate": "Vyberte datum",
     "booking.chooseTime": "Vyberte čas",
@@ -880,6 +907,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Poznámka",
     "booking.confirm": "Potvrdit rezervaci",
     "booking.confirmed": "Rezervace potvrzena",
+    "booking.requestReceived": "Žádost o rezervaci byla odeslána",
+    "booking.pendingConfirmation":
+      "Termín musí potvrdit mistr. Jakmile bude rezervace potvrzena, zobrazíme vám aktualizaci.",
     "booking.close": "Zavřít",
     "booking.noSlots": "Pro toto datum nejsou volné termíny.",
     "booking.selectService": "Vyberte službu a zobrazí se volné termíny.",
@@ -1185,6 +1215,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Sort order must be a whole number between 0 and 100,000.",
     "mobile.signOut": "Sign out",
     "booking.description": "The online booking page is ready.",
+    "booking.loadingContext": "Loading booking page…",
+    "booking.unavailableTitle": "This booking page is unavailable",
+    "booking.unavailableDescription":
+      "The link may be incomplete or the page may be temporarily unavailable. Please ask the professional to share the current link.",
+    "booking.unavailable": "We couldn't load this booking page.",
+    "booking.availabilityFailed": "We couldn't check available times.",
+    "booking.submitFailed":
+      "We couldn't send your request. Check your connection and try again.",
     "booking.chooseService": "Choose a service",
     "booking.chooseDate": "Choose a date",
     "booking.chooseTime": "Choose a time",
@@ -1195,6 +1233,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.note": "Note",
     "booking.confirm": "Confirm booking",
     "booking.confirmed": "Booking confirmed",
+    "booking.requestReceived": "Booking request sent",
+    "booking.pendingConfirmation":
+      "The professional needs to confirm this time. We'll show an update once the booking is confirmed.",
     "booking.close": "Close",
     "booking.noSlots": "There are no available times on this date.",
     "booking.selectService": "Choose a service to see available times.",

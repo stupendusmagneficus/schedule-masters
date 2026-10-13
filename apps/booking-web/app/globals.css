@@ -327,6 +327,7 @@ textarea {
 }
 
 .confirmation-panel {
+  align-content: start;
   display: grid;
   justify-items: center;
   text-align: center;
