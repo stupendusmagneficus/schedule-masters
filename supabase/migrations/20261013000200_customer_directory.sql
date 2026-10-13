@@ -43,8 +43,7 @@ begin
        or coalesce(c.phone, '') ilike '%' || trim(p_search) || '%'
      )
    group by c.id
-   order by lower(c.name), c.created_at, c.id
-   limit 500;
+   order by lower(c.name), c.created_at, c.id;
 end;
 $$;
 
@@ -93,12 +92,12 @@ begin
          a.customer_id,
          c.name,
          a.service_name_snapshot,
-         a.duration_minutes,
+         a.duration_minutes_snapshot,
          a.ends_at,
          a.starts_at,
          a.status,
-         a.price_amount,
-         a.currency,
+         a.price_amount_snapshot,
+         a.currency_snapshot::text,
          a.source
     from public.appointments a
     join public.customers c on c.id = a.customer_id

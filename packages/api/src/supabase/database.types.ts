@@ -759,15 +759,6 @@ export type Database = {
           starts_at: string
         }[]
       }
-      list_master_customers: {
-        Args: { p_search?: string; p_workspace_id: string }
-        Returns: {
-          email: string
-          id: string
-          name: string
-          phone: string
-        }[]
-      }
       list_master_customer_directory: {
         Args: { p_search?: string; p_workspace_id: string }
         Returns: {
@@ -794,6 +785,15 @@ export type Database = {
           source: Database["public"]["Enums"]["appointment_source"]
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
+      list_master_customers: {
+        Args: { p_search?: string; p_workspace_id: string }
+        Returns: {
+          email: string
+          id: string
+          name: string
+          phone: string
         }[]
       }
       reschedule_appointment: {

@@ -1012,6 +1012,154 @@ describe("Supabase public booking contract", () => {
   });
 });
 
+describe("customer directory RPC", () => {
+  rlsIntegrationTest(
+    "returns workspace-scoped customers and their appointment history",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const otherWorkspaceId = randomUUID();
+      const customerId = randomUUID();
+      const otherCustomerId = randomUUID();
+      const email = `customer-directory-${suffix}@example.test`;
+      const password = `Test-${suffix}-Password!`;
+      let userId: string | undefined;
+
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert([
+              {
+                id: workspaceId,
+                name: "Customer Directory Workspace",
+                slug: `customer-directory-${suffix}`,
+              },
+              {
+                id: otherWorkspaceId,
+                name: "Other Customer Directory Workspace",
+                slug: `other-customer-directory-${suffix}`,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+
+        const user = await createAuthenticatedTestUser({
+          admin,
+          email,
+          password,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        userId = user.user.id;
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              role: "owner",
+              user_id: user.user.id,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        expect(
+          (
+            await admin.from("customers").insert([
+              {
+                email: "anna@example.test",
+                id: customerId,
+                name: "Anna Customer",
+                notes: "Prefers mornings",
+                phone: "+420111222333",
+                workspace_id: workspaceId,
+              },
+              {
+                email: "other@example.test",
+                id: otherCustomerId,
+                name: "Other Workspace Customer",
+                workspace_id: otherWorkspaceId,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("appointments").insert({
+              completed_at: "2020-04-03T10:00:00.000Z",
+              currency_snapshot: "CZK",
+              customer_id: customerId,
+              duration_minutes_snapshot: 60,
+              ends_at: "2020-04-03T10:00:00.000Z",
+              occupied_range:
+                "[2020-04-03T09:00:00.000Z,2020-04-03T10:00:00.000Z)",
+              price_amount_snapshot: 700,
+              service_name_snapshot: "Directory service",
+              source: "master_created",
+              starts_at: "2020-04-03T09:00:00.000Z",
+              status: "completed",
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const directory = await user.client.rpc(
+          "list_master_customer_directory",
+          { p_workspace_id: workspaceId },
+        );
+        expect(directory.error).toBeNull();
+        expect(directory.data).toHaveLength(1);
+        expect(directory.data?.[0]).toMatchObject({
+          completed_visits: 1,
+          email: "anna@example.test",
+          id: customerId,
+          name: "Anna Customer",
+          notes: "Prefers mornings",
+          phone: "+420111222333",
+        });
+
+        const history = await user.client.rpc("list_master_customer_history", {
+          p_customer_id: customerId,
+          p_workspace_id: workspaceId,
+        });
+        expect(history.error).toBeNull();
+        expect(history.data).toHaveLength(1);
+        expect(history.data?.[0]).toMatchObject({
+          customer_id: customerId,
+          duration_minutes: 60,
+          price_amount: 700,
+          service_name: "Directory service",
+          status: "completed",
+        });
+
+        const crossWorkspaceHistory = await user.client.rpc(
+          "list_master_customer_history",
+          { p_customer_id: otherCustomerId, p_workspace_id: workspaceId },
+        );
+        expect(crossWorkspaceHistory.data).toBeNull();
+        expect(crossWorkspaceHistory.error?.code).toBe("P0002");
+      } finally {
+        const deletedWorkspaces = await admin
+          .from("workspaces")
+          .delete()
+          .in("id", [workspaceId, otherWorkspaceId]);
+        const deletedUser = userId
+          ? await admin.auth.admin.deleteUser(userId)
+          : null;
+        expect(deletedWorkspaces.error).toBeNull();
+        expect(deletedUser?.error).toBeNull();
+      }
+    },
+    30_000,
+  );
+});
+
 describe("workspace settings RPC", () => {
   rlsIntegrationTest(
     "allows only owners to update workspace settings",
