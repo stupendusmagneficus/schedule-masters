@@ -707,6 +707,13 @@ export type Database = {
         Returns: Json
       }
       check_public_booking_request: { Args: never; Returns: undefined }
+      create_customer_appointment_link: {
+        Args: {
+          p_appointment_id: string
+          p_customer_consent_confirmed: boolean
+        }
+        Returns: Json
+      }
       create_master_availability_block: {
         Args: {
           p_date: string
@@ -733,22 +740,6 @@ export type Database = {
         }
         Returns: Json
       }
-      create_customer_appointment_link: {
-        Args: { p_appointment_id: string; p_customer_consent_confirmed: boolean }
-        Returns: Json
-      }
-      get_customer_appointment: {
-        Args: { p_token: string }
-        Returns: Json
-      }
-      record_customer_link_share: {
-        Args: {
-          p_appointment_id: string
-          p_error_code?: string
-          p_status: Database["public"]["Enums"]["notification_delivery_status"]
-        }
-        Returns: undefined
-      }
       create_public_booking: {
         Args: {
           p_customer_note?: string
@@ -770,6 +761,7 @@ export type Database = {
         Args: { p_workspace_id: string }
         Returns: undefined
       }
+      get_customer_appointment: { Args: { p_token: string }; Returns: Json }
       get_master_available_slots: {
         Args: { p_date: string; p_service_id: string; p_workspace_id: string }
         Returns: {
@@ -862,6 +854,14 @@ export type Database = {
           name: string
           phone: string
         }[]
+      }
+      record_customer_link_share: {
+        Args: {
+          p_appointment_id: string
+          p_error_code?: string
+          p_status: Database["public"]["Enums"]["notification_delivery_status"]
+        }
+        Returns: undefined
       }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }
