@@ -55,7 +55,10 @@ export function MonthCalendar({
             accessibilityRole="button"
             accessibilityState={{ selected: day.isSelected }}
             key={day.date}
-            onPress={() => onSelectDate(day.date)}
+            onPress={() => {
+              onSelectDate(day.date);
+              onOpenSelectedDay();
+            }}
             style={({ pressed }) => [
               styles.dayCell,
               day.isClosed && styles.closedDay,

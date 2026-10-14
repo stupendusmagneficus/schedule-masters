@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
@@ -34,25 +34,27 @@ export function FullscreenModal({
       presentationStyle="fullScreen"
       visible={visible}
     >
-      <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-        <View style={styles.header}>
-          <Pressable
-            accessibilityLabel={closeLabel}
-            accessibilityRole="button"
-            disabled={closeDisabled}
-            onPress={onClose}
-            style={[styles.headerAction, closeDisabled && styles.disabled]}
-          >
-            <Text style={styles.closeText}>{closeLabel}</Text>
-          </Pressable>
-          <Text numberOfLines={1} style={styles.title}>
-            {title}
-          </Text>
-          <View style={styles.headerAction}>{headerRight}</View>
-        </View>
-        <View style={styles.content}>{children}</View>
-        {footer ? <View style={styles.footer}>{footer}</View> : null}
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
+          <View style={styles.header}>
+            <Pressable
+              accessibilityLabel={closeLabel}
+              accessibilityRole="button"
+              disabled={closeDisabled}
+              onPress={onClose}
+              style={[styles.headerAction, closeDisabled && styles.disabled]}
+            >
+              <Text style={styles.closeText}>{closeLabel}</Text>
+            </Pressable>
+            <Text numberOfLines={1} style={styles.title}>
+              {title}
+            </Text>
+            <View style={styles.headerAction}>{headerRight}</View>
+          </View>
+          <View style={styles.content}>{children}</View>
+          {footer ? <View style={styles.footer}>{footer}</View> : null}
+        </SafeAreaView>
+      </SafeAreaProvider>
     </Modal>
   );
 }
@@ -76,7 +78,12 @@ const styles = StyleSheet.create({
     minHeight: 56,
     paddingHorizontal: 16,
   },
-  headerAction: { flex: 1, minWidth: 88 },
+  headerAction: {
+    flex: 0,
+    justifyContent: "center",
+    minHeight: 44,
+    width: 88,
+  },
   screen: { backgroundColor: colors.canvas, flex: 1 },
   title: {
     ...typography.label,

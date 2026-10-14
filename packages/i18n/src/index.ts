@@ -20,6 +20,7 @@ export type MessageKey =
   | "common.retry"
   | "common.loading"
   | "common.error"
+  | "common.done"
   | "auth.emailLabel"
   | "auth.passwordLabel"
   | "auth.passwordHint"
@@ -120,6 +121,7 @@ export type MessageKey =
   | "mobile.statusNoShow"
   | "mobile.appointmentDetails"
   | "mobile.appointmentStatus"
+  | "mobile.appointmentStatusUpdated"
   | "mobile.appointmentDate"
   | "mobile.appointmentTime"
   | "mobile.appointmentService"
@@ -245,6 +247,12 @@ export type MessageKey =
   | "mobile.personalBlockAdd"
   | "mobile.personalBlockDelete"
   | "mobile.personalBlockOverlap"
+  | "mobile.personalBlockCreated"
+  | "mobile.personalBlockDeleted"
+  | "mobile.datePickerChoose"
+  | "mobile.datePickerToday"
+  | "mobile.datePickerPreviousMonth"
+  | "mobile.datePickerNextMonth"
   | "mobile.services"
   | "mobile.servicesDescription"
   | "mobile.serviceAdd"
@@ -328,6 +336,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.next": "Продолжить",
     "common.retry": "Повторить",
     "common.loading": "Загрузка…",
+    "common.done": "Готово",
     "common.error":
       "Не удалось завершить действие. Повторите попытку через несколько секунд.",
     "auth.emailLabel": "Email",
@@ -455,6 +464,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusNoShow": "Клиент не пришёл",
     "mobile.appointmentDetails": "Детали записи",
     "mobile.appointmentStatus": "Статус",
+    "mobile.appointmentStatusUpdated": "Статус записи обновлён",
     "mobile.appointmentDate": "Дата",
     "mobile.appointmentTime": "Время",
     "mobile.appointmentService": "Услуга",
@@ -600,6 +610,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Удалить",
     "mobile.personalBlockOverlap":
       "Это время пересекается с существующей записью или блоком.",
+    "mobile.personalBlockCreated": "Личный блок добавлен",
+    "mobile.personalBlockDeleted": "Личный блок удалён",
+    "mobile.datePickerChoose": "Выберите дату",
+    "mobile.datePickerToday": "Сегодня",
+    "mobile.datePickerPreviousMonth": "Предыдущий месяц",
+    "mobile.datePickerNextMonth": "Следующий месяц",
     "mobile.services": "Услуги",
     "mobile.servicesDescription":
       "Управляйте услугами, ценами и длительностью записей.",
@@ -692,6 +708,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.next": "Pokračovat",
     "common.retry": "Zkusit znovu",
     "common.loading": "Načítání…",
+    "common.done": "Hotovo",
     "common.error":
       "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
     "auth.emailLabel": "E-mail",
@@ -817,6 +834,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusNoShow": "Klient nepřišel",
     "mobile.appointmentDetails": "Detail rezervace",
     "mobile.appointmentStatus": "Stav",
+    "mobile.appointmentStatusUpdated": "Stav rezervace byl aktualizován",
     "mobile.appointmentDate": "Datum",
     "mobile.appointmentTime": "Čas",
     "mobile.appointmentService": "Služba",
@@ -962,6 +980,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Smazat",
     "mobile.personalBlockOverlap":
       "Čas se překrývá s existující rezervací nebo blokem.",
+    "mobile.personalBlockCreated": "Osobní blok byl přidán",
+    "mobile.personalBlockDeleted": "Osobní blok byl smazán",
+    "mobile.datePickerChoose": "Vyberte datum",
+    "mobile.datePickerToday": "Dnes",
+    "mobile.datePickerPreviousMonth": "Předchozí měsíc",
+    "mobile.datePickerNextMonth": "Další měsíc",
     "mobile.services": "Služby",
     "mobile.servicesDescription": "Spravujte služby, ceny a délku rezervací.",
     "mobile.serviceAdd": "Přidat službu",
@@ -1051,6 +1075,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.next": "Continue",
     "common.retry": "Try again",
     "common.loading": "Loading…",
+    "common.done": "Done",
     "common.error":
       "We could not complete that action. Please try again shortly.",
     "auth.emailLabel": "Email",
@@ -1179,6 +1204,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusNoShow": "No-show",
     "mobile.appointmentDetails": "Appointment details",
     "mobile.appointmentStatus": "Status",
+    "mobile.appointmentStatusUpdated": "Booking status updated",
     "mobile.appointmentDate": "Date",
     "mobile.appointmentTime": "Time",
     "mobile.appointmentService": "Service",
@@ -1327,6 +1353,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockDelete": "Delete",
     "mobile.personalBlockOverlap":
       "This time overlaps an existing booking or block.",
+    "mobile.personalBlockCreated": "Personal block added",
+    "mobile.personalBlockDeleted": "Personal block deleted",
+    "mobile.datePickerChoose": "Choose a date",
+    "mobile.datePickerToday": "Today",
+    "mobile.datePickerPreviousMonth": "Previous month",
+    "mobile.datePickerNextMonth": "Next month",
     "mobile.services": "Services",
     "mobile.servicesDescription":
       "Manage the services, prices, and booking durations you offer.",

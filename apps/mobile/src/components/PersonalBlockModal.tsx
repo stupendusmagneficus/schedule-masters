@@ -1,4 +1,4 @@
-import type { MessageKey } from "@schedule-app/i18n";
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -24,6 +24,7 @@ type PersonalBlockModalProps = {
   readonly error: string | null;
   readonly initialDate: string;
   readonly isSaving: boolean;
+  readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onSave: (draft: PersonalBlockDraft) => Promise<void>;
   readonly t: (key: MessageKey) => string;
@@ -34,6 +35,7 @@ export function PersonalBlockModal({
   error,
   initialDate,
   isSaving,
+  locale,
   onClose,
   onSave,
   t,
@@ -111,31 +113,37 @@ export function PersonalBlockModal({
           </Text>
           <DateTimePickerField
             label={t("mobile.personalBlockDate")}
+            locale={locale}
             mode="date"
             onChange={(date) => setDraft((current) => ({ ...current, date }))}
             placeholder={t("mobile.personalBlockDatePlaceholder")}
+            t={t}
             value={draft.date}
           />
           <View style={styles.timeRow}>
             <View style={styles.timeField}>
               <DateTimePickerField
                 label={t("mobile.personalBlockStart")}
+                locale={locale}
                 mode="time"
                 onChange={(startTime) =>
                   setDraft((current) => ({ ...current, startTime }))
                 }
                 placeholder={t("mobile.personalBlockTimePlaceholder")}
+                t={t}
                 value={draft.startTime}
               />
             </View>
             <View style={styles.timeField}>
               <DateTimePickerField
                 label={t("mobile.personalBlockEnd")}
+                locale={locale}
                 mode="time"
                 onChange={(endTime) =>
                   setDraft((current) => ({ ...current, endTime }))
                 }
                 placeholder={t("mobile.personalBlockTimePlaceholder")}
+                t={t}
                 value={draft.endTime}
               />
             </View>
@@ -208,20 +216,21 @@ const styles = StyleSheet.create({
   description: {
     ...typography.body,
     color: colors.secondaryText,
-    marginBottom: 8,
   },
   disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginBottom: 8 },
-  field: { gap: 6, marginTop: 16 },
-  form: { padding: 20, paddingBottom: 32 },
+  field: { gap: 6 },
+  form: { gap: 18, padding: 20, paddingBottom: 32 },
   input: {
     ...typography.body,
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     color: colors.primaryText,
-    minHeight: 44,
+    height: 48,
+    paddingVertical: 0,
     paddingHorizontal: 14,
+    textAlignVertical: "center",
   },
   label: {
     ...typography.caption,

@@ -1,6 +1,12 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import {
+  getIntlLocale,
+  type MessageKey,
+  type SupportedLocale,
+} from "@schedule-app/i18n";
 import { type ComponentProps, useState } from "react";
 import {
   Platform,
@@ -13,12 +19,19 @@ import {
 
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import {
+  formatDateFieldValue,
+  serializeDateFieldValue,
+} from "../utils/dateFieldValue";
+import { CalendarDatePickerSheet } from "./CalendarDatePickerSheet";
 
 type DateTimePickerFieldProps = {
   readonly label: string;
+  readonly locale: SupportedLocale;
   readonly mode: "date" | "time";
   readonly onChange: (value: string) => void;
   readonly placeholder: string;
+  readonly t: (key: MessageKey) => string;
   readonly value: string;
 };
 
@@ -28,18 +41,25 @@ type WebPickerInputProps = ComponentProps<typeof TextInput> & {
 
 export function DateTimePickerField({
   label,
+  locale,
   mode,
   onChange,
   placeholder,
+  t,
   value,
 }: DateTimePickerFieldProps) {
   const [isOpen, setOpen] = useState(false);
+  const [draftDate, setDraftDate] = useState(() => parseValue(value, "date"));
+  const displayValue =
+    mode === "date" ? formatDateFieldValue(value, locale) : value;
 
   function handleChange(event: DateTimePickerEvent, selectedDate?: Date) {
     setOpen(false);
     if (event.type === "dismissed" || !selectedDate) return;
     onChange(
-      mode === "date" ? formatDate(selectedDate) : formatTime(selectedDate),
+      mode === "date"
+        ? serializeDateFieldValue(selectedDate)
+        : formatTime(selectedDate),
     );
   }
 
@@ -66,16 +86,51 @@ export function DateTimePickerField({
       <Pressable
         accessibilityLabel={label}
         accessibilityRole="button"
-        onPress={() => setOpen(true)}
-        style={styles.input}
+        accessibilityValue={{ text: displayValue }}
+        onPress={() => {
+          if (Platform.OS === "ios" && mode === "date") {
+            setDraftDate(parseValue(value, "date"));
+          }
+          setOpen(true);
+        }}
+        style={({ pressed }) => [styles.input, pressed && styles.pressed]}
       >
-        <Text style={value ? styles.value : styles.placeholder}>
-          {value || placeholder}
+        <Text
+          style={displayValue ? styles.value : styles.placeholder}
+          numberOfLines={1}
+        >
+          {displayValue || placeholder}
         </Text>
+        {mode === "date" ? (
+          <MaterialCommunityIcons
+            color={colors.secondaryText}
+            name="calendar-month-outline"
+            size={20}
+          />
+        ) : null}
       </Pressable>
-      {isOpen ? (
+      {isOpen && Platform.OS === "ios" && mode === "date" ? (
+        <CalendarDatePickerSheet
+          initialDate={draftDate}
+          locale={locale}
+          onCancel={() => setOpen(false)}
+          onConfirm={(date) => {
+            onChange(serializeDateFieldValue(date));
+            setOpen(false);
+          }}
+          t={t}
+        />
+      ) : null}
+      {isOpen && !(Platform.OS === "ios" && mode === "date") ? (
         <DateTimePicker
-          display="spinner"
+          display={
+            mode === "date"
+              ? "default"
+              : Platform.OS === "ios"
+                ? "spinner"
+                : "default"
+          }
+          locale={getIntlLocale(locale)}
           mode={mode}
           onChange={handleChange}
           value={parseValue(value, mode)}
@@ -102,14 +157,6 @@ function parseValue(value: string, mode: "date" | "time") {
   return date;
 }
 
-function formatDate(value: Date) {
-  return [value.getFullYear(), value.getMonth() + 1, value.getDate()]
-    .map((part, index) =>
-      index === 0 ? String(part) : String(part).padStart(2, "0"),
-    )
-    .join("-");
-}
-
 function formatTime(value: Date) {
   return `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`;
 }
@@ -117,13 +164,16 @@ function formatTime(value: Date) {
 const styles = StyleSheet.create({
   field: { gap: 8 },
   input: {
+    alignItems: "center",
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: "center",
-    minHeight: 48,
+    flexDirection: "row",
+    height: 48,
+    justifyContent: "space-between",
     paddingHorizontal: 16,
   },
+  pressed: { backgroundColor: colors.subtleSurface },
   label: {
     ...typography.caption,
     color: colors.primaryText,

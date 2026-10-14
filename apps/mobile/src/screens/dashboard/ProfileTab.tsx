@@ -2,7 +2,7 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
+import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { InfoCard } from "../../components/InfoCard";
 import { LocalePicker } from "../../components/LocalePicker";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
@@ -20,6 +20,7 @@ type ProfileTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly isSigningOut: boolean;
   readonly onLocaleChange: (locale: DashboardTabProps["locale"]) => void;
+  readonly onClose: () => void;
   readonly onOpenBookingLink: () => void;
   readonly onSignOut: () => void;
   readonly onWorkspaceSaved: (draft: WorkspaceSettingsDraft) => void;
@@ -36,6 +37,7 @@ export function ProfileTab({
   isSigningOut,
   locale,
   onLocaleChange,
+  onClose,
   onOpenBookingLink,
   onSignOut,
   onWorkspaceSaved,
@@ -49,10 +51,17 @@ export function ProfileTab({
     useState(false);
   return (
     <View style={styles.content}>
-      <View>
-        <Text style={styles.eyebrow}>{t("mobile.profile")}</Text>
-        <Text style={styles.title}>{workspace.name}</Text>
-        <Text style={styles.helper}>{workspace.timezone}</Text>
+      <View style={styles.profileHeading}>
+        <View style={styles.profileHeadingCopy}>
+          <Text style={styles.eyebrow}>{t("mobile.profile")}</Text>
+          <Text style={styles.title}>{workspace.name}</Text>
+          <Text style={styles.helper}>{workspace.timezone}</Text>
+        </View>
+        <DashboardHeaderAction
+          accessibilityLabel={t("common.back")}
+          icon="chevron-left"
+          onPress={onClose}
+        />
       </View>
       {canManageWorkspace && client ? (
         <InfoCard>
@@ -73,6 +82,7 @@ export function ProfileTab({
           </Pressable>
           <WorkspaceSettingsModal
             client={client}
+            locale={locale}
             onClose={() => setWorkspaceSettingsVisible(false)}
             onSaved={onWorkspaceSaved}
             t={t}
@@ -81,16 +91,16 @@ export function ProfileTab({
           />
         </InfoCard>
       ) : null}
-      <InfoCard>
-        <Text style={styles.sectionTitle}>{t("common.language")}</Text>
-        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
-      </InfoCard>
       <ServiceCatalogCard
         controller={serviceCatalog}
         editable={canManageServices}
         locale={locale}
         t={t}
       />
+      <InfoCard>
+        <Text style={styles.sectionTitle}>{t("common.language")}</Text>
+        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
+      </InfoCard>
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
         <Pressable
@@ -126,6 +136,12 @@ export function ProfileTab({
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
+  profileHeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  profileHeadingCopy: { flex: 1, gap: 2, minWidth: 0 },
   disabledButton: { opacity: 0.6 },
   eyebrow: {
     color: colors.accent,

@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getInitialManualBookingStep,
   manualBookingStepIndex,
   nextManualBookingStep,
   previousManualBookingStep,
 } from "./manualBookingFlow";
 
 describe("manual booking flow", () => {
+  it("starts with time when a customer is selected but no slot is chosen", () => {
+    expect(
+      getInitialManualBookingStep({ hasCustomer: true, hasStartsAt: false }),
+    ).toBe("time");
+  });
+
   it("moves forward without passing the review step", () => {
     expect(nextManualBookingStep("time")).toBe("customer");
     expect(nextManualBookingStep("customer")).toBe("review");

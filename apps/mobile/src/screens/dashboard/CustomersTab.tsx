@@ -14,6 +14,7 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
+import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
@@ -29,9 +30,11 @@ import type { DashboardTabProps } from "./types";
 
 type CustomersTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
+  readonly onOpenProfile: () => void;
   readonly onCreateBooking: (customer: CustomerProfile) => void;
   readonly onSelectAppointment: (appointment: MasterAppointment) => void;
   readonly workspace: Workspace;
+  readonly visible: boolean;
 };
 
 const segmentOrder: readonly CustomerSegment[] = [
@@ -43,10 +46,12 @@ const segmentOrder: readonly CustomerSegment[] = [
 export function CustomersTab({
   client,
   locale,
+  onOpenProfile,
   onCreateBooking,
   onSelectAppointment,
   t,
   workspace,
+  visible,
 }: CustomersTabProps) {
   const [search, setSearch] = useState("");
   const [activeSegment, setActiveSegment] = useState<CustomerSegment | "all">(
@@ -76,7 +81,7 @@ export function CustomersTab({
 
   if (selected) {
     return (
-      <View style={styles.content}>
+      <View style={[styles.content, !visible && styles.hidden]}>
         <Pressable
           accessibilityRole="button"
           onPress={() => directory.selectCustomer(null)}
@@ -84,14 +89,21 @@ export function CustomersTab({
         >
           <Text style={styles.backText}>‹ {t("mobile.customers")}</Text>
         </Pressable>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("mobile.customers")}</Text>
-          <Text accessibilityRole="header" style={styles.title}>
-            {selected.name}
-          </Text>
-          <Text style={styles.helper}>
-            {t("mobile.customerVisitCount")}: {selected.completed_visits}
-          </Text>
+        <View style={styles.customerHeading}>
+          <View style={styles.header}>
+            <Text style={styles.eyebrow}>{t("mobile.customers")}</Text>
+            <Text accessibilityRole="header" style={styles.title}>
+              {selected.name}
+            </Text>
+            <Text style={styles.helper}>
+              {t("mobile.customerVisitCount")}: {selected.completed_visits}
+            </Text>
+          </View>
+          <DashboardHeaderAction
+            accessibilityLabel={t("mobile.profile")}
+            icon="account-circle-outline"
+            onPress={onOpenProfile}
+          />
         </View>
         <Pressable
           accessibilityRole="button"
@@ -180,12 +192,19 @@ export function CustomersTab({
   }
 
   return (
-    <View style={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>{workspace.name}</Text>
-        <Text accessibilityRole="header" style={styles.title}>
-          {t("mobile.customers")}
-        </Text>
+    <View style={[styles.content, !visible && styles.hidden]}>
+      <View style={styles.customerHeading}>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>{workspace.name}</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            {t("mobile.customers")}
+          </Text>
+        </View>
+        <DashboardHeaderAction
+          accessibilityLabel={t("mobile.profile")}
+          icon="account-circle-outline"
+          onPress={onOpenProfile}
+        />
       </View>
       <TextInput
         accessibilityLabel={t("mobile.customerSearch")}
@@ -341,6 +360,11 @@ const styles = StyleSheet.create({
   backText: { ...typography.label, color: colors.accent, fontWeight: "700" },
   body: { ...typography.body, color: colors.primaryText },
   content: { gap: 14 },
+  customerHeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
   customerCopy: { flex: 1, gap: 3, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
   customerRow: { alignItems: "center", flexDirection: "row", gap: 10 },
@@ -351,8 +375,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     ...typography.eyebrow,
   },
-  header: { gap: 2 },
+  header: { flex: 1, gap: 2, minWidth: 0 },
   helper: { ...typography.body, color: colors.secondaryText },
+  hidden: { display: "none" },
   label: { ...typography.label, color: colors.secondaryText, marginBottom: 4 },
   note: {
     borderTopColor: colors.borderSubtle,
@@ -367,6 +392,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 16,
+    textAlignVertical: "center",
   },
   primaryButtonText: {
     ...typography.label,
@@ -383,6 +409,7 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     minHeight: 48,
     paddingHorizontal: 16,
+    textAlignVertical: "center",
   },
   sectionHeader: {
     alignItems: "center",
