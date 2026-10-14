@@ -1,11 +1,19 @@
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import type {
   AppointmentStatus,
   MasterAppointment,
 } from "../features/appointments/manualBooking";
+import { parseAppointmentPayment } from "../features/finance/appointmentPayment";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import {
@@ -22,6 +30,7 @@ type AppointmentDetailsModalProps = {
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onStatusChange: (status: AppointmentStatus) => Promise<void>;
+  readonly onPaymentSave?: (amount: number) => Promise<boolean>;
   readonly onShare?: (customerConsentConfirmed: boolean) => Promise<boolean>;
   readonly t: (key: MessageKey) => string;
   readonly timezone: string;
@@ -35,6 +44,7 @@ export function AppointmentDetailsModal({
   locale,
   onClose,
   onStatusChange,
+  onPaymentSave,
   t,
   timezone,
   onShare,
@@ -44,6 +54,8 @@ export function AppointmentDetailsModal({
   const [shareState, setShareState] = useState<"idle" | "opened" | "failed">(
     "idle",
   );
+  const [paymentDraft, setPaymentDraft] = useState<string | null>(null);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const actions = appointment ? getStatusActions(appointment.status, t) : [];
 
   return (
@@ -115,6 +127,75 @@ export function AppointmentDetailsModal({
                 />
               </View>
             </InfoCard>
+
+            {appointment.status === "completed" && onPaymentSave ? (
+              <InfoCard>
+                <Text style={styles.sectionTitle}>
+                  {t("mobile.paymentReceived")}
+                </Text>
+                <Text style={styles.helper}>
+                  {t("mobile.paymentAmountHint")}:{" "}
+                  {formatCurrency(
+                    Number(appointment.price_amount),
+                    locale,
+                    appointment.currency.trim(),
+                  )}
+                </Text>
+                <TextInput
+                  accessibilityLabel={t("mobile.paymentReceived")}
+                  keyboardType="decimal-pad"
+                  onChangeText={(value) => {
+                    setPaymentDraft(value);
+                    setPaymentMessage(null);
+                  }}
+                  placeholder="0"
+                  style={styles.paymentInput}
+                  value={paymentDraft ?? String(appointment.paid_amount)}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={isSaving}
+                  onPress={async () => {
+                    const amount = parseAppointmentPayment(
+                      paymentDraft ?? String(appointment.paid_amount),
+                      Number(appointment.price_amount),
+                    );
+                    if (amount === null) {
+                      setPaymentMessage(t("mobile.paymentAmountInvalid"));
+                      return;
+                    }
+                    const saved = await onPaymentSave(amount);
+                    if (saved) {
+                      setPaymentDraft(null);
+                      setPaymentMessage(t("mobile.paymentSaved"));
+                    } else {
+                      setPaymentMessage(t("mobile.paymentSaveFailed"));
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    styles.action,
+                    isSaving && styles.disabled,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.actionText}>
+                    {t("mobile.paymentSave")}
+                  </Text>
+                </Pressable>
+                {paymentMessage ? (
+                  <Text
+                    accessibilityRole="alert"
+                    style={
+                      paymentMessage === t("mobile.paymentSaved")
+                        ? styles.helper
+                        : styles.error
+                    }
+                  >
+                    {paymentMessage}
+                  </Text>
+                ) : null}
+              </InfoCard>
+            ) : null}
 
             <InfoCard>
               <Text style={styles.sectionTitle}>
@@ -336,6 +417,16 @@ const styles = StyleSheet.create({
   headerCopy: { flex: 1, gap: 4 },
   helper: { ...typography.body, color: colors.secondaryText },
   pressed: { opacity: 0.82 },
+  paymentInput: {
+    ...typography.body,
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: 1,
+    color: colors.primaryText,
+    marginVertical: 12,
+    minHeight: 52,
+    paddingHorizontal: 16,
+  },
   sectionTitle: {
     ...typography.section,
     color: colors.primaryText,

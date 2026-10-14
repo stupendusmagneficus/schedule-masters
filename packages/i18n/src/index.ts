@@ -221,6 +221,33 @@ export type MessageKey =
   | "mobile.manualBookingLoadFailed"
   | "mobile.bookings"
   | "mobile.expectedRevenue"
+  | "mobile.finances"
+  | "mobile.financeSummaryTitle"
+  | "mobile.financeIncome"
+  | "mobile.financeActual"
+  | "mobile.financeActualDescription"
+  | "mobile.financeProfitUnavailable"
+  | "mobile.financeAppointments"
+  | "mobile.financePreviousMonth"
+  | "mobile.financeNextMonth"
+  | "mobile.financeExpected"
+  | "mobile.financeExpectedDescription"
+  | "mobile.financeCompletedAppointments"
+  | "mobile.financeUpcomingAppointments"
+  | "mobile.financeCanceledAppointments"
+  | "mobile.financeNoShowAppointments"
+  | "mobile.financeEmpty"
+  | "mobile.financeLoadFailed"
+  | "mobile.financeRetry"
+  | "mobile.financeNewCustomers"
+  | "mobile.financeReturningCustomers"
+  | "mobile.financeBookedHours"
+  | "mobile.paymentReceived"
+  | "mobile.paymentAmountHint"
+  | "mobile.paymentAmountInvalid"
+  | "mobile.paymentSave"
+  | "mobile.paymentSaved"
+  | "mobile.paymentSaveFailed"
   | "mobile.nextBooking"
   | "mobile.noBookingsToday"
   | "mobile.daySchedule"
@@ -580,6 +607,36 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось загрузить клиентов или свободные окна.",
     "mobile.bookings": "Записи",
     "mobile.expectedRevenue": "Ожидаемая выручка",
+    "mobile.finances": "Финансы",
+    "mobile.financeSummaryTitle": "Сводка за месяц",
+    "mobile.financeIncome": "Сумма по записям",
+    "mobile.financeActual": "Получено",
+    "mobile.financeActualDescription": "Сумма оплаты, указанная мастером",
+    "mobile.financeProfitUnavailable":
+      "Это не прибыль: расходы здесь не учитываются.",
+    "mobile.financeAppointments": "Записи",
+    "mobile.financePreviousMonth": "Предыдущий месяц",
+    "mobile.financeNextMonth": "Следующий месяц",
+    "mobile.financeExpected": "Ожидается",
+    "mobile.financeExpectedDescription":
+      "Будущие записи по цене услуг; оплата не подтверждена.",
+    "mobile.financeCompletedAppointments": "Состоявшиеся записи",
+    "mobile.financeUpcomingAppointments": "Предстоящие записи",
+    "mobile.financeCanceledAppointments": "Отменённые записи",
+    "mobile.financeNoShowAppointments": "Неявки",
+    "mobile.financeEmpty": "За этот месяц записей нет.",
+    "mobile.financeLoadFailed": "Не удалось загрузить сводку за месяц.",
+    "mobile.financeRetry": "Повторить",
+    "mobile.financeNewCustomers": "Новые клиенты",
+    "mobile.financeReturningCustomers": "Повторные клиенты",
+    "mobile.financeBookedHours": "Занято часов",
+    "mobile.paymentReceived": "Получено за запись",
+    "mobile.paymentAmountHint": "Цена услуги",
+    "mobile.paymentAmountInvalid":
+      "Введите сумму от 0 до цены услуги (до 2 знаков после запятой).",
+    "mobile.paymentSave": "Сохранить оплату",
+    "mobile.paymentSaved": "Оплата сохранена",
+    "mobile.paymentSaveFailed": "Не удалось сохранить оплату.",
     "mobile.nextBooking": "Следующая запись",
     "mobile.noBookingsToday": "На сегодня записей нет.",
     "mobile.daySchedule": "Расписание дня",
@@ -951,6 +1008,36 @@ const messages: Record<SupportedLocale, Messages> = {
       "Nepodařilo se načíst klienty nebo volné termíny.",
     "mobile.bookings": "Rezervace",
     "mobile.expectedRevenue": "Očekávané tržby",
+    "mobile.finances": "Finance",
+    "mobile.financeSummaryTitle": "Měsíční přehled",
+    "mobile.financeIncome": "Částky podle rezervací",
+    "mobile.financeActual": "Přijato",
+    "mobile.financeActualDescription": "Částka platby zadaná poskytovatelem",
+    "mobile.financeProfitUnavailable":
+      "Nejde o zisk: výdaje se zde nezohledňují.",
+    "mobile.financeAppointments": "Rezervace",
+    "mobile.financePreviousMonth": "Předchozí měsíc",
+    "mobile.financeNextMonth": "Následující měsíc",
+    "mobile.financeExpected": "Očekává se",
+    "mobile.financeExpectedDescription":
+      "Budoucí rezervace podle ceny služby; platba není potvrzena.",
+    "mobile.financeCompletedAppointments": "Dokončené rezervace",
+    "mobile.financeUpcomingAppointments": "Nadcházející rezervace",
+    "mobile.financeCanceledAppointments": "Zrušené rezervace",
+    "mobile.financeNoShowAppointments": "Nedostavení se",
+    "mobile.financeEmpty": "Pro tento měsíc nejsou žádné rezervace.",
+    "mobile.financeLoadFailed": "Měsíční přehled se nepodařilo načíst.",
+    "mobile.financeRetry": "Zkusit znovu",
+    "mobile.financeNewCustomers": "Noví klienti",
+    "mobile.financeReturningCustomers": "Vracející se klienti",
+    "mobile.financeBookedHours": "Obsazené hodiny",
+    "mobile.paymentReceived": "Přijato za rezervaci",
+    "mobile.paymentAmountHint": "Cena služby",
+    "mobile.paymentAmountInvalid":
+      "Zadejte částku od 0 do ceny služby (max. 2 desetinná místa).",
+    "mobile.paymentSave": "Uložit platbu",
+    "mobile.paymentSaved": "Platba uložena",
+    "mobile.paymentSaveFailed": "Platbu se nepodařilo uložit.",
     "mobile.nextBooking": "Další rezervace",
     "mobile.noBookingsToday": "Na dnešek nemáte žádné rezervace.",
     "mobile.daySchedule": "Denní rozvrh",
@@ -1322,6 +1409,36 @@ const messages: Record<SupportedLocale, Messages> = {
       "Customers or available times could not be loaded.",
     "mobile.bookings": "Bookings",
     "mobile.expectedRevenue": "Expected revenue",
+    "mobile.finances": "Finances",
+    "mobile.financeSummaryTitle": "Monthly overview",
+    "mobile.financeIncome": "Booking amounts",
+    "mobile.financeActual": "Received",
+    "mobile.financeActualDescription": "Payment amount entered by the provider",
+    "mobile.financeProfitUnavailable":
+      "This is not profit: expenses are not included.",
+    "mobile.financeAppointments": "Bookings",
+    "mobile.financePreviousMonth": "Previous month",
+    "mobile.financeNextMonth": "Next month",
+    "mobile.financeExpected": "Expected",
+    "mobile.financeExpectedDescription":
+      "Upcoming bookings at service price; payment is not confirmed.",
+    "mobile.financeCompletedAppointments": "Completed bookings",
+    "mobile.financeUpcomingAppointments": "Upcoming bookings",
+    "mobile.financeCanceledAppointments": "Canceled bookings",
+    "mobile.financeNoShowAppointments": "No-shows",
+    "mobile.financeEmpty": "There are no bookings for this month.",
+    "mobile.financeLoadFailed": "Could not load the monthly overview.",
+    "mobile.financeRetry": "Retry",
+    "mobile.financeNewCustomers": "New customers",
+    "mobile.financeReturningCustomers": "Returning customers",
+    "mobile.financeBookedHours": "Booked hours",
+    "mobile.paymentReceived": "Received for appointment",
+    "mobile.paymentAmountHint": "Service price",
+    "mobile.paymentAmountInvalid":
+      "Enter an amount from 0 up to the service price (2 decimal places max).",
+    "mobile.paymentSave": "Save payment",
+    "mobile.paymentSaved": "Payment saved",
+    "mobile.paymentSaveFailed": "Could not save payment.",
     "mobile.nextBooking": "Next booking",
     "mobile.noBookingsToday": "There are no bookings today.",
     "mobile.daySchedule": "Day schedule",

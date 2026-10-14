@@ -898,6 +898,14 @@ describe("Supabase public booking contract", () => {
       if (!appointmentId)
         throw new Error("Lifecycle appointment was not created");
 
+      const paymentBeforeCompletion = await user.client.rpc(
+        "set_master_appointment_paid_amount",
+        { p_appointment_id: appointmentId, p_paid_amount: 350 },
+      );
+      expect(paymentBeforeCompletion.error?.message).toContain(
+        "completed appointments",
+      );
+
       const confirmed = await user.client.rpc("set_appointment_status", {
         p_appointment_id: appointmentId,
         p_status: "confirmed",
@@ -917,6 +925,40 @@ describe("Supabase public booking contract", () => {
         id: appointmentId,
         status: "completed",
       });
+
+      const payment = await user.client.rpc(
+        "set_master_appointment_paid_amount",
+        { p_appointment_id: appointmentId, p_paid_amount: 350 },
+      );
+      expect(payment.error).toBeNull();
+      expect(payment.data).toMatchObject({
+        id: appointmentId,
+        paid_amount: 350,
+      });
+      const overpayment = await user.client.rpc(
+        "set_master_appointment_paid_amount",
+        { p_appointment_id: appointmentId, p_paid_amount: 701 },
+      );
+      expect(overpayment.data).toBeNull();
+      expect(overpayment.error?.message).toContain("Payment amount");
+      const overPrecision = await user.client.rpc(
+        "set_master_appointment_paid_amount",
+        { p_appointment_id: appointmentId, p_paid_amount: 350.123 },
+      );
+      expect(overPrecision.error?.message).toContain("Payment amount");
+
+      const outsider = await createAuthenticatedTestUser({
+        admin,
+        email: `status-outsider-${suffix}@example.test`,
+        password: `Test-${suffix}-Outsider!`,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const crossWorkspacePayment = await outsider.client.rpc(
+        "set_master_appointment_paid_amount",
+        { p_appointment_id: appointmentId, p_paid_amount: 350 },
+      );
+      expect(crossWorkspacePayment.error?.code).toBe("42501");
 
       const invalidTransition = await user.client.rpc(
         "set_appointment_status",
@@ -959,12 +1001,19 @@ describe("Supabase public booking contract", () => {
       expect(listed.error).toBeNull();
       expect(listed.data).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: appointmentId, status: "completed" }),
+          expect.objectContaining({
+            id: appointmentId,
+            is_new_customer: true,
+            is_returning_customer: false,
+            paid_amount: 350,
+            status: "completed",
+          }),
         ]),
       );
 
       await admin.from("workspaces").delete().eq("id", workspaceId);
       await admin.auth.admin.deleteUser(user.user.id);
+      await admin.auth.admin.deleteUser(outsider.user.id);
     },
   );
 
