@@ -26,7 +26,7 @@ export function useMasterAppointments({
     if (!client) {
       setAppointments([]);
       setLoading(false);
-      return;
+      return [];
     }
 
     setLoading(true);
@@ -34,13 +34,19 @@ export function useMasterAppointments({
     try {
       const fromDate = getTodayCalendarDate(timezone);
       const toDate = addCalendarDays(fromDate, 7);
-      setAppointments(
-        await listMasterAppointments(client, workspaceId, fromDate, toDate),
+      const nextAppointments = await listMasterAppointments(
+        client,
+        workspaceId,
+        fromDate,
+        toDate,
       );
+      setAppointments(nextAppointments);
+      return nextAppointments;
     } catch (nextError) {
       setError(
         nextError instanceof Error ? nextError : new Error("Unknown error"),
       );
+      return [];
     } finally {
       setLoading(false);
     }

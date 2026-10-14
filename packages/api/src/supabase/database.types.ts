@@ -157,6 +157,7 @@ export type Database = {
           id: string
           master_note: string | null
           occupied_range: unknown
+          paid_amount: number
           price_amount_snapshot: number
           service_id: string | null
           service_name_snapshot: string
@@ -183,6 +184,7 @@ export type Database = {
           id?: string
           master_note?: string | null
           occupied_range: unknown
+          paid_amount?: number
           price_amount_snapshot: number
           service_id?: string | null
           service_name_snapshot: string
@@ -209,6 +211,7 @@ export type Database = {
           id?: string
           master_note?: string | null
           occupied_range?: unknown
+          paid_amount?: number
           price_amount_snapshot?: number
           service_id?: string | null
           service_name_snapshot?: string
@@ -802,6 +805,9 @@ export type Database = {
           duration_minutes: number
           ends_at: string
           id: string
+          is_new_customer: boolean
+          is_returning_customer: boolean
+          paid_amount: number
           price_amount: number
           service_name: string
           source: Database["public"]["Enums"]["appointment_source"]
@@ -839,6 +845,7 @@ export type Database = {
           duration_minutes: number
           ends_at: string
           id: string
+          paid_amount: number
           price_amount: number
           service_name: string
           source: Database["public"]["Enums"]["appointment_source"]
@@ -873,6 +880,10 @@ export type Database = {
           p_reason?: string
           p_status: Database["public"]["Enums"]["appointment_status"]
         }
+        Returns: Json
+      }
+      set_master_appointment_paid_amount: {
+        Args: { p_appointment_id: string; p_paid_amount: number }
         Returns: Json
       }
       update_customer_appointment: {

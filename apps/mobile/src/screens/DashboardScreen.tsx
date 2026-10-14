@@ -20,6 +20,7 @@ import type { DemoData } from "../demo/types";
 import {
   type AppointmentStatus,
   type MasterAppointment,
+  setMasterAppointmentPaidAmount,
   setMasterAppointmentStatus,
 } from "../features/appointments/manualBooking";
 import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
@@ -40,6 +41,7 @@ import {
 } from "../utils/bookingUrl";
 import { CalendarTab } from "./dashboard/CalendarTab";
 import { CustomersTab } from "./dashboard/CustomersTab";
+import { FinancesTab } from "./dashboard/FinancesTab";
 import { ProfileTab } from "./dashboard/ProfileTab";
 import { TodayTab } from "./dashboard/TodayTab";
 
@@ -126,6 +128,7 @@ export function DashboardScreen({
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     customers: t("mobile.customers"),
+    finances: t("mobile.finances"),
     today: t("mobile.today"),
   };
 
@@ -143,12 +146,47 @@ export function DashboardScreen({
     setAppointmentActionError(false);
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
-      await reloadAppointments();
+      const refreshed = await reloadAppointments();
       await calendar.reload();
-      setSelectedAppointment(null);
-      setFeedback(t("mobile.appointmentStatusUpdated"));
+      if (status === "completed") {
+        const updated = refreshed?.find(
+          ({ id }) => id === selectedAppointment.id,
+        );
+        setSelectedAppointment(updated ?? { ...selectedAppointment, status });
+      } else {
+        setSelectedAppointment(null);
+        setFeedback(t("mobile.appointmentStatusUpdated"));
+      }
     } catch {
       setAppointmentActionError(true);
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
+
+  async function saveAppointmentPayment(amount: number): Promise<boolean> {
+    if (!client || !selectedAppointment) return false;
+    setUpdatingAppointment(true);
+    setAppointmentActionError(false);
+    try {
+      await setMasterAppointmentPaidAmount(
+        client,
+        selectedAppointment.id,
+        amount,
+      );
+      const refreshed = await reloadAppointments();
+      await calendar.reload();
+      setSelectedAppointment(
+        refreshed?.find(({ id }) => id === selectedAppointment.id) ?? {
+          ...selectedAppointment,
+          paid_amount: amount,
+        },
+      );
+      setFeedback(t("mobile.paymentSaved"));
+      return true;
+    } catch {
+      setAppointmentActionError(true);
+      return false;
     } finally {
       setUpdatingAppointment(false);
     }
@@ -245,6 +283,16 @@ export function DashboardScreen({
                 ? openManualBooking(date, startsAt)
                 : setNewBookingNoticeVisible(true)
             }
+            t={t}
+            workspace={workspace}
+          />
+        )}
+        {activeTab === "finances" && (
+          <FinancesTab
+            client={client}
+            demoData={demoData}
+            locale={locale}
+            onOpenProfile={openProfile}
             t={t}
             workspace={workspace}
           />
@@ -364,6 +412,7 @@ export function DashboardScreen({
           }
         }}
         onStatusChange={updateAppointmentStatus}
+        onPaymentSave={saveAppointmentPayment}
         onShare={client ? shareAppointmentLink : undefined}
         t={t}
         timezone={workspace.timezone}

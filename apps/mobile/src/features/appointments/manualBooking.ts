@@ -3,8 +3,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ManualBookingCustomer =
   Database["public"]["Functions"]["list_master_customers"]["Returns"][number];
-export type MasterAppointment =
+type MasterAppointmentRow =
   Database["public"]["Functions"]["list_master_appointments"]["Returns"][number];
+export type MasterAppointment = Omit<
+  MasterAppointmentRow,
+  "is_new_customer" | "is_returning_customer"
+> & {
+  readonly is_new_customer?: boolean;
+  readonly is_returning_customer?: boolean;
+};
 export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];
 export type MonthAvailableSlot =
@@ -177,6 +184,26 @@ export async function setMasterAppointmentStatus(
   }
 
   return { id: response.id, status: response.status as AppointmentStatus };
+}
+
+export async function setMasterAppointmentPaidAmount(
+  client: ManualBookingClient,
+  appointmentId: string,
+  amount: number,
+): Promise<number> {
+  const { data, error } = await client.rpc(
+    "set_master_appointment_paid_amount",
+    { p_appointment_id: appointmentId, p_paid_amount: amount },
+  );
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Appointment payment response is invalid");
+  }
+  const paidAmount = (data as { paid_amount?: unknown }).paid_amount;
+  if (typeof paidAmount !== "number" || !Number.isFinite(paidAmount)) {
+    throw new Error("Appointment payment response is invalid");
+  }
+  return paidAmount;
 }
 
 export function createIdempotencyKey(): string {
