@@ -55,10 +55,11 @@ test.describe("mobile web smoke", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
 
-    await expect(page.getByRole("tab")).toHaveCount(3);
+    await expect(page.getByRole("tab")).toHaveCount(4);
+    await expect(page.getByRole("tab", { name: "Finance" })).toBeVisible();
     await page.getByRole("button", { name: "Profil", exact: true }).click();
     await expect(page.getByText("Profil", { exact: true })).toBeVisible();
-    await expect(page.getByRole("tab")).toHaveCount(3);
+    await expect(page.getByRole("tab")).toHaveCount(4);
 
     await page.getByRole("button", { name: "Zpět", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();

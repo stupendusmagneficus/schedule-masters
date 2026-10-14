@@ -845,8 +845,8 @@ export type Database = {
           duration_minutes: number
           ends_at: string
           id: string
-          price_amount: number
           paid_amount: number
+          price_amount: number
           service_name: string
           source: Database["public"]["Enums"]["appointment_source"]
           starts_at: string
@@ -861,10 +861,6 @@ export type Database = {
           name: string
           phone: string
         }[]
-      }
-      set_master_appointment_paid_amount: {
-        Args: { p_appointment_id: string; p_paid_amount: number }
-        Returns: Json
       }
       record_customer_link_share: {
         Args: {
@@ -884,6 +880,10 @@ export type Database = {
           p_reason?: string
           p_status: Database["public"]["Enums"]["appointment_status"]
         }
+        Returns: Json
+      }
+      set_master_appointment_paid_amount: {
+        Args: { p_appointment_id: string; p_paid_amount: number }
         Returns: Json
       }
       update_customer_appointment: {
