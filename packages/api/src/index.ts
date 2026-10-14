@@ -2,6 +2,7 @@ export type ApiBoundary = {
   readonly name: "schedule-masters-api";
 };
 
+export type { SupabaseDatabaseClient } from "./supabase/client";
 export { createSupabaseClient } from "./supabase/client";
 export type { Database } from "./supabase/database.types";
 

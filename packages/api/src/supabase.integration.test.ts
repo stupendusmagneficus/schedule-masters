@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 import { createSupabaseClient } from "./supabase/client";
 import {
@@ -1157,6 +1157,300 @@ describe("customer directory RPC", () => {
       }
     },
     30_000,
+  );
+
+  rlsIntegrationTest(
+    "limits customer appointment links to expiring, revocable booking details",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const otherWorkspaceId = randomUUID();
+      const password = `Test-${suffix}-Password!`;
+      const owner = await createAuthenticatedTestUser({
+        admin,
+        email: `appointment-link-${suffix}@example.test`,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const otherOwner = await createAuthenticatedTestUser({
+        admin,
+        email: `appointment-link-other-${suffix}@example.test`,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+
+      await admin.from("workspaces").insert([
+        {
+          id: workspaceId,
+          name: "Appointment link studio",
+          slug: `appointment-link-${suffix}`,
+        },
+        {
+          id: otherWorkspaceId,
+          name: "Other appointment studio",
+          slug: `appointment-link-other-${suffix}`,
+        },
+      ]);
+      await admin.from("workspace_members").insert([
+        {
+          role: "owner",
+          user_id: owner.user.id,
+          workspace_id: workspaceId,
+        },
+        {
+          role: "owner",
+          user_id: otherOwner.user.id,
+          workspace_id: otherWorkspaceId,
+        },
+      ]);
+      const customer = await admin
+        .from("customers")
+        .insert({
+          email: "private@example.test",
+          name: "Private Customer",
+          phone: "+420123456789",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      const customerId = customer.data?.id;
+      expect(customer.error).toBeNull();
+      if (!customerId) throw new Error("Customer fixture was not created");
+
+      const appointment = await admin
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-03-01T11:00:00.000Z",
+          occupied_range: "[2030-03-01T10:00:00.000Z,2030-03-01T11:00:00.000Z)",
+          price_amount_snapshot: 700,
+          service_name_snapshot: "Private Service",
+          source: "master_created",
+          starts_at: "2030-03-01T10:00:00.000Z",
+          status: "pending",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      const appointmentId = appointment.data?.id;
+      expect(appointment.error).toBeNull();
+      if (!appointmentId)
+        throw new Error("Appointment fixture was not created");
+
+      const withoutConsent = await owner.client.rpc(
+        "create_customer_appointment_link",
+        {
+          p_appointment_id: appointmentId,
+          p_customer_consent_confirmed: false,
+        },
+      );
+      expect(withoutConsent.error?.message).toContain("consent is required");
+      const crossWorkspaceLink = await otherOwner.client.rpc(
+        "create_customer_appointment_link",
+        { p_appointment_id: appointmentId, p_customer_consent_confirmed: true },
+      );
+      expect(crossWorkspaceLink.data).toBeNull();
+      expect(crossWorkspaceLink.error?.message).toContain(
+        "Appointment access denied",
+      );
+
+      const createdLink = await owner.client.rpc(
+        "create_customer_appointment_link",
+        { p_appointment_id: appointmentId, p_customer_consent_confirmed: true },
+      );
+      expect(createdLink.error).toBeNull();
+      const token = (createdLink.data as { token?: string } | null)?.token;
+      expect(token).toMatch(/^[0-9a-f]{128}$/);
+      if (!token) throw new Error("Appointment link token was not created");
+
+      const storedToken = await admin
+        .from("appointment_access_tokens")
+        .select("token_hash, expires_at, revoked_at")
+        .eq("appointment_id", appointmentId)
+        .single();
+      expect(storedToken.error).toBeNull();
+      expect(storedToken.data?.token_hash).not.toBe(token);
+      expect(storedToken.data?.token_hash).toMatch(/^[0-9a-f]{64}$/);
+
+      const shareOpened = await owner.client.rpc("record_customer_link_share", {
+        p_appointment_id: appointmentId,
+        p_status: "share_sheet_opened",
+      });
+      expect(shareOpened.error).toBeNull();
+      const notificationEvents = await owner.client
+        .from("appointment_notification_events")
+        .select("status, error_code, channel")
+        .eq("appointment_id", appointmentId);
+      expect(notificationEvents.error).toBeNull();
+      expect(notificationEvents.data?.map((event) => event.status)).toEqual(
+        expect.arrayContaining(["manual_required", "share_sheet_opened"]),
+      );
+      const crossWorkspaceEvents = await otherOwner.client
+        .from("appointment_notification_events")
+        .select("status")
+        .eq("appointment_id", appointmentId);
+      expect(crossWorkspaceEvents.error).toBeNull();
+      expect(crossWorkspaceEvents.data).toEqual([]);
+
+      const details = await supabase?.rpc("get_customer_appointment", {
+        p_token: token,
+      });
+      expect(details?.error).toBeNull();
+      expect(details?.data).toMatchObject({
+        canCancel: true,
+        canConfirm: true,
+        serviceName: "Private Service",
+        status: "pending",
+        workspaceName: "Appointment link studio",
+      });
+      expect(details?.data).not.toHaveProperty("customerName");
+      expect(details?.data).not.toHaveProperty("email");
+      expect(details?.data).not.toHaveProperty("phone");
+
+      const confirmed = await supabase?.rpc("update_customer_appointment", {
+        p_action: "confirm",
+        p_token: token,
+      });
+      expect(confirmed?.error).toBeNull();
+      expect(confirmed?.data).toMatchObject({ status: "confirmed" });
+      const confirmationRetry = await supabase?.rpc(
+        "update_customer_appointment",
+        { p_action: "confirm", p_token: token },
+      );
+      expect(confirmationRetry?.error).toBeNull();
+      expect(confirmationRetry?.data).toMatchObject({ status: "confirmed" });
+
+      const cancelled = await supabase?.rpc("update_customer_appointment", {
+        p_action: "cancel",
+        p_token: token,
+      });
+      expect(cancelled?.error).toBeNull();
+      expect(cancelled?.data).toMatchObject({
+        status: "cancelled_by_customer",
+      });
+      const cancellationRetry = await supabase?.rpc(
+        "update_customer_appointment",
+        { p_action: "cancel", p_token: token },
+      );
+      expect(cancellationRetry?.error).toBeNull();
+      expect(cancellationRetry?.data).toMatchObject({
+        status: "cancelled_by_customer",
+      });
+
+      const revokedDetails = await supabase?.rpc("get_customer_appointment", {
+        p_token: token,
+      });
+      expect(revokedDetails?.data).toBeNull();
+
+      const rescheduledAppointment = await admin
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-03-02T11:00:00.000Z",
+          occupied_range: "[2030-03-02T10:00:00.000Z,2030-03-02T11:00:00.000Z)",
+          price_amount_snapshot: 700,
+          service_name_snapshot: "Rescheduled Service",
+          source: "master_created",
+          starts_at: "2030-03-02T10:00:00.000Z",
+          status: "confirmed",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      const rescheduledId = rescheduledAppointment.data?.id;
+      expect(rescheduledAppointment.error).toBeNull();
+      if (!rescheduledId) {
+        throw new Error("Rescheduled appointment fixture was not created");
+      }
+      const rescheduleLink = await owner.client.rpc(
+        "create_customer_appointment_link",
+        { p_appointment_id: rescheduledId, p_customer_consent_confirmed: true },
+      );
+      const rescheduleToken = (rescheduleLink.data as { token?: string } | null)
+        ?.token;
+      expect(rescheduleLink.error).toBeNull();
+      expect(rescheduleToken).toMatch(/^[0-9a-f]{128}$/);
+      await admin
+        .from("appointments")
+        .update({
+          ends_at: "2030-03-04T11:00:00.000Z",
+          starts_at: "2030-03-04T10:00:00.000Z",
+        })
+        .eq("id", rescheduledId);
+      const staleScheduleDetails = await supabase?.rpc(
+        "get_customer_appointment",
+        { p_token: rescheduleToken as string },
+      );
+      expect(staleScheduleDetails?.data).toBeNull();
+
+      const expiringAppointment = await admin
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-03-05T11:00:00.000Z",
+          occupied_range: "[2030-03-05T10:00:00.000Z,2030-03-05T11:00:00.000Z)",
+          price_amount_snapshot: 700,
+          service_name_snapshot: "Expiring Service",
+          source: "master_created",
+          starts_at: "2030-03-05T10:00:00.000Z",
+          status: "confirmed",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      const expiringId = expiringAppointment.data?.id;
+      expect(expiringAppointment.error).toBeNull();
+      if (!expiringId)
+        throw new Error("Expiring appointment fixture is missing");
+      const expiringLink = await owner.client.rpc(
+        "create_customer_appointment_link",
+        { p_appointment_id: expiringId, p_customer_consent_confirmed: true },
+      );
+      const expiringToken = (expiringLink.data as { token?: string } | null)
+        ?.token;
+      expect(expiringLink.error).toBeNull();
+      if (!expiringToken)
+        throw new Error("Expiring link token was not created");
+      const expiringHash = createHash("sha256")
+        .update(expiringToken)
+        .digest("hex");
+      await admin
+        .from("appointment_access_tokens")
+        .update({ expires_at: new Date(Date.now() - 60_000).toISOString() })
+        .eq("token_hash", expiringHash);
+      const expiredDetails = await supabase?.rpc("get_customer_appointment", {
+        p_token: expiringToken,
+      });
+      expect(expiredDetails?.data).toBeNull();
+      const expiredAction = await supabase?.rpc("update_customer_appointment", {
+        p_action: "confirm",
+        p_token: expiringToken,
+      });
+      expect(expiredAction?.error?.message).toContain("invalid or expired");
+
+      await admin
+        .from("workspaces")
+        .delete()
+        .in("id", [workspaceId, otherWorkspaceId]);
+      await admin.auth.admin.deleteUser(owner.user.id);
+      await admin.auth.admin.deleteUser(otherOwner.user.id);
+    },
   );
 });
 

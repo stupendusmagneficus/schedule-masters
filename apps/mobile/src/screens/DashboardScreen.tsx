@@ -3,7 +3,7 @@ import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
-import { Linking, ScrollView, StyleSheet } from "react-native";
+import { Linking, ScrollView, Share, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
 import {
@@ -25,11 +25,18 @@ import { useMasterAppointments } from "../features/appointments/useMasterAppoint
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useCalendarData } from "../features/calendar/useCalendarData";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
+import {
+  createCustomerAppointmentLink,
+  recordCustomerLinkShare,
+} from "../features/notifications/customerAppointmentLink";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
-import { buildBookingUrl } from "../utils/bookingUrl";
+import {
+  buildAppointmentManagementUrl,
+  buildBookingUrl,
+} from "../utils/bookingUrl";
 import { CalendarTab } from "./dashboard/CalendarTab";
 import { CustomersTab } from "./dashboard/CustomersTab";
 import { ProfileTab } from "./dashboard/ProfileTab";
@@ -132,6 +139,48 @@ export function DashboardScreen({
       setSelectedAppointment(null);
     } catch {
       setAppointmentActionError(true);
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
+
+  async function shareAppointmentLink(consentConfirmed: boolean) {
+    if (!client || !selectedAppointment) return false;
+
+    setUpdatingAppointment(true);
+    try {
+      const { token } = await createCustomerAppointmentLink(
+        client,
+        selectedAppointment.id,
+        consentConfirmed,
+      );
+      const url = buildAppointmentManagementUrl(mobileEnv.bookingWebUrl, token);
+      try {
+        await Share.share({
+          message: url,
+          title: t("mobile.shareAppointment"),
+          url,
+        });
+      } catch {
+        await recordCustomerLinkShare(
+          client,
+          selectedAppointment.id,
+          "share_sheet_failed",
+        );
+        return false;
+      }
+      try {
+        await recordCustomerLinkShare(
+          client,
+          selectedAppointment.id,
+          "share_sheet_opened",
+        );
+      } catch {
+        // The sheet result is not delivery confirmation, so keep the truthful UI state.
+      }
+      return true;
+    } catch {
+      return false;
     } finally {
       setUpdatingAppointment(false);
     }
@@ -288,6 +337,7 @@ export function DashboardScreen({
         />
       ) : null}
       <AppointmentDetailsModal
+        key={selectedAppointment?.id ?? "closed"}
         appointment={selectedAppointment}
         error={appointmentActionError ? t("mobile.statusUpdateFailed") : null}
         isSaving={isUpdatingAppointment}
@@ -299,6 +349,7 @@ export function DashboardScreen({
           }
         }}
         onStatusChange={updateAppointmentStatus}
+        onShare={client ? shareAppointmentLink : undefined}
         t={t}
         timezone={workspace.timezone}
         visible={Boolean(selectedAppointment)}

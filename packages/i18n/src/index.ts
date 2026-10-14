@@ -130,6 +130,12 @@ export type MessageKey =
   | "mobile.markNoShow"
   | "mobile.noStatusActions"
   | "mobile.statusUpdateFailed"
+  | "mobile.shareAppointment"
+  | "mobile.shareConsent"
+  | "mobile.shareConsentRequired"
+  | "mobile.shareManualDelivery"
+  | "mobile.shareSheetOpened"
+  | "mobile.shareSheetFailed"
   | "mobile.today"
   | "mobile.calendar"
   | "mobile.customers"
@@ -298,7 +304,17 @@ export type MessageKey =
   | "booking.availableTimesForDate"
   | "booking.noSlotsForDate"
   | "booking.requiredHint"
-  | "booking.optional";
+  | "booking.optional"
+  | "booking.manageUnavailableTitle"
+  | "booking.manageUnavailable"
+  | "booking.manageDescription"
+  | "booking.manageConfirm"
+  | "booking.manageCancel"
+  | "booking.managePending"
+  | "booking.manageConfirmed"
+  | "booking.manageCancelled"
+  | "booking.manageCompleted"
+  | "booking.manageActionFailed";
 
 type Messages = Record<MessageKey, string>;
 
@@ -449,6 +465,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.markNoShow": "Отметить неявку",
     "mobile.noStatusActions": "Для этого статуса нет доступных действий.",
     "mobile.statusUpdateFailed": "Не удалось изменить статус записи.",
+    "mobile.shareAppointment": "Поделиться ссылкой для клиента",
+    "mobile.shareConsent":
+      "Клиент согласился получать сообщения об этой записи.",
+    "mobile.shareConsentRequired": "Подтвердите согласие клиента.",
+    "mobile.shareManualDelivery":
+      "Автоматическая отправка не настроена. Отправьте ссылку клиенту сами и проверьте результат.",
+    "mobile.shareSheetOpened":
+      "Окно отправки открыто. Доставка не подтверждена — проверьте приложение обмена.",
+    "mobile.shareSheetFailed":
+      "Не удалось подготовить ссылку или открыть отправку. Она не отмечена как отправленная; попробуйте ещё раз.",
     "mobile.today": "Сегодня",
     "mobile.calendar": "Календарь",
     "mobile.customers": "Клиенты",
@@ -644,6 +670,18 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.requiredHint":
       "Поля со знаком * обязательны. Email и телефон можно не заполнять.",
     "booking.optional": "необязательно",
+    "booking.manageUnavailableTitle": "Ссылка недействительна",
+    "booking.manageUnavailable":
+      "Срок ссылки истёк или запись больше недоступна. Попросите мастера прислать новую ссылку.",
+    "booking.manageDescription": "Детали вашей записи",
+    "booking.manageConfirm": "Подтвердить запись",
+    "booking.manageCancel": "Отменить запись",
+    "booking.managePending": "Ожидает подтверждения",
+    "booking.manageConfirmed": "Подтверждена",
+    "booking.manageCancelled": "Отменена",
+    "booking.manageCompleted": "Завершена",
+    "booking.manageActionFailed":
+      "Не удалось обновить запись. Попробуйте ещё раз.",
   },
   cz: {
     "common.appName": "Schedule Masters",
@@ -789,6 +827,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.markNoShow": "Označit jako nedostavení",
     "mobile.noStatusActions": "Pro tento stav nejsou dostupné žádné akce.",
     "mobile.statusUpdateFailed": "Stav rezervace se nepodařilo změnit.",
+    "mobile.shareAppointment": "Sdílet odkaz s klientem",
+    "mobile.shareConsent": "Klient souhlasil se zprávami o této rezervaci.",
+    "mobile.shareConsentRequired": "Potvrďte souhlas klienta.",
+    "mobile.shareManualDelivery":
+      "Automatické odesílání není nastavené. Odkaz odešlete sami a ověřte výsledek.",
+    "mobile.shareSheetOpened":
+      "Nabídka sdílení byla otevřena. Doručení není potvrzeno; zkontrolujte aplikaci.",
+    "mobile.shareSheetFailed":
+      "Odkaz se nepodařilo připravit nebo otevřít sdílení. Odeslání není potvrzeno; zkuste to znovu.",
     "mobile.today": "Dnes",
     "mobile.calendar": "Kalendář",
     "mobile.customers": "Klienti",
@@ -982,6 +1029,18 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.requiredHint":
       "Pole označená * jsou povinná. E-mail a telefon jsou nepovinné.",
     "booking.optional": "nepovinné",
+    "booking.manageUnavailableTitle": "Odkaz není platný",
+    "booking.manageUnavailable":
+      "Odkaz vypršel nebo rezervace již není dostupná. Požádejte mistra o nový odkaz.",
+    "booking.manageDescription": "Podrobnosti rezervace",
+    "booking.manageConfirm": "Potvrdit rezervaci",
+    "booking.manageCancel": "Zrušit rezervaci",
+    "booking.managePending": "Čeká na potvrzení",
+    "booking.manageConfirmed": "Potvrzeno",
+    "booking.manageCancelled": "Zrušeno",
+    "booking.manageCompleted": "Dokončeno",
+    "booking.manageActionFailed":
+      "Rezervaci se nepodařilo změnit. Zkuste to znovu.",
   },
   en: {
     "common.appName": "Schedule Masters",
@@ -1130,6 +1189,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.markNoShow": "Mark as no-show",
     "mobile.noStatusActions": "No actions are available for this status.",
     "mobile.statusUpdateFailed": "The booking status could not be changed.",
+    "mobile.shareAppointment": "Share customer link",
+    "mobile.shareConsent":
+      "The customer agreed to receive messages about this appointment.",
+    "mobile.shareConsentRequired": "Confirm the customer's consent.",
+    "mobile.shareManualDelivery":
+      "Automatic sending is not configured. Share the link yourself and verify delivery.",
+    "mobile.shareSheetOpened":
+      "The share sheet opened. Delivery is not confirmed; check the sharing app.",
+    "mobile.shareSheetFailed":
+      "We couldn't prepare the link or open sharing. It is not marked as sent; try again.",
     "mobile.today": "Today",
     "mobile.calendar": "Calendar",
     "mobile.customers": "Customers",
@@ -1329,6 +1398,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.requiredHint":
       "Fields marked with * are required. Email and phone are optional.",
     "booking.optional": "optional",
+    "booking.manageUnavailableTitle": "This link is unavailable",
+    "booking.manageUnavailable":
+      "The link has expired or the appointment is no longer available. Ask the professional for a new link.",
+    "booking.manageDescription": "Your appointment details",
+    "booking.manageConfirm": "Confirm booking",
+    "booking.manageCancel": "Cancel booking",
+    "booking.managePending": "Awaiting confirmation",
+    "booking.manageConfirmed": "Confirmed",
+    "booking.manageCancelled": "Cancelled",
+    "booking.manageCompleted": "Completed",
+    "booking.manageActionFailed": "We couldn't update the booking. Try again.",
   },
 };
 
