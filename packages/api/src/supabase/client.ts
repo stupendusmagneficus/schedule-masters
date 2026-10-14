@@ -9,6 +9,8 @@ export type SupabaseClientConfig = {
   readonly url: string;
 };
 
+export type SupabaseDatabaseClient = SupabaseClient<Database>;
+
 export type SupabaseStorage = {
   getItem: (key: string) => string | null | Promise<string | null>;
   removeItem: (key: string) => void | Promise<void>;
@@ -20,7 +22,7 @@ export function createSupabaseClient({
   publishableKey,
   storage,
   flowType = "implicit",
-}: SupabaseClientConfig): SupabaseClient<Database> {
+}: SupabaseClientConfig): SupabaseDatabaseClient {
   return createClient<Database>(url, publishableKey, {
     auth: {
       autoRefreshToken: true,

@@ -1,6 +1,51 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("public booking web", () => {
+  test("loads a private appointment link and confirms without exposing customer contact data", async ({
+    page,
+  }) => {
+    const actions: Record<string, unknown>[] = [];
+    await page.route("**/rest/v1/rpc/get_customer_appointment", (route) =>
+      route.fulfill({
+        json: {
+          appointmentId: "appointment-1",
+          canCancel: true,
+          canConfirm: true,
+          endsAt: "2030-01-03T10:00:00.000Z",
+          serviceName: "Manicure",
+          startsAt: "2030-01-03T09:00:00.000Z",
+          status: "pending",
+          timezone: "Europe/Prague",
+          workspaceName: "Elena Beauty",
+        },
+      }),
+    );
+    await page.route(
+      "**/rest/v1/rpc/update_customer_appointment",
+      async (route) => {
+        actions.push(route.request().postDataJSON() as Record<string, unknown>);
+        await route.fulfill({
+          json: { id: "appointment-1", status: "confirmed" },
+        });
+      },
+    );
+
+    await page.goto(`/#token=${"a".repeat(128)}`);
+
+    await expect(
+      page.getByRole("heading", { name: "Elena Beauty" }),
+    ).toBeVisible();
+    await expect(page.getByText("Private Customer")).not.toBeVisible();
+    await expect(page.getByText("private@example.test")).not.toBeVisible();
+    await page.getByRole("button", { name: "Confirm booking" }).click();
+
+    await expect(page.getByText("Confirmed", { exact: true })).toBeVisible();
+    expect(actions).toEqual([
+      { p_action: "confirm", p_token: "a".repeat(128) },
+    ]);
+    await expect(page).toHaveURL(/\/$/);
+  });
+
   test("does not present the demo workspace on a public booking URL", async ({
     page,
   }) => {

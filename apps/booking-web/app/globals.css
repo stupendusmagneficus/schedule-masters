@@ -278,6 +278,22 @@ textarea {
   width: 100%;
 }
 
+.appointment-summary {
+  display: grid;
+  gap: 8px;
+  margin: 28px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--surface-subtle);
+  line-height: 1.5;
+}
+
+.management-actions {
+  display: grid;
+  gap: 10px;
+}
+
 .confirm-button {
   width: 100%;
   margin-top: 24px;

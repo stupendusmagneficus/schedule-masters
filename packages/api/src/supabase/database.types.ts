@@ -91,6 +91,54 @@ export type Database = {
           },
         ]
       }
+      appointment_notification_events: {
+        Row: {
+          appointment_id: string
+          channel: string
+          created_at: string
+          error_code: string | null
+          id: string
+          status: Database["public"]["Enums"]["notification_delivery_status"]
+          type: Database["public"]["Enums"]["notification_type"]
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id: string
+          channel?: string
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          status: Database["public"]["Enums"]["notification_delivery_status"]
+          type: Database["public"]["Enums"]["notification_type"]
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string
+          channel?: string
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["notification_delivery_status"]
+          type?: Database["public"]["Enums"]["notification_type"]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_notification_events_appointment_workspace_fkey"
+            columns: ["appointment_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "appointment_notification_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           buffer_after_minutes_snapshot: number
@@ -103,6 +151,7 @@ export type Database = {
           currency_snapshot: string
           customer_id: string
           customer_note: string | null
+          customer_notification_consent_at: string | null
           duration_minutes_snapshot: number
           ends_at: string
           id: string
@@ -128,6 +177,7 @@ export type Database = {
           currency_snapshot: string
           customer_id: string
           customer_note?: string | null
+          customer_notification_consent_at?: string | null
           duration_minutes_snapshot: number
           ends_at: string
           id?: string
@@ -153,6 +203,7 @@ export type Database = {
           currency_snapshot?: string
           customer_id?: string
           customer_note?: string | null
+          customer_notification_consent_at?: string | null
           duration_minutes_snapshot?: number
           ends_at?: string
           id?: string
@@ -656,6 +707,13 @@ export type Database = {
         Returns: Json
       }
       check_public_booking_request: { Args: never; Returns: undefined }
+      create_customer_appointment_link: {
+        Args: {
+          p_appointment_id: string
+          p_customer_consent_confirmed: boolean
+        }
+        Returns: Json
+      }
       create_master_availability_block: {
         Args: {
           p_date: string
@@ -703,6 +761,7 @@ export type Database = {
         Args: { p_workspace_id: string }
         Returns: undefined
       }
+      get_customer_appointment: { Args: { p_token: string }; Returns: Json }
       get_master_available_slots: {
         Args: { p_date: string; p_service_id: string; p_workspace_id: string }
         Returns: {
@@ -796,6 +855,14 @@ export type Database = {
           phone: string
         }[]
       }
+      record_customer_link_share: {
+        Args: {
+          p_appointment_id: string
+          p_error_code?: string
+          p_status: Database["public"]["Enums"]["notification_delivery_status"]
+        }
+        Returns: undefined
+      }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }
         Returns: Json
@@ -806,6 +873,10 @@ export type Database = {
           p_reason?: string
           p_status: Database["public"]["Enums"]["appointment_status"]
         }
+        Returns: Json
+      }
+      update_customer_appointment: {
+        Args: { p_action: string; p_token: string }
         Returns: Json
       }
       update_master_workspace_settings: {
@@ -839,6 +910,10 @@ export type Database = {
         | "no_show"
       availability_exception_kind: "blocked" | "extra" | "modified"
       notification_channel: "email" | "push"
+      notification_delivery_status:
+        | "manual_required"
+        | "share_sheet_opened"
+        | "share_sheet_failed"
       notification_job_status:
         | "pending"
         | "processing"
@@ -999,6 +1074,11 @@ export const Constants = {
       ],
       availability_exception_kind: ["blocked", "extra", "modified"],
       notification_channel: ["email", "push"],
+      notification_delivery_status: [
+        "manual_required",
+        "share_sheet_opened",
+        "share_sheet_failed",
+      ],
       notification_job_status: [
         "pending",
         "processing",

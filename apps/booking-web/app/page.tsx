@@ -18,7 +18,7 @@ import {
   supportedLocales,
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
-
+import { CustomerAppointmentPage } from "../src/components/CustomerAppointmentPage";
 import { analytics } from "../src/lib/analytics";
 import {
   getFollowingBookableDate,
@@ -86,6 +86,7 @@ export default function HomePage() {
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [isLoadingContext, setIsLoadingContext] = useState(true);
   const [contextLoadError, setContextLoadError] = useState(false);
+  const [managementToken, setManagementToken] = useState<string | null>(null);
   const [date, setDate] = useState(getNextBookableDate);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
@@ -127,6 +128,7 @@ export default function HomePage() {
   );
 
   useEffect(() => {
+    if (hasManagementTokenInLocation()) return;
     void analytics.init();
     analytics.track(analyticsEvents.bookingPageViewed);
   }, []);
@@ -159,6 +161,18 @@ export default function HomePage() {
       const slug = new URLSearchParams(window.location.search)
         .get("slug")
         ?.trim();
+      const token = getManagementTokenFromLocation();
+      if (token) {
+        setManagementToken(token);
+        setContext(null);
+        window.history.replaceState(
+          null,
+          "",
+          `${window.location.pathname}${window.location.search}`,
+        );
+        setIsLoadingContext(false);
+        return;
+      }
       if (!slug || !supabase) {
         setContext(null);
         setContextLoadError(true);
@@ -327,6 +341,16 @@ export default function HomePage() {
           </p>
         </section>
       </main>
+    );
+  }
+
+  if (managementToken && supabase) {
+    return (
+      <CustomerAppointmentPage
+        client={supabase}
+        locale={locale}
+        token={managementToken}
+      />
     );
   }
 
@@ -601,5 +625,21 @@ export default function HomePage() {
         </button>
       </section>
     </main>
+  );
+}
+
+function getManagementTokenFromLocation() {
+  if (typeof window === "undefined") return null;
+  return (
+    new URLSearchParams(window.location.hash.slice(1)).get("token")?.trim() ||
+    null
+  );
+}
+
+function hasManagementTokenInLocation() {
+  if (getManagementTokenFromLocation()) return true;
+  return (
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("token")
   );
 }

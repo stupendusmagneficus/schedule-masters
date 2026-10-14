@@ -1,5 +1,6 @@
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
+import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type {
   AppointmentStatus,
@@ -21,6 +22,7 @@ type AppointmentDetailsModalProps = {
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onStatusChange: (status: AppointmentStatus) => Promise<void>;
+  readonly onShare?: (customerConsentConfirmed: boolean) => Promise<boolean>;
   readonly t: (key: MessageKey) => string;
   readonly timezone: string;
   readonly visible: boolean;
@@ -35,8 +37,13 @@ export function AppointmentDetailsModal({
   onStatusChange,
   t,
   timezone,
+  onShare,
   visible,
 }: AppointmentDetailsModalProps) {
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
+  const [shareState, setShareState] = useState<"idle" | "opened" | "failed">(
+    "idle",
+  );
   const actions = appointment ? getStatusActions(appointment.status, t) : [];
 
   return (
@@ -148,6 +155,74 @@ export function AppointmentDetailsModal({
                 </Text>
               ) : null}
             </InfoCard>
+
+            {onShare && actions.length ? (
+              <InfoCard>
+                <Text style={styles.sectionTitle}>
+                  {t("mobile.shareAppointment")}
+                </Text>
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: consentConfirmed }}
+                  onPress={() => setConsentConfirmed((value) => !value)}
+                  style={styles.consentRow}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      consentConfirmed && styles.checkboxChecked,
+                    ]}
+                  >
+                    {consentConfirmed ? (
+                      <Text style={styles.checkmark}>✓</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.helper}>{t("mobile.shareConsent")}</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={isSaving}
+                  onPress={async () => {
+                    if (!consentConfirmed) {
+                      setShareState("failed");
+                      return;
+                    }
+                    setShareState(
+                      (await onShare(consentConfirmed)) ? "opened" : "failed",
+                    );
+                  }}
+                  style={({ pressed }) => [
+                    styles.action,
+                    isSaving && styles.disabled,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.actionText}>
+                    {t("mobile.shareAppointment")}
+                  </Text>
+                </Pressable>
+                {shareState !== "idle" ? (
+                  <Text
+                    accessibilityRole={
+                      shareState === "failed" ? "alert" : undefined
+                    }
+                    style={
+                      shareState === "failed" ? styles.error : styles.helper
+                    }
+                  >
+                    {shareState === "failed"
+                      ? consentConfirmed
+                        ? t("mobile.shareSheetFailed")
+                        : t("mobile.shareConsentRequired")
+                      : t("mobile.shareSheetOpened")}
+                  </Text>
+                ) : (
+                  <Text style={styles.helper}>
+                    {t("mobile.shareManualDelivery")}
+                  </Text>
+                )}
+              </InfoCard>
+            ) : null}
           </>
         ) : null}
       </ScrollView>
@@ -222,6 +297,27 @@ const styles = StyleSheet.create({
   },
   actions: { gap: 10 },
   content: { gap: 16, padding: 16, paddingBottom: 32 },
+  checkbox: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 5,
+    borderWidth: 1,
+    height: 24,
+    justifyContent: "center",
+    width: 24,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.action,
+    borderColor: colors.action,
+  },
+  checkmark: { color: colors.actionText, fontWeight: "700" },
+  consentRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+    minHeight: 48,
+  },
   customerName: { ...typography.heading, color: colors.primaryText },
   destructiveAction: { backgroundColor: colors.dangerSoft },
   destructiveActionText: { color: colors.danger },
