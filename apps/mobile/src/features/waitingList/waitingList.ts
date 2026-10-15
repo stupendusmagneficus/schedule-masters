@@ -71,6 +71,57 @@ export async function saveMasterWaitingListEntry(
   return data;
 }
 
+export async function createMasterWaitingListCustomer(
+  client: WaitingListClient,
+  workspaceId: string,
+  draft: WaitingListDraft,
+): Promise<string> {
+  const { data, error } = await client.rpc(
+    "create_master_waiting_list_customer",
+    {
+      p_customer_email: draft.customerEmail?.trim() || "",
+      p_customer_name: draft.customerName.trim(),
+      p_customer_phone: draft.customerPhone?.trim() || "",
+      p_desired_date: draft.desiredDate,
+      p_desired_time_from: draft.desiredTimeFrom || undefined,
+      p_desired_time_to: draft.desiredTimeTo || undefined,
+      p_note: draft.note?.trim() || undefined,
+      p_service_id: draft.serviceId,
+      p_workspace_id: workspaceId,
+    },
+  );
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function removeAllMasterWaitingListEntries(
+  client: WaitingListClient,
+  workspaceId: string,
+): Promise<number> {
+  const { data, error } = await client.rpc(
+    "remove_all_master_waiting_list_entries",
+    { p_workspace_id: workspaceId },
+  );
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function moveBookingRequestToWaitingList(
+  client: WaitingListClient,
+  workspaceId: string,
+  appointmentId: string,
+): Promise<string> {
+  const { data, error } = await client.rpc(
+    "move_booking_request_to_waiting_list",
+    {
+      p_appointment_id: appointmentId,
+      p_workspace_id: workspaceId,
+    },
+  );
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function setMasterWaitingListEntryStatus(
   client: WaitingListClient,
   workspaceId: string,

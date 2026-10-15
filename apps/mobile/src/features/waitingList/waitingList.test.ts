@@ -2,8 +2,11 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
+  createMasterWaitingListCustomer,
   listMasterWaitingList,
   listMasterWaitingListMatches,
+  moveBookingRequestToWaitingList,
+  removeAllMasterWaitingListEntries,
   saveMasterWaitingListEntry,
   setMasterWaitingListEntryStatus,
 } from "./waitingList";
@@ -78,6 +81,51 @@ describe("master waiting list API", () => {
       p_appointment_id: "appointment-1",
       p_entry_id: "entry-1",
       p_status: "booked",
+      p_workspace_id: "workspace-a",
+    });
+  });
+
+  it("removes all active entries through one workspace-scoped operation", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: 3, error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+    await expect(
+      removeAllMasterWaitingListEntries(client, "workspace-a"),
+    ).resolves.toBe(3);
+    expect(rpc).toHaveBeenCalledWith("remove_all_master_waiting_list_entries", {
+      p_workspace_id: "workspace-a",
+    });
+  });
+
+  it("creates a new customer and waiting-list entry atomically", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: "entry-2", error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+    await expect(
+      createMasterWaitingListCustomer(client, "workspace-a", {
+        customerEmail: "new@example.test",
+        customerName: "New client",
+        customerPhone: "+420 123 456 789",
+        desiredDate: "2030-01-03",
+        serviceId: "service-1",
+      }),
+    ).resolves.toBe("entry-2");
+    expect(rpc).toHaveBeenCalledWith("create_master_waiting_list_customer", {
+      p_customer_email: "new@example.test",
+      p_customer_name: "New client",
+      p_customer_phone: "+420 123 456 789",
+      p_desired_date: "2030-01-03",
+      p_service_id: "service-1",
+      p_workspace_id: "workspace-a",
+    });
+  });
+
+  it("moves a public request using the workspace-scoped RPC", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: "entry-1", error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+    await expect(
+      moveBookingRequestToWaitingList(client, "workspace-a", "appointment-1"),
+    ).resolves.toBe("entry-1");
+    expect(rpc).toHaveBeenCalledWith("move_booking_request_to_waiting_list", {
+      p_appointment_id: "appointment-1",
       p_workspace_id: "workspace-a",
     });
   });

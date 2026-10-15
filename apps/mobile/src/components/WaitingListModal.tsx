@@ -17,7 +17,9 @@ import {
   type ManualBookingCustomer,
 } from "../features/appointments/manualBooking";
 import {
+  createMasterWaitingListCustomer,
   type MasterWaitingListEntry,
+  removeAllMasterWaitingListEntries,
   saveMasterWaitingListEntry,
   setMasterWaitingListEntryStatus,
   type WaitingListDraft,
@@ -61,8 +63,14 @@ export function WaitingListModal({
   workspaceId,
 }: WaitingListModalProps) {
   const [editing, setEditing] = useState<MasterWaitingListEntry | null>(null);
+  const [formMode, setFormMode] = useState<"existing" | "new" | "edit" | null>(
+    null,
+  );
   const [saving, setSaving] = useState(false);
-  const [actionError, setActionError] = useState(false);
+  const [confirmRemoveAll, setConfirmRemoveAll] = useState(false);
+  const [actionError, setActionError] = useState<"save" | "duplicate" | null>(
+    null,
+  );
   const [isLoadingCustomers, setLoadingCustomers] = useState(false);
   const [customers, setCustomers] = useState<ManualBookingCustomer[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
@@ -108,15 +116,17 @@ export function WaitingListModal({
       .slice(0, 6);
   }, [customerSearch, customers, locale]);
 
-  function startNew() {
+  function startNew(mode: "existing" | "new") {
     setEditing(null);
+    setFormMode(mode);
     setDraft(emptyDraft(services, defaultDate));
     setCustomerSearch("");
-    setActionError(false);
+    setActionError(null);
   }
 
   function startEdit(entry: MasterWaitingListEntry) {
     setEditing(entry);
+    setFormMode("edit");
     setDraft({
       customerEmail: entry.customer_email ?? "",
       customerId: entry.customer_id,
@@ -129,7 +139,7 @@ export function WaitingListModal({
       serviceId: entry.service_id,
     });
     setCustomerSearch(entry.customer_name);
-    setActionError(false);
+    setActionError(null);
   }
 
   async function save() {
@@ -137,21 +147,37 @@ export function WaitingListModal({
       !draft.customerName.trim() ||
       !draft.desiredDate ||
       !draft.serviceId ||
-      (!draft.customerId &&
+      (formMode === "existing" && !draft.customerId) ||
+      ((formMode === "new" || !draft.customerId) &&
         !draft.customerEmail?.trim() &&
         !draft.customerPhone?.trim())
     ) {
-      setActionError(true);
+      setActionError("save");
       return;
     }
     setSaving(true);
-    setActionError(false);
+    setActionError(null);
     try {
-      await saveMasterWaitingListEntry(client, workspaceId, draft, editing?.id);
+      if (formMode === "new" && !editing) {
+        await createMasterWaitingListCustomer(client, workspaceId, draft);
+      } else {
+        await saveMasterWaitingListEntry(
+          client,
+          workspaceId,
+          draft,
+          editing?.id,
+        );
+      }
+      setFormMode(null);
       setEditing(null);
       await onSaved();
-    } catch {
-      setActionError(true);
+    } catch (error) {
+      setActionError(
+        error instanceof Error &&
+          error.message.includes("Customer contact already exists")
+          ? "duplicate"
+          : "save",
+      );
     } finally {
       setSaving(false);
     }
@@ -159,7 +185,7 @@ export function WaitingListModal({
 
   async function remove(entry: MasterWaitingListEntry) {
     setSaving(true);
-    setActionError(false);
+    setActionError(null);
     try {
       await setMasterWaitingListEntryStatus(
         client,
@@ -169,7 +195,21 @@ export function WaitingListModal({
       );
       await onSaved();
     } catch {
-      setActionError(true);
+      setActionError("save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeAll() {
+    setSaving(true);
+    setActionError(null);
+    try {
+      await removeAllMasterWaitingListEntries(client, workspaceId);
+      setConfirmRemoveAll(false);
+      await onSaved();
+    } catch {
+      setActionError("save");
     } finally {
       setSaving(false);
     }
@@ -177,8 +217,10 @@ export function WaitingListModal({
 
   function close() {
     if (saving) return;
+    setFormMode(null);
     setEditing(null);
-    setActionError(false);
+    setActionError(null);
+    setConfirmRemoveAll(false);
     onClose();
   }
 
@@ -194,58 +236,29 @@ export function WaitingListModal({
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {editing ? (
+        {formMode ? (
           <InfoCard>
             <Text style={styles.sectionTitle}>
-              {editing.id
+              {formMode === "edit"
                 ? t("mobile.waitingListEdit")
-                : t("mobile.waitingListAdd")}
+                : formMode === "existing"
+                  ? t("mobile.waitingListAddExisting")
+                  : t("mobile.waitingListAddNew")}
             </Text>
-            <Text style={styles.label}>{t("mobile.waitingListCustomer")}</Text>
-            <TextInput
-              accessibilityLabel={t("mobile.waitingListCustomer")}
-              onChangeText={(value) => {
-                setCustomerSearch(value);
-                setDraft((current) => ({
-                  ...current,
-                  customerId: null,
-                  customerName: value,
-                  customerEmail: "",
-                  customerPhone: "",
-                }));
-              }}
-              placeholder={t("mobile.customerSearch")}
-              placeholderTextColor={colors.secondaryText}
-              style={styles.input}
-              value={customerSearch}
-            />
-            {matchingCustomers.map((customer) => (
-              <Pressable
-                accessibilityRole="button"
-                key={customer.id}
-                onPress={() => {
-                  setCustomerSearch(customer.name);
-                  setDraft((current) => ({
-                    ...current,
-                    customerId: customer.id,
-                    customerName: customer.name,
-                    customerEmail: customer.email,
-                    customerPhone: customer.phone,
-                  }));
-                }}
-                style={styles.customerOption}
-              >
-                <Text style={styles.body}>{customer.name}</Text>
-                <Text style={styles.secondary}>
-                  {customer.email || customer.phone || "—"}
-                </Text>
-              </Pressable>
-            ))}
-            {isLoadingCustomers ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : null}
-            {draft.customerId ? null : (
+            {formMode === "new" ||
+            (formMode === "edit" && !draft.customerId) ? (
               <>
+                <Text style={styles.label}>
+                  {t("mobile.waitingListCustomerName")}
+                </Text>
+                <TextInput
+                  accessibilityLabel={t("mobile.waitingListCustomerName")}
+                  onChangeText={(customerName) =>
+                    setDraft((current) => ({ ...current, customerName }))
+                  }
+                  style={styles.input}
+                  value={draft.customerName}
+                />
                 <Text style={styles.secondary}>
                   {t("mobile.waitingListContactRequired")}
                 </Text>
@@ -269,6 +282,62 @@ export function WaitingListModal({
                   style={styles.input}
                   value={draft.customerPhone}
                 />
+              </>
+            ) : (
+              <>
+                <Text style={styles.label}>
+                  {t("mobile.waitingListCustomer")}
+                </Text>
+                <TextInput
+                  accessibilityLabel={t("mobile.waitingListCustomer")}
+                  onChangeText={(value) => {
+                    setCustomerSearch(value);
+                    setDraft((current) => ({
+                      ...current,
+                      customerId: null,
+                      customerName: value,
+                      customerEmail: "",
+                      customerPhone: "",
+                    }));
+                  }}
+                  placeholder={t("mobile.customerSearch")}
+                  placeholderTextColor={colors.secondaryText}
+                  style={styles.input}
+                  value={customerSearch}
+                />
+                {matchingCustomers.map((customer) => (
+                  <Pressable
+                    accessibilityRole="button"
+                    key={customer.id}
+                    onPress={() => {
+                      setCustomerSearch(customer.name);
+                      setDraft((current) => ({
+                        ...current,
+                        customerId: customer.id,
+                        customerName: customer.name,
+                        customerEmail: customer.email,
+                        customerPhone: customer.phone,
+                      }));
+                    }}
+                    style={styles.customerOption}
+                  >
+                    <Text style={styles.body}>{customer.name}</Text>
+                    <Text style={styles.secondary}>
+                      {customer.email || customer.phone || "—"}
+                    </Text>
+                  </Pressable>
+                ))}
+                {isLoadingCustomers ? (
+                  <ActivityIndicator color={colors.accent} />
+                ) : null}
+                {draft.customerId ? (
+                  <Text style={styles.selectedCustomer}>
+                    {t("mobile.waitingListSelectedCustomer").replace(
+                      "{name}",
+                      draft.customerName,
+                    )}
+                  </Text>
+                ) : null}
               </>
             )}
             <Text style={styles.label}>{t("mobile.waitingListService")}</Text>
@@ -353,8 +422,33 @@ export function WaitingListModal({
             />
             {actionError ? (
               <Text accessibilityRole="alert" style={styles.error}>
-                {t("mobile.waitingListSaveFailed")}
+                {t(
+                  actionError === "duplicate"
+                    ? "mobile.waitingListDuplicateCustomer"
+                    : "mobile.waitingListSaveFailed",
+                )}
               </Text>
+            ) : null}
+            {actionError === "duplicate" ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  setFormMode("existing");
+                  setEditing(null);
+                  setCustomerSearch(
+                    draft.customerEmail ||
+                      draft.customerPhone ||
+                      draft.customerName,
+                  );
+                  setDraft((current) => ({ ...current, customerId: null }));
+                  setActionError(null);
+                }}
+                style={styles.secondaryButton}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("mobile.waitingListAddExisting")}
+                </Text>
+              </Pressable>
             ) : null}
             <Pressable
               accessibilityRole="button"
@@ -370,7 +464,10 @@ export function WaitingListModal({
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => setEditing(null)}
+              onPress={() => {
+                setFormMode(null);
+                setEditing(null);
+              }}
               style={styles.secondaryButton}
             >
               <Text style={styles.secondaryButtonText}>
@@ -382,16 +479,81 @@ export function WaitingListModal({
           <>
             <Pressable
               accessibilityRole="button"
-              onPress={startNew}
+              onPress={() => startNew("existing")}
               style={styles.primaryButton}
             >
               <Text style={styles.primaryText}>
-                {t("mobile.waitingListAdd")}
+                {t("mobile.waitingListAddExisting")}
               </Text>
             </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => startNew("new")}
+              style={styles.secondaryButton}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("mobile.waitingListAddNew")}
+              </Text>
+            </Pressable>
+            {entries.some((entry) => entry.status === "active") ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={saving}
+                onPress={() => {
+                  setConfirmRemoveAll(true);
+                  setActionError(null);
+                }}
+                style={styles.removeAllButton}
+              >
+                <Text style={styles.removeAllText}>
+                  {t("mobile.waitingListRemoveAll")}
+                </Text>
+              </Pressable>
+            ) : null}
+            {confirmRemoveAll ? (
+              <InfoCard>
+                <Text style={styles.body}>
+                  {t("mobile.waitingListRemoveAllPrompt").replace(
+                    "{count}",
+                    String(
+                      entries.filter((entry) => entry.status === "active")
+                        .length,
+                    ),
+                  )}
+                </Text>
+                <View style={styles.actions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={saving}
+                    onPress={() => setConfirmRemoveAll(false)}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {t("common.cancel")}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={saving}
+                    onPress={() => void removeAll()}
+                    style={styles.removeAllButton}
+                  >
+                    <Text style={styles.removeAllText}>
+                      {saving
+                        ? t("common.loading")
+                        : t("mobile.waitingListRemoveAllConfirm")}
+                    </Text>
+                  </Pressable>
+                </View>
+              </InfoCard>
+            ) : null}
             {actionError ? (
               <Text accessibilityRole="alert" style={styles.error}>
-                {t("mobile.waitingListSaveFailed")}
+                {t(
+                  actionError === "duplicate"
+                    ? "mobile.waitingListDuplicateCustomer"
+                    : "mobile.waitingListSaveFailed",
+                )}
               </Text>
             ) : null}
             {isLoading && entries.length === 0 ? (
@@ -551,6 +713,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 16,
+  },
+  removeAllButton: {
+    alignItems: "center",
+    backgroundColor: colors.dangerSoft,
+    borderColor: colors.danger,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  removeAllText: {
+    ...typography.caption,
+    color: colors.danger,
+    fontWeight: "700",
+  },
+  selectedCustomer: {
+    ...typography.caption,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.surface,
+    color: colors.accent,
+    padding: 10,
   },
   primaryText: { ...typography.label, color: colors.surface },
   secondaryButton: {

@@ -41,6 +41,7 @@ import { useWaitingList } from "../features/waitingList/useWaitingList";
 import {
   listMasterWaitingListMatches,
   type MasterWaitingListMatch,
+  moveBookingRequestToWaitingList,
   setMasterWaitingListEntryStatus,
 } from "../features/waitingList/waitingList";
 import { analytics, analyticsEvents } from "../lib/analytics";
@@ -256,6 +257,30 @@ export function DashboardScreen({
           ? t("mobile.bookingRequestEmailNotConfigured")
           : t("mobile.bookingRequestUpdated"),
       );
+      return true;
+    } catch {
+      setBookingRequestActionError(true);
+      await bookingRequests.reload();
+      return false;
+    } finally {
+      setSavingRequestId(null);
+    }
+  }
+
+  async function moveBookingRequestIntoWaitingList(
+    appointmentId: string,
+  ): Promise<boolean> {
+    if (!client) return false;
+    setSavingRequestId(appointmentId);
+    setBookingRequestActionError(false);
+    try {
+      await moveBookingRequestToWaitingList(
+        client,
+        workspace.id,
+        appointmentId,
+      );
+      await Promise.all([bookingRequests.reload(), waitingList.reload()]);
+      setFeedback(t("mobile.bookingRequestMovedToWaitingList"));
       return true;
     } catch {
       setBookingRequestActionError(true);
@@ -594,6 +619,7 @@ export function DashboardScreen({
         isLoading={bookingRequests.isLoading}
         locale={locale}
         onClose={() => setBookingRequestsVisible(false)}
+        onMoveToWaitingList={moveBookingRequestIntoWaitingList}
         onRespond={respondToBookingRequest}
         onRetry={() => void bookingRequests.reload()}
         requests={bookingRequests.requests}
