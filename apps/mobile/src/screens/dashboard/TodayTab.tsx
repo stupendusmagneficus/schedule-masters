@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
   formatAccessibleDate,
   formatCompactDate,
@@ -37,6 +38,8 @@ type TodayTabProps = DashboardTabProps & {
   readonly onRetryAppointments?: () => void;
   readonly onGoToToday: () => void;
   readonly onNextDay: () => void;
+  readonly hasActiveServices: boolean;
+  readonly onOpenFreeSlots: () => void;
   readonly onPreviousDay: () => void;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onOpenProfile: () => void;
@@ -53,9 +56,11 @@ export function TodayTab({
   onRetryAppointments,
   onGoToToday,
   onNextDay,
+  onOpenFreeSlots,
   onPreviousDay,
   onSelectAppointment,
   onOpenProfile,
+  hasActiveServices,
   selectedDate,
   t,
   workspace,
@@ -171,6 +176,27 @@ export function TodayTab({
         />
       ) : null}
 
+      {hasActiveServices || demoData ? (
+        <Pressable
+          accessibilityLabel={t("mobile.freeSlots")}
+          accessibilityRole="button"
+          onPress={onOpenFreeSlots}
+          style={({ pressed }) => [
+            styles.freeSlotsAction,
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialCommunityIcons
+            color={colors.accent}
+            name="calendar-search"
+            size={20}
+          />
+          <Text style={styles.freeSlotsActionText}>
+            {t("mobile.freeSlots")}
+          </Text>
+        </Pressable>
+      ) : null}
+
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
           <Text style={styles.sectionTitle}>
@@ -194,18 +220,6 @@ export function TodayTab({
                 : t("mobile.noBookingsOnDay")}
             </Text>
           )}
-          {isToday ? (
-            <>
-              <Text style={styles.freeSlotsLabel}>{t("mobile.freeSlots")}</Text>
-              <View style={styles.freeSlots}>
-                {demoData.freeSlots.map((slot) => (
-                  <Text key={slot} style={styles.freeSlot}>
-                    {slot}
-                  </Text>
-                ))}
-              </View>
-            </>
-          ) : null}
         </InfoCard>
       )}
 
@@ -287,6 +301,23 @@ const styles = StyleSheet.create({
   },
   dayNavigationSpacer: { flex: 1 },
   scheduleCard: { marginTop: 8 },
+  freeSlotsAction: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radii.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 8,
+    minHeight: 48,
+    paddingHorizontal: 16,
+  },
+  freeSlotsActionText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   todayButton: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,
@@ -316,23 +347,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.primaryText,
     fontWeight: "700",
-  },
-  freeSlot: {
-    ...typography.label,
-    backgroundColor: colors.subtleSurface,
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    color: colors.primaryText,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  freeSlots: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  freeSlotsLabel: {
-    ...typography.caption,
-    color: colors.secondaryText,
-    marginBottom: 8,
-    marginTop: 16,
   },
 });
 

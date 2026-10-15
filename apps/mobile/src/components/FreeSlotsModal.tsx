@@ -254,6 +254,7 @@ export function FreeSlotsModal({
                   disabled: !available || !inMonth,
                   selected,
                 }}
+                aria-pressed={selected}
                 disabled={!available || !inMonth || isLoading}
                 key={date}
                 onPress={() => {
@@ -324,6 +325,7 @@ export function FreeSlotsModal({
                   )}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
+                  aria-pressed={selected}
                   key={slot.starts_at}
                   onPress={() => setSelectedStart(slot.starts_at)}
                   style={[styles.slot, selected && styles.slotSelected]}
