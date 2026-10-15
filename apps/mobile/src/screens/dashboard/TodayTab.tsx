@@ -158,24 +158,6 @@ export function TodayTab({
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
 
-      {(!appointmentsLoading && !appointmentsError) || demoData ? (
-        <SummaryMetrics
-          metrics={[
-            {
-              id: "bookings",
-              label: t("mobile.bookings"),
-              value: String(appointmentCount),
-            },
-            {
-              id: "expected-revenue",
-              label: t("mobile.expectedRevenue"),
-              tone: "accent",
-              value: formatCurrency(expectedRevenue, locale, "CZK"),
-            },
-          ]}
-        />
-      ) : null}
-
       {hasActiveServices || demoData ? (
         <Pressable
           accessibilityLabel={t("mobile.freeSlots")}
@@ -195,6 +177,24 @@ export function TodayTab({
             {t("mobile.freeSlots")}
           </Text>
         </Pressable>
+      ) : null}
+
+      {(!appointmentsLoading && !appointmentsError) || demoData ? (
+        <SummaryMetrics
+          metrics={[
+            {
+              id: "bookings",
+              label: t("mobile.bookings"),
+              value: String(appointmentCount),
+            },
+            {
+              id: "expected-revenue",
+              label: t("mobile.expectedRevenue"),
+              tone: "accent",
+              value: formatCurrency(expectedRevenue, locale, "CZK"),
+            },
+          ]}
+        />
       ) : null}
 
       {demoData && (

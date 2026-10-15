@@ -281,7 +281,16 @@ test.describe("mobile web smoke", () => {
       page.getByRole("heading", { name: selectedDate }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Volné termíny" }).click();
+    const freeSlotsButton = page.getByRole("button", {
+      name: "Volné termíny",
+    });
+    await expect(freeSlotsButton).toBeVisible();
+    const freeSlotsButtonBox = await freeSlotsButton.boundingBox();
+    const summaryBox = await page
+      .getByText("Rezervace", { exact: true })
+      .boundingBox();
+    expect(freeSlotsButtonBox?.y).toBeLessThan(summaryBox?.y ?? 0);
+    await freeSlotsButton.click();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: selectedDate }),
