@@ -106,7 +106,7 @@ export function BookingRequestsModal({
             const isSaving = savingRequestId === request.id;
             const isConfirmingRejection = rejectionId === request.id;
             return (
-              <InfoCard key={request.id}>
+              <InfoCard key={request.id} style={styles.requestCard}>
                 <View style={styles.header}>
                   <View style={styles.requestCopy}>
                     <Text style={styles.customerName}>
@@ -128,30 +128,25 @@ export function BookingRequestsModal({
                       month: "long",
                       timeZone: timezone,
                       year: "numeric",
-                    })}
-                  </Text>
-                  <Text style={styles.helper}>
+                    })}{" "}
+                    ·{" "}
                     {formatTime(new Date(request.starts_at), locale, {
                       hour: "2-digit",
                       minute: "2-digit",
                       timeZone: timezone,
-                    })}{" "}
-                    —{" "}
+                    })}
+                    –
                     {formatTime(new Date(request.ends_at), locale, {
                       hour: "2-digit",
                       minute: "2-digit",
                       timeZone: timezone,
-                    })}{" "}
-                    · {request.duration_minutes} {t("mobile.minutes")}
+                    })}
                   </Text>
-                  {request.customer_phone ? (
-                    <Text selectable style={styles.helper}>
-                      {request.customer_phone}
-                    </Text>
-                  ) : null}
-                  {request.customer_email ? (
-                    <Text selectable style={styles.helper}>
-                      {request.customer_email}
+                  {request.customer_phone || request.customer_email ? (
+                    <Text selectable style={styles.contact}>
+                      {[request.customer_phone, request.customer_email]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </Text>
                   ) : null}
                 </View>
@@ -258,18 +253,23 @@ const styles = StyleSheet.create({
   confirmation: {
     borderTopColor: colors.borderSubtle,
     borderTopWidth: 1,
-    gap: 10,
-    marginTop: 14,
-    paddingTop: 14,
+    gap: 8,
+    marginTop: 8,
+    paddingTop: 8,
   },
-  content: { gap: 12, padding: 16, paddingBottom: 32 },
-  customerName: { ...typography.section, color: colors.primaryText },
+  content: { gap: 8, padding: 16, paddingBottom: 32 },
+  contact: { ...typography.metadata, color: colors.secondaryText },
+  customerName: {
+    ...typography.body,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
   declineButton: {
     alignItems: "center",
     backgroundColor: colors.dangerSoft,
     borderRadius: radii.control,
     justifyContent: "center",
-    minHeight: 48,
+    minHeight: 44,
     paddingHorizontal: 14,
   },
   declineButtonText: {
@@ -278,24 +278,25 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   detailValue: {
-    ...typography.body,
+    ...typography.metadata,
     color: colors.primaryText,
     fontWeight: "600",
   },
-  details: { gap: 4, marginVertical: 14 },
+  details: { gap: 2, marginVertical: 6 },
   disabled: { opacity: 0.6 },
   emptyTitle: { ...typography.body, color: colors.secondaryText },
   error: { ...typography.body, color: colors.danger, marginTop: 8 },
-  header: { alignItems: "flex-start", flexDirection: "row", gap: 8 },
+  header: { alignItems: "center", flexDirection: "row", gap: 8 },
   helper: { ...typography.body, color: colors.secondaryText },
   pressed: { opacity: 0.78 },
   requestCopy: { flex: 1, gap: 4 },
+  requestCard: { padding: 12 },
   secondaryButton: {
     alignItems: "center",
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,
     justifyContent: "center",
-    minHeight: 48,
+    minHeight: 44,
     paddingHorizontal: 14,
   },
   secondaryButtonText: {
@@ -303,6 +304,6 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     fontWeight: "700",
   },
-  serviceName: { ...typography.body, color: colors.secondaryText },
+  serviceName: { ...typography.metadata, color: colors.secondaryText },
   state: { alignItems: "center", gap: 12, padding: 24 },
 });
