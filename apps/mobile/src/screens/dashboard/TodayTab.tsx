@@ -40,9 +40,13 @@ type TodayTabProps = DashboardTabProps & {
   readonly bookingRequestCount: number | null;
   readonly bookingRequestsError: boolean;
   readonly bookingRequestsLoading: boolean;
+  readonly waitingListCount: number | null;
+  readonly waitingListError: boolean;
+  readonly waitingListLoading: boolean;
   readonly defaultCurrency: string;
   readonly onRetryAppointments?: () => void;
   readonly onOpenBookingRequests: () => void;
+  readonly onOpenWaitingList: () => void;
   readonly onGoToToday: () => void;
   readonly onNextDay: () => void;
   readonly hasActiveServices: boolean;
@@ -63,8 +67,12 @@ export function TodayTab({
   bookingRequestCount,
   bookingRequestsError,
   bookingRequestsLoading,
+  waitingListCount,
+  waitingListError,
+  waitingListLoading,
   defaultCurrency,
   onOpenBookingRequests,
+  onOpenWaitingList,
   onGoToToday,
   onNextDay,
   onOpenFreeSlots,
@@ -229,6 +237,37 @@ export function TodayTab({
           ) : bookingRequestCount !== null ? (
             <View style={styles.requestCount}>
               <Text style={styles.requestCountText}>{bookingRequestCount}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+      ) : null}
+
+      {!demoData ? (
+        <Pressable
+          accessibilityLabel={
+            waitingListCount === null
+              ? t("mobile.waitingList")
+              : `${t("mobile.waitingList")}: ${waitingListCount}`
+          }
+          accessibilityRole="button"
+          onPress={onOpenWaitingList}
+          style={({ pressed }) => [
+            styles.bookingRequestsAction,
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={styles.bookingRequestsCopy}>
+            <Text style={styles.bookingRequestsTitle}>
+              {t("mobile.waitingList")}
+            </Text>
+          </View>
+          {waitingListLoading && waitingListCount === null ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : waitingListError ? (
+            <Text style={styles.requestErrorText}>{t("common.error")}</Text>
+          ) : waitingListCount !== null ? (
+            <View style={styles.requestCount}>
+              <Text style={styles.requestCountText}>{waitingListCount}</Text>
             </View>
           ) : null}
         </Pressable>

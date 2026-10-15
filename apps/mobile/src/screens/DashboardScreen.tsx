@@ -16,6 +16,8 @@ import { FloatingBookingAction } from "../components/FloatingBookingAction";
 import { FreeSlotsModal } from "../components/FreeSlotsModal";
 import { ManualBookingModal } from "../components/ManualBookingModal";
 import { NewBookingNotice } from "../components/NewBookingNotice";
+import { WaitingListMatchesModal } from "../components/WaitingListMatchesModal";
+import { WaitingListModal } from "../components/WaitingListModal";
 import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
 import {
@@ -35,6 +37,12 @@ import {
   recordCustomerLinkShare,
 } from "../features/notifications/customerAppointmentLink";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
+import { useWaitingList } from "../features/waitingList/useWaitingList";
+import {
+  listMasterWaitingListMatches,
+  type MasterWaitingListMatch,
+  setMasterWaitingListEntryStatus,
+} from "../features/waitingList/waitingList";
 import { analytics, analyticsEvents } from "../lib/analytics";
 import { spacing } from "../theme/spacing";
 import { colors } from "../theme/tokens";
@@ -83,11 +91,29 @@ export function DashboardScreen({
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
   const [isBookingRequestsVisible, setBookingRequestsVisible] = useState(false);
+  const [isWaitingListVisible, setWaitingListVisible] = useState(false);
+  const [waitingListMatchesVisible, setWaitingListMatchesVisible] =
+    useState(false);
+  const [waitingListMatches, setWaitingListMatches] = useState<
+    MasterWaitingListMatch[]
+  >([]);
+  const [waitingListMatchesLoading, setWaitingListMatchesLoading] =
+    useState(false);
+  const [waitingListMatchesError, setWaitingListMatchesError] = useState(false);
+  const [waitingListMatchTargetId, setWaitingListMatchTargetId] = useState<
+    string | null
+  >(null);
+  const [selectedWaitingListMatch, setSelectedWaitingListMatch] =
+    useState<MasterWaitingListMatch | null>(null);
   const [manualBookingServiceId, setManualBookingServiceId] = useState<
     string | null
   >(null);
-  const [manualBookingCustomer, setManualBookingCustomer] =
-    useState<CustomerProfile | null>(null);
+  const [manualBookingCustomer, setManualBookingCustomer] = useState<
+    | (Pick<CustomerProfile, "email" | "name" | "phone"> & {
+        id: string | null;
+      })
+    | null
+  >(null);
   const [pendingBooking, setPendingBooking] = useState<{
     date: string;
     serviceId: string;
@@ -116,6 +142,11 @@ export function DashboardScreen({
     workspaceId: workspace.id,
   });
   const bookingRequests = useBookingRequests({
+    client,
+    enabled: activeTab === "today" && !demoData,
+    workspaceId: workspace.id,
+  });
+  const waitingList = useWaitingList({
     client,
     enabled: activeTab === "today" && !demoData,
     workspaceId: workspace.id,
@@ -160,6 +191,12 @@ export function DashboardScreen({
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (status === "completed") {
         setSelectedAppointment({ ...selectedAppointment, status });
+      } else if (
+        status === "cancelled_by_master" ||
+        status === "cancelled_by_customer"
+      ) {
+        setSelectedAppointment(null);
+        await loadWaitingListMatches(selectedAppointment.id);
       } else {
         setSelectedAppointment(null);
         setFeedback(t("mobile.appointmentStatusUpdated"));
@@ -168,6 +205,28 @@ export function DashboardScreen({
       setAppointmentActionError(true);
     } finally {
       setUpdatingAppointment(false);
+    }
+  }
+
+  async function loadWaitingListMatches(cancelledAppointmentId: string) {
+    if (!client) return;
+    setWaitingListMatchTargetId(cancelledAppointmentId);
+    setWaitingListMatchesLoading(true);
+    setWaitingListMatchesError(false);
+    setWaitingListMatchesVisible(true);
+    try {
+      setWaitingListMatches(
+        await listMasterWaitingListMatches(
+          client,
+          workspace.id,
+          cancelledAppointmentId,
+        ),
+      );
+    } catch {
+      setWaitingListMatchesError(true);
+      setWaitingListMatches([]);
+    } finally {
+      setWaitingListMatchesLoading(false);
     }
   }
 
@@ -181,6 +240,13 @@ export function DashboardScreen({
     try {
       await setMasterAppointmentStatus(client, appointmentId, status);
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
+      if (
+        status === "cancelled_by_master" ||
+        status === "cancelled_by_customer"
+      ) {
+        setBookingRequestsVisible(false);
+        await loadWaitingListMatches(appointmentId);
+      }
       setFeedback(t("mobile.bookingRequestUpdated"));
       return true;
     } catch {
@@ -302,12 +368,26 @@ export function DashboardScreen({
             }
             bookingRequestsError={Boolean(bookingRequests.error)}
             bookingRequestsLoading={bookingRequests.isLoading}
+            waitingListCount={
+              waitingList.error ||
+              (waitingList.isLoading && waitingList.entries.length === 0)
+                ? null
+                : waitingList.entries.filter(
+                    (entry) => entry.status === "active",
+                  ).length
+            }
+            waitingListError={Boolean(waitingList.error)}
+            waitingListLoading={waitingList.isLoading}
             defaultCurrency={bookingServices[0]?.currency ?? "CZK"}
             onRetryAppointments={() => void calendar.reload()}
             onOpenBookingRequests={() => {
               setBookingRequestActionError(false);
               setBookingRequestsVisible(true);
               void bookingRequests.reload();
+            }}
+            onOpenWaitingList={() => {
+              setWaitingListVisible(true);
+              void waitingList.reload();
             }}
             onGoToToday={calendar.goToTodayDay}
             onNextDay={calendar.goToNextDay}
@@ -436,10 +516,31 @@ export function DashboardScreen({
             setManualBookingStartAt(null);
             setManualBookingServiceId(null);
             setManualBookingCustomer(null);
+            setSelectedWaitingListMatch(null);
           }}
-          onCreated={async () => {
+          onCreated={async (appointmentId) => {
             await calendar.reload();
-            setFeedback(t("mobile.manualBookingCreated"));
+            let waitlistStatusSaved = true;
+            if (selectedWaitingListMatch) {
+              try {
+                await setMasterWaitingListEntryStatus(
+                  client,
+                  workspace.id,
+                  selectedWaitingListMatch.id,
+                  "booked",
+                  appointmentId,
+                );
+                await waitingList.reload();
+              } catch {
+                waitlistStatusSaved = false;
+              }
+              setSelectedWaitingListMatch(null);
+            }
+            setFeedback(
+              waitlistStatusSaved
+                ? t("mobile.manualBookingCreated")
+                : t("mobile.waitingListBookingPartialFailure"),
+            );
             analytics.track(analyticsEvents.appointmentCreated, {
               source: "master_created",
             });
@@ -492,6 +593,54 @@ export function DashboardScreen({
         t={t}
         timezone={workspace.timezone}
         visible={isBookingRequestsVisible}
+      />
+      {client ? (
+        <WaitingListModal
+          client={client}
+          defaultDate={formatDateInTimeZone(new Date(), workspace.timezone)}
+          entries={waitingList.entries}
+          error={waitingList.error}
+          isLoading={waitingList.isLoading}
+          locale={locale}
+          onClose={() => setWaitingListVisible(false)}
+          onReload={() => void waitingList.reload()}
+          onSaved={waitingList.reload}
+          services={bookingServices}
+          t={t}
+          visible={isWaitingListVisible}
+          workspaceId={workspace.id}
+        />
+      ) : null}
+      <WaitingListMatchesModal
+        error={waitingListMatchesError}
+        isLoading={waitingListMatchesLoading}
+        locale={locale}
+        matches={waitingListMatches}
+        onBook={(match) => {
+          setSelectedWaitingListMatch(match);
+          setWaitingListMatchesVisible(false);
+          setManualBookingCustomer({
+            email: match.customer_email,
+            id: match.customer_id,
+            name: match.customer_name,
+            phone: match.customer_phone,
+          });
+          openManualBooking(
+            match.desired_date,
+            match.starts_at,
+            match.service_id,
+          );
+        }}
+        onClose={() => setWaitingListMatchesVisible(false)}
+        onRetry={() =>
+          waitingListMatchTargetId
+            ? void loadWaitingListMatches(waitingListMatchTargetId)
+            : undefined
+        }
+        saving={isUpdatingAppointment}
+        t={t}
+        timezone={workspace.timezone}
+        visible={waitingListMatchesVisible}
       />
       <StatusBar style="dark" />
     </SafeAreaView>

@@ -22,6 +22,8 @@ export type MessageKey =
   | "common.error"
   | "common.done"
   | "common.close"
+  | "common.edit"
+  | "common.delete"
   | "auth.emailLabel"
   | "auth.passwordLabel"
   | "auth.passwordHint"
@@ -114,6 +116,29 @@ export type MessageKey =
   | "mobile.freeSlotsLoadFailed"
   | "mobile.freeSlotsBook"
   | "mobile.bookingRequests"
+  | "mobile.waitingList"
+  | "mobile.waitingListAdd"
+  | "mobile.waitingListEdit"
+  | "mobile.waitingListCustomer"
+  | "mobile.waitingListEmail"
+  | "mobile.waitingListPhone"
+  | "mobile.waitingListContactRequired"
+  | "mobile.waitingListBookingPartialFailure"
+  | "mobile.waitingListService"
+  | "mobile.waitingListDate"
+  | "mobile.waitingListFrom"
+  | "mobile.waitingListTo"
+  | "mobile.waitingListNote"
+  | "mobile.waitingListEmpty"
+  | "mobile.waitingListLoadFailed"
+  | "mobile.waitingListSaveFailed"
+  | "mobile.waitingListStatusActive"
+  | "mobile.waitingListStatusBooked"
+  | "mobile.waitingListStatusRemoved"
+  | "mobile.waitingListMatches"
+  | "mobile.waitingListMatchesDescription"
+  | "mobile.waitingListMatchesEmpty"
+  | "mobile.waitingListBook"
   | "mobile.bookingRequestsEmpty"
   | "mobile.bookingRequestsLoadFailed"
   | "mobile.bookingRequestAccept"
@@ -394,6 +419,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Загрузка…",
     "common.done": "Готово",
     "common.close": "Закрыть",
+    "common.edit": "Изменить",
+    "common.delete": "Удалить",
     "common.error":
       "Не удалось завершить действие. Повторите попытку через несколько секунд.",
     "auth.emailLabel": "Email",
@@ -513,6 +540,33 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось загрузить свободные окна. Попробуйте ещё раз.",
     "mobile.freeSlotsBook": "Записать клиента",
     "mobile.bookingRequests": "Заявки",
+    "mobile.waitingList": "Лист ожидания",
+    "mobile.waitingListAdd": "Добавить в лист ожидания",
+    "mobile.waitingListEdit": "Запись в листе ожидания",
+    "mobile.waitingListCustomer": "Клиент или новый контакт",
+    "mobile.waitingListEmail": "Email клиента",
+    "mobile.waitingListPhone": "Телефон клиента",
+    "mobile.waitingListContactRequired":
+      "Для нового контакта укажите email или телефон.",
+    "mobile.waitingListBookingPartialFailure":
+      "Запись создана, но статус в листе ожидания не обновлён. Проверьте список.",
+    "mobile.waitingListService": "Услуга",
+    "mobile.waitingListDate": "Желаемая дата",
+    "mobile.waitingListFrom": "Время с",
+    "mobile.waitingListTo": "Время до",
+    "mobile.waitingListNote": "Заметка",
+    "mobile.waitingListEmpty": "Лист ожидания пока пуст.",
+    "mobile.waitingListLoadFailed": "Не удалось загрузить лист ожидания.",
+    "mobile.waitingListSaveFailed": "Не удалось сохранить изменения.",
+    "mobile.waitingListStatusActive": "Ожидает",
+    "mobile.waitingListStatusBooked": "Записан",
+    "mobile.waitingListStatusRemoved": "Удалён",
+    "mobile.waitingListMatches": "Клиенты из листа ожидания",
+    "mobile.waitingListMatchesDescription":
+      "Эти клиенты выбрали ту же услугу и подходят по времени. Выберите клиента и подтвердите свободный слот.",
+    "mobile.waitingListMatchesEmpty":
+      "Подходящих клиентов для этого времени нет.",
+    "mobile.waitingListBook": "Записать клиента",
     "mobile.bookingRequestsEmpty": "Новых заявок пока нет.",
     "mobile.bookingRequestsLoadFailed":
       "Не удалось загрузить заявки. Попробуйте ещё раз.",
@@ -829,6 +883,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Načítání…",
     "common.done": "Hotovo",
     "common.close": "Zavřít",
+    "common.edit": "Upravit",
+    "common.delete": "Smazat",
     "common.error":
       "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
     "auth.emailLabel": "E-mail",
@@ -946,6 +1002,32 @@ const messages: Record<SupportedLocale, Messages> = {
       "Volné termíny se nepodařilo načíst. Zkuste to znovu.",
     "mobile.freeSlotsBook": "Objednat klienta",
     "mobile.bookingRequests": "Žádosti",
+    "mobile.waitingList": "Seznam náhradníků",
+    "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
+    "mobile.waitingListEdit": "Záznam v seznamu náhradníků",
+    "mobile.waitingListCustomer": "Klient nebo nový kontakt",
+    "mobile.waitingListEmail": "E-mail klienta",
+    "mobile.waitingListPhone": "Telefon klienta",
+    "mobile.waitingListContactRequired":
+      "U nového kontaktu vyplňte e-mail nebo telefon.",
+    "mobile.waitingListBookingPartialFailure":
+      "Objednávka byla vytvořena, ale stav v seznamu náhradníků nebyl aktualizován. Zkontrolujte seznam.",
+    "mobile.waitingListService": "Služba",
+    "mobile.waitingListDate": "Požadované datum",
+    "mobile.waitingListFrom": "Čas od",
+    "mobile.waitingListTo": "Čas do",
+    "mobile.waitingListNote": "Poznámka",
+    "mobile.waitingListEmpty": "Seznam náhradníků je zatím prázdný.",
+    "mobile.waitingListLoadFailed": "Seznam náhradníků se nepodařilo načíst.",
+    "mobile.waitingListSaveFailed": "Změny se nepodařilo uložit.",
+    "mobile.waitingListStatusActive": "Čeká",
+    "mobile.waitingListStatusBooked": "Objednán",
+    "mobile.waitingListStatusRemoved": "Odebrán",
+    "mobile.waitingListMatches": "Klienti ze seznamu náhradníků",
+    "mobile.waitingListMatchesDescription":
+      "Tito klienti zvolili stejnou službu a vyhovuje jim čas. Vyberte klienta a potvrďte volný termín.",
+    "mobile.waitingListMatchesEmpty": "Pro tento termín nejsou vhodní klienti.",
+    "mobile.waitingListBook": "Objednat klienta",
     "mobile.bookingRequestsEmpty": "Zatím tu nejsou žádné nové žádosti.",
     "mobile.bookingRequestsLoadFailed":
       "Žádosti se nepodařilo načíst. Zkuste to znovu.",
@@ -1259,6 +1341,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.loading": "Loading…",
     "common.done": "Done",
     "common.close": "Close",
+    "common.edit": "Edit",
+    "common.delete": "Delete",
     "common.error":
       "We could not complete that action. Please try again shortly.",
     "auth.emailLabel": "Email",
@@ -1379,6 +1463,32 @@ const messages: Record<SupportedLocale, Messages> = {
       "Couldn't load available times. Please try again.",
     "mobile.freeSlotsBook": "Book client",
     "mobile.bookingRequests": "Requests",
+    "mobile.waitingList": "Waiting list",
+    "mobile.waitingListAdd": "Add to waiting list",
+    "mobile.waitingListEdit": "Waiting list entry",
+    "mobile.waitingListCustomer": "Customer or new contact",
+    "mobile.waitingListEmail": "Customer email",
+    "mobile.waitingListPhone": "Customer phone",
+    "mobile.waitingListContactRequired":
+      "Add an email or phone number for a new contact.",
+    "mobile.waitingListBookingPartialFailure":
+      "The appointment was created, but the waiting list status wasn't updated. Check the list.",
+    "mobile.waitingListService": "Service",
+    "mobile.waitingListDate": "Preferred date",
+    "mobile.waitingListFrom": "Time from",
+    "mobile.waitingListTo": "Time to",
+    "mobile.waitingListNote": "Note",
+    "mobile.waitingListEmpty": "The waiting list is empty.",
+    "mobile.waitingListLoadFailed": "Couldn't load the waiting list.",
+    "mobile.waitingListSaveFailed": "Couldn't save the changes.",
+    "mobile.waitingListStatusActive": "Waiting",
+    "mobile.waitingListStatusBooked": "Booked",
+    "mobile.waitingListStatusRemoved": "Removed",
+    "mobile.waitingListMatches": "Waiting list matches",
+    "mobile.waitingListMatchesDescription":
+      "These clients chose the same service and match this time. Select a client and confirm the available slot.",
+    "mobile.waitingListMatchesEmpty": "No clients match this time.",
+    "mobile.waitingListBook": "Book client",
     "mobile.bookingRequestsEmpty": "There are no new requests yet.",
     "mobile.bookingRequestsLoadFailed":
       "Couldn't load requests. Please try again.",
