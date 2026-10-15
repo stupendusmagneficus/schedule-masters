@@ -935,17 +935,17 @@ describe("Supabase public booking contract", () => {
         id: appointmentId,
         paid_amount: 350,
       });
-      const overpayment = await user.client.rpc(
+      const aboveServicePrice = await user.client.rpc(
         "set_master_appointment_paid_amount",
         { p_appointment_id: appointmentId, p_paid_amount: 701 },
       );
-      expect(overpayment.data).toBeNull();
-      expect(overpayment.error?.message).toContain("Payment amount");
+      expect(aboveServicePrice.error).toBeNull();
+      expect(aboveServicePrice.data).toMatchObject({ paid_amount: 701 });
       const overPrecision = await user.client.rpc(
         "set_master_appointment_paid_amount",
         { p_appointment_id: appointmentId, p_paid_amount: 350.123 },
       );
-      expect(overPrecision.error?.message).toContain("Payment amount");
+      expect(overPrecision.error?.message).toContain("payment amount");
 
       const outsider = await createAuthenticatedTestUser({
         admin,
@@ -1005,7 +1005,7 @@ describe("Supabase public booking contract", () => {
             id: appointmentId,
             is_new_customer: true,
             is_returning_customer: false,
-            paid_amount: 350,
+            paid_amount: 701,
             status: "completed",
           }),
         ]),
@@ -1173,6 +1173,16 @@ describe("customer directory RPC", () => {
           phone: "+420111222333",
         });
 
+        const contact = await user.client
+          .from("customers")
+          .select("phone")
+          .eq("workspace_id", workspaceId)
+          .eq("id", customerId)
+          .is("anonymized_at", null)
+          .maybeSingle();
+        expect(contact.error).toBeNull();
+        expect(contact.data).toEqual({ phone: "+420111222333" });
+
         const history = await user.client.rpc("list_master_customer_history", {
           p_customer_id: customerId,
           p_workspace_id: workspaceId,
@@ -1193,6 +1203,15 @@ describe("customer directory RPC", () => {
         );
         expect(crossWorkspaceHistory.data).toBeNull();
         expect(crossWorkspaceHistory.error?.code).toBe("P0002");
+
+        const crossWorkspaceContact = await user.client
+          .from("customers")
+          .select("phone")
+          .eq("workspace_id", workspaceId)
+          .eq("id", otherCustomerId)
+          .maybeSingle();
+        expect(crossWorkspaceContact.data).toBeNull();
+        expect(crossWorkspaceContact.error).toBeNull();
       } finally {
         const deletedWorkspaces = await admin
           .from("workspaces")

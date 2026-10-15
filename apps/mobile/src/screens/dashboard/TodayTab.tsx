@@ -24,6 +24,7 @@ import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
+import { sumReceivedRevenue } from "../../features/finance/todayRevenue";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -71,12 +72,6 @@ export function TodayTab({
     timeZone: workspace.timezone,
   });
   const demoAppointments = isToday ? (demoData?.appointments ?? []) : [];
-  const revenueAppointments = masterAppointments.filter(
-    (appointment) =>
-      appointment.status === "pending" ||
-      appointment.status === "confirmed" ||
-      appointment.status === "completed",
-  );
   const visibleAppointments = masterAppointments.filter(
     (appointment) =>
       appointment.status !== "cancelled_by_customer" &&
@@ -86,15 +81,7 @@ export function TodayTab({
     (appointment) =>
       appointment.status === "pending" || appointment.status === "confirmed",
   );
-  const expectedRevenue = demoData
-    ? demoAppointments.reduce(
-        (total, appointment) => total + appointment.priceAmount,
-        0,
-      )
-    : revenueAppointments.reduce(
-        (total, appointment) => total + Number(appointment.price_amount),
-        0,
-      );
+  const receivedRevenue = demoData ? 0 : sumReceivedRevenue(masterAppointments);
   const appointmentCount = demoData
     ? demoAppointments.length
     : visibleAppointments.length;
@@ -188,10 +175,10 @@ export function TodayTab({
               value: String(appointmentCount),
             },
             {
-              id: "expected-revenue",
-              label: t("mobile.expectedRevenue"),
+              id: "received-revenue",
+              label: t("mobile.receivedRevenue"),
               tone: "accent",
-              value: formatCurrency(expectedRevenue, locale, "CZK"),
+              value: formatCurrency(receivedRevenue, locale, "CZK"),
             },
           ]}
         />

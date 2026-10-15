@@ -126,8 +126,15 @@ export type MessageKey =
   | "mobile.appointmentTime"
   | "mobile.appointmentService"
   | "mobile.appointmentPrice"
+  | "mobile.appointmentContact"
+  | "mobile.customerContactLoading"
+  | "mobile.customerContactLoadFailed"
+  | "mobile.customerCall"
+  | "mobile.customerSms"
+  | "mobile.customerContactActionFailed"
   | "mobile.confirmBooking"
   | "mobile.cancelBooking"
+  | "mobile.cancelBookingConfirmDescription"
   | "mobile.completeBooking"
   | "mobile.markNoShow"
   | "mobile.noStatusActions"
@@ -225,6 +232,7 @@ export type MessageKey =
   | "mobile.manualBookingLoadFailed"
   | "mobile.bookings"
   | "mobile.expectedRevenue"
+  | "mobile.receivedRevenue"
   | "mobile.finances"
   | "mobile.financeSummaryTitle"
   | "mobile.financeIncome"
@@ -507,8 +515,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.appointmentTime": "Время",
     "mobile.appointmentService": "Услуга",
     "mobile.appointmentPrice": "Стоимость",
+    "mobile.appointmentContact": "Связь с клиентом",
+    "mobile.customerContactLoading": "Загружаем номер телефона…",
+    "mobile.customerContactLoadFailed": "Не удалось загрузить контакт клиента.",
+    "mobile.customerCall": "Позвонить",
+    "mobile.customerSms": "Написать SMS",
+    "mobile.customerContactActionFailed":
+      "Не удалось открыть приложение для связи.",
     "mobile.confirmBooking": "Подтвердить запись",
     "mobile.cancelBooking": "Отменить запись",
+    "mobile.cancelBookingConfirmDescription":
+      "Вы уверены, что хотите отменить эту запись?",
     "mobile.completeBooking": "Завершить запись",
     "mobile.markNoShow": "Отметить неявку",
     "mobile.noStatusActions": "Для этого статуса нет доступных действий.",
@@ -622,6 +639,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось загрузить клиентов или свободные окна.",
     "mobile.bookings": "Записи",
     "mobile.expectedRevenue": "Ожидаемая выручка",
+    "mobile.receivedRevenue": "Полученная выручка",
     "mobile.finances": "Финансы",
     "mobile.financeSummaryTitle": "Сводка за месяц",
     "mobile.financeIncome": "Сумма по записям",
@@ -648,7 +666,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Получено за запись",
     "mobile.paymentAmountHint": "Цена услуги",
     "mobile.paymentAmountInvalid":
-      "Введите сумму от 0 до цены услуги (до 2 знаков после запятой).",
+      "Введите сумму от 0 до 99 999 999,99 (до 2 знаков после запятой).",
     "mobile.paymentSave": "Сохранить оплату",
     "mobile.paymentSaved": "Оплата сохранена",
     "mobile.paymentSaveFailed": "Не удалось сохранить оплату.",
@@ -918,8 +936,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.appointmentTime": "Čas",
     "mobile.appointmentService": "Služba",
     "mobile.appointmentPrice": "Cena",
+    "mobile.appointmentContact": "Kontakt na klienta",
+    "mobile.customerContactLoading": "Načítání telefonního čísla…",
+    "mobile.customerContactLoadFailed": "Kontakt klienta se nepodařilo načíst.",
+    "mobile.customerCall": "Zavolat",
+    "mobile.customerSms": "Napsat SMS",
+    "mobile.customerContactActionFailed":
+      "Aplikaci pro kontakt se nepodařilo otevřít.",
     "mobile.confirmBooking": "Potvrdit rezervaci",
     "mobile.cancelBooking": "Zrušit rezervaci",
+    "mobile.cancelBookingConfirmDescription":
+      "Opravdu chcete tuto rezervaci zrušit?",
     "mobile.completeBooking": "Označit jako dokončenou",
     "mobile.markNoShow": "Označit jako nedostavení",
     "mobile.noStatusActions": "Pro tento stav nejsou dostupné žádné akce.",
@@ -1034,6 +1061,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Nepodařilo se načíst klienty nebo volné termíny.",
     "mobile.bookings": "Rezervace",
     "mobile.expectedRevenue": "Očekávané tržby",
+    "mobile.receivedRevenue": "Přijaté tržby",
     "mobile.finances": "Finance",
     "mobile.financeSummaryTitle": "Měsíční přehled",
     "mobile.financeIncome": "Částky podle rezervací",
@@ -1060,7 +1088,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Přijato za rezervaci",
     "mobile.paymentAmountHint": "Cena služby",
     "mobile.paymentAmountInvalid":
-      "Zadejte částku od 0 do ceny služby (max. 2 desetinná místa).",
+      "Zadejte částku od 0 do 99 999 999,99 (max. 2 desetinná místa).",
     "mobile.paymentSave": "Uložit platbu",
     "mobile.paymentSaved": "Platba uložena",
     "mobile.paymentSaveFailed": "Platbu se nepodařilo uložit.",
@@ -1329,8 +1357,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.appointmentTime": "Time",
     "mobile.appointmentService": "Service",
     "mobile.appointmentPrice": "Price",
+    "mobile.appointmentContact": "Contact customer",
+    "mobile.customerContactLoading": "Loading phone number…",
+    "mobile.customerContactLoadFailed":
+      "Could not load the customer's contact.",
+    "mobile.customerCall": "Call",
+    "mobile.customerSms": "Text by SMS",
+    "mobile.customerContactActionFailed": "Could not open the contact app.",
     "mobile.confirmBooking": "Confirm booking",
     "mobile.cancelBooking": "Cancel booking",
+    "mobile.cancelBookingConfirmDescription":
+      "Are you sure you want to cancel this appointment?",
     "mobile.completeBooking": "Complete booking",
     "mobile.markNoShow": "Mark as no-show",
     "mobile.noStatusActions": "No actions are available for this status.",
@@ -1446,6 +1483,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Customers or available times could not be loaded.",
     "mobile.bookings": "Bookings",
     "mobile.expectedRevenue": "Expected revenue",
+    "mobile.receivedRevenue": "Received revenue",
     "mobile.finances": "Finances",
     "mobile.financeSummaryTitle": "Monthly overview",
     "mobile.financeIncome": "Booking amounts",
@@ -1472,7 +1510,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Received for appointment",
     "mobile.paymentAmountHint": "Service price",
     "mobile.paymentAmountInvalid":
-      "Enter an amount from 0 up to the service price (2 decimal places max).",
+      "Enter an amount from 0 to 99,999,999.99 (2 decimal places max).",
     "mobile.paymentSave": "Save payment",
     "mobile.paymentSaved": "Payment saved",
     "mobile.paymentSaveFailed": "Could not save payment.",
