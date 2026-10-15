@@ -33,7 +33,7 @@ create index booking_decision_email_outbox_status_created_idx
   where status in ('pending', 'not_configured', 'processing');
 
 alter table public.appointments
-  add column customer_locale text not null default 'cs'
+  add column customer_locale text not null default 'cz'
     check (customer_locale in ('ru', 'cz', 'en'));
 
 alter table public.booking_decision_email_outbox enable row level security;
@@ -53,7 +53,7 @@ create function public.create_public_booking(
   p_starts_at timestamptz,
   p_customer_note text default null,
   p_idempotency_key text default null,
-  p_locale text default 'cs'
+  p_locale text default 'cz'
 )
 returns jsonb
 language plpgsql
@@ -346,11 +346,11 @@ begin
     raise exception 'Invalid booking notification batch size';
   end if;
 
-  update public.booking_decision_email_outbox
+  update public.booking_decision_email_outbox as email
      set status = 'failed', processing_at = null, last_error = 'provider_unavailable'
-   where status = 'processing'
-     and processing_at < now() - interval '10 minutes'
-     and attempts >= 5;
+   where email.status = 'processing'
+     and email.processing_at < now() - interval '10 minutes'
+     and email.attempts >= 5;
 
   return query
   with next_emails as (
