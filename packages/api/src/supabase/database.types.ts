@@ -631,6 +631,138 @@ export type Database = {
           },
         ]
       }
+      waiting_list_entries: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          desired_date: string
+          desired_time_from: string | null
+          desired_time_to: string | null
+          id: string
+          note: string | null
+          service_id: string
+          status: Database["public"]["Enums"]["waiting_list_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          desired_date: string
+          desired_time_from?: string | null
+          desired_time_to?: string | null
+          id?: string
+          note?: string | null
+          service_id: string
+          status?: Database["public"]["Enums"]["waiting_list_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          desired_date?: string
+          desired_time_from?: string | null
+          desired_time_to?: string | null
+          id?: string
+          note?: string | null
+          service_id?: string
+          status?: Database["public"]["Enums"]["waiting_list_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waiting_list_entries_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiting_list_entries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiting_list_entries_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiting_list_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waiting_list_entry_events: {
+        Row: {
+          actor_user_id: string | null
+          appointment_id: string | null
+          created_at: string
+          entry_id: string
+          from_status: Database["public"]["Enums"]["waiting_list_status"] | null
+          id: string
+          to_status: Database["public"]["Enums"]["waiting_list_status"]
+        }
+        Insert: {
+          actor_user_id?: string | null
+          appointment_id?: string | null
+          created_at?: string
+          entry_id: string
+          from_status?:
+            | Database["public"]["Enums"]["waiting_list_status"]
+            | null
+          id?: string
+          to_status: Database["public"]["Enums"]["waiting_list_status"]
+        }
+        Update: {
+          actor_user_id?: string | null
+          appointment_id?: string | null
+          created_at?: string
+          entry_id?: string
+          from_status?:
+            | Database["public"]["Enums"]["waiting_list_status"]
+            | null
+          id?: string
+          to_status?: Database["public"]["Enums"]["waiting_list_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waiting_list_entry_events_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiting_list_entry_events_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "waiting_list_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_members: {
         Row: {
           created_at: string
@@ -745,6 +877,21 @@ export type Database = {
           p_workspace_id: string
         }
         Returns: Json
+      }
+      create_master_waiting_list_entry: {
+        Args: {
+          p_customer_email?: string
+          p_customer_id?: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_desired_date: string
+          p_desired_time_from?: string
+          p_desired_time_to?: string
+          p_note?: string
+          p_service_id: string
+          p_workspace_id: string
+        }
+        Returns: string
       }
       create_public_booking: {
         Args: {
@@ -880,6 +1027,45 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      list_master_waiting_list: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          appointment_id: string
+          created_at: string
+          customer_email: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string | null
+          desired_date: string
+          desired_time_from: string
+          desired_time_to: string
+          duration_minutes: number
+          id: string
+          note: string
+          service_id: string
+          service_name: string
+          status: Database["public"]["Enums"]["waiting_list_status"]
+        }[]
+      }
+      list_master_waiting_list_matches: {
+        Args: { p_cancelled_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          customer_email: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string | null
+          desired_date: string
+          desired_time_from: string
+          desired_time_to: string
+          duration_minutes: number
+          ends_at: string
+          id: string
+          note: string
+          service_id: string
+          service_name: string
+          starts_at: string
+        }[]
+      }
       record_customer_link_share: {
         Args: {
           p_appointment_id: string
@@ -904,9 +1090,34 @@ export type Database = {
         Args: { p_appointment_id: string; p_paid_amount: number }
         Returns: Json
       }
+      set_master_waiting_list_entry_status: {
+        Args: {
+          p_appointment_id?: string
+          p_entry_id: string
+          p_status: Database["public"]["Enums"]["waiting_list_status"]
+          p_workspace_id: string
+        }
+        Returns: undefined
+      }
       update_customer_appointment: {
         Args: { p_action: string; p_token: string }
         Returns: Json
+      }
+      update_master_waiting_list_entry: {
+        Args: {
+          p_customer_email?: string
+          p_customer_id?: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_desired_date: string
+          p_desired_time_from?: string
+          p_desired_time_to?: string
+          p_entry_id: string
+          p_note?: string
+          p_service_id: string
+          p_workspace_id: string
+        }
+        Returns: string
       }
       update_master_workspace_settings: {
         Args: {
@@ -954,6 +1165,7 @@ export type Database = {
         | "reminder"
         | "cancellation"
         | "rescheduled"
+      waiting_list_status: "active" | "booked" | "removed"
       workspace_role: "owner" | "admin" | "member"
       workspace_status: "active" | "paused" | "archived"
     }
@@ -1121,6 +1333,7 @@ export const Constants = {
         "cancellation",
         "rescheduled",
       ],
+      waiting_list_status: ["active", "booked", "removed"],
       workspace_role: ["owner", "admin", "member"],
       workspace_status: ["active", "paused", "archived"],
     },

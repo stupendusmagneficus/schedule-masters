@@ -1845,3 +1845,254 @@ describe("workspace settings RPC", () => {
     },
   );
 });
+
+describe("master waiting list RPC", () => {
+  rlsIntegrationTest(
+    "scopes entries and only suggests an exact service, duration, date, and time match",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey)
+        return;
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const otherWorkspaceId = randomUUID();
+      const serviceId = randomUUID();
+      const longerServiceId = randomUUID();
+      const archivedServiceId = randomUUID();
+      const customerId = randomUUID();
+      const appointmentId = randomUUID();
+      const bookedAppointmentId = randomUUID();
+      let userId: string | undefined;
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert([
+              {
+                id: workspaceId,
+                name: "Waiting List",
+                slug: `waiting-list-${suffix}`,
+              },
+              {
+                id: otherWorkspaceId,
+                name: "Other Waiting List",
+                slug: `other-waiting-list-${suffix}`,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+
+        const user = await createAuthenticatedTestUser({
+          admin,
+          email: `waiting-list-${suffix}@example.test`,
+          password: `Test-${suffix}-Password!`,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        userId = user.user.id;
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              role: "owner",
+              user_id: user.user.id,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        expect(
+          (
+            await admin.from("services").insert([
+              {
+                id: serviceId,
+                workspace_id: workspaceId,
+                name: "Manicure",
+                duration_minutes: 60,
+                price_amount: 1000,
+              },
+              {
+                id: longerServiceId,
+                workspace_id: workspaceId,
+                name: "Long manicure",
+                duration_minutes: 120,
+                price_amount: 1500,
+              },
+              {
+                id: archivedServiceId,
+                workspace_id: workspaceId,
+                name: "Archived manicure",
+                duration_minutes: 60,
+                price_amount: 1000,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("customers").insert({
+              id: customerId,
+              workspace_id: workspaceId,
+              name: "Waiting Anna",
+              email: "anna@example.test",
+            })
+          ).error,
+        ).toBeNull();
+
+        const entry = await user.client.rpc(
+          "create_master_waiting_list_entry",
+          {
+            p_customer_id: customerId,
+            p_customer_name: "Waiting Anna",
+            p_desired_date: "2030-01-03",
+            p_desired_time_from: "09:00",
+            p_desired_time_to: "10:00",
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(entry.error).toBeNull();
+        const wrongDuration = await user.client.rpc(
+          "create_master_waiting_list_entry",
+          {
+            p_customer_name: "Long Service Anna",
+            p_customer_email: "long-service@example.test",
+            p_desired_date: "2030-01-03",
+            p_service_id: longerServiceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(wrongDuration.error).toBeNull();
+        const archivedServiceEntry = await user.client.rpc(
+          "create_master_waiting_list_entry",
+          {
+            p_customer_name: "Archived Service Anna",
+            p_customer_email: "archived@example.test",
+            p_desired_date: "2030-01-03",
+            p_service_id: archivedServiceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(archivedServiceEntry.error).toBeNull();
+        expect(
+          (
+            await admin
+              .from("services")
+              .update({
+                archived_at: new Date().toISOString(),
+                is_active: false,
+              })
+              .eq("id", archivedServiceId)
+              .eq("workspace_id", workspaceId)
+          ).error,
+        ).toBeNull();
+        const missingContact = await user.client.rpc(
+          "create_master_waiting_list_entry",
+          {
+            p_customer_name: "No Contact",
+            p_desired_date: "2030-01-03",
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(missingContact.error?.message).toContain("Email or phone");
+        expect(
+          (
+            await admin.from("appointments").insert({
+              id: appointmentId,
+              workspace_id: workspaceId,
+              customer_id: customerId,
+              service_id: serviceId,
+              service_name_snapshot: "Manicure",
+              duration_minutes_snapshot: 60,
+              price_amount_snapshot: 1000,
+              currency_snapshot: "CZK",
+              starts_at: "2030-01-03T08:00:00.000Z",
+              ends_at: "2030-01-03T09:00:00.000Z",
+              occupied_range:
+                "[2030-01-03T08:00:00.000Z,2030-01-03T09:00:00.000Z)",
+              status: "cancelled_by_master",
+              source: "master_created",
+            })
+          ).error,
+        ).toBeNull();
+
+        expect(
+          (
+            await admin.from("appointments").insert({
+              id: bookedAppointmentId,
+              workspace_id: workspaceId,
+              customer_id: customerId,
+              service_id: serviceId,
+              service_name_snapshot: "Manicure",
+              duration_minutes_snapshot: 60,
+              price_amount_snapshot: 1000,
+              currency_snapshot: "CZK",
+              starts_at: "2030-01-03T08:00:00.000Z",
+              ends_at: "2030-01-03T09:00:00.000Z",
+              occupied_range:
+                "[2030-01-03T08:00:00.000Z,2030-01-03T09:00:00.000Z)",
+              status: "confirmed",
+              source: "master_created",
+            })
+          ).error,
+        ).toBeNull();
+
+        const matches = await user.client.rpc(
+          "list_master_waiting_list_matches",
+          {
+            p_cancelled_appointment_id: appointmentId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(matches.error).toBeNull();
+        expect(matches.data?.map(({ id }) => id)).toEqual([entry.data]);
+        const booked = await user.client.rpc(
+          "set_master_waiting_list_entry_status",
+          {
+            p_appointment_id: bookedAppointmentId,
+            p_entry_id: entry.data as string,
+            p_status: "booked",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(booked.error).toBeNull();
+        const history = await admin
+          .from("waiting_list_entry_events")
+          .select("from_status, to_status, appointment_id")
+          .eq("entry_id", entry.data as string)
+          .order("created_at");
+        expect(history.error).toBeNull();
+        expect(history.data).toEqual(
+          expect.arrayContaining([
+            { from_status: null, to_status: "active", appointment_id: null },
+            {
+              from_status: "active",
+              to_status: "booked",
+              appointment_id: bookedAppointmentId,
+            },
+          ]),
+        );
+        const list = await user.client.rpc("list_master_waiting_list", {
+          p_workspace_id: workspaceId,
+        });
+        expect(list.error).toBeNull();
+        expect(list.data).toHaveLength(3);
+        expect(list.data?.find(({ id }) => id === entry.data)?.status).toBe(
+          "booked",
+        );
+        const denied = await user.client.rpc("list_master_waiting_list", {
+          p_workspace_id: otherWorkspaceId,
+        });
+        expect(denied.error?.code).toBe("42501");
+      } finally {
+        await admin
+          .from("workspaces")
+          .delete()
+          .in("id", [workspaceId, otherWorkspaceId]);
+        if (userId) await admin.auth.admin.deleteUser(userId);
+      }
+    },
+  );
+});

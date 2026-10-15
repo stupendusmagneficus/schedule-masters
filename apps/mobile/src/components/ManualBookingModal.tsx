@@ -46,12 +46,12 @@ type ManualBookingModalProps = {
   readonly initialStartsAt?: string;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
-  readonly onCreated: () => Promise<void>;
+  readonly onCreated: (appointmentId: string) => Promise<void>;
   readonly initialServiceId?: string;
   readonly initialCustomer?: Pick<
     CustomerProfile,
-    "email" | "id" | "name" | "phone"
-  >;
+    "email" | "name" | "phone"
+  > & { readonly id: string | null };
   readonly services: readonly Service[];
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -288,8 +288,15 @@ export function ManualBookingModal({
     setSaving(true);
     setError(null);
     try {
-      await createMasterBooking(client, workspace.id, draft, idempotencyKey);
-      await onCreated();
+      const created = await createMasterBooking(
+        client,
+        workspace.id,
+        draft,
+        idempotencyKey,
+      );
+      if (typeof created.id !== "string")
+        throw new Error("Booking response is invalid");
+      await onCreated(created.id);
       onClose();
     } catch (nextError) {
       setError(serverErrorMessage(nextError, t));
