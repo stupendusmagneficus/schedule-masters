@@ -8,30 +8,60 @@ import {
 
 describe("customer contact", () => {
   it("loads only the selected customer's phone from the active workspace", async () => {
-    const rpc = vi.fn().mockResolvedValue({
-      data: [{ phone: "+420 123 456 789" }],
-      error: null,
-    });
-    const client = { rpc } as unknown as SupabaseClient<Database>;
+    const query = {
+      eq: vi.fn(),
+      is: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: { phone: "+420 123 456 789" },
+        error: null,
+      }),
+      select: vi.fn(),
+    };
+    query.select.mockReturnValue(query);
+    query.eq.mockReturnValue(query);
+    query.is.mockReturnValue(query);
+    const from = vi.fn().mockReturnValue(query);
+    const client = { from } as unknown as SupabaseClient<Database>;
 
     await expect(
       getMasterCustomerPhone(client, "workspace-a", "customer-a"),
     ).resolves.toBe("+420 123 456 789");
-    expect(rpc).toHaveBeenCalledWith("get_master_customer_contact", {
-      p_customer_id: "customer-a",
-      p_workspace_id: "workspace-a",
-    });
+    expect(from).toHaveBeenCalledWith("customers");
+    expect(query.select).toHaveBeenCalledWith("phone");
+    expect(query.eq).toHaveBeenCalledWith("workspace_id", "workspace-a");
+    expect(query.eq).toHaveBeenCalledWith("id", "customer-a");
+    expect(query.is).toHaveBeenCalledWith("anonymized_at", null);
   });
 
   it("preserves null when the customer has no phone and propagates access errors", async () => {
-    const noPhoneClient = {
-      rpc: vi.fn().mockResolvedValue({ data: [{ phone: null }], error: null }),
-    } as unknown as SupabaseClient<Database>;
-    const deniedClient = {
-      rpc: vi.fn().mockResolvedValue({
+    const noPhoneQuery = {
+      eq: vi.fn(),
+      is: vi.fn(),
+      maybeSingle: vi
+        .fn()
+        .mockResolvedValue({ data: { phone: null }, error: null }),
+      select: vi.fn(),
+    };
+    noPhoneQuery.select.mockReturnValue(noPhoneQuery);
+    noPhoneQuery.eq.mockReturnValue(noPhoneQuery);
+    noPhoneQuery.is.mockReturnValue(noPhoneQuery);
+    const deniedQuery = {
+      eq: vi.fn(),
+      is: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue({
         data: null,
         error: { message: "Workspace access denied" },
       }),
+      select: vi.fn(),
+    };
+    deniedQuery.select.mockReturnValue(deniedQuery);
+    deniedQuery.eq.mockReturnValue(deniedQuery);
+    deniedQuery.is.mockReturnValue(deniedQuery);
+    const noPhoneClient = {
+      from: vi.fn().mockReturnValue(noPhoneQuery),
+    } as unknown as SupabaseClient<Database>;
+    const deniedClient = {
+      from: vi.fn().mockReturnValue(deniedQuery),
     } as unknown as SupabaseClient<Database>;
 
     await expect(

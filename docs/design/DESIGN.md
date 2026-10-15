@@ -132,7 +132,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 1. Compact top bar: current date, profile/settings entry and locale-independent status affordances.
 2. Greeting plus a concise date label.
 3. Primary action: floating `New booking` action above the bottom navigation.
-4. Today summary: number of bookings, expected revenue and next appointment. Expected revenue stays visible in the first viewport.
+4. Today summary: number of bookings, received revenue and next appointment. Received revenue starts at zero and grows only after the master saves payment for a completed appointment. Keep it visible in the first viewport.
 5. Chronological appointment list with status, client name, service and time.
 6. Empty gaps/free slots affordance, with a visible action to start a booking in that gap.
 
@@ -147,8 +147,8 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - Tapping an appointment opens its details.
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.
-- Bookings and expected revenue share one grouped summary surface. Bookings
-  stays neutral; expected revenue uses a graphite value with a restrained green
+- Bookings and received revenue share one grouped summary surface. Bookings
+  stays neutral; received revenue uses a graphite value with a restrained green
   accent without turning the entire summary into a high-saturation block.
 - The quick-add action offers `Appointment` and `Break` as two equally clear choices.
 
@@ -222,7 +222,7 @@ Use a small fixed bottom navigation with four primary destinations:
 This is an information architecture decision, not only a visual grouping:
 
 - **Today** is the default operational surface. It answers “what is happening
-  today?” with bookings, the next client, daily totals and expected revenue.
+  today?” with bookings, the next client, daily totals and received revenue.
 - **Calendar** is the planning surface. It answers “when am I available?” with
   the timeline, free slots, breaks and appointment creation.
 - **Customers** supports customer lookup and customer history.

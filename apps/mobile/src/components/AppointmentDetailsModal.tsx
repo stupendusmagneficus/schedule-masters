@@ -1,7 +1,9 @@
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -104,18 +106,80 @@ export function AppointmentDetailsModal({
           <>
             <InfoCard>
               <View style={styles.header}>
-                <View style={styles.headerCopy}>
+                <View style={styles.nameRow}>
                   <Text style={styles.customerName}>
                     {appointment.customer_name}
                   </Text>
+                  {customerContactLoading ? (
+                    <View style={styles.contactLoading}>
+                      <ActivityIndicator
+                        accessibilityLabel={t("mobile.customerContactLoading")}
+                        color={colors.secondaryText}
+                        size="small"
+                      />
+                    </View>
+                  ) : customerContactError ? (
+                    <Pressable
+                      accessibilityLabel={`${t("mobile.customerContactLoadFailed")} ${t("common.retry")}`}
+                      accessibilityRole="button"
+                      onPress={onRetryCustomerContact}
+                      style={({ pressed }) => [
+                        styles.iconAction,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        color={colors.danger}
+                        name="refresh"
+                        size={22}
+                      />
+                    </Pressable>
+                  ) : customerPhone ? (
+                    <View style={styles.contactActions}>
+                      <Pressable
+                        accessibilityHint={customerPhone}
+                        accessibilityLabel={t("mobile.customerCall")}
+                        accessibilityRole="button"
+                        onPress={onCallCustomer}
+                        style={({ pressed }) => [
+                          styles.iconAction,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          color={colors.primaryText}
+                          name="phone-outline"
+                          size={22}
+                        />
+                      </Pressable>
+                      <Pressable
+                        accessibilityHint={customerPhone}
+                        accessibilityLabel={t("mobile.customerSms")}
+                        accessibilityRole="button"
+                        onPress={onTextCustomer}
+                        style={({ pressed }) => [
+                          styles.iconAction,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          color={colors.primaryText}
+                          name="message-text-outline"
+                          size={22}
+                        />
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </View>
+                <View style={styles.serviceStatusRow}>
                   <Text style={styles.serviceName}>
                     {appointment.service_name}
                   </Text>
+                  <AppointmentStatusBadge
+                    label={getAppointmentStatusLabel(appointment.status, t)}
+                    status={appointment.status}
+                  />
                 </View>
-                <AppointmentStatusBadge
-                  label={getAppointmentStatusLabel(appointment.status, t)}
-                  status={appointment.status}
-                />
               </View>
               <View style={styles.details}>
                 <DetailRow
@@ -158,56 +222,6 @@ export function AppointmentDetailsModal({
               </View>
             </InfoCard>
 
-            {customerContactLoading || customerContactError || customerPhone ? (
-              <InfoCard>
-                <Text style={styles.sectionTitle}>
-                  {t("mobile.appointmentContact")}
-                </Text>
-                {customerContactLoading ? (
-                  <Text accessibilityRole="text" style={styles.helper}>
-                    {t("mobile.customerContactLoading")}
-                  </Text>
-                ) : customerContactError ? (
-                  <>
-                    <Text accessibilityRole="alert" style={styles.error}>
-                      {t("mobile.customerContactLoadFailed")}
-                    </Text>
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={onRetryCustomerContact}
-                      style={styles.action}
-                    >
-                      <Text style={styles.actionText}>{t("common.retry")}</Text>
-                    </Pressable>
-                  </>
-                ) : customerPhone ? (
-                  <>
-                    <Text style={styles.phone}>{customerPhone}</Text>
-                    <View style={styles.contactActions}>
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={onCallCustomer}
-                        style={styles.contactAction}
-                      >
-                        <Text style={styles.actionText}>
-                          {t("mobile.customerCall")}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={onTextCustomer}
-                        style={styles.contactAction}
-                      >
-                        <Text style={styles.actionText}>
-                          {t("mobile.customerSms")}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </>
-                ) : null}
-              </InfoCard>
-            ) : null}
-
             {appointment.status === "completed" && onPaymentSave ? (
               <InfoCard>
                 <Text style={styles.sectionTitle}>
@@ -230,15 +244,14 @@ export function AppointmentDetailsModal({
                   }}
                   placeholder="0"
                   style={styles.paymentInput}
-                  value={paymentDraft ?? String(appointment.paid_amount)}
+                  value={paymentDraft ?? String(appointment.paid_amount ?? 0)}
                 />
                 <Pressable
                   accessibilityRole="button"
                   disabled={isSaving}
                   onPress={async () => {
                     const amount = parseAppointmentPayment(
-                      paymentDraft ?? String(appointment.paid_amount),
-                      Number(appointment.price_amount),
+                      paymentDraft ?? String(appointment.paid_amount ?? 0),
                     );
                     if (amount === null) {
                       setPaymentMessage(t("mobile.paymentAmountInvalid"));
@@ -277,90 +290,83 @@ export function AppointmentDetailsModal({
               </InfoCard>
             ) : null}
 
-            <InfoCard>
-              <Text style={styles.sectionTitle}>
-                {t("mobile.appointmentStatus")}
-              </Text>
-              {actions.length ? (
-                <View style={styles.actions}>
-                  {actions.map((action) => (
-                    <Pressable
-                      accessibilityRole="button"
-                      disabled={isSaving || Boolean(activeStatusConfirmation)}
-                      key={action.status}
-                      onPress={() => {
-                        if (action.destructive) {
-                          setStatusConfirmation({
-                            appointmentId: appointment.id,
-                            appointmentStatus: appointment.status,
-                            status: action.status,
-                          });
-                        } else {
-                          void onStatusChange(action.status);
-                        }
-                      }}
-                      style={({ pressed }) => [
-                        styles.action,
-                        action.destructive && styles.destructiveAction,
-                        isSaving && styles.disabled,
-                        pressed && styles.pressed,
+            {actions.length > 0 || error ? (
+              <View style={styles.actions}>
+                {actions.map((action) => (
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={isSaving || Boolean(activeStatusConfirmation)}
+                    key={action.status}
+                    onPress={() => {
+                      if (action.destructive) {
+                        setStatusConfirmation({
+                          appointmentId: appointment.id,
+                          appointmentStatus: appointment.status,
+                          status: action.status,
+                        });
+                      } else {
+                        void onStatusChange(action.status);
+                      }
+                    }}
+                    style={({ pressed }) => [
+                      styles.action,
+                      action.destructive && styles.destructiveAction,
+                      isSaving && styles.disabled,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.actionText,
+                        action.destructive && styles.destructiveActionText,
                       ]}
                     >
-                      <Text
-                        style={[
-                          styles.actionText,
-                          action.destructive && styles.destructiveActionText,
-                        ]}
+                      {action.label}
+                    </Text>
+                  </Pressable>
+                ))}
+                {activeStatusConfirmation ? (
+                  <View accessibilityRole="alert" style={styles.confirmation}>
+                    <Text style={styles.helper}>
+                      {t("mobile.cancelBookingConfirmDescription")}
+                    </Text>
+                    <View style={styles.confirmationActions}>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={isSaving}
+                        onPress={() => setStatusConfirmation(null)}
+                        style={styles.contactAction}
                       >
-                        {action.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                  {activeStatusConfirmation ? (
-                    <View accessibilityRole="alert" style={styles.confirmation}>
-                      <Text style={styles.helper}>
-                        {t("mobile.cancelBookingConfirmDescription")}
-                      </Text>
-                      <View style={styles.contactActions}>
-                        <Pressable
-                          accessibilityRole="button"
-                          disabled={isSaving}
-                          onPress={() => setStatusConfirmation(null)}
-                          style={styles.contactAction}
-                        >
-                          <Text style={styles.actionText}>
-                            {t("common.cancel")}
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          accessibilityRole="button"
-                          disabled={isSaving}
-                          onPress={() => {
-                            const confirmation = activeStatusConfirmation;
-                            setStatusConfirmation(null);
-                            if (confirmation.appointmentId === appointment.id) {
-                              void onStatusChange(confirmation.status);
-                            }
-                          }}
-                          style={[styles.contactAction, styles.confirmCancel]}
-                        >
-                          <Text style={styles.confirmCancelText}>
-                            {t("mobile.cancelBooking")}
-                          </Text>
-                        </Pressable>
-                      </View>
+                        <Text style={styles.actionText}>
+                          {t("common.cancel")}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={isSaving}
+                        onPress={() => {
+                          const confirmation = activeStatusConfirmation;
+                          setStatusConfirmation(null);
+                          if (confirmation.appointmentId === appointment.id) {
+                            void onStatusChange(confirmation.status);
+                          }
+                        }}
+                        style={[styles.contactAction, styles.confirmCancel]}
+                      >
+                        <Text style={styles.confirmCancelText}>
+                          {t("mobile.cancelBooking")}
+                        </Text>
+                      </Pressable>
                     </View>
-                  ) : null}
-                </View>
-              ) : (
-                <Text style={styles.helper}>{t("mobile.noStatusActions")}</Text>
-              )}
-              {error ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                  {error}
-                </Text>
-              ) : null}
-            </InfoCard>
+                  </View>
+                ) : null}
+                {error ? (
+                  <Text accessibilityRole="alert" style={styles.error}>
+                    {error}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
 
             {onShare && actions.length ? (
               <InfoCard>
@@ -524,7 +530,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     minHeight: 48,
   },
-  contactActions: { flexDirection: "row", gap: 10, marginTop: 12 },
+  contactActions: { alignItems: "center", flexDirection: "row", gap: 4 },
+  confirmationActions: { flexDirection: "row", gap: 10, marginTop: 12 },
+  contactLoading: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
   confirmation: {
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.surface,
@@ -540,7 +553,11 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 8,
   },
-  customerName: { ...typography.heading, color: colors.primaryText },
+  customerName: {
+    ...typography.heading,
+    color: colors.primaryText,
+    flexShrink: 1,
+  },
   confirmCancel: { backgroundColor: colors.dangerSoft },
   confirmCancelText: {
     ...typography.label,
@@ -560,8 +577,19 @@ const styles = StyleSheet.create({
   details: { marginTop: 12 },
   disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
-  header: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
-  headerCopy: { flex: 1, gap: 4 },
+  header: { gap: 6 },
+  iconAction: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  nameRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 44,
+  },
   helper: { ...typography.body, color: colors.secondaryText },
   pressed: { opacity: 0.82 },
   paymentInput: {
@@ -574,11 +602,20 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: 16,
   },
-  phone: { ...typography.body, color: colors.primaryText },
   sectionTitle: {
     ...typography.section,
     color: colors.primaryText,
     marginBottom: 12,
   },
-  serviceName: { ...typography.body, color: colors.secondaryText },
+  serviceName: {
+    ...typography.body,
+    color: colors.secondaryText,
+    flexShrink: 1,
+  },
+  serviceStatusRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
 });

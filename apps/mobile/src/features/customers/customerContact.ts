@@ -9,12 +9,15 @@ export async function getMasterCustomerPhone(
   workspaceId: string,
   customerId: string,
 ): Promise<string | null> {
-  const { data, error } = await client.rpc("get_master_customer_contact", {
-    p_customer_id: customerId,
-    p_workspace_id: workspaceId,
-  });
+  const { data, error } = await client
+    .from("customers")
+    .select("phone")
+    .eq("workspace_id", workspaceId)
+    .eq("id", customerId)
+    .is("anonymized_at", null)
+    .maybeSingle();
   if (error) throw new Error(error.message);
-  return data?.[0]?.phone ?? null;
+  return data?.phone ?? null;
 }
 
 export function buildCustomerPhoneUrl(

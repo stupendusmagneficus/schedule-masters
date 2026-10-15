@@ -232,6 +232,7 @@ export type MessageKey =
   | "mobile.manualBookingLoadFailed"
   | "mobile.bookings"
   | "mobile.expectedRevenue"
+  | "mobile.receivedRevenue"
   | "mobile.finances"
   | "mobile.financeSummaryTitle"
   | "mobile.financeIncome"
@@ -638,6 +639,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось загрузить клиентов или свободные окна.",
     "mobile.bookings": "Записи",
     "mobile.expectedRevenue": "Ожидаемая выручка",
+    "mobile.receivedRevenue": "Полученная выручка",
     "mobile.finances": "Финансы",
     "mobile.financeSummaryTitle": "Сводка за месяц",
     "mobile.financeIncome": "Сумма по записям",
@@ -664,7 +666,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Получено за запись",
     "mobile.paymentAmountHint": "Цена услуги",
     "mobile.paymentAmountInvalid":
-      "Введите сумму от 0 до цены услуги (до 2 знаков после запятой).",
+      "Введите сумму от 0 до 99 999 999,99 (до 2 знаков после запятой).",
     "mobile.paymentSave": "Сохранить оплату",
     "mobile.paymentSaved": "Оплата сохранена",
     "mobile.paymentSaveFailed": "Не удалось сохранить оплату.",
@@ -1059,6 +1061,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Nepodařilo se načíst klienty nebo volné termíny.",
     "mobile.bookings": "Rezervace",
     "mobile.expectedRevenue": "Očekávané tržby",
+    "mobile.receivedRevenue": "Přijaté tržby",
     "mobile.finances": "Finance",
     "mobile.financeSummaryTitle": "Měsíční přehled",
     "mobile.financeIncome": "Částky podle rezervací",
@@ -1085,7 +1088,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Přijato za rezervaci",
     "mobile.paymentAmountHint": "Cena služby",
     "mobile.paymentAmountInvalid":
-      "Zadejte částku od 0 do ceny služby (max. 2 desetinná místa).",
+      "Zadejte částku od 0 do 99 999 999,99 (max. 2 desetinná místa).",
     "mobile.paymentSave": "Uložit platbu",
     "mobile.paymentSaved": "Platba uložena",
     "mobile.paymentSaveFailed": "Platbu se nepodařilo uložit.",
@@ -1480,6 +1483,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Customers or available times could not be loaded.",
     "mobile.bookings": "Bookings",
     "mobile.expectedRevenue": "Expected revenue",
+    "mobile.receivedRevenue": "Received revenue",
     "mobile.finances": "Finances",
     "mobile.financeSummaryTitle": "Monthly overview",
     "mobile.financeIncome": "Booking amounts",
@@ -1506,7 +1510,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentReceived": "Received for appointment",
     "mobile.paymentAmountHint": "Service price",
     "mobile.paymentAmountInvalid":
-      "Enter an amount from 0 up to the service price (2 decimal places max).",
+      "Enter an amount from 0 to 99,999,999.99 (2 decimal places max).",
     "mobile.paymentSave": "Save payment",
     "mobile.paymentSaved": "Payment saved",
     "mobile.paymentSaveFailed": "Could not save payment.",
