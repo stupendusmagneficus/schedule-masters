@@ -258,6 +258,8 @@ export function DashboardScreen({
             onRetryAppointments={() => void calendar.reload()}
             onGoToToday={calendar.goToTodayDay}
             onNextDay={calendar.goToNextDay}
+            hasActiveServices={bookingServices.length > 0}
+            onOpenFreeSlots={() => setFreeSlotsVisible(true)}
             onPreviousDay={calendar.goToPreviousDay}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             selectedDate={calendar.selectedDate}
@@ -272,7 +274,11 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
-            onOpenFreeSlots={() => setFreeSlotsVisible(true)}
+            onOpenFreeSlots={
+              bookingServices.length > 0
+                ? () => setFreeSlotsVisible(true)
+                : undefined
+            }
             onOpenProfile={openProfile}
             onFeedback={setFeedback}
             onSelectTime={(date, startsAt) =>

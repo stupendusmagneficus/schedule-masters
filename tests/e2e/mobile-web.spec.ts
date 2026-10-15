@@ -250,6 +250,76 @@ test.describe("mobile web smoke", () => {
       ),
     ).toBeVisible();
   });
+
+  test("opens free slots from Today with the selected date and continues to booking entry", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("button", { name: "Následující den" }).click();
+
+    const selectedDate = await page.evaluate(() => {
+      const parts = new Intl.DateTimeFormat("en", {
+        day: "numeric",
+        month: "numeric",
+        timeZone: "Europe/Prague",
+        year: "numeric",
+      }).formatToParts(new Date());
+      const part = (type: Intl.DateTimeFormatPartTypes) =>
+        Number(parts.find((value) => value.type === type)?.value);
+      const date = new Date(
+        Date.UTC(part("year"), part("month") - 1, part("day") + 1, 12),
+      );
+      return new Intl.DateTimeFormat("cs-CZ", {
+        day: "numeric",
+        month: "long",
+        timeZone: "Europe/Prague",
+        year: "numeric",
+      }).format(date);
+    });
+    await expect(
+      page.getByRole("heading", { name: selectedDate }),
+    ).toBeVisible();
+
+    const freeSlotsButton = page.getByRole("button", {
+      name: "Volné termíny",
+    });
+    await expect(freeSlotsButton).toBeVisible();
+    const freeSlotsButtonBox = await freeSlotsButton.boundingBox();
+    const summaryBox = await page
+      .getByText("Rezervace", { exact: true })
+      .boundingBox();
+    expect(freeSlotsButtonBox?.y).toBeLessThan(summaryBox?.y ?? 0);
+    await freeSlotsButton.click();
+    await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: selectedDate }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.getByText("Gel manicure", { exact: true }).first(),
+    ).toBeVisible();
+    const hasHorizontalOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+
+    await page.getByRole("button", { name: "Zrušit" }).click();
+    await expect(
+      page.getByRole("heading", { name: selectedDate }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Volné termíny" }).click();
+    await page.getByRole("button", { name: "11:00", exact: true }).click();
+    await page.getByRole("button", { name: "Objednat klienta" }).click();
+
+    await expect(
+      page.getByText(
+        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
+      ),
+    ).toBeVisible();
+  });
   test("renders the public booking URL as an actionable profile link", async ({
     page,
   }) => {
