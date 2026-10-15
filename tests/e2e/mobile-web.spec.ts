@@ -401,7 +401,7 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
 
     await expect(
       page.getByRole("link", {
@@ -411,7 +411,7 @@ test.describe("mobile web smoke", () => {
   });
   test("keeps service editor fields vertically separated", async ({ page }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
     await page.getByRole("button", { name: "Přidat službu" }).click();
 
     await expect(

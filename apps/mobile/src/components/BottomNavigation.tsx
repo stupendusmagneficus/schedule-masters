@@ -100,6 +100,7 @@ export function BottomNavigation({
             accessibilityLabel={labels[item.id]}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
+            aria-selected={isActive}
             key={item.id}
             onPress={() => onTabChange(item.id)}
             style={styles.item}
