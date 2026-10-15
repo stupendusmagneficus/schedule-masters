@@ -1687,13 +1687,24 @@ export function formatCompactDateRange(
   const currentYear = getDateYear(referenceDate, timeZone);
   const includeYear =
     fromYear !== toYear || fromYear !== currentYear || toYear !== currentYear;
-  const format = (date: Date) =>
-    formatDate(date, locale, {
+  const format = (date: Date) => {
+    if (locale === "cz") {
+      const day = formatDate(date, locale, { day: "numeric", timeZone });
+      const month = formatDate(date, locale, { month: "short", timeZone });
+      const year = includeYear
+        ? ` ${formatDate(date, locale, { year: "numeric", timeZone })}`
+        : "";
+
+      return `${day} ${month}${year}`;
+    }
+
+    return formatDate(date, locale, {
       day: "numeric",
       month: "short",
       timeZone,
       ...(includeYear ? { year: "numeric" as const } : {}),
     });
+  };
 
   return `${format(fromDate)} – ${format(toDate)}`;
 }

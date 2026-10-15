@@ -118,6 +118,17 @@ describe("compact date formatting", () => {
     expect(result).toContain("2027");
   });
 
+  it("uses abbreviated Czech month names in cross-year ranges", () => {
+    const result = formatCompactDateRange(
+      new Date("2026-10-15T12:00:00.000Z"),
+      new Date("2027-01-12T12:00:00.000Z"),
+      "cz",
+      { referenceDate, timeZone: "Europe/Prague" },
+    );
+
+    expect(result).toBe("15. říj 2026 – 12. led 2027");
+  });
+
   it("keeps a same-year range compact", () => {
     const result = formatCompactDateRange(
       new Date("2026-10-13T12:00:00.000Z"),
