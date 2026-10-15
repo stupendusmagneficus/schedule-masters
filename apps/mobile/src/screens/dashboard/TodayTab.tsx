@@ -30,6 +30,7 @@ import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
+import { shouldShowBookingRequests } from "./bookingRequestsVisibility";
 import type { DashboardTabProps } from "./types";
 
 type TodayTabProps = DashboardTabProps & {
@@ -78,7 +79,12 @@ export function TodayTab({
   workspace,
 }: TodayTabProps) {
   const selectedDateValue = new Date(`${selectedDate}T12:00:00.000Z`);
-  const isToday = selectedDate === getTodayCalendarDate(workspace.timezone);
+  const todayDate = getTodayCalendarDate(workspace.timezone);
+  const isToday = selectedDate === todayDate;
+  const showBookingRequests = shouldShowBookingRequests(
+    selectedDate,
+    todayDate,
+  );
   const dateLabel = formatCompactDate(selectedDateValue, locale, {
     timeZone: workspace.timezone,
   });
@@ -202,7 +208,7 @@ export function TodayTab({
         />
       ) : null}
 
-      {!demoData ? (
+      {!demoData && showBookingRequests ? (
         <Pressable
           accessibilityLabel={
             bookingRequestCount === null
@@ -222,7 +228,7 @@ export function TodayTab({
             </Text>
           </View>
           {bookingRequestsLoading && bookingRequestCount === null ? (
-            <ActivityIndicator color={colors.pendingText} />
+            <ActivityIndicator color={colors.accent} />
           ) : bookingRequestsError ? (
             <View style={styles.requestError}>
               <MaterialCommunityIcons
@@ -340,7 +346,7 @@ const styles = StyleSheet.create({
   appointmentsList: { gap: 12 },
   bookingRequestsAction: {
     alignItems: "center",
-    backgroundColor: colors.pendingSoft,
+    backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radii.surface,
     borderWidth: StyleSheet.hairlineWidth,
@@ -352,12 +358,12 @@ const styles = StyleSheet.create({
   bookingRequestsCopy: { flex: 1 },
   bookingRequestsTitle: {
     ...typography.body,
-    color: colors.pendingText,
+    color: colors.primaryText,
     fontWeight: "700",
   },
   requestCount: {
     alignItems: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.accentSoft,
     borderRadius: radii.pill,
     justifyContent: "center",
     minHeight: 36,
@@ -366,7 +372,7 @@ const styles = StyleSheet.create({
   },
   requestCountText: {
     ...typography.label,
-    color: colors.pendingText,
+    color: colors.accent,
     fontWeight: "700",
   },
   requestError: { alignItems: "center", flexDirection: "row", gap: 4 },
