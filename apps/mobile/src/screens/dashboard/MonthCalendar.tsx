@@ -1,5 +1,10 @@
 import type { SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency, formatDate } from "@schedule-app/i18n";
+import {
+  formatAccessibleDate,
+  formatCompactDate,
+  formatCurrency,
+  formatDate,
+} from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { MonthCalendarDay } from "../../features/calendar/monthCalendar";
@@ -14,6 +19,7 @@ type MonthCalendarProps = {
   readonly onSelectDate: (date: string) => void;
   readonly selectedDate: string;
   readonly t: DashboardTabProps["t"];
+  readonly timezone: string;
 };
 
 export function MonthCalendar({
@@ -23,6 +29,7 @@ export function MonthCalendar({
   onSelectDate,
   selectedDate,
   t,
+  timezone,
 }: MonthCalendarProps) {
   const selectedDay = days.find((day) => day.date === selectedDate);
   const monthLabel = formatDate(
@@ -116,17 +123,18 @@ export function MonthCalendar({
       {selectedDay ? (
         <View style={styles.summary}>
           <View style={styles.summaryCopy}>
-            <Text style={styles.summaryDate}>
-              {formatDate(
+            <Text
+              accessibilityLabel={formatAccessibleDate(
                 new Date(`${selectedDay.date}T12:00:00.000Z`),
                 locale,
-                {
-                  day: "numeric",
-                  month: "long",
-                  timeZone: "UTC",
-                  weekday: "long",
-                  year: "numeric",
-                },
+                timezone,
+              )}
+              style={styles.summaryDate}
+            >
+              {formatCompactDate(
+                new Date(`${selectedDay.date}T12:00:00.000Z`),
+                locale,
+                { timeZone: timezone },
               )}
             </Text>
             <Text style={styles.summaryDetails}>

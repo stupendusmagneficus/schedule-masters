@@ -1,5 +1,5 @@
 import type { SupportedLocale } from "@schedule-app/i18n";
-import { formatDate } from "@schedule-app/i18n";
+import { formatAccessibleDate, formatCompactDate } from "@schedule-app/i18n";
 
 import type { MasterAppointment } from "../appointments/manualBooking";
 import {
@@ -95,12 +95,21 @@ export function buildCalendarFeed({
 export function formatCalendarFeedDate(
   date: string,
   locale: SupportedLocale,
+  timezone = "Europe/Prague",
 ): string {
-  return formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-    weekday: "long",
-    year: "numeric",
+  return formatCompactDate(new Date(`${date}T12:00:00.000Z`), locale, {
+    timeZone: timezone,
   });
+}
+
+export function getCalendarFeedDateAccessibilityLabel(
+  date: string,
+  locale: SupportedLocale,
+  timezone = "Europe/Prague",
+): string {
+  return formatAccessibleDate(
+    new Date(`${date}T12:00:00.000Z`),
+    locale,
+    timezone,
+  );
 }

@@ -1649,6 +1649,68 @@ export function formatDate(
   return new Intl.DateTimeFormat(getIntlLocale(locale), options).format(value);
 }
 
+export type CompactDateOptions = {
+  readonly timeZone?: string;
+};
+
+const defaultDateTimeZone = "Europe/Prague";
+
+export function formatCompactDate(
+  value: Date | number,
+  locale: SupportedLocale,
+  options: CompactDateOptions = {},
+): string {
+  const timeZone = options.timeZone ?? defaultDateTimeZone;
+  const date = value instanceof Date ? value : new Date(value);
+
+  return formatDate(date, locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone,
+  });
+}
+
+export function formatCompactDateRange(
+  from: Date | number,
+  to: Date | number,
+  locale: SupportedLocale,
+  options: CompactDateOptions = {},
+): string {
+  const timeZone = options.timeZone ?? defaultDateTimeZone;
+  const fromDate = from instanceof Date ? from : new Date(from);
+  const toDate = to instanceof Date ? to : new Date(to);
+  const format = (date: Date) => {
+    if (locale === "cz") {
+      const day = formatDate(date, locale, { day: "numeric", timeZone });
+      const month = formatDate(date, locale, { month: "short", timeZone });
+      const year = formatDate(date, locale, { year: "numeric", timeZone });
+
+      return `${day} ${month} ${year}`;
+    }
+
+    return formatDate(date, locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone,
+    });
+  };
+
+  return `${format(fromDate)} – ${format(toDate)}`;
+}
+
+export function formatAccessibleDate(
+  value: Date | number,
+  locale: SupportedLocale,
+  timeZone = defaultDateTimeZone,
+): string {
+  return formatDate(value, locale, {
+    dateStyle: "full",
+    timeZone,
+  });
+}
+
 export function formatTime(
   value: Date | number,
   locale: SupportedLocale,

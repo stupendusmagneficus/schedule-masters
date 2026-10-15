@@ -1,6 +1,11 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
-import { formatDate, formatTime, getIntlLocale } from "@schedule-app/i18n";
+import {
+  formatAccessibleDate,
+  formatCompactDate,
+  formatTime,
+  getIntlLocale,
+} from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
 import {
@@ -175,15 +180,14 @@ export function CustomersTab({
         {directory.history.map((visit) => (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${formatDate(new Date(visit.starts_at), locale, { timeZone: workspace.timezone })} ${visit.service_name}`}
+            accessibilityLabel={`${formatAccessibleDate(new Date(visit.starts_at), locale, workspace.timezone)} ${visit.service_name}`}
             key={visit.id}
             onPress={() => onSelectAppointment(visit)}
           >
             <InfoCard style={styles.visitCard}>
               <View style={styles.visitHeading}>
                 <Text style={styles.visitDate}>
-                  {formatDate(new Date(visit.starts_at), locale, {
-                    dateStyle: "medium",
+                  {formatCompactDate(new Date(visit.starts_at), locale, {
                     timeZone: workspace.timezone,
                   })}
                   {" · "}

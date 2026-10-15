@@ -52,6 +52,7 @@ Use `.ios.tsx` or `.android.tsx` only for genuine native differences. Do not use
 - Mobile controls must expose accessible labels, roles, states, and hints where visual context is insufficient.
 - Every interactive component must define pressed, disabled, loading, error, and focus-visible behavior where applicable.
 - Date and calendar components must support keyboard navigation on web and VoiceOver-friendly labels on iOS.
+- Standalone page headings, cards, and list dates use the shared localized day, full month, and year formatter. Date ranges use abbreviated month names and show the year on both dates, including same-year ranges. Keep a full localized weekday date in accessibility labels, and preserve ISO date values and workspace day-boundary calculations.
 - Visual QA must include small screens, dynamic text sizing, reduced motion, light/dark appearance, and RU/CZ/EN text expansion.
 
 ## Component ownership

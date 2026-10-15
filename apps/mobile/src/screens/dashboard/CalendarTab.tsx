@@ -1,5 +1,9 @@
 import type { Database } from "@schedule-app/api";
-import { formatDate, formatTime } from "@schedule-app/i18n";
+import {
+  formatAccessibleDate,
+  formatCompactDate,
+  formatTime,
+} from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import {
@@ -40,6 +44,7 @@ import {
 } from "../../features/calendar/monthCalendar";
 import {
   type CalendarDataController,
+  getAccessibleCalendarLabel,
   getCalendarDateLabel,
   getCalendarFeedLabel,
   getCalendarWeekLabel,
@@ -87,10 +92,18 @@ export function CalendarTab({
   const [feedFilter, setFeedFilter] = useState<CalendarFeedFilter>("future");
   const dateLabel =
     calendar.view === "week"
-      ? getCalendarWeekLabel(calendar.selectedDate, locale)
+      ? getCalendarWeekLabel(calendar.selectedDate, locale, workspace.timezone)
       : calendar.view === "feed"
-        ? getCalendarFeedLabel(calendar.selectedDate, locale)
-        : getCalendarDateLabel(calendar.selectedDate, locale);
+        ? getCalendarFeedLabel(
+            calendar.selectedDate,
+            locale,
+            workspace.timezone,
+          )
+        : getCalendarDateLabel(
+            calendar.selectedDate,
+            locale,
+            workspace.timezone,
+          );
   const timeline = demoData
     ? buildDemoDayTimeline(demoData.appointments)
     : buildDayTimeline({
@@ -173,6 +186,14 @@ export function CalendarTab({
             actionLabel={t("mobile.profile")}
             onAction={onOpenProfile}
             subtitle={dateLabel}
+            subtitleAccessibilityLabel={getAccessibleCalendarLabel(
+              calendar.selectedDate,
+              calendar.view === "week" || calendar.view === "feed"
+                ? calendar.view
+                : "day",
+              locale,
+              workspace.timezone,
+            )}
             title={t("mobile.calendar")}
           />
           <View style={styles.calendarToolbar}>
@@ -304,6 +325,7 @@ export function CalendarTab({
               onSelectDate={calendar.setSelectedDate}
               selectedDate={calendar.selectedDate}
               t={t}
+              timezone={workspace.timezone}
             />
           ) : calendar.view === "feed" ? (
             calendar.error && !demoData ? (
@@ -475,9 +497,7 @@ function PersonalBlockRow({
   readonly t: DashboardTabProps["t"];
   readonly timezone: string;
 }) {
-  const date = formatDate(new Date(block.starts_at), locale, {
-    day: "numeric",
-    month: "short",
+  const date = formatCompactDate(new Date(block.starts_at), locale, {
     timeZone: timezone,
   });
   const start = formatTime(new Date(block.starts_at), locale, {
@@ -497,7 +517,14 @@ function PersonalBlockRow({
         <Text style={styles.blockTitle}>
           {block.reason || t("mobile.personalBlocks")}
         </Text>
-        <Text style={styles.helper}>
+        <Text
+          accessibilityLabel={`${formatAccessibleDate(
+            new Date(block.starts_at),
+            locale,
+            timezone,
+          )}, ${start} – ${end}`}
+          style={styles.helper}
+        >
           {date} · {start} – {end}
         </Text>
       </View>

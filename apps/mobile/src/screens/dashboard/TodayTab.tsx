@@ -1,4 +1,9 @@
-import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
+import {
+  formatAccessibleDate,
+  formatCompactDate,
+  formatCurrency,
+  formatTime,
+} from "@schedule-app/i18n";
 import {
   ActivityIndicator,
   Pressable,
@@ -46,10 +51,9 @@ export function TodayTab({
   t,
   workspace,
 }: TodayTabProps) {
-  const today = formatDate(new Date(), locale, {
-    day: "numeric",
-    month: "long",
-    weekday: "long",
+  const now = new Date();
+  const today = formatCompactDate(now, locale, {
+    timeZone: workspace.timezone,
   });
   const todayInWorkspace = formatDateInTimeZone(new Date(), workspace.timezone);
   const liveAppointments = masterAppointments.filter(
@@ -95,6 +99,11 @@ export function TodayTab({
         actionLabel={t("mobile.profile")}
         onAction={onOpenProfile}
         subtitle={today}
+        subtitleAccessibilityLabel={formatAccessibleDate(
+          now,
+          locale,
+          workspace.timezone,
+        )}
         title={t("mobile.today")}
       />
       {demoData ? (

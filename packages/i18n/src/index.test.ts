@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   defaultLocale,
   detectLocale,
+  formatAccessibleDate,
+  formatCompactDate,
+  formatCompactDateRange,
   formatCurrency,
   formatDate,
   formatTime,
@@ -54,5 +57,94 @@ describe("translations and formatting", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);
     expect(formatCurrency(149, "cz")).toContain("149");
+  });
+});
+
+describe("compact date formatting", () => {
+  it.each(["ru", "cz", "en"] as const)(
+    "shows the day, full month, and year for %s",
+    (locale) => {
+      const result = formatCompactDate(
+        new Date("2026-10-13T12:00:00.000Z"),
+        locale,
+        { timeZone: "Europe/Prague" },
+      );
+
+      expect(result).toMatch(/13/);
+      expect(result).toContain("2026");
+      expect(result).toBe(
+        formatDate(new Date("2026-10-13T12:00:00.000Z"), locale, {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/Prague",
+        }),
+      );
+    },
+  );
+
+  it.each(["ru", "cz", "en"] as const)(
+    "includes the year for another year in %s",
+    (locale) => {
+      expect(
+        formatCompactDate(new Date("2025-10-13T12:00:00.000Z"), locale, {
+          timeZone: "Europe/Prague",
+        }),
+      ).toContain("2025");
+    },
+  );
+
+  it("formats the date in the workspace timezone", () => {
+    const result = formatCompactDate(
+      new Date("2026-12-31T23:30:00.000Z"),
+      "en",
+      { timeZone: "Europe/Prague" },
+    );
+
+    expect(result).toContain("January 1, 2027");
+  });
+
+  it("shows years at both ends of a date range", () => {
+    const result = formatCompactDateRange(
+      new Date("2026-12-31T12:00:00.000Z"),
+      new Date("2027-01-02T12:00:00.000Z"),
+      "en",
+      { timeZone: "Europe/Prague" },
+    );
+
+    expect(result).toContain("2026");
+    expect(result).toContain("2027");
+  });
+
+  it("uses abbreviated Czech month names in cross-year ranges", () => {
+    const result = formatCompactDateRange(
+      new Date("2026-10-15T12:00:00.000Z"),
+      new Date("2027-01-12T12:00:00.000Z"),
+      "cz",
+      { timeZone: "Europe/Prague" },
+    );
+
+    expect(result).toBe("15. říj 2026 – 12. led 2027");
+  });
+
+  it("includes the year at both ends of a same-year range", () => {
+    const result = formatCompactDateRange(
+      new Date("2026-10-13T12:00:00.000Z"),
+      new Date("2026-10-20T12:00:00.000Z"),
+      "en",
+      { timeZone: "Europe/Prague" },
+    );
+
+    expect(result).toBe("Oct 13, 2026 – Oct 20, 2026");
+  });
+
+  it("provides a full date label for assistive technology", () => {
+    expect(
+      formatAccessibleDate(
+        new Date("2026-10-13T12:00:00.000Z"),
+        "en",
+        "Europe/Prague",
+      ),
+    ).toContain("2026");
   });
 });
