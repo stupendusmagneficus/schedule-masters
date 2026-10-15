@@ -19,6 +19,13 @@ export type WaitingListDraft = {
 
 type WaitingListClient = SupabaseClient<Database>;
 
+export function getWaitingListCustomerSearchQuery(
+  value: string,
+): string | null {
+  const query = value.trim();
+  return query.length > 0 ? query : null;
+}
+
 export async function listMasterWaitingList(
   client: WaitingListClient,
   workspaceId: string,

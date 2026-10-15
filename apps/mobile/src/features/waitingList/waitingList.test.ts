@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
   createMasterWaitingListCustomer,
+  getWaitingListCustomerSearchQuery,
   listMasterWaitingList,
   listMasterWaitingListMatches,
   moveBookingRequestToWaitingList,
@@ -12,6 +13,11 @@ import {
 } from "./waitingList";
 
 describe("master waiting list API", () => {
+  it("requires a search term before querying existing customers", () => {
+    expect(getWaitingListCustomerSearchQuery("  ")).toBeNull();
+    expect(getWaitingListCustomerSearchQuery("  Anna  ")).toBe("Anna");
+  });
+
   it("loads entries scoped to the current workspace", async () => {
     const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
     const client = { rpc } as unknown as SupabaseClient<Database>;

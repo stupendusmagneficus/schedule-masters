@@ -122,6 +122,8 @@ export type MessageKey =
   | "mobile.waitingListAddNew"
   | "mobile.waitingListEdit"
   | "mobile.waitingListCustomer"
+  | "mobile.waitingListSearchCustomerLabel"
+  | "mobile.waitingListSearchCustomer"
   | "mobile.waitingListCustomerName"
   | "mobile.waitingListSelectedCustomer"
   | "mobile.waitingListEmail"
@@ -562,6 +564,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListAddNew": "Создать нового клиента",
     "mobile.waitingListEdit": "Запись в листе ожидания",
     "mobile.waitingListCustomer": "Клиент или новый контакт",
+    "mobile.waitingListSearchCustomerLabel": "Поиск клиента",
+    "mobile.waitingListSearchCustomer":
+      "Введите имя, телефон или email для поиска клиента",
     "mobile.waitingListCustomerName": "Имя клиента",
     "mobile.waitingListSelectedCustomer": "Выбран клиент: {name}",
     "mobile.waitingListEmail": "Email клиента",
@@ -1046,6 +1051,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListAddNew": "Vytvořit nového klienta",
     "mobile.waitingListEdit": "Záznam v seznamu náhradníků",
     "mobile.waitingListCustomer": "Klient nebo nový kontakt",
+    "mobile.waitingListSearchCustomerLabel": "Vyhledat klienta",
+    "mobile.waitingListSearchCustomer":
+      "Zadejte jméno, telefon nebo e-mail a vyhledejte klienta",
     "mobile.waitingListCustomerName": "Jméno klienta",
     "mobile.waitingListSelectedCustomer": "Vybraný klient: {name}",
     "mobile.waitingListEmail": "E-mail klienta",
@@ -1529,6 +1537,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListAddNew": "Create new client",
     "mobile.waitingListEdit": "Waiting list entry",
     "mobile.waitingListCustomer": "Customer or new contact",
+    "mobile.waitingListSearchCustomerLabel": "Search for a client",
+    "mobile.waitingListSearchCustomer":
+      "Enter a name, phone, or email to search for a client",
     "mobile.waitingListCustomerName": "Customer name",
     "mobile.waitingListSelectedCustomer": "Selected client: {name}",
     "mobile.waitingListEmail": "Customer email",
