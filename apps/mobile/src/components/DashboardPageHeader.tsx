@@ -4,9 +4,9 @@ import { typography } from "../theme/typography";
 import { DashboardHeaderAction } from "./DashboardHeaderAction";
 
 type DashboardPageHeaderProps = {
-  readonly actionLabel: string;
+  readonly actionLabel?: string;
   readonly centeredTitle?: boolean;
-  readonly onAction: () => void;
+  readonly onAction?: () => void;
   readonly subtitle?: string;
   readonly subtitleAccessibilityLabel?: string;
   readonly title: string;
@@ -22,9 +22,16 @@ export function DashboardPageHeader({
   title,
   titleAccessibilityLabel,
 }: DashboardPageHeaderProps) {
+  const hasAction = Boolean(actionLabel && onAction);
   return (
     <View style={[styles.row, centeredTitle && styles.centeredRow]}>
-      <View style={[styles.copy, centeredTitle && styles.centeredCopy]}>
+      <View
+        style={[
+          styles.copy,
+          centeredTitle && styles.centeredCopy,
+          centeredTitle && !hasAction && styles.centeredCopyWithoutAction,
+        ]}
+      >
         <Text
           accessibilityLabel={titleAccessibilityLabel}
           accessibilityRole="header"
@@ -42,13 +49,15 @@ export function DashboardPageHeader({
           </Text>
         ) : null}
       </View>
-      <View style={centeredTitle && styles.centeredAction}>
-        <DashboardHeaderAction
-          accessibilityLabel={actionLabel}
-          icon="account-circle-outline"
-          onPress={onAction}
-        />
-      </View>
+      {actionLabel && onAction ? (
+        <View style={centeredTitle && styles.centeredAction}>
+          <DashboardHeaderAction
+            accessibilityLabel={actionLabel}
+            icon="account-circle-outline"
+            onPress={onAction}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -57,6 +66,7 @@ const styles = StyleSheet.create({
   copy: { flex: 1, gap: 4, minWidth: 0 },
   centeredAction: { position: "absolute", right: 0, top: 0 },
   centeredCopy: { alignItems: "center", paddingHorizontal: 56, width: "100%" },
+  centeredCopyWithoutAction: { paddingHorizontal: 0 },
   centeredRow: { justifyContent: "center", position: "relative" },
   centeredText: { textAlign: "center" },
   row: { alignItems: "flex-start", flexDirection: "row", gap: 12 },

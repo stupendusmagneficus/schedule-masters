@@ -50,7 +50,6 @@ type TodayTabProps = DashboardTabProps & {
   readonly onOpenFreeSlots: () => void;
   readonly onPreviousDay: () => void;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
-  readonly onOpenProfile: () => void;
   readonly selectedDate: string;
   readonly workspace: Workspace;
 };
@@ -72,7 +71,6 @@ export function TodayTab({
   onOpenFreeSlots,
   onPreviousDay,
   onSelectAppointment,
-  onOpenProfile,
   hasActiveServices,
   selectedDate,
   t,
@@ -114,9 +112,7 @@ export function TodayTab({
   return (
     <View style={styles.content}>
       <DashboardPageHeader
-        actionLabel={t("mobile.profile")}
         centeredTitle
-        onAction={onOpenProfile}
         subtitle={isToday ? dateLabel : undefined}
         subtitleAccessibilityLabel={
           isToday

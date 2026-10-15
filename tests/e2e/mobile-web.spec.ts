@@ -103,19 +103,52 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
-  test("keeps profile out of the bottom tabs and opens it from the header", async ({
+  test("opens Profile from the five bottom tabs at a narrow viewport", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+    await page.setViewportSize({ width: 320, height: 720 });
     await page.goto("/?demo=1");
 
-    await expect(page.getByRole("tab")).toHaveCount(4);
+    await expect(page.getByRole("tab")).toHaveCount(5);
+    for (const label of ["Dnes", "Kalendář", "Klienti", "Finance", "Profil"]) {
+      await expect(page.getByRole("tab", { name: label })).toBeVisible();
+    }
     await expect(page.getByRole("tab", { name: "Finance" })).toBeVisible();
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
-    await expect(page.getByText("Profil", { exact: true })).toBeVisible();
-    await expect(page.getByRole("tab")).toHaveCount(4);
+    await expect(
+      page.getByRole("button", { name: "Profil", exact: true }),
+    ).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Zpět", exact: true }).click();
+    const tabTargets = await page.getByRole("tab").evaluateAll((tabs) =>
+      tabs.map((tab) => {
+        const bounds = tab.getBoundingClientRect();
+        return {
+          height: bounds.height,
+          left: bounds.left,
+          right: bounds.right,
+          width: bounds.width,
+        };
+      }),
+    );
+    for (const target of tabTargets) {
+      expect(target.width).toBeGreaterThanOrEqual(44);
+      expect(target.height).toBeGreaterThanOrEqual(44);
+      expect(target.left).toBeGreaterThanOrEqual(0);
+      expect(target.right).toBeLessThanOrEqual(320);
+    }
+
+    await page.getByRole("tab", { name: "Profil" }).click();
+    await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Profil" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await page.getByRole("tab", { name: "Klienti" }).click();
+    await expect(page.getByRole("heading", { name: "Klienti" })).toBeVisible();
+    await page.getByRole("tab", { name: "Profil" }).click();
+    await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Zpět" })).toHaveCount(0);
+    await page.getByRole("tab", { name: "Dnes" }).click();
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
   });
 

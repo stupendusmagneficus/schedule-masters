@@ -129,7 +129,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 **First viewport order:**
 
-1. Compact top bar: current date, profile/settings entry and locale-independent status affordances.
+1. Compact top bar: current date and locale-independent status affordances.
 2. Greeting plus a concise date label.
 3. Primary action: floating `New booking` action above the bottom navigation.
 4. Today summary: number of bookings, received revenue and next appointment. Received revenue starts at zero and grows only after the master saves payment for a completed appointment. Keep it visible in the first viewport.
@@ -212,12 +212,13 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 ### Mobile master app
 
-Use a small fixed bottom navigation with four primary destinations:
+Use a small fixed bottom navigation with five primary destinations:
 
 - Today
 - Calendar
 - Customers
 - Finances
+- Profile
 
 This is an information architecture decision, not only a visual grouping:
 
@@ -228,7 +229,7 @@ This is an information architecture decision, not only a visual grouping:
 - **Customers** supports customer lookup and customer history.
 - **Finances** gives a quick view of expected and actual income.
 
-Profile is a low-frequency configuration surface and is reached from the profile action in the top page header. It contains the master profile, public booking link, language, subscription, and settings.
+Profile is a low-frequency configuration surface with a dedicated bottom navigation destination. It contains the master profile, public booking link, language, subscription, and settings. Do not duplicate profile navigation actions in page headers.
 
 The destinations are intentionally ordered by frequency of use. Messages,
 Explore, Inbox and client discovery are not MVP destinations: adding them now
