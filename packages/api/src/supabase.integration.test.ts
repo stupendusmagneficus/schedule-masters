@@ -1957,6 +1957,7 @@ describe("master waiting list RPC", () => {
           "create_master_waiting_list_entry",
           {
             p_customer_name: "Long Service Anna",
+            p_customer_email: "long-service@example.test",
             p_desired_date: "2030-01-03",
             p_service_id: longerServiceId,
             p_workspace_id: workspaceId,
@@ -2077,7 +2078,7 @@ describe("master waiting list RPC", () => {
           p_workspace_id: workspaceId,
         });
         expect(list.error).toBeNull();
-        expect(list.data).toHaveLength(2);
+        expect(list.data).toHaveLength(3);
         expect(list.data?.find(({ id }) => id === entry.data)?.status).toBe(
           "booked",
         );
