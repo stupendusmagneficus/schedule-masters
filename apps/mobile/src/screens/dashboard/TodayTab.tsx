@@ -35,7 +35,11 @@ type TodayTabProps = DashboardTabProps & {
   readonly masterAppointments?: readonly MasterAppointment[];
   readonly appointmentsError?: string | null;
   readonly appointmentsLoading?: boolean;
+  readonly bookingRequestCount: number | null;
+  readonly bookingRequestsError: boolean;
+  readonly bookingRequestsLoading: boolean;
   readonly onRetryAppointments?: () => void;
+  readonly onOpenBookingRequests: () => void;
   readonly onGoToToday: () => void;
   readonly onNextDay: () => void;
   readonly hasActiveServices: boolean;
@@ -54,6 +58,10 @@ export function TodayTab({
   appointmentsError = null,
   appointmentsLoading = false,
   onRetryAppointments,
+  bookingRequestCount,
+  bookingRequestsError,
+  bookingRequestsLoading,
+  onOpenBookingRequests,
   onGoToToday,
   onNextDay,
   onOpenFreeSlots,
@@ -197,6 +205,45 @@ export function TodayTab({
         />
       ) : null}
 
+      {!demoData ? (
+        <Pressable
+          accessibilityLabel={
+            bookingRequestCount === null
+              ? t("mobile.bookingRequests")
+              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
+          }
+          accessibilityRole="button"
+          onPress={onOpenBookingRequests}
+          style={({ pressed }) => [
+            styles.bookingRequestsAction,
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={styles.bookingRequestsCopy}>
+            <Text style={styles.bookingRequestsTitle}>
+              {t("mobile.bookingRequests")}
+            </Text>
+          </View>
+          {bookingRequestsLoading && bookingRequestCount === null ? (
+            <ActivityIndicator color={colors.pendingText} />
+          ) : bookingRequestsError ? (
+            <View style={styles.requestError}>
+              <MaterialCommunityIcons
+                accessibilityElementsHidden
+                color={colors.danger}
+                name="alert-circle-outline"
+                size={20}
+              />
+              <Text style={styles.requestErrorText}>{t("common.error")}</Text>
+            </View>
+          ) : bookingRequestCount !== null ? (
+            <View style={styles.requestCount}>
+              <Text style={styles.requestCountText}>{bookingRequestCount}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+      ) : null}
+
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
           <Text style={styles.sectionTitle}>
@@ -294,6 +341,43 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appointmentsList: { gap: 12 },
+  bookingRequestsAction: {
+    alignItems: "center",
+    backgroundColor: colors.pendingSoft,
+    borderColor: colors.border,
+    borderRadius: radii.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 56,
+    paddingHorizontal: 16,
+  },
+  bookingRequestsCopy: { flex: 1 },
+  bookingRequestsTitle: {
+    ...typography.body,
+    color: colors.pendingText,
+    fontWeight: "700",
+  },
+  requestCount: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radii.pill,
+    justifyContent: "center",
+    minHeight: 36,
+    minWidth: 36,
+    paddingHorizontal: 10,
+  },
+  requestCountText: {
+    ...typography.label,
+    color: colors.pendingText,
+    fontWeight: "700",
+  },
+  requestError: { alignItems: "center", flexDirection: "row", gap: 4 },
+  requestErrorText: {
+    ...typography.caption,
+    color: colors.danger,
+    fontWeight: "700",
+  },
   dayNavigation: {
     alignItems: "center",
     flexDirection: "row",

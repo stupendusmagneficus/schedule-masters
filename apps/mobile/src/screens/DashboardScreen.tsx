@@ -7,6 +7,7 @@ import { Linking, ScrollView, Share, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ActionFeedback } from "../components/ActionFeedback";
 import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
+import { BookingRequestsModal } from "../components/BookingRequestsModal";
 import {
   BottomNavigation,
   type MobileTab,
@@ -24,6 +25,7 @@ import {
   setMasterAppointmentStatus,
 } from "../features/appointments/manualBooking";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
+import { useBookingRequests } from "../features/bookingRequests/useBookingRequests";
 import { useCalendarData } from "../features/calendar/useCalendarData";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
 import {
@@ -81,6 +83,7 @@ export function DashboardScreen({
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
+  const [isBookingRequestsVisible, setBookingRequestsVisible] = useState(false);
   const [manualBookingServiceId, setManualBookingServiceId] = useState<
     string | null
   >(null);
@@ -102,12 +105,20 @@ export function DashboardScreen({
   >(null);
   const [isUpdatingAppointment, setUpdatingAppointment] = useState(false);
   const [appointmentActionError, setAppointmentActionError] = useState(false);
+  const [bookingRequestActionError, setBookingRequestActionError] =
+    useState(false);
+  const [savingRequestId, setSavingRequestId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const dismissFeedback = useCallback(() => setFeedback(null), []);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const calendar = useCalendarData({
     client,
     timezone: workspace.timezone,
+    workspaceId: workspace.id,
+  });
+  const bookingRequests = useBookingRequests({
+    client,
+    enabled: activeTab === "today" && !demoData,
     workspaceId: workspace.id,
   });
   const serviceCatalog = useServiceCatalog({
@@ -146,7 +157,7 @@ export function DashboardScreen({
     setAppointmentActionError(false);
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
-      await calendar.reload();
+      await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (status === "completed") {
         setSelectedAppointment({ ...selectedAppointment, status });
       } else {
@@ -157,6 +168,27 @@ export function DashboardScreen({
       setAppointmentActionError(true);
     } finally {
       setUpdatingAppointment(false);
+    }
+  }
+
+  async function respondToBookingRequest(
+    appointmentId: string,
+    status: AppointmentStatus,
+  ): Promise<boolean> {
+    if (!client) return false;
+    setSavingRequestId(appointmentId);
+    setBookingRequestActionError(false);
+    try {
+      await setMasterAppointmentStatus(client, appointmentId, status);
+      await Promise.all([calendar.reload(), bookingRequests.reload()]);
+      setFeedback(t("mobile.bookingRequestUpdated"));
+      return true;
+    } catch {
+      setBookingRequestActionError(true);
+      await bookingRequests.reload();
+      return false;
+    } finally {
+      setSavingRequestId(null);
     }
   }
 
@@ -255,7 +287,17 @@ export function DashboardScreen({
             masterAppointments={calendar.appointments}
             appointmentsError={calendar.error}
             appointmentsLoading={calendar.isLoading}
+            bookingRequestCount={
+              bookingRequests.error ? null : bookingRequests.requests.length
+            }
+            bookingRequestsError={Boolean(bookingRequests.error)}
+            bookingRequestsLoading={bookingRequests.isLoading}
             onRetryAppointments={() => void calendar.reload()}
+            onOpenBookingRequests={() => {
+              setBookingRequestActionError(false);
+              setBookingRequestsVisible(true);
+              void bookingRequests.reload();
+            }}
             onGoToToday={calendar.goToTodayDay}
             onNextDay={calendar.goToNextDay}
             hasActiveServices={bookingServices.length > 0}
@@ -419,6 +461,24 @@ export function DashboardScreen({
         t={t}
         timezone={workspace.timezone}
         visible={Boolean(selectedAppointment)}
+      />
+      <BookingRequestsModal
+        actionError={
+          bookingRequestActionError
+            ? t("mobile.bookingRequestActionFailed")
+            : null
+        }
+        error={bookingRequests.error}
+        isLoading={bookingRequests.isLoading}
+        locale={locale}
+        onClose={() => setBookingRequestsVisible(false)}
+        onRespond={respondToBookingRequest}
+        onRetry={() => void bookingRequests.reload()}
+        requests={bookingRequests.requests}
+        savingRequestId={savingRequestId}
+        t={t}
+        timezone={workspace.timezone}
+        visible={isBookingRequestsVisible}
       />
       <StatusBar style="dark" />
     </SafeAreaView>

@@ -23,7 +23,7 @@
     "supabase:stop": "npx supabase@2.117.0 stop",
     "supabase:status": "npx supabase@2.117.0 status",
     "supabase:reset": "npx supabase@2.117.0 db reset",
-    "supabase:types": "npx supabase@2.117.0 gen types typescript --local --schema public | sed '${/^$/d;}' | sed -E '/      list_master_customer_directory:/,/      list_master_customer_history:/ s/(email|last_completed_visit_at|notes|phone): string$/\\1: string | null/' > packages/api/src/supabase/database.types.ts"
+    "supabase:types": "npx supabase@2.117.0 gen types typescript --local --schema public | sed '${/^$/d;}' | sed -E '/      list_master_customer_directory:/,/      list_master_customer_history:/ s/(email|last_completed_visit_at|notes|phone): string$/\\1: string | null/' | sed -E '/      list_master_pending_booking_requests:/,/      record_customer_link_share:/ s/(customer_email|customer_phone): string$/\\1: string | null/' > packages/api/src/supabase/database.types.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
