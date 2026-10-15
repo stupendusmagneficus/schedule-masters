@@ -55,7 +55,9 @@ test.describe("mobile web smoke", () => {
         headingRight: headingBounds.right,
         headingTop: headingBounds.top,
         nextTop: nextBounds.top,
+        nextLeft: nextBounds.left,
         previousBottom: previousBounds.bottom,
+        previousRight: previousBounds.right,
         previousTop: previousBounds.top,
       };
     });
@@ -69,6 +71,13 @@ test.describe("mobile web smoke", () => {
     expect(dayHeaderGeometry?.nextTop).toBeLessThan(
       dayHeaderGeometry?.headingBottom ?? 0,
     );
+    expect(dayHeaderGeometry?.previousRight).toBeLessThanOrEqual(
+      dayHeaderGeometry?.headingLeft ?? 0,
+    );
+    expect(dayHeaderGeometry?.nextLeft).toBeGreaterThanOrEqual(
+      dayHeaderGeometry?.headingRight ?? Number.POSITIVE_INFINITY,
+    );
+    const initialPreviousTop = dayHeaderGeometry?.previousTop;
     const twoDaysAgo = await page.evaluate(() => {
       const parts = new Intl.DateTimeFormat("en", {
         day: "numeric",
@@ -95,6 +104,10 @@ test.describe("mobile web smoke", () => {
     await previousDayButton.click();
 
     await expect(page.getByRole("heading", { name: twoDaysAgo })).toBeVisible();
+    const selectedDayArrowTop = await previousDayButton.evaluate(
+      (button) => button.getBoundingClientRect().top,
+    );
+    expect(selectedDayArrowTop).toBe(initialPreviousTop);
     await expect(
       page.getByRole("button", { name: "Dnes", exact: true }),
     ).toBeVisible();

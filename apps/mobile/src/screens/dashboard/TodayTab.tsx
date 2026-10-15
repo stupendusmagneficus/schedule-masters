@@ -122,6 +122,15 @@ export function TodayTab({
           icon: "arrow-right",
           onPress: onNextDay,
         }}
+        subtitleAction={
+          isToday
+            ? undefined
+            : {
+                accessibilityLabel: t("mobile.today"),
+                label: t("mobile.today"),
+                onPress: onGoToToday,
+              }
+        }
         subtitle={isToday ? dateLabel : undefined}
         subtitleAccessibilityLabel={
           isToday
@@ -143,19 +152,6 @@ export function TodayTab({
               )
         }
       />
-      {!isToday ? (
-        <Pressable
-          accessibilityLabel={t("mobile.today")}
-          accessibilityRole="button"
-          onPress={onGoToToday}
-          style={({ pressed }) => [
-            styles.todayButton,
-            pressed && styles.pressed,
-          ]}
-        >
-          <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
-        </Pressable>
-      ) : null}
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
@@ -386,22 +382,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   freeSlotsActionText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
-  todayButton: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.border,
-    borderRadius: radii.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  todayButtonText: {
     ...typography.label,
     color: colors.accent,
     fontWeight: "700",

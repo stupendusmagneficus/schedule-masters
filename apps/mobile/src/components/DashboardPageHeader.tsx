@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import {
@@ -9,6 +9,11 @@ import {
 type DashboardPageHeaderProps = {
   readonly centeredTitle?: boolean;
   readonly leadingAction?: DashboardHeaderActionProps;
+  readonly subtitleAction?: {
+    readonly accessibilityLabel: string;
+    readonly label: string;
+    readonly onPress: () => void;
+  };
   readonly trailingAction?: DashboardHeaderActionProps;
   readonly subtitle?: string;
   readonly subtitleAccessibilityLabel?: string;
@@ -19,72 +24,104 @@ type DashboardPageHeaderProps = {
 export function DashboardPageHeader({
   centeredTitle = false,
   leadingAction,
+  subtitleAction,
   trailingAction,
   subtitle,
   subtitleAccessibilityLabel,
   title,
   titleAccessibilityLabel,
 }: DashboardPageHeaderProps) {
-  const hasActions = Boolean(leadingAction || trailingAction);
   return (
     <View style={[styles.row, centeredTitle && styles.centeredRow]}>
-      {leadingAction ? (
-        <View style={centeredTitle && styles.centeredLeadingAction}>
-          <DashboardHeaderAction {...leadingAction} />
+      {centeredTitle ? (
+        <View style={styles.actionSlot}>
+          {leadingAction ? <DashboardHeaderAction {...leadingAction} /> : null}
         </View>
+      ) : leadingAction ? (
+        <DashboardHeaderAction {...leadingAction} />
       ) : null}
-      <View
-        style={[
-          styles.copy,
-          centeredTitle && styles.centeredCopy,
-          centeredTitle && !hasActions && styles.centeredCopyWithoutAction,
-        ]}
-      >
+      <View style={[styles.copy, centeredTitle && styles.centeredCopy]}>
         <Text
+          adjustsFontSizeToFit={centeredTitle}
           accessibilityLabel={titleAccessibilityLabel}
           accessibilityRole="header"
-          numberOfLines={2}
+          minimumFontScale={centeredTitle ? 0.8 : 1}
+          numberOfLines={centeredTitle ? 1 : 2}
           style={[styles.title, centeredTitle && styles.centeredText]}
         >
           {title}
         </Text>
-        {subtitle ? (
-          <Text
-            accessibilityLabel={subtitleAccessibilityLabel}
-            style={[styles.subtitle, centeredTitle && styles.centeredText]}
-          >
-            {subtitle}
-          </Text>
+        {subtitle || subtitleAction ? (
+          <View style={centeredTitle && styles.centeredSubtitleSlot}>
+            {subtitle ? (
+              <Text
+                accessibilityLabel={subtitleAccessibilityLabel}
+                style={[styles.subtitle, centeredTitle && styles.centeredText]}
+              >
+                {subtitle}
+              </Text>
+            ) : subtitleAction ? (
+              <Pressable
+                accessibilityLabel={subtitleAction.accessibilityLabel}
+                accessibilityRole="button"
+                onPress={subtitleAction.onPress}
+                style={({ pressed }) => [
+                  styles.subtitleAction,
+                  pressed && styles.subtitleActionPressed,
+                ]}
+              >
+                <Text style={styles.subtitleActionText}>
+                  {subtitleAction.label}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         ) : null}
       </View>
-      {trailingAction ? (
-        <View style={centeredTitle && styles.centeredTrailingAction}>
-          <DashboardHeaderAction {...trailingAction} />
+      {centeredTitle ? (
+        <View style={styles.actionSlot}>
+          {trailingAction ? (
+            <DashboardHeaderAction {...trailingAction} />
+          ) : null}
         </View>
+      ) : trailingAction ? (
+        <DashboardHeaderAction {...trailingAction} />
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  actionSlot: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+    width: 48,
+  },
+  centeredCopy: { alignItems: "center" },
+  centeredRow: { alignItems: "center", justifyContent: "space-between" },
+  centeredSubtitleSlot: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+    width: "100%",
+  },
   copy: { flex: 1, gap: 4, minWidth: 0 },
-  centeredLeadingAction: {
-    left: 0,
-    position: "absolute",
-    top: "50%",
-    transform: [{ translateY: -24 }],
-  },
-  centeredCopy: { alignItems: "center", paddingHorizontal: 56, width: "100%" },
-  centeredCopyWithoutAction: { paddingHorizontal: 0 },
-  centeredRow: { justifyContent: "center", position: "relative" },
-  centeredTrailingAction: {
-    position: "absolute",
-    right: 0,
-    top: "50%",
-    transform: [{ translateY: -24 }],
-  },
   centeredText: { textAlign: "center" },
   row: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
+  subtitleAction: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    minWidth: 72,
+    paddingHorizontal: 16,
+  },
+  subtitleActionPressed: { backgroundColor: colors.subtleSurface },
+  subtitleActionText: { ...typography.label, color: colors.accent },
   subtitle: { ...typography.body, color: colors.secondaryText },
   title: { ...typography.heading, color: colors.primaryText },
 });
