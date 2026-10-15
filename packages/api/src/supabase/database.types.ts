@@ -777,7 +777,9 @@ export type Database = {
       }
       get_master_customer_contact: {
         Args: { p_customer_id: string; p_workspace_id: string }
-        Returns: { phone: string | null }[]
+        Returns: {
+          phone: string | null
+        }[]
       }
       get_master_month_available_slots: {
         Args: {
