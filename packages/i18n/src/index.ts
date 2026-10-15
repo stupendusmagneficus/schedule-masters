@@ -1650,7 +1650,6 @@ export function formatDate(
 }
 
 export type CompactDateOptions = {
-  readonly includeYear?: boolean;
   readonly referenceDate?: Date;
   readonly timeZone?: string;
 };
@@ -1664,15 +1663,12 @@ export function formatCompactDate(
 ): string {
   const timeZone = options.timeZone ?? defaultDateTimeZone;
   const date = value instanceof Date ? value : new Date(value);
-  const referenceDate = options.referenceDate ?? new Date();
-  const year = getDateYear(date, timeZone);
-  const currentYear = getDateYear(referenceDate, timeZone);
 
   return formatDate(date, locale, {
     day: "numeric",
-    month: "short",
+    month: "long",
+    year: "numeric",
     timeZone,
-    ...(options.includeYear || year !== currentYear ? { year: "numeric" } : {}),
   });
 }
 
@@ -1690,10 +1686,7 @@ export function formatCompactDateRange(
   const toYear = getDateYear(toDate, timeZone);
   const currentYear = getDateYear(referenceDate, timeZone);
   const includeYear =
-    options.includeYear ||
-    fromYear !== toYear ||
-    fromYear !== currentYear ||
-    toYear !== currentYear;
+    fromYear !== toYear || fromYear !== currentYear || toYear !== currentYear;
   const format = (date: Date) =>
     formatDate(date, locale, {
       day: "numeric",

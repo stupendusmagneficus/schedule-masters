@@ -16,7 +16,8 @@ describe("calendar date labels", () => {
     const result = getCalendarDateLabel(`${currentYear}-10-02`, "cz");
 
     expect(result).toContain("2");
-    expect(result).not.toContain(currentYear);
+    expect(result).toContain(currentYear);
+    expect(result).toContain("října");
   });
 
   it("formats the selected week using the selected Czech locale", () => {

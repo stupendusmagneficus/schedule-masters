@@ -64,62 +64,69 @@ describe("compact date formatting", () => {
   const referenceDate = new Date("2026-10-15T12:00:00.000Z");
 
   it.each(["ru", "cz", "en"] as const)(
-    "omits the year for an unambiguous current-year date in %s",
+    "shows the day, full month, and year for %s",
     (locale) => {
       const result = formatCompactDate(
         new Date("2026-10-13T12:00:00.000Z"),
         locale,
-        { referenceDate, timeZone: "Europe/Prague" },
+        { timeZone: "Europe/Prague" },
       );
 
       expect(result).toMatch(/13/);
-      expect(result).not.toContain("2026");
+      expect(result).toContain("2026");
+      expect(result).toBe(
+        formatDate(new Date("2026-10-13T12:00:00.000Z"), locale, {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/Prague",
+        }),
+      );
     },
   );
-
-  it("can keep the year when the surrounding context is ambiguous", () => {
-    expect(
-      formatCompactDate(new Date("2026-10-13T12:00:00.000Z"), "en", {
-        includeYear: true,
-        referenceDate,
-        timeZone: "Europe/Prague",
-      }),
-    ).toContain("2026");
-  });
 
   it.each(["ru", "cz", "en"] as const)(
     "includes the year for another year in %s",
     (locale) => {
       expect(
         formatCompactDate(new Date("2025-10-13T12:00:00.000Z"), locale, {
-          referenceDate,
           timeZone: "Europe/Prague",
         }),
       ).toContain("2025");
     },
   );
 
-  it("uses the workspace timezone to determine which year is current", () => {
-    const referenceDate = new Date("2026-12-31T23:30:00.000Z");
+  it("formats the date in the workspace timezone", () => {
     const result = formatCompactDate(
-      new Date("2027-01-01T00:30:00.000Z"),
+      new Date("2026-12-31T23:30:00.000Z"),
       "en",
-      { referenceDate, timeZone: "Europe/Prague" },
+      { timeZone: "Europe/Prague" },
     );
 
-    expect(result).not.toContain("2027");
+    expect(result).toContain("January 1, 2027");
   });
 
-  it("shows years at both ends of a range that crosses a year boundary", () => {
+  it("shows years at both ends of a date range", () => {
     const result = formatCompactDateRange(
       new Date("2026-12-31T12:00:00.000Z"),
       new Date("2027-01-02T12:00:00.000Z"),
       "en",
-      { referenceDate, timeZone: "Europe/Prague" },
+      { timeZone: "Europe/Prague" },
     );
 
     expect(result).toContain("2026");
     expect(result).toContain("2027");
+  });
+
+  it("keeps a same-year range compact", () => {
+    const result = formatCompactDateRange(
+      new Date("2026-10-13T12:00:00.000Z"),
+      new Date("2026-10-20T12:00:00.000Z"),
+      "en",
+      { referenceDate, timeZone: "Europe/Prague" },
+    );
+
+    expect(result).not.toContain("2026");
   });
 
   it("provides a full date label for assistive technology", () => {

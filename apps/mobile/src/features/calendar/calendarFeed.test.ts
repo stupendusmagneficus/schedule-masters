@@ -111,6 +111,7 @@ describe("calendar feed", () => {
     const result = formatCalendarFeedDate(`${year}-10-02`, "cz");
 
     expect(result).toContain("2");
-    expect(result).not.toContain(year);
+    expect(result).toContain(year);
+    expect(result).toContain("října");
   });
 });
