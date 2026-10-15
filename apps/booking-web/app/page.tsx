@@ -25,6 +25,7 @@ import {
   getNextBookableDate,
   parseDateInput,
 } from "../src/utils/dates";
+import { isValidBookingEmail } from "../src/utils/emailValidation";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -280,6 +281,14 @@ export default function HomePage() {
       setError(t("booking.nameRequired"));
       return;
     }
+    if (!email.trim()) {
+      setError(t("booking.emailRequired"));
+      return;
+    }
+    if (!isValidBookingEmail(email)) {
+      setError(t("booking.emailInvalid"));
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
@@ -311,6 +320,7 @@ export default function HomePage() {
           p_customer_note: note || undefined,
           p_email: email,
           p_idempotency_key: idempotencyKey,
+          p_locale: locale,
           p_name: name,
           p_phone: phone,
           p_service_id: selectedService.id,
@@ -570,16 +580,21 @@ export default function HomePage() {
             <label>
               <span>
                 {t("booking.email")}{" "}
-                <span className="optional-label">
-                  ({t("booking.optional")})
+                <span className="required-marker" aria-hidden="true">
+                  *
                 </span>
               </span>
               <input
-                aria-label={`${t("booking.email")} (${t("booking.optional")})`}
+                aria-required="true"
+                autoComplete="email"
                 onChange={(event) => setEmail(event.target.value)}
+                required
                 type="email"
                 value={email}
               />
+              <span className="muted-copy">
+                {t("booking.emailNotificationNotice")}
+              </span>
             </label>
             <label>
               <span>

@@ -146,6 +146,7 @@ export type MessageKey =
   | "mobile.bookingRequestDeclinePrompt"
   | "mobile.bookingRequestActionFailed"
   | "mobile.bookingRequestUpdated"
+  | "mobile.bookingRequestEmailNotConfigured"
   | "mobile.minutes"
   | "mobile.available"
   | "mobile.pending"
@@ -376,6 +377,9 @@ export type MessageKey =
   | "booking.yourDetails"
   | "booking.name"
   | "booking.email"
+  | "booking.emailRequired"
+  | "booking.emailInvalid"
+  | "booking.emailNotificationNotice"
   | "booking.phone"
   | "booking.note"
   | "booking.confirm"
@@ -576,6 +580,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Не удалось обновить заявку. Возможно, её статус уже изменился. Обновите список.",
     "mobile.bookingRequestUpdated": "Решение по заявке сохранено.",
+    "mobile.bookingRequestEmailNotConfigured":
+      "Решение сохранено, но email-доставка пока не настроена. Клиент не получит уведомление, пока ее не включат.",
     "mobile.minutes": "мин",
     "mobile.available": "Свободно",
     "mobile.pending": "Ожидает подтверждения",
@@ -839,6 +845,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.yourDetails": "Ваши данные",
     "booking.name": "Имя",
     "booking.email": "Email",
+    "booking.emailRequired": "Укажите email, чтобы отправить заявку.",
+    "booking.emailInvalid": "Введите корректный email.",
+    "booking.emailNotificationNotice":
+      "На этот адрес придет письмо, когда мастер примет решение по заявке. Рекламных писем не будет.",
     "booking.phone": "Телефон",
     "booking.note": "Комментарий",
     "booking.confirm": "Подтвердить запись",
@@ -857,7 +867,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availableTimesForDate": "Свободное время на {date}",
     "booking.noSlotsForDate": "На {date} свободного времени нет.",
     "booking.requiredHint":
-      "Поля со знаком * обязательны. Email и телефон можно не заполнять.",
+      "Поля со знаком * обязательны. Email нужен, чтобы получить ответ мастера; телефон можно не указывать.",
     "booking.optional": "необязательно",
     "booking.manageUnavailableTitle": "Ссылка недействительна",
     "booking.manageUnavailable":
@@ -1037,6 +1047,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Žádost se nepodařilo aktualizovat. Její stav se možná změnil. Obnovte seznam.",
     "mobile.bookingRequestUpdated": "Rozhodnutí o žádosti bylo uloženo.",
+    "mobile.bookingRequestEmailNotConfigured":
+      "Rozhodnutí bylo uloženo, ale e-mailové doručování zatím není nastaveno. Klient oznámení nedostane, dokud nebude zapnuto.",
     "mobile.minutes": "min",
     "mobile.available": "Volno",
     "mobile.pending": "Čeká na potvrzení",
@@ -1297,6 +1309,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.yourDetails": "Vaše údaje",
     "booking.name": "Jméno",
     "booking.email": "E-mail",
+    "booking.emailRequired": "Zadejte e-mail pro odeslání žádosti.",
+    "booking.emailInvalid": "Zadejte platný e-mail.",
+    "booking.emailNotificationNotice":
+      "Na tuto adresu vám pošleme zprávu, až mistr rozhodne o žádosti. Reklamní e-maily neposíláme.",
     "booking.phone": "Telefon",
     "booking.note": "Poznámka",
     "booking.confirm": "Potvrdit rezervaci",
@@ -1315,7 +1331,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availableTimesForDate": "Volné termíny pro {date}",
     "booking.noSlotsForDate": "Pro {date} nejsou volné termíny.",
     "booking.requiredHint":
-      "Pole označená * jsou povinná. E-mail a telefon jsou nepovinné.",
+      "Pole označená * jsou povinná. E-mail potřebujeme, abychom vám oznámili rozhodnutí mistra; telefon je nepovinný.",
     "booking.optional": "nepovinné",
     "booking.manageUnavailableTitle": "Odkaz není platný",
     "booking.manageUnavailable":
@@ -1498,6 +1514,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Couldn't update the request. Its status may have changed. Refresh the list.",
     "mobile.bookingRequestUpdated": "Your decision was saved.",
+    "mobile.bookingRequestEmailNotConfigured":
+      "Your decision was saved, but email delivery is not configured yet. The client will not receive a notification until it is enabled.",
     "mobile.minutes": "min",
     "mobile.available": "Available",
     "mobile.pending": "Pending confirmation",
@@ -1765,6 +1783,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.yourDetails": "Your details",
     "booking.name": "Name",
     "booking.email": "Email",
+    "booking.emailRequired": "Enter your email to send the request.",
+    "booking.emailInvalid": "Enter a valid email address.",
+    "booking.emailNotificationNotice":
+      "We will email you when the master decides about your request. We will not send marketing emails.",
     "booking.phone": "Phone",
     "booking.note": "Note",
     "booking.confirm": "Confirm booking",
@@ -1783,7 +1805,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availableTimesForDate": "Available times for {date}",
     "booking.noSlotsForDate": "There are no available times on {date}.",
     "booking.requiredHint":
-      "Fields marked with * are required. Email and phone are optional.",
+      "Fields marked with * are required. We need your email to tell you the master's decision; phone is optional.",
     "booking.optional": "optional",
     "booking.manageUnavailableTitle": "This link is unavailable",
     "booking.manageUnavailable":

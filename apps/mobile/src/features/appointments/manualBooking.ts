@@ -167,7 +167,17 @@ export async function setMasterAppointmentStatus(
   appointmentId: string,
   status: AppointmentStatus,
   reason?: string,
-): Promise<{ id: string; status: AppointmentStatus }> {
+): Promise<{
+  id: string;
+  notificationStatus?:
+    | "accepted_by_provider"
+    | "failed"
+    | "not_configured"
+    | "pending"
+    | "processing"
+    | null;
+  status: AppointmentStatus;
+}> {
   const { data, error } = await client.rpc("set_appointment_status", {
     p_appointment_id: appointmentId,
     p_reason: reason?.trim() || undefined,
@@ -178,12 +188,42 @@ export async function setMasterAppointmentStatus(
     throw new Error("Appointment status response is invalid");
   }
 
-  const response = data as { id?: unknown; status?: unknown };
+  const response = data as {
+    id?: unknown;
+    notificationStatus?: unknown;
+    status?: unknown;
+  };
   if (typeof response.id !== "string" || typeof response.status !== "string") {
     throw new Error("Appointment status response is invalid");
   }
 
-  return { id: response.id, status: response.status as AppointmentStatus };
+  const notificationStatuses = new Set([
+    "accepted_by_provider",
+    "failed",
+    "not_configured",
+    "pending",
+    "processing",
+  ]);
+  if (
+    response.notificationStatus !== undefined &&
+    response.notificationStatus !== null &&
+    !notificationStatuses.has(String(response.notificationStatus))
+  ) {
+    throw new Error("Appointment notification status response is invalid");
+  }
+
+  return {
+    id: response.id,
+    notificationStatus: response.notificationStatus as
+      | "accepted_by_provider"
+      | "failed"
+      | "not_configured"
+      | "pending"
+      | "processing"
+      | null
+      | undefined,
+    status: response.status as AppointmentStatus,
+  };
 }
 
 export async function setMasterAppointmentPaidAmount(
