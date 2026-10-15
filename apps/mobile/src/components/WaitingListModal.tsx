@@ -450,30 +450,32 @@ export function WaitingListModal({
                 </Text>
               </Pressable>
             ) : null}
-            <Pressable
-              accessibilityRole="button"
-              disabled={
-                saving || !draft.customerName.trim() || !draft.serviceId
-              }
-              onPress={() => void save()}
-              style={styles.primaryButton}
-            >
-              <Text style={styles.primaryText}>
-                {saving ? t("common.loading") : t("common.save")}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setFormMode(null);
-                setEditing(null);
-              }}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("common.cancel")}
-              </Text>
-            </Pressable>
+            <View style={styles.formActions}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={
+                  saving || !draft.customerName.trim() || !draft.serviceId
+                }
+                onPress={() => void save()}
+                style={styles.primaryButton}
+              >
+                <Text style={styles.primaryText}>
+                  {saving ? t("common.loading") : t("common.save")}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  setFormMode(null);
+                  setEditing(null);
+                }}
+                style={styles.secondaryButton}
+              >
+                <Text style={styles.secondaryButtonText}>
+                  {t("common.cancel")}
+                </Text>
+              </Pressable>
+            </View>
           </InfoCard>
         ) : (
           <>
@@ -708,7 +710,7 @@ const styles = StyleSheet.create({
   half: { flex: 1 },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: colors.primaryText,
+    backgroundColor: colors.action,
     borderRadius: radii.pill,
     justifyContent: "center",
     minHeight: 48,
@@ -752,6 +754,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   actions: { flexDirection: "row", gap: 8, marginTop: 10 },
+  formActions: { gap: 8, marginTop: 8 },
   entryCard: { gap: 8, padding: 12 },
   entryHeader: {
     alignItems: "center",

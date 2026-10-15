@@ -310,8 +310,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.dangerSoft,
     borderRadius: radii.control,
+    flex: 1,
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 14,
   },
   declineButtonText: {
@@ -349,7 +350,8 @@ const styles = StyleSheet.create({
   serviceName: { ...typography.metadata, color: colors.secondaryText },
   state: { alignItems: "center", gap: 12, padding: 24 },
   waitingListButton: {
-    alignSelf: "flex-start",
+    alignItems: "center",
+    alignSelf: "stretch",
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
@@ -359,8 +361,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   waitingListButtonText: {
-    ...typography.caption,
-    color: colors.secondaryText,
+    ...typography.label,
+    color: colors.primaryText,
     fontWeight: "600",
   },
 });
