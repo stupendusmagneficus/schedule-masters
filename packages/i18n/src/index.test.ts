@@ -61,8 +61,6 @@ describe("translations and formatting", () => {
 });
 
 describe("compact date formatting", () => {
-  const referenceDate = new Date("2026-10-15T12:00:00.000Z");
-
   it.each(["ru", "cz", "en"] as const)(
     "shows the day, full month, and year for %s",
     (locale) => {
@@ -123,21 +121,21 @@ describe("compact date formatting", () => {
       new Date("2026-10-15T12:00:00.000Z"),
       new Date("2027-01-12T12:00:00.000Z"),
       "cz",
-      { referenceDate, timeZone: "Europe/Prague" },
+      { timeZone: "Europe/Prague" },
     );
 
     expect(result).toBe("15. říj 2026 – 12. led 2027");
   });
 
-  it("keeps a same-year range compact", () => {
+  it("includes the year at both ends of a same-year range", () => {
     const result = formatCompactDateRange(
       new Date("2026-10-13T12:00:00.000Z"),
       new Date("2026-10-20T12:00:00.000Z"),
       "en",
-      { referenceDate, timeZone: "Europe/Prague" },
+      { timeZone: "Europe/Prague" },
     );
 
-    expect(result).not.toContain("2026");
+    expect(result).toBe("Oct 13, 2026 – Oct 20, 2026");
   });
 
   it("provides a full date label for assistive technology", () => {

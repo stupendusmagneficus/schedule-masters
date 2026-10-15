@@ -25,7 +25,7 @@ describe("calendar date labels", () => {
 
     expect(result).toContain("28");
     expect(result).toContain("4");
-    expect(result).not.toContain(currentYear);
+    expect(result.match(new RegExp(currentYear, "g"))).toHaveLength(2);
   });
 
   it("provides full accessible dates for the selected day", () => {

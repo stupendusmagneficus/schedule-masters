@@ -1650,7 +1650,6 @@ export function formatDate(
 }
 
 export type CompactDateOptions = {
-  readonly referenceDate?: Date;
   readonly timeZone?: string;
 };
 
@@ -1681,28 +1680,20 @@ export function formatCompactDateRange(
   const timeZone = options.timeZone ?? defaultDateTimeZone;
   const fromDate = from instanceof Date ? from : new Date(from);
   const toDate = to instanceof Date ? to : new Date(to);
-  const referenceDate = options.referenceDate ?? new Date();
-  const fromYear = getDateYear(fromDate, timeZone);
-  const toYear = getDateYear(toDate, timeZone);
-  const currentYear = getDateYear(referenceDate, timeZone);
-  const includeYear =
-    fromYear !== toYear || fromYear !== currentYear || toYear !== currentYear;
   const format = (date: Date) => {
     if (locale === "cz") {
       const day = formatDate(date, locale, { day: "numeric", timeZone });
       const month = formatDate(date, locale, { month: "short", timeZone });
-      const year = includeYear
-        ? ` ${formatDate(date, locale, { year: "numeric", timeZone })}`
-        : "";
+      const year = formatDate(date, locale, { year: "numeric", timeZone });
 
-      return `${day} ${month}${year}`;
+      return `${day} ${month} ${year}`;
     }
 
     return formatDate(date, locale, {
       day: "numeric",
       month: "short",
+      year: "numeric",
       timeZone,
-      ...(includeYear ? { year: "numeric" as const } : {}),
     });
   };
 
@@ -1718,15 +1709,6 @@ export function formatAccessibleDate(
     dateStyle: "full",
     timeZone,
   });
-}
-
-function getDateYear(value: Date, timeZone: string): number {
-  return Number(
-    new Intl.DateTimeFormat("en", {
-      timeZone,
-      year: "numeric",
-    }).format(value),
-  );
 }
 
 export function formatTime(
