@@ -27,6 +27,8 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByText("Volné termíny", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByText("Přijato", { exact: true })).toBeVisible();
+    await expect(page.getByText(/0,00\s*Kč/)).toBeVisible();
   });
 
   test("navigates to another day and returns to Today", async ({ page }) => {

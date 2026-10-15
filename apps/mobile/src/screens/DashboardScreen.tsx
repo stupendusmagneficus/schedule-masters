@@ -310,6 +310,7 @@ export function DashboardScreen({
             }
             bookingRequestsError={Boolean(bookingRequests.error)}
             bookingRequestsLoading={bookingRequests.isLoading}
+            defaultCurrency={bookingServices[0]?.currency ?? "CZK"}
             onRetryAppointments={() => void calendar.reload()}
             onOpenBookingRequests={() => {
               setBookingRequestActionError(false);

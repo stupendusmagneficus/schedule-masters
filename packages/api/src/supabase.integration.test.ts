@@ -1020,7 +1020,9 @@ describe("Supabase public booking contract", () => {
       const customerId = randomUUID();
       const email = `status-lifecycle-${suffix}@example.test`;
       const password = `Test-${suffix}-Password!`;
-      const startsAt = "2030-04-03T09:00:00.000Z";
+      // This is April 3 in the Prague workspace, but still April 2 in UTC.
+      const startsAt = "2030-04-02T22:30:00.000Z";
+      const endsAt = "2030-04-02T23:30:00.000Z";
 
       expect(
         (
@@ -1075,8 +1077,8 @@ describe("Supabase public booking contract", () => {
           currency_snapshot: "CZK",
           customer_id: customerId,
           duration_minutes_snapshot: 60,
-          ends_at: "2030-04-03T10:00:00.000Z",
-          occupied_range: "[2030-04-03T09:00:00.000Z,2030-04-03T10:00:00.000Z)",
+          ends_at: endsAt,
+          occupied_range: `[${startsAt},${endsAt})`,
           price_amount_snapshot: 700,
           service_id: serviceId,
           service_name_snapshot: "Lifecycle service",
@@ -1204,6 +1206,16 @@ describe("Supabase public booking contract", () => {
           }),
         ]),
       );
+      const listedUtcPreviousDay = await user.client.rpc(
+        "list_master_appointments",
+        {
+          p_from_date: "2030-04-02",
+          p_to_date: "2030-04-02",
+          p_workspace_id: workspaceId,
+        },
+      );
+      expect(listedUtcPreviousDay.error).toBeNull();
+      expect(listedUtcPreviousDay.data).toEqual([]);
 
       await admin.from("workspaces").delete().eq("id", workspaceId);
       await admin.auth.admin.deleteUser(user.user.id);

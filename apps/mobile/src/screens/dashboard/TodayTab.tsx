@@ -4,6 +4,7 @@ import {
   formatCompactDate,
   formatCurrency,
   formatTime,
+  type SupportedLocale,
 } from "@schedule-app/i18n";
 import {
   ActivityIndicator,
@@ -24,7 +25,7 @@ import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
-import { sumReceivedRevenue } from "../../features/finance/todayRevenue";
+import { sumReceivedRevenueByCurrency } from "../../features/finance/todayRevenue";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -39,6 +40,7 @@ type TodayTabProps = DashboardTabProps & {
   readonly bookingRequestCount: number | null;
   readonly bookingRequestsError: boolean;
   readonly bookingRequestsLoading: boolean;
+  readonly defaultCurrency: string;
   readonly onRetryAppointments?: () => void;
   readonly onOpenBookingRequests: () => void;
   readonly onGoToToday: () => void;
@@ -62,6 +64,7 @@ export function TodayTab({
   bookingRequestCount,
   bookingRequestsError,
   bookingRequestsLoading,
+  defaultCurrency,
   onOpenBookingRequests,
   onGoToToday,
   onNextDay,
@@ -89,7 +92,14 @@ export function TodayTab({
     (appointment) =>
       appointment.status === "pending" || appointment.status === "confirmed",
   );
-  const receivedRevenue = demoData ? 0 : sumReceivedRevenue(masterAppointments);
+  const receivedRevenueByCurrency = demoData
+    ? {}
+    : sumReceivedRevenueByCurrency(masterAppointments);
+  const receivedRevenue = formatReceivedRevenue(
+    receivedRevenueByCurrency,
+    locale,
+    defaultCurrency,
+  );
   const appointmentCount = demoData
     ? demoAppointments.length
     : visibleAppointments.length;
@@ -186,7 +196,7 @@ export function TodayTab({
               id: "received-revenue",
               label: t("mobile.receivedRevenue"),
               tone: "accent",
-              value: formatCurrency(receivedRevenue, locale, "CZK"),
+              value: receivedRevenue,
             },
           ]}
         />
@@ -420,6 +430,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
+
+function formatReceivedRevenue(
+  amounts: Readonly<Record<string, number>>,
+  locale: SupportedLocale,
+  defaultCurrency: string,
+): string {
+  const entries = Object.entries(amounts);
+  if (entries.length === 0) {
+    return formatCurrency(0, locale, defaultCurrency);
+  }
+  return entries
+    .map(([currency, amount]) => formatCurrency(amount, locale, currency))
+    .join(" · ");
+}
 
 function AppointmentRow({
   appointment,
