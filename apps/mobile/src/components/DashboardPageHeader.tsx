@@ -1,12 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
-import { DashboardHeaderAction } from "./DashboardHeaderAction";
+import {
+  DashboardHeaderAction,
+  type DashboardHeaderActionProps,
+} from "./DashboardHeaderAction";
 
 type DashboardPageHeaderProps = {
-  readonly actionLabel?: string;
   readonly centeredTitle?: boolean;
-  readonly onAction?: () => void;
+  readonly leadingAction?: DashboardHeaderActionProps;
+  readonly trailingAction?: DashboardHeaderActionProps;
   readonly subtitle?: string;
   readonly subtitleAccessibilityLabel?: string;
   readonly title: string;
@@ -14,22 +17,27 @@ type DashboardPageHeaderProps = {
 };
 
 export function DashboardPageHeader({
-  actionLabel,
   centeredTitle = false,
-  onAction,
+  leadingAction,
+  trailingAction,
   subtitle,
   subtitleAccessibilityLabel,
   title,
   titleAccessibilityLabel,
 }: DashboardPageHeaderProps) {
-  const hasAction = Boolean(actionLabel && onAction);
+  const hasActions = Boolean(leadingAction || trailingAction);
   return (
     <View style={[styles.row, centeredTitle && styles.centeredRow]}>
+      {leadingAction ? (
+        <View style={centeredTitle && styles.centeredLeadingAction}>
+          <DashboardHeaderAction {...leadingAction} />
+        </View>
+      ) : null}
       <View
         style={[
           styles.copy,
           centeredTitle && styles.centeredCopy,
-          centeredTitle && !hasAction && styles.centeredCopyWithoutAction,
+          centeredTitle && !hasActions && styles.centeredCopyWithoutAction,
         ]}
       >
         <Text
@@ -49,13 +57,9 @@ export function DashboardPageHeader({
           </Text>
         ) : null}
       </View>
-      {actionLabel && onAction ? (
-        <View style={centeredTitle && styles.centeredAction}>
-          <DashboardHeaderAction
-            accessibilityLabel={actionLabel}
-            icon="account-circle-outline"
-            onPress={onAction}
-          />
+      {trailingAction ? (
+        <View style={centeredTitle && styles.centeredTrailingAction}>
+          <DashboardHeaderAction {...trailingAction} />
         </View>
       ) : null}
     </View>
@@ -64,10 +68,21 @@ export function DashboardPageHeader({
 
 const styles = StyleSheet.create({
   copy: { flex: 1, gap: 4, minWidth: 0 },
-  centeredAction: { position: "absolute", right: 0, top: 0 },
+  centeredLeadingAction: {
+    left: 0,
+    position: "absolute",
+    top: "50%",
+    transform: [{ translateY: -24 }],
+  },
   centeredCopy: { alignItems: "center", paddingHorizontal: 56, width: "100%" },
   centeredCopyWithoutAction: { paddingHorizontal: 0 },
   centeredRow: { justifyContent: "center", position: "relative" },
+  centeredTrailingAction: {
+    position: "absolute",
+    right: 0,
+    top: "50%",
+    transform: [{ translateY: -24 }],
+  },
   centeredText: { textAlign: "center" },
   row: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
   subtitle: { ...typography.body, color: colors.secondaryText },

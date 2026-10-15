@@ -144,6 +144,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 **Interaction rules:**
 
+- Place previous/next day controls beside the centered day label and date in one header group; do not reserve a separate row for the arrows.
 - Tapping an appointment opens its details.
 - Tapping a free slot starts a booking with date/time prefilled.
 - Revenue is informational and never competes with the booking CTA.

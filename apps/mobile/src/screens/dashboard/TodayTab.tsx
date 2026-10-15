@@ -18,7 +18,6 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
-import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
@@ -113,6 +112,16 @@ export function TodayTab({
     <View style={styles.content}>
       <DashboardPageHeader
         centeredTitle
+        leadingAction={{
+          accessibilityLabel: t("mobile.previousDay"),
+          icon: "arrow-left",
+          onPress: onPreviousDay,
+        }}
+        trailingAction={{
+          accessibilityLabel: t("mobile.nextDay"),
+          icon: "arrow-right",
+          onPress: onNextDay,
+        }}
         subtitle={isToday ? dateLabel : undefined}
         subtitleAccessibilityLabel={
           isToday
@@ -134,33 +143,19 @@ export function TodayTab({
               )
         }
       />
-      <View style={styles.dayNavigation}>
-        <DashboardHeaderAction
-          accessibilityLabel={t("mobile.previousDay")}
-          icon="arrow-left"
-          onPress={onPreviousDay}
-        />
-        {!isToday ? (
-          <Pressable
-            accessibilityLabel={t("mobile.today")}
-            accessibilityRole="button"
-            onPress={onGoToToday}
-            style={({ pressed }) => [
-              styles.todayButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
-          </Pressable>
-        ) : (
-          <View style={styles.dayNavigationSpacer} />
-        )}
-        <DashboardHeaderAction
-          accessibilityLabel={t("mobile.nextDay")}
-          icon="arrow-right"
-          onPress={onNextDay}
-        />
-      </View>
+      {!isToday ? (
+        <Pressable
+          accessibilityLabel={t("mobile.today")}
+          accessibilityRole="button"
+          onPress={onGoToToday}
+          style={({ pressed }) => [
+            styles.todayButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
+        </Pressable>
+      ) : null}
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
@@ -377,12 +372,6 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontWeight: "700",
   },
-  dayNavigation: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  dayNavigationSpacer: { flex: 1 },
   scheduleCard: { marginTop: 8 },
   freeSlotsAction: {
     alignItems: "center",
@@ -403,6 +392,7 @@ const styles = StyleSheet.create({
   },
   todayButton: {
     alignItems: "center",
+    alignSelf: "center",
     backgroundColor: colors.accentSoft,
     borderColor: colors.border,
     borderRadius: radii.pill,

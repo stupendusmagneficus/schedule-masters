@@ -40,6 +40,35 @@ test.describe("mobile web smoke", () => {
       "text-align",
       "center",
     );
+    const dayHeaderGeometry = await page.evaluate(() => {
+      const heading = document.querySelector('[role="heading"]');
+      const previous = document.querySelector('[aria-label="Předchozí den"]');
+      const next = document.querySelector('[aria-label="Následující den"]');
+      if (!heading || !previous || !next) return null;
+      const bounds = (element: Element) => element.getBoundingClientRect();
+      const headingBounds = bounds(heading);
+      const previousBounds = bounds(previous);
+      const nextBounds = bounds(next);
+      return {
+        headingBottom: headingBounds.bottom,
+        headingLeft: headingBounds.left,
+        headingRight: headingBounds.right,
+        headingTop: headingBounds.top,
+        nextTop: nextBounds.top,
+        previousBottom: previousBounds.bottom,
+        previousTop: previousBounds.top,
+      };
+    });
+    expect(dayHeaderGeometry).not.toBeNull();
+    expect(dayHeaderGeometry?.previousTop).toBeLessThan(
+      dayHeaderGeometry?.headingBottom ?? 0,
+    );
+    expect(dayHeaderGeometry?.previousBottom).toBeGreaterThan(
+      dayHeaderGeometry?.headingTop ?? Number.POSITIVE_INFINITY,
+    );
+    expect(dayHeaderGeometry?.nextTop).toBeLessThan(
+      dayHeaderGeometry?.headingBottom ?? 0,
+    );
     const twoDaysAgo = await page.evaluate(() => {
       const parts = new Intl.DateTimeFormat("en", {
         day: "numeric",
