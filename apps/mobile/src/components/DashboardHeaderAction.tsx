@@ -1,4 +1,4 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { ComponentProps } from "react";
 import { Pressable, StyleSheet } from "react-native";
 
@@ -25,7 +25,7 @@ export function DashboardHeaderAction({
       <MaterialCommunityIcons
         color={colors.primaryText}
         name={icon}
-        size={22}
+        size={26}
       />
     </Pressable>
   );

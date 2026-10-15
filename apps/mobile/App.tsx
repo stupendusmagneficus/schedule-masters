@@ -1,3 +1,4 @@
+import "expo-font";
 import "react-native-url-polyfill/auto";
 
 import {

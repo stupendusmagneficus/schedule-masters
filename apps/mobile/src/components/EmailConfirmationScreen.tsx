@@ -1,4 +1,4 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey } from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

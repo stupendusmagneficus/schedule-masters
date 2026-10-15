@@ -10,6 +10,7 @@ const validDraft: ServiceDraft = {
   bufferAfterMinutes: "10",
   bufferBeforeMinutes: "5",
   currency: "CZK",
+  category: "Nails",
   description: "Gel manicure with a clean finish.",
   durationMinutes: "90",
   name: "Gel manicure",

@@ -268,10 +268,11 @@ const styles = StyleSheet.create({
   content: { gap: 20, padding: 20, paddingBottom: 32 },
   dayButton: {
     alignItems: "center",
-    borderColor: colors.borderSubtle,
+    borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
-    minWidth: 42,
+    minHeight: 44,
+    minWidth: 44,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },

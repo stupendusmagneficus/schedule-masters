@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     flex: 1,
     justifyContent: "center",
-    minHeight: 36,
+    minHeight: 44,
     paddingHorizontal: 12,
   },
   filterButtonActive: { backgroundColor: colors.surface },

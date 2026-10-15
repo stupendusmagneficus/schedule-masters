@@ -16,6 +16,7 @@ export type Service = {
   readonly archived_at: string | null;
   readonly buffer_after_minutes: number;
   readonly buffer_before_minutes: number;
+  readonly category?: string | null;
   readonly description: string | null;
   readonly id: string;
   readonly is_active: boolean;

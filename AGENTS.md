@@ -39,6 +39,13 @@ Use Biome as the canonical formatter and linter for JavaScript, TypeScript, JSX,
 
 The detailed conventions are in [Code organization and responsibility boundaries](docs/architecture/code-organization.md).
 
+## Product design system
+
+- Before changing a user-facing screen or shared UI, read [the approved visual direction](docs/design/DESIGN.md), [design tokens](docs/design/design-tokens.json), and [UI conventions](docs/architecture/ui-conventions.md).
+- Treat those documents and `apps/mobile/src/theme/` as the product design system. Reuse shared components such as `DashboardPageHeader` and `FullscreenModal`; do not introduce screen-specific visual patterns for elements that already have a shared component.
+- Keep colors, spacing, type, radii, control sizes, iconography, modal navigation, feedback, and motion consistent with the approved rules. If a product need requires a change, update the shared rule/token and affected shared components as part of the same change.
+- Review mobile UI changes at narrow and wide supported viewports when feasible. Record visual evidence or the reason visual review was unavailable in the PR.
+
 ## Architecture diagrams
 
 Use the project-local [Archify skill](.agents/skills/archify/SKILL.md) when a change needs an architecture, workflow, sequence, data-flow, or lifecycle diagram.

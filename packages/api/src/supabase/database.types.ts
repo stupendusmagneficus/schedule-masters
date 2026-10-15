@@ -574,6 +574,7 @@ export type Database = {
           archived_at: string | null
           buffer_after_minutes: number
           buffer_before_minutes: number
+          category: string | null
           created_at: string
           currency: string
           description: string | null
@@ -590,6 +591,7 @@ export type Database = {
           archived_at?: string | null
           buffer_after_minutes?: number
           buffer_before_minutes?: number
+          category?: string | null
           created_at?: string
           currency?: string
           description?: string | null
@@ -606,6 +608,7 @@ export type Database = {
           archived_at?: string | null
           buffer_after_minutes?: number
           buffer_before_minutes?: number
+          category?: string | null
           created_at?: string
           currency?: string
           description?: string | null

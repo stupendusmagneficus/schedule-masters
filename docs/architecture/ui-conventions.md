@@ -6,7 +6,7 @@ For the MVP, the project uses a hybrid platform-aware UI approach:
 
 - `apps/mobile` uses Expo, React Native, and NativeWind v4.
 - `apps/booking-web` uses Next.js, Tailwind CSS, and Radix/shadcn-style web primitives.
-- `packages/design-tokens` is the shared source of truth for colors, typography, spacing, radii, elevations, and semantic states.
+- `docs/design/design-tokens.json` is the platform-neutral source of truth for colors, typography, spacing, radii, elevations, and semantic states. App theme modules adapt these values to the platform; do not add conflicting app-local design systems.
 - Mobile and web presentation components are platform-specific when their interaction or semantics differ.
 
 The goal is a fast, focused mobile experience inspired by Masters Pro while keeping the public booking web page semantic, accessible, and suitable for Next.js rendering.
@@ -15,9 +15,6 @@ The goal is a fast, focused mobile experience inspired by Masters Pro while keep
 
 ```text
 packages/
-  design-tokens/    # platform-neutral visual tokens and semantic names
-  ui-mobile/        # React Native primitives and mobile compound components
-  ui-web/           # accessible web primitives and web compound components
   config/           # shared TypeScript, lint, formatting, and test configuration
 
 apps/
@@ -30,7 +27,7 @@ The UI packages must not import application routes, Supabase clients, or feature
 ## Styling rules
 
 1. Use tokens and semantic names instead of raw colors, arbitrary spacing, or duplicated typography values.
-2. Use NativeWind utility classes in mobile components; do not mix NativeWind and ad-hoc inline style objects except for measured or platform-native values.
+2. In the mobile app, use React Native `StyleSheet` and shared theme tokens for component styling, following the existing component conventions. Use NativeWind only where it is already part of the local pattern; avoid mixing several styling approaches in one component.
 3. Use Tailwind CSS for web layout and styling, wrapping Radix primitives in project-owned components.
 4. Keep the public component API small and product-oriented: `Button`, `TextField`, `Card`, `Dialog`, `Tabs`, `Toast`, `DatePicker`, and calendar primitives are preferred over exposing library internals throughout the apps.
 5. Prefer composition over large configurable components with many boolean props.
@@ -60,7 +57,7 @@ Use `.ios.tsx` or `.android.tsx` only for genuine native differences. Do not use
 ## Component ownership
 
 - The external library provides behavior and low-level primitives.
-- `ui-mobile` and `ui-web` own the product-facing API, tokens, variants, accessibility defaults, and tests.
+- Shared app components own the product-facing API, variants, accessibility defaults, and tests until a UI package exists.
 - App screens own orchestration and business state.
 - Domain and API packages must remain independent of presentation libraries.
 
@@ -70,6 +67,5 @@ Add a UI dependency only when it removes meaningful implementation risk or provi
 
 ## Deferred decisions
 
-- Exact MVP token values and visual direction are defined in `docs/design/DESIGN.md` and `docs/design/design-tokens.json`. The product name and final brand identity may still evolve without changing the semantic token contract.
-- Calendar/date-picker implementation will be selected while implementing the booking vertical slice.
+- Exact token values and visual direction are defined in `docs/design/DESIGN.md` and `docs/design/design-tokens.json`. The product name and final brand identity may still evolve without changing the semantic token contract.
 - A universal UI library such as Tamagui can be reconsidered if the product later requires extensive shared screens between mobile and web.

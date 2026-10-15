@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
 import { formatDate, formatTime, getIntlLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -15,6 +16,7 @@ import {
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
 import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
+import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
@@ -23,6 +25,7 @@ import {
   getCustomerSegment,
 } from "../../features/customers/customerSegments";
 import { useCustomerDirectory } from "../../features/customers/useCustomerDirectory";
+import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
@@ -73,10 +76,19 @@ export function CustomersTab({
       })),
     [directory.customers],
   );
-  const visibleCustomers =
-    activeSegment === "all"
-      ? segments
-      : segments.filter(({ segment }) => segment === activeSegment);
+  const intlLocale = getIntlLocale(locale);
+  const normalizedSearch = search.trim().toLocaleLowerCase(intlLocale);
+  const visibleCustomers = segments.filter(({ customer, segment }) => {
+    const matchesSegment = activeSegment === "all" || segment === activeSegment;
+    const matchesSearch =
+      !normalizedSearch ||
+      [customer.name, customer.email, customer.phone]
+        .filter((value): value is string => Boolean(value))
+        .some((value) =>
+          value.toLocaleLowerCase(intlLocale).includes(normalizedSearch),
+        );
+    return matchesSegment && matchesSearch;
+  });
   const selected = directory.selectedCustomer;
 
   if (selected) {
@@ -84,10 +96,16 @@ export function CustomersTab({
       <View style={[styles.content, !visible && styles.hidden]}>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={`${t("common.back")}: ${t("mobile.customers")}`}
           onPress={() => directory.selectCustomer(null)}
           style={styles.backButton}
         >
-          <Text style={styles.backText}>‹ {t("mobile.customers")}</Text>
+          <MaterialCommunityIcons
+            color={colors.primaryText}
+            name="chevron-left"
+            size={24}
+          />
+          <Text style={styles.backText}>{t("mobile.customers")}</Text>
         </Pressable>
         <View style={styles.customerHeading}>
           <View style={styles.header}>
@@ -193,19 +211,11 @@ export function CustomersTab({
 
   return (
     <View style={[styles.content, !visible && styles.hidden]}>
-      <View style={styles.customerHeading}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{workspace.name}</Text>
-          <Text accessibilityRole="header" style={styles.title}>
-            {t("mobile.customers")}
-          </Text>
-        </View>
-        <DashboardHeaderAction
-          accessibilityLabel={t("mobile.profile")}
-          icon="account-circle-outline"
-          onPress={onOpenProfile}
-        />
-      </View>
+      <DashboardPageHeader
+        actionLabel={t("mobile.profile")}
+        onAction={onOpenProfile}
+        title={t("mobile.customers")}
+      />
       <TextInput
         accessibilityLabel={t("mobile.customerSearch")}
         onChangeText={setSearch}
@@ -353,17 +363,24 @@ const styles = StyleSheet.create({
   activeSegment: { backgroundColor: colors.accent },
   activeSegmentText: { color: colors.actionText },
   backButton: {
+    alignItems: "center",
     alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 4,
     minHeight: 44,
     justifyContent: "center",
   },
-  backText: { ...typography.label, color: colors.accent, fontWeight: "700" },
+  backText: {
+    ...typography.label,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
   body: { ...typography.body, color: colors.primaryText },
-  content: { gap: 14 },
+  content: { gap: spacing.section },
   customerHeading: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.control,
   },
   customerCopy: { flex: 1, gap: 3, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
@@ -375,8 +392,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     ...typography.eyebrow,
   },
-  header: { flex: 1, gap: 2, minWidth: 0 },
   helper: { ...typography.body, color: colors.secondaryText },
+  header: { flex: 1, gap: 2, minWidth: 0 },
   hidden: { display: "none" },
   label: { ...typography.label, color: colors.secondaryText, marginBottom: 4 },
   note: {
@@ -424,7 +441,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     justifyContent: "center",
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: 12,
   },
   segmentLabel: {

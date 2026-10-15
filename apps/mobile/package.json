@@ -11,8 +11,8 @@
     "test:e2e": "echo 'Mobile E2E is executed by the root Playwright configuration.'"
   },
   "dependencies": {
-    "@expo/vector-icons": "^15.1.1",
     "@react-native-community/datetimepicker": "9.1.0",
+    "@react-native-vector-icons/material-design-icons": "^13.1.5",
     "@schedule-app/analytics": "workspace:*",
     "@schedule-app/api": "workspace:*",
     "@schedule-app/i18n": "workspace:*",

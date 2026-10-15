@@ -38,7 +38,7 @@ import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
-import { ServiceAccordion } from "./ServiceAccordion";
+import { ServicePickerField } from "./ServicePickerField";
 
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
@@ -311,6 +311,7 @@ export function ManualBookingModal({
   return (
     <FullscreenModal
       closeLabel={step === "time" ? t("common.cancel") : t("common.back")}
+      closeIcon={step === "time" ? "close" : "chevron-left"}
       closeDisabled={isSaving}
       onClose={handleBack}
       title={t("mobile.manualBookingTitle")}
@@ -475,12 +476,13 @@ function TimeStep({
         {t("mobile.manualBookingService")}
       </Text>
       {services.length ? (
-        <ServiceAccordion
+        <ServicePickerField
           label={t("mobile.manualBookingService")}
           locale={locale}
           onSelect={onSelectService}
           selectedService={selectedService}
           services={services}
+          t={t}
         />
       ) : (
         <Text style={styles.helper}>{t("mobile.noServices")}</Text>
@@ -882,7 +884,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     flex: 1,
     justifyContent: "center",
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: 8,
   },
   modeButtonText: {
@@ -900,7 +902,7 @@ const styles = StyleSheet.create({
   optionList: { gap: 8, marginTop: 8 },
   optionRow: {
     alignItems: "center",
-    borderColor: colors.borderSubtle,
+    borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
@@ -1002,7 +1004,7 @@ const styles = StyleSheet.create({
   },
   summary: {
     backgroundColor: colors.surface,
-    borderColor: colors.borderSubtle,
+    borderColor: colors.border,
     borderRadius: radii.surface,
     borderWidth: StyleSheet.hairlineWidth,
     gap: 0,
