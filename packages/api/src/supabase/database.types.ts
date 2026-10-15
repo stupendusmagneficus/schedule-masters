@@ -865,6 +865,21 @@ export type Database = {
           phone: string
         }[]
       }
+      list_master_pending_booking_requests: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          duration_minutes: number
+          ends_at: string
+          id: string
+          service_name: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
       record_customer_link_share: {
         Args: {
           p_appointment_id: string

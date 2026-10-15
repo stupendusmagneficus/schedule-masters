@@ -1,0 +1,308 @@
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
+import { formatDate, formatTime } from "@schedule-app/i18n";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import type { AppointmentStatus } from "../features/appointments/manualBooking";
+import type { MasterPendingBookingRequest } from "../features/bookingRequests/bookingRequests";
+import { colors, radii } from "../theme/tokens";
+import { typography } from "../theme/typography";
+import {
+  AppointmentStatusBadge,
+  getAppointmentStatusLabel,
+} from "./AppointmentStatusBadge";
+import { FullscreenModal } from "./FullscreenModal";
+import { InfoCard } from "./InfoCard";
+
+type BookingRequestsModalProps = {
+  readonly actionError: string | null;
+  readonly error: string | null;
+  readonly isLoading: boolean;
+  readonly locale: SupportedLocale;
+  readonly onClose: () => void;
+  readonly onRespond: (
+    appointmentId: string,
+    status: AppointmentStatus,
+  ) => Promise<boolean>;
+  readonly onRetry: () => void;
+  readonly requests: readonly MasterPendingBookingRequest[];
+  readonly savingRequestId: string | null;
+  readonly t: (key: MessageKey) => string;
+  readonly timezone: string;
+  readonly visible: boolean;
+};
+
+export function BookingRequestsModal({
+  actionError,
+  error,
+  isLoading,
+  locale,
+  onClose,
+  onRespond,
+  onRetry,
+  requests,
+  savingRequestId,
+  t,
+  timezone,
+  visible,
+}: BookingRequestsModalProps) {
+  const [rejectionId, setRejectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!visible) setRejectionId(null);
+  }, [visible]);
+
+  return (
+    <FullscreenModal
+      closeDisabled={savingRequestId !== null}
+      closeLabel={t("common.close")}
+      onClose={onClose}
+      title={t("mobile.bookingRequests")}
+      visible={visible}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        {actionError ? (
+          <Text accessibilityRole="alert" style={styles.error}>
+            {actionError}
+          </Text>
+        ) : null}
+        {isLoading && requests.length === 0 ? (
+          <View accessibilityLiveRegion="polite" style={styles.state}>
+            <ActivityIndicator color={colors.accent} />
+            <Text style={styles.helper}>{t("common.loading")}</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.state}>
+            <Text accessibilityRole="alert" style={styles.error}>
+              {t("mobile.bookingRequestsLoadFailed")}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onRetry}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {t("common.retry")}
+              </Text>
+            </Pressable>
+          </View>
+        ) : requests.length === 0 ? (
+          <InfoCard>
+            <Text style={styles.emptyTitle}>
+              {t("mobile.bookingRequestsEmpty")}
+            </Text>
+          </InfoCard>
+        ) : (
+          requests.map((request) => {
+            const isSaving = savingRequestId === request.id;
+            const isConfirmingRejection = rejectionId === request.id;
+            return (
+              <InfoCard key={request.id}>
+                <View style={styles.header}>
+                  <View style={styles.requestCopy}>
+                    <Text style={styles.customerName}>
+                      {request.customer_name}
+                    </Text>
+                    <Text style={styles.serviceName}>
+                      {request.service_name}
+                    </Text>
+                  </View>
+                  <AppointmentStatusBadge
+                    label={getAppointmentStatusLabel(request.status, t)}
+                    status={request.status}
+                  />
+                </View>
+                <View style={styles.details}>
+                  <Text style={styles.detailValue}>
+                    {formatDate(new Date(request.starts_at), locale, {
+                      day: "numeric",
+                      month: "long",
+                      timeZone: timezone,
+                      year: "numeric",
+                    })}
+                  </Text>
+                  <Text style={styles.helper}>
+                    {formatTime(new Date(request.starts_at), locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: timezone,
+                    })}{" "}
+                    —{" "}
+                    {formatTime(new Date(request.ends_at), locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: timezone,
+                    })}{" "}
+                    · {request.duration_minutes} {t("mobile.minutes")}
+                  </Text>
+                  {request.customer_phone ? (
+                    <Text selectable style={styles.helper}>
+                      {request.customer_phone}
+                    </Text>
+                  ) : null}
+                  {request.customer_email ? (
+                    <Text selectable style={styles.helper}>
+                      {request.customer_email}
+                    </Text>
+                  ) : null}
+                </View>
+                {isConfirmingRejection ? (
+                  <View style={styles.confirmation}>
+                    <Text style={styles.helper}>
+                      {t("mobile.bookingRequestDeclinePrompt")}
+                    </Text>
+                    <View style={styles.actions}>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={savingRequestId !== null}
+                        onPress={() => setRejectionId(null)}
+                        style={({ pressed }) => [
+                          styles.secondaryButton,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <Text style={styles.secondaryButtonText}>
+                          {t("common.cancel")}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={isSaving || savingRequestId !== null}
+                        onPress={async () => {
+                          if (
+                            await onRespond(request.id, "cancelled_by_master")
+                          ) {
+                            setRejectionId(null);
+                          }
+                        }}
+                        style={({ pressed }) => [
+                          styles.declineButton,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <Text style={styles.declineButtonText}>
+                          {t("mobile.bookingRequestDecline")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.actions}>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={savingRequestId !== null}
+                      onPress={() => setRejectionId(request.id)}
+                      style={({ pressed }) => [
+                        styles.secondaryButton,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {t("mobile.bookingRequestDecline")}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={savingRequestId !== null}
+                      onPress={() => void onRespond(request.id, "confirmed")}
+                      style={({ pressed }) => [
+                        styles.acceptButton,
+                        savingRequestId !== null && styles.disabled,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      {isSaving ? (
+                        <ActivityIndicator color={colors.actionText} />
+                      ) : (
+                        <Text style={styles.acceptButtonText}>
+                          {t("mobile.bookingRequestAccept")}
+                        </Text>
+                      )}
+                    </Pressable>
+                  </View>
+                )}
+              </InfoCard>
+            );
+          })
+        )}
+      </ScrollView>
+    </FullscreenModal>
+  );
+}
+
+const styles = StyleSheet.create({
+  acceptButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: radii.control,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14,
+  },
+  acceptButtonText: {
+    ...typography.label,
+    color: colors.inverse,
+    fontWeight: "700",
+  },
+  actions: { flexDirection: "row", gap: 8 },
+  confirmation: {
+    borderTopColor: colors.borderSubtle,
+    borderTopWidth: 1,
+    gap: 10,
+    marginTop: 14,
+    paddingTop: 14,
+  },
+  content: { gap: 12, padding: 16, paddingBottom: 32 },
+  customerName: { ...typography.section, color: colors.primaryText },
+  declineButton: {
+    alignItems: "center",
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radii.control,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14,
+  },
+  declineButtonText: {
+    ...typography.label,
+    color: colors.danger,
+    fontWeight: "700",
+  },
+  detailValue: {
+    ...typography.body,
+    color: colors.primaryText,
+    fontWeight: "600",
+  },
+  details: { gap: 4, marginVertical: 14 },
+  disabled: { opacity: 0.6 },
+  emptyTitle: { ...typography.body, color: colors.secondaryText },
+  error: { ...typography.body, color: colors.danger, marginTop: 8 },
+  header: { alignItems: "flex-start", flexDirection: "row", gap: 8 },
+  helper: { ...typography.body, color: colors.secondaryText },
+  pressed: { opacity: 0.78 },
+  requestCopy: { flex: 1, gap: 4 },
+  secondaryButton: {
+    alignItems: "center",
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14,
+  },
+  secondaryButtonText: {
+    ...typography.label,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
+  serviceName: { ...typography.body, color: colors.secondaryText },
+  state: { alignItems: "center", gap: 12, padding: 24 },
+});

@@ -810,6 +810,200 @@ describe("Supabase public booking contract", () => {
   );
 
   rlsIntegrationTest(
+    "lists only this workspace's pending public booking requests in urgency order",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const serviceId = randomUUID();
+      const customerId = randomUUID();
+      const password = `Test-${suffix}-Password!`;
+      const email = `booking-requests-${suffix}@example.test`;
+      let userId: string | null = null;
+
+      try {
+        const workspace = await admin.from("workspaces").insert({
+          id: workspaceId,
+          name: "Booking Requests Workspace",
+          slug: `booking-requests-${suffix}`,
+        });
+        expect(workspace.error).toBeNull();
+
+        const user = await createAuthenticatedTestUser({
+          admin,
+          email,
+          password,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        userId = user.user.id;
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              role: "owner",
+              user_id: userId,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("services").insert({
+              duration_minutes: 60,
+              id: serviceId,
+              name: "Request service",
+              price_amount: 700,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("customers").insert({
+              email: "request@example.test",
+              id: customerId,
+              name: "Request customer",
+              phone: "+420111222333",
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const appointments = await admin
+          .from("appointments")
+          .insert([
+            {
+              currency_snapshot: "CZK",
+              customer_id: customerId,
+              duration_minutes_snapshot: 60,
+              ends_at: "2030-04-01T10:00:00.000Z",
+              occupied_range:
+                "[2030-04-01T09:00:00.000Z,2030-04-01T10:00:00.000Z)",
+              price_amount_snapshot: 700,
+              service_id: serviceId,
+              service_name_snapshot: "Request service",
+              source: "public_booking",
+              starts_at: "2030-04-01T09:00:00.000Z",
+              status: "pending",
+              workspace_id: workspaceId,
+            },
+            {
+              currency_snapshot: "CZK",
+              customer_id: customerId,
+              duration_minutes_snapshot: 60,
+              ends_at: "2030-04-03T10:00:00.000Z",
+              occupied_range:
+                "[2030-04-03T09:00:00.000Z,2030-04-03T10:00:00.000Z)",
+              price_amount_snapshot: 700,
+              service_id: serviceId,
+              service_name_snapshot: "Request service",
+              source: "public_booking",
+              starts_at: "2030-04-03T09:00:00.000Z",
+              status: "pending",
+              workspace_id: workspaceId,
+            },
+            {
+              currency_snapshot: "CZK",
+              customer_id: customerId,
+              duration_minutes_snapshot: 60,
+              ends_at: "2030-04-05T10:00:00.000Z",
+              occupied_range:
+                "[2030-04-05T09:00:00.000Z,2030-04-05T10:00:00.000Z)",
+              price_amount_snapshot: 700,
+              service_id: serviceId,
+              service_name_snapshot: "Request service",
+              source: "master_created",
+              starts_at: "2030-04-05T09:00:00.000Z",
+              status: "pending",
+              workspace_id: workspaceId,
+            },
+            {
+              currency_snapshot: "CZK",
+              customer_id: customerId,
+              duration_minutes_snapshot: 60,
+              ends_at: "2030-04-07T10:00:00.000Z",
+              occupied_range:
+                "[2030-04-07T09:00:00.000Z,2030-04-07T10:00:00.000Z)",
+              price_amount_snapshot: 700,
+              service_id: serviceId,
+              service_name_snapshot: "Request service",
+              source: "public_booking",
+              starts_at: "2030-04-07T09:00:00.000Z",
+              status: "confirmed",
+              workspace_id: workspaceId,
+            },
+          ])
+          .select("id");
+        expect(appointments.error).toBeNull();
+
+        const result = await user.client.rpc(
+          "list_master_pending_booking_requests",
+          { p_workspace_id: workspaceId },
+        );
+        expect(result.error).toBeNull();
+        expect(result.data).toHaveLength(2);
+        expect(
+          result.data?.map((request) =>
+            new Date(request.starts_at).toISOString(),
+          ),
+        ).toEqual(["2030-04-01T09:00:00.000Z", "2030-04-03T09:00:00.000Z"]);
+        expect(result.data?.[0]).toMatchObject({
+          customer_email: "request@example.test",
+          customer_name: "Request customer",
+          customer_phone: "+420111222333",
+          service_name: "Request service",
+          status: "pending",
+        });
+
+        const earliestRequestId = result.data?.[0]?.id;
+        if (!earliestRequestId)
+          throw new Error("The earliest pending request was not listed");
+        const declinedRequest = await user.client.rpc(
+          "set_appointment_status",
+          {
+            p_appointment_id: earliestRequestId,
+            p_status: "cancelled_by_master",
+          },
+        );
+        expect(declinedRequest.error).toBeNull();
+        const remainingRequests = await user.client.rpc(
+          "list_master_pending_booking_requests",
+          { p_workspace_id: workspaceId },
+        );
+        expect(remainingRequests.data).toHaveLength(1);
+        expect(
+          new Date(remainingRequests.data?.[0]?.starts_at ?? "").toISOString(),
+        ).toBe("2030-04-03T09:00:00.000Z");
+
+        const outsider = await createAuthenticatedTestUser({
+          admin,
+          email: `booking-requests-outsider-${suffix}@example.test`,
+          password: `Test-${suffix}-Outsider!`,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        const denied = await outsider.client.rpc(
+          "list_master_pending_booking_requests",
+          { p_workspace_id: workspaceId },
+        );
+        expect(denied.error?.code).toBe("42501");
+        await admin.auth.admin.deleteUser(outsider.user.id);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+        if (userId) await admin.auth.admin.deleteUser(userId);
+      }
+    },
+    30_000,
+  );
+
+  rlsIntegrationTest(
     "enforces the appointment status lifecycle and records transitions",
     async () => {
       if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {

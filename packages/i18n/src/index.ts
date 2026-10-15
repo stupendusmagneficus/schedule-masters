@@ -21,6 +21,7 @@ export type MessageKey =
   | "common.loading"
   | "common.error"
   | "common.done"
+  | "common.close"
   | "auth.emailLabel"
   | "auth.passwordLabel"
   | "auth.passwordHint"
@@ -112,6 +113,15 @@ export type MessageKey =
   | "mobile.freeSlotsNoSlots"
   | "mobile.freeSlotsLoadFailed"
   | "mobile.freeSlotsBook"
+  | "mobile.bookingRequests"
+  | "mobile.bookingRequestsEmpty"
+  | "mobile.bookingRequestsLoadFailed"
+  | "mobile.bookingRequestAccept"
+  | "mobile.bookingRequestDecline"
+  | "mobile.bookingRequestDeclinePrompt"
+  | "mobile.bookingRequestActionFailed"
+  | "mobile.bookingRequestUpdated"
+  | "mobile.minutes"
   | "mobile.available"
   | "mobile.pending"
   | "mobile.confirmed"
@@ -383,6 +393,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.retry": "Повторить",
     "common.loading": "Загрузка…",
     "common.done": "Готово",
+    "common.close": "Закрыть",
     "common.error":
       "Не удалось завершить действие. Повторите попытку через несколько секунд.",
     "auth.emailLabel": "Email",
@@ -501,6 +512,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Не удалось загрузить свободные окна. Попробуйте ещё раз.",
     "mobile.freeSlotsBook": "Записать клиента",
+    "mobile.bookingRequests": "Заявки",
+    "mobile.bookingRequestsEmpty": "Новых заявок пока нет.",
+    "mobile.bookingRequestsLoadFailed":
+      "Не удалось загрузить заявки. Попробуйте ещё раз.",
+    "mobile.bookingRequestAccept": "Подтвердить",
+    "mobile.bookingRequestDecline": "Отклонить",
+    "mobile.bookingRequestDeclinePrompt": "Отклонить эту заявку?",
+    "mobile.bookingRequestActionFailed":
+      "Не удалось обновить заявку. Возможно, её статус уже изменился. Обновите список.",
+    "mobile.bookingRequestUpdated": "Решение по заявке сохранено.",
+    "mobile.minutes": "мин",
     "mobile.available": "Свободно",
     "mobile.pending": "Ожидает подтверждения",
     "mobile.confirmed": "Подтверждено",
@@ -806,6 +828,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.retry": "Zkusit znovu",
     "common.loading": "Načítání…",
     "common.done": "Hotovo",
+    "common.close": "Zavřít",
     "common.error":
       "Akci se nepodařilo dokončit. Zkuste to prosím znovu za chvíli.",
     "auth.emailLabel": "E-mail",
@@ -922,6 +945,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Volné termíny se nepodařilo načíst. Zkuste to znovu.",
     "mobile.freeSlotsBook": "Objednat klienta",
+    "mobile.bookingRequests": "Žádosti",
+    "mobile.bookingRequestsEmpty": "Zatím tu nejsou žádné nové žádosti.",
+    "mobile.bookingRequestsLoadFailed":
+      "Žádosti se nepodařilo načíst. Zkuste to znovu.",
+    "mobile.bookingRequestAccept": "Potvrdit",
+    "mobile.bookingRequestDecline": "Odmítnout",
+    "mobile.bookingRequestDeclinePrompt": "Odmítnout tuto žádost?",
+    "mobile.bookingRequestActionFailed":
+      "Žádost se nepodařilo aktualizovat. Její stav se možná změnil. Obnovte seznam.",
+    "mobile.bookingRequestUpdated": "Rozhodnutí o žádosti bylo uloženo.",
+    "mobile.minutes": "min",
     "mobile.available": "Volno",
     "mobile.pending": "Čeká na potvrzení",
     "mobile.confirmed": "Potvrzeno",
@@ -1224,6 +1258,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "common.retry": "Try again",
     "common.loading": "Loading…",
     "common.done": "Done",
+    "common.close": "Close",
     "common.error":
       "We could not complete that action. Please try again shortly.",
     "auth.emailLabel": "Email",
@@ -1343,6 +1378,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Couldn't load available times. Please try again.",
     "mobile.freeSlotsBook": "Book client",
+    "mobile.bookingRequests": "Requests",
+    "mobile.bookingRequestsEmpty": "There are no new requests yet.",
+    "mobile.bookingRequestsLoadFailed":
+      "Couldn't load requests. Please try again.",
+    "mobile.bookingRequestAccept": "Confirm",
+    "mobile.bookingRequestDecline": "Decline",
+    "mobile.bookingRequestDeclinePrompt": "Decline this request?",
+    "mobile.bookingRequestActionFailed":
+      "Couldn't update the request. Its status may have changed. Refresh the list.",
+    "mobile.bookingRequestUpdated": "Your decision was saved.",
+    "mobile.minutes": "min",
     "mobile.available": "Available",
     "mobile.pending": "Pending confirmation",
     "mobile.confirmed": "Confirmed",
