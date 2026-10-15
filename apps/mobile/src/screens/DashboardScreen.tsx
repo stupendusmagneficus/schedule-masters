@@ -27,7 +27,9 @@ import {
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useBookingRequests } from "../features/bookingRequests/useBookingRequests";
 import { useCalendarData } from "../features/calendar/useCalendarData";
+import { buildCustomerPhoneUrl } from "../features/customers/customerContact";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
+import { useCustomerPhone } from "../features/customers/useCustomerPhone";
 import {
   createCustomerAppointmentLink,
   recordCustomerLinkShare,
@@ -121,6 +123,11 @@ export function DashboardScreen({
     enabled: activeTab === "today" && !demoData,
     workspaceId: workspace.id,
   });
+  const customerPhone = useCustomerPhone({
+    client,
+    customerId: selectedAppointment?.customer_id ?? null,
+    workspaceId: workspace.id,
+  });
   const serviceCatalog = useServiceCatalog({
     client,
     initialServices: demoData ? [demoData.primaryService] : services,
@@ -203,14 +210,25 @@ export function DashboardScreen({
         amount,
       );
       await calendar.reload();
-      setSelectedAppointment({ ...selectedAppointment, paid_amount: amount });
+      setSelectedAppointment(null);
       setFeedback(t("mobile.paymentSaved"));
       return true;
     } catch {
-      setAppointmentActionError(true);
       return false;
     } finally {
       setUpdatingAppointment(false);
+    }
+  }
+
+  async function openCustomerPhoneAction(action: "call" | "sms") {
+    const url = customerPhone.phone
+      ? buildCustomerPhoneUrl(customerPhone.phone, action)
+      : null;
+    if (!url) return;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      setFeedback(t("mobile.customerContactActionFailed"));
     }
   }
 
@@ -457,6 +475,12 @@ export function DashboardScreen({
         }}
         onStatusChange={updateAppointmentStatus}
         onPaymentSave={saveAppointmentPayment}
+        customerPhone={customerPhone.phone}
+        customerContactLoading={customerPhone.isLoading}
+        customerContactError={customerPhone.error}
+        onRetryCustomerContact={customerPhone.retry}
+        onCallCustomer={() => void openCustomerPhoneAction("call")}
+        onTextCustomer={() => void openCustomerPhoneAction("sms")}
         onShare={client ? shareAppointmentLink : undefined}
         t={t}
         timezone={workspace.timezone}
