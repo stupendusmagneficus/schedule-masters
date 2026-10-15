@@ -52,16 +52,16 @@ export function ProfileTab({
   return (
     <View style={styles.content}>
       <View style={styles.profileHeading}>
-        <View style={styles.profileHeadingCopy}>
-          <Text style={styles.eyebrow}>{t("mobile.profile")}</Text>
-          <Text style={styles.title}>{workspace.name}</Text>
-          <Text style={styles.helper}>{workspace.timezone}</Text>
-        </View>
         <DashboardHeaderAction
           accessibilityLabel={t("common.back")}
           icon="chevron-left"
           onPress={onClose}
         />
+        <View style={styles.profileHeadingCopy}>
+          <Text style={styles.eyebrow}>{t("mobile.profile")}</Text>
+          <Text style={styles.title}>{workspace.name}</Text>
+          <Text style={styles.helper}>{workspace.timezone}</Text>
+        </View>
       </View>
       {canManageWorkspace && client ? (
         <InfoCard>

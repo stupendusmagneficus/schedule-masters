@@ -33,6 +33,7 @@ import {
 } from "../features/notifications/customerAppointmentLink";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { analytics, analyticsEvents } from "../lib/analytics";
+import { spacing } from "../theme/spacing";
 import { colors } from "../theme/tokens";
 import type { Service, Workspace } from "../types";
 import {
@@ -105,7 +106,12 @@ export function DashboardScreen({
   const [feedback, setFeedback] = useState<string | null>(null);
   const dismissFeedback = useCallback(() => setFeedback(null), []);
   const t = useMemo(() => createTranslator(locale), [locale]);
-  const { appointments, reload: reloadAppointments } = useMasterAppointments({
+  const {
+    appointments,
+    error: appointmentsError,
+    isLoading: appointmentsLoading,
+    reload: reloadAppointments,
+  } = useMasterAppointments({
     client,
     timezone: workspace.timezone,
     workspaceId: workspace.id,
@@ -263,6 +269,9 @@ export function DashboardScreen({
             onOpenProfile={openProfile}
             demoData={demoData}
             masterAppointments={appointments}
+            appointmentsError={appointmentsError}
+            appointmentsLoading={appointmentsLoading}
+            onRetryAppointments={() => void reloadAppointments()}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             t={t}
             workspace={workspace}
@@ -426,9 +435,9 @@ export function DashboardScreen({
 const styles = StyleSheet.create({
   bottomSafeArea: {
     backgroundColor: colors.canvas,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: spacing.page,
+    paddingTop: spacing.compact,
   },
-  content: { gap: 16, padding: 16, paddingBottom: 128 },
+  content: { gap: spacing.section, padding: spacing.page, paddingBottom: 128 },
   screen: { backgroundColor: colors.canvas, flex: 1 },
 });

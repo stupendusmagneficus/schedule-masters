@@ -1,4 +1,4 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
 import {
   formatCurrency,
@@ -14,7 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
+import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { DemoData } from "../../demo/types";
 import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
@@ -24,6 +24,7 @@ import {
 } from "../../features/calendar/calendar";
 import { summarizeFinanceMonth } from "../../features/finance/financeSummary";
 import { useFinanceData } from "../../features/finance/useFinanceData";
+import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
@@ -78,22 +79,12 @@ export function FinancesTab({
 
   return (
     <View style={styles.content}>
-      <View style={styles.headingRow}>
-        <View style={styles.headingCopy}>
-          <Text accessibilityRole="header" style={styles.title}>
-            {t("mobile.finances")}
-          </Text>
-          <Text style={styles.subtitle}>{t("mobile.financeSummaryTitle")}</Text>
-          {demoData ? (
-            <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
-          ) : null}
-        </View>
-        <DashboardHeaderAction
-          accessibilityLabel={t("mobile.profile")}
-          icon="account-circle-outline"
-          onPress={onOpenProfile}
-        />
-      </View>
+      <DashboardPageHeader
+        actionLabel={t("mobile.profile")}
+        onAction={onOpenProfile}
+        subtitle={t("mobile.financeSummaryTitle")}
+        title={t("mobile.finances")}
+      />
 
       <View style={styles.monthSelector}>
         <MonthButton
@@ -136,95 +127,97 @@ export function FinancesTab({
       ) : null}
 
       {!financeData.isLoading && !financeData.error ? (
-        <>
-          {!hasAppointments ? (
-            <InfoCard>
-              <Text style={styles.helper}>{t("mobile.financeEmpty")}</Text>
+        !hasAppointments ? (
+          <InfoCard>
+            <Text style={styles.helper}>{t("mobile.financeEmpty")}</Text>
+          </InfoCard>
+        ) : (
+          <>
+            <InfoCard style={styles.summaryCard}>
+              <Text style={styles.sectionTitle}>
+                {t("mobile.financeIncome")}
+              </Text>
+              <View style={styles.incomeRow}>
+                <View style={styles.incomeColumn}>
+                  <View style={styles.incomeLabelRow}>
+                    <View style={[styles.statusDot, styles.completedDot]} />
+                    <Text style={styles.incomeLabel}>
+                      {t("mobile.financeActual")}
+                    </Text>
+                  </View>
+                  <Text style={styles.amount} numberOfLines={2}>
+                    {receivedAmounts}
+                  </Text>
+                  <Text style={styles.helper}>
+                    {t("mobile.financeActualDescription")}
+                  </Text>
+                </View>
+                <View style={styles.incomeColumn}>
+                  <View style={styles.incomeLabelRow}>
+                    <View style={[styles.statusDot, styles.expectedDot]} />
+                    <Text style={styles.incomeLabel}>
+                      {t("mobile.financeExpected")}
+                    </Text>
+                  </View>
+                  <Text style={styles.amount} numberOfLines={2}>
+                    {expectedAmounts}
+                  </Text>
+                  <Text style={styles.helper}>
+                    {t("mobile.financeExpectedDescription")}
+                  </Text>
+                </View>
+              </View>
             </InfoCard>
-          ) : null}
 
-          <InfoCard style={styles.summaryCard}>
-            <Text style={styles.sectionTitle}>{t("mobile.financeIncome")}</Text>
-            <View style={styles.incomeRow}>
-              <View style={styles.incomeColumn}>
-                <View style={styles.incomeLabelRow}>
-                  <View style={[styles.statusDot, styles.completedDot]} />
-                  <Text style={styles.incomeLabel}>
-                    {t("mobile.financeActual")}
-                  </Text>
-                </View>
-                <Text style={styles.amount} numberOfLines={2}>
-                  {receivedAmounts}
-                </Text>
-                <Text style={styles.helper}>
-                  {t("mobile.financeActualDescription")}
-                </Text>
+            <InfoCard style={styles.appointmentsCard}>
+              <Text style={styles.sectionTitle}>
+                {t("mobile.financeAppointments")}
+              </Text>
+              <View style={styles.metricsGrid}>
+                <MetricCard
+                  label={t("mobile.financeCompletedAppointments")}
+                  value={String(summary.completedCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeUpcomingAppointments")}
+                  value={String(summary.upcomingCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeCanceledAppointments")}
+                  value={String(summary.canceledCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeNoShowAppointments")}
+                  value={String(summary.noShowCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeNewCustomers")}
+                  value={String(summary.newCustomerCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeReturningCustomers")}
+                  value={String(summary.returningCustomerCount)}
+                />
+                <MetricCard
+                  label={t("mobile.financeBookedHours")}
+                  value={String(
+                    Math.round((summary.bookedMinutes / 60) * 10) / 10,
+                  )}
+                />
               </View>
-              <View style={styles.incomeColumn}>
-                <View style={styles.incomeLabelRow}>
-                  <View style={[styles.statusDot, styles.expectedDot]} />
-                  <Text style={styles.incomeLabel}>
-                    {t("mobile.financeExpected")}
-                  </Text>
-                </View>
-                <Text style={styles.amount} numberOfLines={2}>
-                  {expectedAmounts}
-                </Text>
-                <Text style={styles.helper}>
-                  {t("mobile.financeExpectedDescription")}
-                </Text>
-              </View>
+            </InfoCard>
+            <View style={styles.notice}>
+              <MaterialCommunityIcons
+                color={colors.secondaryText}
+                name="information-outline"
+                size={18}
+              />
+              <Text style={styles.noticeText}>
+                {t("mobile.financeProfitUnavailable")}
+              </Text>
             </View>
-          </InfoCard>
-
-          <InfoCard style={styles.appointmentsCard}>
-            <Text style={styles.sectionTitle}>
-              {t("mobile.financeAppointments")}
-            </Text>
-            <View style={styles.metricsGrid}>
-              <MetricCard
-                label={t("mobile.financeCompletedAppointments")}
-                value={String(summary.completedCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeUpcomingAppointments")}
-                value={String(summary.upcomingCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeCanceledAppointments")}
-                value={String(summary.canceledCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeNoShowAppointments")}
-                value={String(summary.noShowCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeNewCustomers")}
-                value={String(summary.newCustomerCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeReturningCustomers")}
-                value={String(summary.returningCustomerCount)}
-              />
-              <MetricCard
-                label={t("mobile.financeBookedHours")}
-                value={String(
-                  Math.round((summary.bookedMinutes / 60) * 10) / 10,
-                )}
-              />
-            </View>
-          </InfoCard>
-          <View style={styles.notice}>
-            <MaterialCommunityIcons
-              color={colors.secondaryText}
-              name="information-outline"
-              size={18}
-            />
-            <Text style={styles.noticeText}>
-              {t("mobile.financeProfitUnavailable")}
-            </Text>
-          </View>
-        </>
+          </>
+        )
       ) : null}
     </View>
   );
@@ -287,24 +280,18 @@ const styles = StyleSheet.create({
   appointmentsCard: { gap: 12 },
   completedDot: { backgroundColor: colors.accent },
   content: {
-    gap: 16,
-    paddingBottom: 120,
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    gap: spacing.section,
   },
-  demoLabel: {
-    ...typography.caption,
-    color: colors.accentPressed,
-    marginTop: 4,
-  },
-  headingCopy: { flex: 1, gap: 4 },
-  headingRow: { alignItems: "center", flexDirection: "row", gap: 12 },
   expectedDot: { backgroundColor: colors.primaryText },
   helper: { ...typography.caption, color: colors.secondaryText, marginTop: 4 },
   incomeColumn: { flex: 1, minWidth: 0 },
   incomeLabel: { ...typography.caption, color: colors.secondaryText },
   incomeLabelRow: { alignItems: "center", flexDirection: "row", gap: 6 },
-  incomeRow: { flexDirection: "row", gap: 16, marginTop: 16 },
+  incomeRow: {
+    flexDirection: "row",
+    gap: spacing.section,
+    marginTop: spacing.section,
+  },
   metricCard: { flexBasis: "45%", flexGrow: 1, gap: 4, minWidth: 0 },
   metricLabel: { ...typography.caption, color: colors.secondaryText },
   metricValue: { ...typography.label, color: colors.primaryText },
@@ -345,12 +332,10 @@ const styles = StyleSheet.create({
   retryButton: { alignSelf: "flex-start", marginTop: 12 },
   retryText: { ...typography.label, color: colors.accentPressed },
   state: { alignItems: "center", gap: 8, paddingVertical: 28 },
-  subtitle: { ...typography.body, color: colors.secondaryText },
   summaryCard: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accentSoft,
   },
   sectionTitle: { ...typography.label, color: colors.primaryText },
   statusDot: { borderRadius: 4, height: 8, width: 8 },
-  title: { ...typography.heading, color: colors.primaryText },
 });

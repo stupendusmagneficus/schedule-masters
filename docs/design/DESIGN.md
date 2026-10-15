@@ -2,9 +2,9 @@
 
 ## Status
 
-**Approved direction for MVP implementation**
+**Core product design system — approved**
 
-This document is the source of truth for the first visual language of Schedule Masters. It applies to the master mobile app and the public booking web experience.
+This document defines the product visual language for Schedule Masters. It applies to the master mobile app and the public booking web experience. Future screens and UI changes must follow these rules and reuse the shared theme tokens and components. Update the system itself when a product need requires a new pattern; do not create one-off visual exceptions silently.
 
 The approved direction is **Shadcn-inspired schedule operations**: neutral
 surfaces, high-contrast graphite actions, one restrained green brand accent,
@@ -37,6 +37,23 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 9. **Shadcn-inspired simplicity.** Use graphite actions, pill controls, 16px
    cards, semantic status colors and a 4px spacing rhythm. Do not add
    gradients, decorative blobs or competing accent colors.
+
+## Core implementation rules
+
+These rules turn the visual direction into decisions that should stay consistent across screens:
+
+- **Shared page frame:** dashboard tabs use the same page padding, typography hierarchy, surface colors, and shared `DashboardPageHeader`. A page title is graphite and follows the same scale; green is for selected, available, or success states rather than a separate page-heading style.
+- **Spacing:** use the 4px rhythm from the token file. Mobile page edges use 16px; section spacing is at least 16px. Related controls may use 8–12px. Do not tune spacing independently on each tab when a shared layout can own it.
+- **Fields:** labels sit above controls; input text and selected values are vertically centered. Controls use consistent height, border, focus, disabled, and error treatments. Multi-line notes are top-aligned and use a moderate card radius rather than the pill radius reserved for single-line controls.
+- **Date and time:** a date field opens its picker on the first tap and visually reads as actionable, with a calendar affordance where space allows. Keep date, start, and end fields in separate, clearly spaced groups; labels and values must not overlap.
+- **Service selection:** support a searchable, categorized list that scales to dozens of services. Use grouped or accordion sections where useful; do not place a long catalog in a native dropdown or force users through a long stack of ungrouped choices.
+- **Modal navigation:** use a left-aligned back arrow when the user moves deeper into a flow and can return to the previous level. Use a right-aligned close X when dismissing the whole flow. Both actions have the same 16px edge inset and at least a 44×44pt hit target; keep their centers symmetrical. Modal titles remain centered and do not collide with either action.
+- **Icons:** use the Expo-compatible Material Design icon set installed in the mobile app through `@react-native-vector-icons/material-design-icons`. Use named icons, consistent sizes, and accessible labels for icon-only buttons. Do not substitute text glyphs, emoji, or square placeholders. Ensure Expo Font is initialized before icon modules in web builds.
+- **Feedback:** successful create, update, and delete actions provide visible confirmation; failures provide a clear message and recovery path. Do not leave users unsure whether an action completed.
+- **Motion:** use short, purposeful transitions for selection and navigation. Respect reduced-motion settings and keep motion from delaying an action or communicating state by itself.
+- **Touch and accessibility:** interactive targets are at least 44pt, controls have accessible names and roles, and color is never the only way to communicate state. Check text contrast and long RU/CZ/EN labels when changing shared UI.
+
+The mobile implementation lives in `apps/mobile/src/theme/` and shared components in `apps/mobile/src/components/`. Current examples include `DashboardPageHeader`, `DashboardHeaderAction`, `FullscreenModal`, and reusable date and service picker fields. Extend these shared components when a rule changes instead of forking styling per screen.
 
 ## Tone
 
@@ -194,11 +211,12 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 ### Mobile master app
 
-Use a small fixed bottom navigation with three primary destinations:
+Use a small fixed bottom navigation with four primary destinations:
 
 - Today
 - Calendar
-- Profile
+- Customers
+- Finances
 
 This is an information architecture decision, not only a visual grouping:
 
@@ -206,8 +224,10 @@ This is an information architecture decision, not only a visual grouping:
   today?” with bookings, the next client, daily totals and expected revenue.
 - **Calendar** is the planning surface. It answers “when am I available?” with
   the timeline, free slots, breaks and appointment creation.
-- **Profile** is the low-frequency configuration surface. It contains the
-  master profile, public booking link, language, subscription and settings.
+- **Customers** supports customer lookup and customer history.
+- **Finances** gives a quick view of expected and actual income.
+
+Profile is a low-frequency configuration surface and is reached from the profile action in the top page header. It contains the master profile, public booking link, language, subscription, and settings.
 
 The destinations are intentionally ordered by frequency of use. Messages,
 Explore, Inbox and client discovery are not MVP destinations: adding them now
@@ -218,11 +238,10 @@ Keep settings and subscription inside Profile. Messaging is deferred from the MV
 Place the primary `New booking` action as a compact floating button immediately
 above the bottom navigation. It must remain reachable while a master scrolls and
 must not cover a selected tab or important information. There must be no second
-`Add booking` button on the Today screen. The action opens the booking creation
-flow when that flow is implemented; until then it must clearly state that the
-flow is not available rather than silently doing nothing.
+`Add booking` button on the Today screen. The action opens the shared booking
+creation flow.
 
-`New booking` is a global creation action, not a fourth destination. Its role is
+`New booking` is a global creation action, not a navigation destination. Its role is
 to start a client appointment quickly from Today or Calendar. Calendar remains
 the place for choosing a time and for creating a break, so the two actions do
 not compete with one another.

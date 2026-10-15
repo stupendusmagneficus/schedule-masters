@@ -131,6 +131,11 @@ export function ServiceEditorModal({
             value={draft.name}
           />
           <Field
+            label={t("mobile.serviceCategory")}
+            onChangeText={(category) => updateDraft({ category })}
+            value={draft.category}
+          />
+          <Field
             error={validationError === "description"}
             label={t("mobile.serviceDescription")}
             multiline

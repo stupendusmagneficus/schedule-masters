@@ -157,6 +157,9 @@ function ServiceRow({
             {t(isActive ? "mobile.serviceActive" : "mobile.serviceArchived")}
           </Text>
         </View>
+        {service.category ? (
+          <Text style={styles.helper}>{service.category}</Text>
+        ) : null}
         <Text style={styles.helper}>
           {service.duration_minutes} min ·{" "}
           {formatCurrency(

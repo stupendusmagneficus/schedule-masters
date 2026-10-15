@@ -1,7 +1,7 @@
 export const colors = {
   accent: "#2F7D5C",
   accentPressed: "#256246",
-  accentSoft: "#E8F2ED",
+  accentSoft: "#F4F7F5",
   action: "#202522",
   actionPressed: "#151A17",
   actionText: "#FFFFFF",

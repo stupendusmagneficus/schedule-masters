@@ -29,7 +29,7 @@ import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
 import { FullscreenModal } from "./FullscreenModal";
-import { ServiceAccordion } from "./ServiceAccordion";
+import { ServicePickerField } from "./ServicePickerField";
 
 type FreeSlotsModalProps = {
   readonly client: SupabaseClient<Database> | null;
@@ -181,7 +181,7 @@ export function FreeSlotsModal({
         <Text style={styles.sectionTitle}>
           {t("mobile.freeSlotsChooseService")}
         </Text>
-        <ServiceAccordion
+        <ServicePickerField
           label={t("mobile.freeSlotsChooseService")}
           locale={locale}
           onSelect={(service) => {
@@ -190,6 +190,7 @@ export function FreeSlotsModal({
           }}
           selectedService={selectedService ?? null}
           services={services}
+          t={t}
         />
 
         <View style={styles.monthHeader}>
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
   day: {
     alignItems: "center",
     borderRadius: radii.control,
-    height: 42,
+    height: 44,
     justifyContent: "center",
     width: "14.2857%",
   },
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   helper: { ...typography.caption, color: colors.secondaryText },
   monthArrow: {
     alignItems: "center",
-    height: 40,
+    height: 44,
     justifyContent: "center",
     width: 44,
   },

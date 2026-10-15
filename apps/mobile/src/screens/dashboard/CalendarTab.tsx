@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
+import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
@@ -48,6 +48,7 @@ import {
   buildDemoWeekCalendar,
   buildWeekCalendar,
 } from "../../features/calendar/weekCalendar";
+import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
@@ -168,19 +169,12 @@ export function CalendarTab({
     <>
       <View style={styles.content}>
         <View>
-          <View style={styles.calendarHeading}>
-            <View style={styles.calendarHeadingCopy}>
-              <Text style={styles.eyebrow}>{t("mobile.calendar")}</Text>
-              <Text numberOfLines={2} style={styles.title}>
-                {dateLabel}
-              </Text>
-            </View>
-            <DashboardHeaderAction
-              accessibilityLabel={t("mobile.profile")}
-              icon="account-circle-outline"
-              onPress={onOpenProfile}
-            />
-          </View>
+          <DashboardPageHeader
+            actionLabel={t("mobile.profile")}
+            onAction={onOpenProfile}
+            subtitle={dateLabel}
+            title={t("mobile.calendar")}
+          />
           <View style={styles.calendarToolbar}>
             <View accessibilityRole="tablist" style={styles.viewSwitcher}>
               <CalendarViewButton
@@ -535,7 +529,7 @@ function PersonalBlockRow({
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 16 },
+  content: { gap: spacing.section },
   addButton: {
     backgroundColor: colors.action,
     borderRadius: radii.control,
@@ -582,12 +576,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-  calendarHeading: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-  },
-  calendarHeadingCopy: { flex: 1, minWidth: 0 },
   deleteButton: { paddingHorizontal: 4, paddingVertical: 8 },
   freeSlotsButton: {
     alignSelf: "flex-start",
@@ -627,12 +615,6 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: "700",
   },
-  eyebrow: {
-    color: colors.accent,
-    marginBottom: 6,
-    textTransform: "uppercase",
-    ...typography.eyebrow,
-  },
   helper: { ...typography.body, color: colors.secondaryText },
   navigationButton: {
     alignItems: "center",
@@ -641,7 +623,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     height: 44,
     justifyContent: "center",
-    width: 36,
+    width: 44,
   },
   navigationButtonPressed: { backgroundColor: colors.subtleSurface },
   navigationButtonText: {
@@ -675,7 +657,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sectionHeaderCopy: { flex: 1 },
-  title: { ...typography.heading, color: colors.primaryText },
   viewButton: {
     alignItems: "center",
     borderRadius: radii.control,

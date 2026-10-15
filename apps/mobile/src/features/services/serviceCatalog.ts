@@ -7,6 +7,7 @@ export type ServiceDraft = {
   readonly bufferAfterMinutes: string;
   readonly bufferBeforeMinutes: string;
   readonly currency: string;
+  readonly category: string;
   readonly description: string;
   readonly durationMinutes: string;
   readonly name: string;
@@ -27,13 +28,14 @@ export type ServiceValidationError =
 type ServiceClient = SupabaseClient<Database>;
 
 const serviceFields =
-  "id, name, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at";
+  "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at";
 
 export function createServiceDraft(service?: Service | null): ServiceDraft {
   return {
     bufferAfterMinutes: String(service?.buffer_after_minutes ?? 0),
     bufferBeforeMinutes: String(service?.buffer_before_minutes ?? 0),
     currency: service?.currency ?? "CZK",
+    category: service?.category ?? "",
     description: service?.description ?? "",
     durationMinutes: String(service?.duration_minutes ?? 60),
     name: service?.name ?? "",
@@ -151,6 +153,7 @@ function toServiceInput(draft: ServiceDraft) {
     buffer_after_minutes: Number(draft.bufferAfterMinutes),
     buffer_before_minutes: Number(draft.bufferBeforeMinutes),
     currency: draft.currency.trim().toUpperCase(),
+    category: draft.category.trim() || null,
     description: draft.description.trim() || null,
     duration_minutes: Number(draft.durationMinutes),
     name: draft.name.trim(),

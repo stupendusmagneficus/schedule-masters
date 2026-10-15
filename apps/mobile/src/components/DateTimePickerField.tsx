@@ -1,7 +1,7 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
   getIntlLocale,
   type MessageKey,
@@ -63,7 +63,7 @@ export function DateTimePickerField({
     );
   }
 
-  if (Platform.OS === "web") {
+  if (Platform.OS === "web" && mode === "time") {
     return (
       <View style={styles.field}>
         <Text style={styles.label}>{label}</Text>
@@ -88,7 +88,10 @@ export function DateTimePickerField({
         accessibilityRole="button"
         accessibilityValue={{ text: displayValue }}
         onPress={() => {
-          if (Platform.OS === "ios" && mode === "date") {
+          if (
+            (Platform.OS === "ios" || Platform.OS === "web") &&
+            mode === "date"
+          ) {
             setDraftDate(parseValue(value, "date"));
           }
           setOpen(true);
@@ -109,7 +112,9 @@ export function DateTimePickerField({
           />
         ) : null}
       </Pressable>
-      {isOpen && Platform.OS === "ios" && mode === "date" ? (
+      {isOpen &&
+      (Platform.OS === "ios" || Platform.OS === "web") &&
+      mode === "date" ? (
         <CalendarDatePickerSheet
           initialDate={draftDate}
           locale={locale}
@@ -121,7 +126,8 @@ export function DateTimePickerField({
           t={t}
         />
       ) : null}
-      {isOpen && !(Platform.OS === "ios" && mode === "date") ? (
+      {isOpen &&
+      !((Platform.OS === "ios" || Platform.OS === "web") && mode === "date") ? (
         <DateTimePicker
           display={
             mode === "date"

@@ -139,6 +139,8 @@ export type MessageKey =
   | "mobile.shareSheetOpened"
   | "mobile.shareSheetFailed"
   | "mobile.today"
+  | "mobile.todayLoadFailed"
+  | "mobile.todayRetry"
   | "mobile.calendar"
   | "mobile.customers"
   | "mobile.customerSearch"
@@ -290,6 +292,12 @@ export type MessageKey =
   | "mobile.serviceActive"
   | "mobile.serviceArchived"
   | "mobile.serviceName"
+  | "mobile.serviceChoose"
+  | "mobile.serviceSearch"
+  | "mobile.serviceSearchEmpty"
+  | "mobile.serviceCategory"
+  | "mobile.serviceAllCategories"
+  | "mobile.serviceUncategorized"
   | "mobile.serviceDescription"
   | "mobile.serviceDuration"
   | "mobile.servicePrice"
@@ -513,6 +521,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Не удалось подготовить ссылку или открыть отправку. Она не отмечена как отправленная; попробуйте ещё раз.",
     "mobile.today": "Сегодня",
+    "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
+    "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
     "mobile.customers": "Клиенты",
     "mobile.customerSearch": "Имя, телефон или email",
@@ -684,6 +694,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceActive": "Активные",
     "mobile.serviceArchived": "Архив",
     "mobile.serviceName": "Название услуги *",
+    "mobile.serviceChoose": "Выберите услугу",
+    "mobile.serviceSearch": "Найти услугу",
+    "mobile.serviceSearchEmpty": "Услуги не найдены.",
+    "mobile.serviceCategory": "Категория",
+    "mobile.serviceAllCategories": "Все",
+    "mobile.serviceUncategorized": "Без категории",
     "mobile.serviceDescription": "Описание",
     "mobile.serviceDuration": "Длительность, минут *",
     "mobile.servicePrice": "Цена *",
@@ -912,6 +928,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Odkaz se nepodařilo připravit nebo otevřít sdílení. Odeslání není potvrzeno; zkuste to znovu.",
     "mobile.today": "Dnes",
+    "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
+    "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
     "mobile.customers": "Klienti",
     "mobile.customerSearch": "Jméno, telefon nebo e-mail",
@@ -1083,6 +1101,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceActive": "Aktivní",
     "mobile.serviceArchived": "Archiv",
     "mobile.serviceName": "Název služby *",
+    "mobile.serviceChoose": "Vyberte službu",
+    "mobile.serviceSearch": "Hledat službu",
+    "mobile.serviceSearchEmpty": "Žádné služby nebyly nalezeny.",
+    "mobile.serviceCategory": "Kategorie",
+    "mobile.serviceAllCategories": "Vše",
+    "mobile.serviceUncategorized": "Bez kategorie",
     "mobile.serviceDescription": "Popis",
     "mobile.serviceDuration": "Délka v minutách *",
     "mobile.servicePrice": "Cena *",
@@ -1313,6 +1337,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "We couldn't prepare the link or open sharing. It is not marked as sent; try again.",
     "mobile.today": "Today",
+    "mobile.todayLoadFailed": "The schedule could not be loaded.",
+    "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
     "mobile.customers": "Customers",
     "mobile.customerSearch": "Name, phone, or email",
@@ -1487,6 +1513,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceActive": "Active",
     "mobile.serviceArchived": "Archived",
     "mobile.serviceName": "Service name *",
+    "mobile.serviceChoose": "Choose a service",
+    "mobile.serviceSearch": "Search services",
+    "mobile.serviceSearchEmpty": "No services found.",
+    "mobile.serviceCategory": "Category",
+    "mobile.serviceAllCategories": "All",
+    "mobile.serviceUncategorized": "Uncategorized",
     "mobile.serviceDescription": "Description",
     "mobile.serviceDuration": "Duration in minutes *",
     "mobile.servicePrice": "Price *",
