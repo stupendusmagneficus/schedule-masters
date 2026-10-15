@@ -16,12 +16,13 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
+import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
-import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
+import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -31,11 +32,15 @@ import type { DashboardTabProps } from "./types";
 type TodayTabProps = DashboardTabProps & {
   readonly demoData?: DemoData;
   readonly masterAppointments?: readonly MasterAppointment[];
-  readonly appointmentsError?: Error | null;
+  readonly appointmentsError?: string | null;
   readonly appointmentsLoading?: boolean;
   readonly onRetryAppointments?: () => void;
+  readonly onGoToToday: () => void;
+  readonly onNextDay: () => void;
+  readonly onPreviousDay: () => void;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onOpenProfile: () => void;
+  readonly selectedDate: string;
   readonly workspace: Workspace;
 };
 
@@ -46,36 +51,33 @@ export function TodayTab({
   appointmentsError = null,
   appointmentsLoading = false,
   onRetryAppointments,
+  onGoToToday,
+  onNextDay,
+  onPreviousDay,
   onSelectAppointment,
   onOpenProfile,
+  selectedDate,
   t,
   workspace,
 }: TodayTabProps) {
-  const now = new Date();
-  const today = formatCompactDate(now, locale, {
+  const selectedDateValue = new Date(`${selectedDate}T12:00:00.000Z`);
+  const isToday = selectedDate === getTodayCalendarDate(workspace.timezone);
+  const dateLabel = formatCompactDate(selectedDateValue, locale, {
     timeZone: workspace.timezone,
   });
-  const todayInWorkspace = formatDateInTimeZone(new Date(), workspace.timezone);
-  const liveAppointments = masterAppointments.filter(
-    (appointment) =>
-      formatDateInTimeZone(
-        new Date(appointment.starts_at),
-        workspace.timezone,
-      ) === todayInWorkspace,
-  );
-  const demoAppointments = demoData?.appointments ?? [];
-  const revenueAppointments = liveAppointments.filter(
+  const demoAppointments = isToday ? (demoData?.appointments ?? []) : [];
+  const revenueAppointments = masterAppointments.filter(
     (appointment) =>
       appointment.status === "pending" ||
       appointment.status === "confirmed" ||
       appointment.status === "completed",
   );
-  const visibleAppointments = liveAppointments.filter(
+  const visibleAppointments = masterAppointments.filter(
     (appointment) =>
       appointment.status !== "cancelled_by_customer" &&
       appointment.status !== "cancelled_by_master",
   );
-  const activeAppointments = liveAppointments.filter(
+  const activeAppointments = masterAppointments.filter(
     (appointment) =>
       appointment.status === "pending" || appointment.status === "confirmed",
   );
@@ -97,15 +99,56 @@ export function TodayTab({
     <View style={styles.content}>
       <DashboardPageHeader
         actionLabel={t("mobile.profile")}
+        centeredTitle
         onAction={onOpenProfile}
-        subtitle={today}
-        subtitleAccessibilityLabel={formatAccessibleDate(
-          now,
-          locale,
-          workspace.timezone,
-        )}
-        title={t("mobile.today")}
+        subtitle={isToday ? dateLabel : undefined}
+        subtitleAccessibilityLabel={
+          isToday
+            ? formatAccessibleDate(
+                selectedDateValue,
+                locale,
+                workspace.timezone,
+              )
+            : undefined
+        }
+        title={isToday ? t("mobile.today") : dateLabel}
+        titleAccessibilityLabel={
+          isToday
+            ? t("mobile.today")
+            : formatAccessibleDate(
+                selectedDateValue,
+                locale,
+                workspace.timezone,
+              )
+        }
       />
+      <View style={styles.dayNavigation}>
+        <DashboardHeaderAction
+          accessibilityLabel={t("mobile.previousDay")}
+          icon="arrow-left"
+          onPress={onPreviousDay}
+        />
+        {!isToday ? (
+          <Pressable
+            accessibilityLabel={t("mobile.today")}
+            accessibilityRole="button"
+            onPress={onGoToToday}
+            style={({ pressed }) => [
+              styles.todayButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.dayNavigationSpacer} />
+        )}
+        <DashboardHeaderAction
+          accessibilityLabel={t("mobile.nextDay")}
+          icon="arrow-right"
+          onPress={onNextDay}
+        />
+      </View>
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
@@ -130,31 +173,47 @@ export function TodayTab({
 
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
-          <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
-          <View style={styles.appointmentsList}>
-            {demoAppointments.map((appointment, index) => (
-              <AppointmentRow
-                appointment={appointment}
-                isNextBooking={index === 0}
-                key={appointment.id}
-                t={t}
-              />
-            ))}
-          </View>
-          <Text style={styles.freeSlotsLabel}>{t("mobile.freeSlots")}</Text>
-          <View style={styles.freeSlots}>
-            {demoData.freeSlots.map((slot) => (
-              <Text key={slot} style={styles.freeSlot}>
-                {slot}
-              </Text>
-            ))}
-          </View>
+          <Text style={styles.sectionTitle}>
+            {isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")}
+          </Text>
+          {demoAppointments.length ? (
+            <View style={styles.appointmentsList}>
+              {demoAppointments.map((appointment, index) => (
+                <AppointmentRow
+                  appointment={appointment}
+                  isNextBooking={index === 0}
+                  key={appointment.id}
+                  t={t}
+                />
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.helper}>
+              {isToday
+                ? t("mobile.noBookingsToday")
+                : t("mobile.noBookingsOnDay")}
+            </Text>
+          )}
+          {isToday ? (
+            <>
+              <Text style={styles.freeSlotsLabel}>{t("mobile.freeSlots")}</Text>
+              <View style={styles.freeSlots}>
+                {demoData.freeSlots.map((slot) => (
+                  <Text key={slot} style={styles.freeSlot}>
+                    {slot}
+                  </Text>
+                ))}
+              </View>
+            </>
+          ) : null}
         </InfoCard>
       )}
 
       {!demoData ? (
         <InfoCard style={styles.scheduleCard}>
-          <Text style={styles.sectionTitle}>{t("mobile.todaySchedule")}</Text>
+          <Text style={styles.sectionTitle}>
+            {isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")}
+          </Text>
           {appointmentsLoading ? (
             <View accessibilityLiveRegion="polite" style={styles.state}>
               <ActivityIndicator color={colors.accent} />
@@ -165,9 +224,9 @@ export function TodayTab({
               <Text style={styles.error}>{t("mobile.todayLoadFailed")}</Text>
               <Text style={styles.retry}>{t("mobile.todayRetry")}</Text>
             </Pressable>
-          ) : liveAppointments.length ? (
+          ) : masterAppointments.length ? (
             <View style={styles.appointmentsList}>
-              {liveAppointments.map((appointment) => (
+              {masterAppointments.map((appointment) => (
                 <MasterAppointmentRow
                   appointment={appointment}
                   isNextBooking={appointment.id === nextLiveAppointment?.id}
@@ -180,7 +239,11 @@ export function TodayTab({
               ))}
             </View>
           ) : (
-            <Text style={styles.helper}>{t("mobile.noBookingsToday")}</Text>
+            <Text style={styles.helper}>
+              {isToday
+                ? t("mobile.noBookingsToday")
+                : t("mobile.noBookingsOnDay")}
+            </Text>
           )}
         </InfoCard>
       ) : null}
@@ -217,7 +280,28 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appointmentsList: { gap: 12 },
+  dayNavigation: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dayNavigationSpacer: { flex: 1 },
   scheduleCard: { marginTop: 8 },
+  todayButton: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radii.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 16,
+  },
+  todayButtonText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
