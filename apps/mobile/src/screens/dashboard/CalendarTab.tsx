@@ -325,6 +325,7 @@ export function CalendarTab({
               onSelectDate={calendar.setSelectedDate}
               selectedDate={calendar.selectedDate}
               t={t}
+              timezone={workspace.timezone}
             />
           ) : calendar.view === "feed" ? (
             calendar.error && !demoData ? (
