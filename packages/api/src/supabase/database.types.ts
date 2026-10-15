@@ -729,7 +729,9 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           entry_id: string
-          from_status?: Database["public"]["Enums"]["waiting_list_status"] | null
+          from_status?:
+            | Database["public"]["Enums"]["waiting_list_status"]
+            | null
           id?: string
           to_status: Database["public"]["Enums"]["waiting_list_status"]
         }
@@ -738,7 +740,9 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           entry_id?: string
-          from_status?: Database["public"]["Enums"]["waiting_list_status"] | null
+          from_status?:
+            | Database["public"]["Enums"]["waiting_list_status"]
+            | null
           id?: string
           to_status?: Database["public"]["Enums"]["waiting_list_status"]
         }
@@ -1026,18 +1030,18 @@ export type Database = {
       list_master_waiting_list: {
         Args: { p_workspace_id: string }
         Returns: {
-          appointment_id: string | null
+          appointment_id: string
           created_at: string
           customer_email: string | null
-          customer_id: string | null
+          customer_id: string
           customer_name: string
           customer_phone: string | null
           desired_date: string
-          desired_time_from: string | null
-          desired_time_to: string | null
+          desired_time_from: string
+          desired_time_to: string
           duration_minutes: number
           id: string
-          note: string | null
+          note: string
           service_id: string
           service_name: string
           status: Database["public"]["Enums"]["waiting_list_status"]
@@ -1047,16 +1051,16 @@ export type Database = {
         Args: { p_cancelled_appointment_id: string; p_workspace_id: string }
         Returns: {
           customer_email: string | null
-          customer_id: string | null
+          customer_id: string
           customer_name: string
           customer_phone: string | null
           desired_date: string
-          desired_time_from: string | null
-          desired_time_to: string | null
+          desired_time_from: string
+          desired_time_to: string
           duration_minutes: number
           ends_at: string
           id: string
-          note: string | null
+          note: string
           service_id: string
           service_name: string
           starts_at: string
