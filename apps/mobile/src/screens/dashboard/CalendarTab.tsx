@@ -70,7 +70,6 @@ type CalendarTabProps = DashboardTabProps & {
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onSelectTime?: (date: string, startsAt: string) => void;
   readonly onOpenFreeSlots?: () => void;
-  readonly onOpenProfile: () => void;
   readonly onFeedback: (message: string) => void;
   readonly workspace: Workspace;
 };
@@ -83,7 +82,6 @@ export function CalendarTab({
   onSelectAppointment,
   onSelectTime,
   onOpenFreeSlots,
-  onOpenProfile,
   onFeedback,
   t,
   workspace,
@@ -183,8 +181,6 @@ export function CalendarTab({
       <View style={styles.content}>
         <View>
           <DashboardPageHeader
-            actionLabel={t("mobile.profile")}
-            onAction={onOpenProfile}
             subtitle={dateLabel}
             subtitleAccessibilityLabel={getAccessibleCalendarLabel(
               calendar.selectedDate,

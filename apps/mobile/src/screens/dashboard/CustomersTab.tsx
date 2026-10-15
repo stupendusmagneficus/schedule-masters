@@ -20,7 +20,6 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
-import { DashboardHeaderAction } from "../../components/DashboardHeaderAction";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
@@ -38,7 +37,6 @@ import type { DashboardTabProps } from "./types";
 
 type CustomersTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
-  readonly onOpenProfile: () => void;
   readonly onCreateBooking: (customer: CustomerProfile) => void;
   readonly onSelectAppointment: (appointment: MasterAppointment) => void;
   readonly workspace: Workspace;
@@ -54,7 +52,6 @@ const segmentOrder: readonly CustomerSegment[] = [
 export function CustomersTab({
   client,
   locale,
-  onOpenProfile,
   onCreateBooking,
   onSelectAppointment,
   t,
@@ -122,11 +119,6 @@ export function CustomersTab({
               {t("mobile.customerVisitCount")}: {selected.completed_visits}
             </Text>
           </View>
-          <DashboardHeaderAction
-            accessibilityLabel={t("mobile.profile")}
-            icon="account-circle-outline"
-            onPress={onOpenProfile}
-          />
         </View>
         <Pressable
           accessibilityRole="button"
@@ -215,11 +207,7 @@ export function CustomersTab({
 
   return (
     <View style={[styles.content, !visible && styles.hidden]}>
-      <DashboardPageHeader
-        actionLabel={t("mobile.profile")}
-        onAction={onOpenProfile}
-        title={t("mobile.customers")}
-      />
+      <DashboardPageHeader title={t("mobile.customers")} />
       <TextInput
         accessibilityLabel={t("mobile.customerSearch")}
         onChangeText={setSearch}

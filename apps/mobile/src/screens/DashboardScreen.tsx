@@ -64,8 +64,6 @@ type DashboardScreenProps = {
   readonly workspace: Workspace;
 };
 
-type DashboardPageTab = MobileTab | "profile";
-
 export function DashboardScreen({
   client,
   isSigningOut,
@@ -80,8 +78,7 @@ export function DashboardScreen({
   services,
   workspace,
 }: DashboardScreenProps) {
-  const [activeTab, setActiveTab] = useState<DashboardPageTab>("today");
-  const [profileReturnTab, setProfileReturnTab] = useState<MobileTab>("today");
+  const [activeTab, setActiveTab] = useState<MobileTab>("today");
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -142,13 +139,9 @@ export function DashboardScreen({
     calendar: t("mobile.calendar"),
     customers: t("mobile.customers"),
     finances: t("mobile.finances"),
+    profile: t("mobile.profile"),
     today: t("mobile.today"),
   };
-
-  function openProfile() {
-    if (activeTab !== "profile") setProfileReturnTab(activeTab);
-    setActiveTab("profile");
-  }
 
   function changeTab(tab: MobileTab) {
     if (tab === "today") calendar.goToTodayDay();
@@ -300,7 +293,6 @@ export function DashboardScreen({
         {activeTab === "today" && (
           <TodayTab
             locale={locale}
-            onOpenProfile={openProfile}
             demoData={demoData}
             masterAppointments={calendar.appointments}
             appointmentsError={calendar.error}
@@ -340,7 +332,6 @@ export function DashboardScreen({
                 ? () => setFreeSlotsVisible(true)
                 : undefined
             }
-            onOpenProfile={openProfile}
             onFeedback={setFeedback}
             onSelectTime={(date, startsAt) =>
               client
@@ -356,7 +347,6 @@ export function DashboardScreen({
             client={client}
             demoData={demoData}
             locale={locale}
-            onOpenProfile={openProfile}
             t={t}
             workspace={workspace}
           />
@@ -364,7 +354,6 @@ export function DashboardScreen({
         <CustomersTab
           client={client}
           locale={locale}
-          onOpenProfile={openProfile}
           onCreateBooking={(customer) => {
             setManualBookingCustomer(customer);
             openManualBooking();
@@ -383,7 +372,6 @@ export function DashboardScreen({
             locale={locale}
             onLocaleChange={onLocaleChange}
             onOpenBookingLink={() => void Linking.openURL(bookingUrl)}
-            onClose={() => setActiveTab(profileReturnTab)}
             onSignOut={onSignOut}
             onWorkspaceSaved={onWorkspaceSaved}
             signOutFailed={signOutFailed}
@@ -403,7 +391,7 @@ export function DashboardScreen({
       />
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
         <BottomNavigation
-          activeTab={activeTab === "profile" ? null : activeTab}
+          activeTab={activeTab}
           labels={navigationLabels}
           onTabChange={changeTab}
         />

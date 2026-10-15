@@ -11,7 +11,12 @@ import {
 
 import { colors, radii, shadows } from "../theme/tokens";
 
-export type MobileTab = "calendar" | "customers" | "finances" | "today";
+export type MobileTab =
+  | "calendar"
+  | "customers"
+  | "finances"
+  | "profile"
+  | "today";
 
 type NavigationLabels = Record<MobileTab, string>;
 
@@ -31,6 +36,7 @@ const navigationItems: readonly NavigationItem[] = [
   { icon: "calendar-month-outline", id: "calendar" },
   { icon: "account-multiple-outline", id: "customers" },
   { icon: "cash-multiple", id: "finances" },
+  { icon: "account-circle-outline", id: "profile" },
 ];
 
 const navigationPadding = 4;
@@ -94,12 +100,20 @@ export function BottomNavigation({
             accessibilityLabel={labels[item.id]}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
+            aria-selected={isActive}
             key={item.id}
             onPress={() => onTabChange(item.id)}
             style={styles.item}
           >
             <MaterialCommunityIcons color={color} name={item.icon} size={21} />
-            <Text style={[styles.label, { color }]}>{labels[item.id]}</Text>
+            <Text
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+              numberOfLines={1}
+              style={[styles.label, { color }]}
+            >
+              {labels[item.id]}
+            </Text>
           </Pressable>
         );
       })}
@@ -134,7 +148,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
+    lineHeight: 14,
   },
 });

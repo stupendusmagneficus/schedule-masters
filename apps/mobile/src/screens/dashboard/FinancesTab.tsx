@@ -33,7 +33,6 @@ import type { DashboardTabProps } from "./types";
 type FinancesTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
-  readonly onOpenProfile: () => void;
   readonly workspace: Workspace;
 };
 
@@ -41,7 +40,6 @@ export function FinancesTab({
   client,
   demoData,
   locale,
-  onOpenProfile,
   t,
   workspace,
 }: FinancesTabProps) {
@@ -80,8 +78,6 @@ export function FinancesTab({
   return (
     <View style={styles.content}>
       <DashboardPageHeader
-        actionLabel={t("mobile.profile")}
-        onAction={onOpenProfile}
         subtitle={t("mobile.financeSummaryTitle")}
         title={t("mobile.finances")}
       />

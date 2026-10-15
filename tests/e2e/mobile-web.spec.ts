@@ -40,6 +40,44 @@ test.describe("mobile web smoke", () => {
       "text-align",
       "center",
     );
+    const dayHeaderGeometry = await page.evaluate(() => {
+      const heading = document.querySelector('[role="heading"]');
+      const previous = document.querySelector('[aria-label="Předchozí den"]');
+      const next = document.querySelector('[aria-label="Následující den"]');
+      if (!heading || !previous || !next) return null;
+      const bounds = (element: Element) => element.getBoundingClientRect();
+      const headingBounds = bounds(heading);
+      const previousBounds = bounds(previous);
+      const nextBounds = bounds(next);
+      return {
+        headingBottom: headingBounds.bottom,
+        headingLeft: headingBounds.left,
+        headingRight: headingBounds.right,
+        headingTop: headingBounds.top,
+        nextTop: nextBounds.top,
+        nextLeft: nextBounds.left,
+        previousBottom: previousBounds.bottom,
+        previousRight: previousBounds.right,
+        previousTop: previousBounds.top,
+      };
+    });
+    expect(dayHeaderGeometry).not.toBeNull();
+    expect(dayHeaderGeometry?.previousTop).toBeLessThan(
+      dayHeaderGeometry?.headingBottom ?? 0,
+    );
+    expect(dayHeaderGeometry?.previousBottom).toBeGreaterThan(
+      dayHeaderGeometry?.headingTop ?? Number.POSITIVE_INFINITY,
+    );
+    expect(dayHeaderGeometry?.nextTop).toBeLessThan(
+      dayHeaderGeometry?.headingBottom ?? 0,
+    );
+    expect(dayHeaderGeometry?.previousRight).toBeLessThanOrEqual(
+      dayHeaderGeometry?.headingLeft ?? 0,
+    );
+    expect(dayHeaderGeometry?.nextLeft).toBeGreaterThanOrEqual(
+      dayHeaderGeometry?.headingRight ?? Number.POSITIVE_INFINITY,
+    );
+    const initialPreviousTop = dayHeaderGeometry?.previousTop;
     const twoDaysAgo = await page.evaluate(() => {
       const parts = new Intl.DateTimeFormat("en", {
         day: "numeric",
@@ -66,6 +104,10 @@ test.describe("mobile web smoke", () => {
     await previousDayButton.click();
 
     await expect(page.getByRole("heading", { name: twoDaysAgo })).toBeVisible();
+    const selectedDayArrowTop = await previousDayButton.evaluate(
+      (button) => button.getBoundingClientRect().top,
+    );
+    expect(selectedDayArrowTop).toBe(initialPreviousTop);
     await expect(
       page.getByRole("button", { name: "Dnes", exact: true }),
     ).toBeVisible();
@@ -103,19 +145,52 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
-  test("keeps profile out of the bottom tabs and opens it from the header", async ({
+  test("opens Profile from the five bottom tabs at a narrow viewport", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+    await page.setViewportSize({ width: 320, height: 720 });
     await page.goto("/?demo=1");
 
-    await expect(page.getByRole("tab")).toHaveCount(4);
+    await expect(page.getByRole("tab")).toHaveCount(5);
+    for (const label of ["Dnes", "Kalendář", "Klienti", "Finance", "Profil"]) {
+      await expect(page.getByRole("tab", { name: label })).toBeVisible();
+    }
     await expect(page.getByRole("tab", { name: "Finance" })).toBeVisible();
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
-    await expect(page.getByText("Profil", { exact: true })).toBeVisible();
-    await expect(page.getByRole("tab")).toHaveCount(4);
+    await expect(
+      page.getByRole("button", { name: "Profil", exact: true }),
+    ).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Zpět", exact: true }).click();
+    const tabTargets = await page.getByRole("tab").evaluateAll((tabs) =>
+      tabs.map((tab) => {
+        const bounds = tab.getBoundingClientRect();
+        return {
+          height: bounds.height,
+          left: bounds.left,
+          right: bounds.right,
+          width: bounds.width,
+        };
+      }),
+    );
+    for (const target of tabTargets) {
+      expect(target.width).toBeGreaterThanOrEqual(44);
+      expect(target.height).toBeGreaterThanOrEqual(44);
+      expect(target.left).toBeGreaterThanOrEqual(0);
+      expect(target.right).toBeLessThanOrEqual(320);
+    }
+
+    await page.getByRole("tab", { name: "Profil" }).click();
+    await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Profil" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await page.getByRole("tab", { name: "Klienti" }).click();
+    await expect(page.getByRole("heading", { name: "Klienti" })).toBeVisible();
+    await page.getByRole("tab", { name: "Profil" }).click();
+    await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Zpět" })).toHaveCount(0);
+    await page.getByRole("tab", { name: "Dnes" }).click();
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
   });
 
@@ -326,7 +401,7 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
 
     await expect(
       page.getByRole("link", {
@@ -336,7 +411,7 @@ test.describe("mobile web smoke", () => {
   });
   test("keeps service editor fields vertically separated", async ({ page }) => {
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Profil", exact: true }).click();
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
     await page.getByRole("button", { name: "Přidat službu" }).click();
 
     await expect(

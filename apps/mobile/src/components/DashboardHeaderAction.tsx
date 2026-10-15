@@ -4,7 +4,7 @@ import { Pressable, StyleSheet } from "react-native";
 
 import { colors, radii } from "../theme/tokens";
 
-type DashboardHeaderActionProps = {
+export type DashboardHeaderActionProps = {
   readonly accessibilityLabel: string;
   readonly icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   readonly onPress: () => void;
