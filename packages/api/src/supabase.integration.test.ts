@@ -1173,6 +1173,13 @@ describe("customer directory RPC", () => {
           phone: "+420111222333",
         });
 
+        const contact = await user.client.rpc("get_master_customer_contact", {
+          p_customer_id: customerId,
+          p_workspace_id: workspaceId,
+        });
+        expect(contact.error).toBeNull();
+        expect(contact.data).toEqual([{ phone: "+420111222333" }]);
+
         const history = await user.client.rpc("list_master_customer_history", {
           p_customer_id: customerId,
           p_workspace_id: workspaceId,
@@ -1193,6 +1200,13 @@ describe("customer directory RPC", () => {
         );
         expect(crossWorkspaceHistory.data).toBeNull();
         expect(crossWorkspaceHistory.error?.code).toBe("P0002");
+
+        const crossWorkspaceContact = await user.client.rpc(
+          "get_master_customer_contact",
+          { p_customer_id: otherCustomerId, p_workspace_id: workspaceId },
+        );
+        expect(crossWorkspaceContact.data).toBeNull();
+        expect(crossWorkspaceContact.error?.code).toBe("P0002");
       } finally {
         const deletedWorkspaces = await admin
           .from("workspaces")

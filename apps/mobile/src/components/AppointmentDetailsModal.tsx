@@ -31,10 +31,22 @@ type AppointmentDetailsModalProps = {
   readonly onClose: () => void;
   readonly onStatusChange: (status: AppointmentStatus) => Promise<void>;
   readonly onPaymentSave?: (amount: number) => Promise<boolean>;
+  readonly customerPhone: string | null;
+  readonly customerContactLoading: boolean;
+  readonly customerContactError: boolean;
+  readonly onRetryCustomerContact: () => void;
+  readonly onCallCustomer: () => void;
+  readonly onTextCustomer: () => void;
   readonly onShare?: (customerConsentConfirmed: boolean) => Promise<boolean>;
   readonly t: (key: MessageKey) => string;
   readonly timezone: string;
   readonly visible: boolean;
+};
+
+type StatusConfirmation = {
+  readonly appointmentId: string;
+  readonly appointmentStatus: AppointmentStatus;
+  readonly status: AppointmentStatus;
 };
 
 export function AppointmentDetailsModal({
@@ -45,6 +57,12 @@ export function AppointmentDetailsModal({
   onClose,
   onStatusChange,
   onPaymentSave,
+  customerPhone,
+  customerContactLoading,
+  customerContactError,
+  onRetryCustomerContact,
+  onCallCustomer,
+  onTextCustomer,
   t,
   timezone,
   onShare,
@@ -56,13 +74,25 @@ export function AppointmentDetailsModal({
   );
   const [paymentDraft, setPaymentDraft] = useState<string | null>(null);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [statusConfirmation, setStatusConfirmation] =
+    useState<StatusConfirmation | null>(null);
+  const activeStatusConfirmation =
+    statusConfirmation &&
+    appointment &&
+    statusConfirmation.appointmentId === appointment.id &&
+    statusConfirmation.appointmentStatus === appointment.status
+      ? statusConfirmation
+      : null;
   const actions = appointment ? getStatusActions(appointment.status, t) : [];
 
   return (
     <FullscreenModal
       closeDisabled={isSaving}
       closeLabel={t("common.cancel")}
-      onClose={onClose}
+      onClose={() => {
+        setStatusConfirmation(null);
+        onClose();
+      }}
       title={t("mobile.appointmentDetails")}
       visible={visible}
     >
@@ -127,6 +157,56 @@ export function AppointmentDetailsModal({
                 />
               </View>
             </InfoCard>
+
+            {customerContactLoading || customerContactError || customerPhone ? (
+              <InfoCard>
+                <Text style={styles.sectionTitle}>
+                  {t("mobile.appointmentContact")}
+                </Text>
+                {customerContactLoading ? (
+                  <Text accessibilityRole="text" style={styles.helper}>
+                    {t("mobile.customerContactLoading")}
+                  </Text>
+                ) : customerContactError ? (
+                  <>
+                    <Text accessibilityRole="alert" style={styles.error}>
+                      {t("mobile.customerContactLoadFailed")}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={onRetryCustomerContact}
+                      style={styles.action}
+                    >
+                      <Text style={styles.actionText}>{t("common.retry")}</Text>
+                    </Pressable>
+                  </>
+                ) : customerPhone ? (
+                  <>
+                    <Text style={styles.phone}>{customerPhone}</Text>
+                    <View style={styles.contactActions}>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={onCallCustomer}
+                        style={styles.contactAction}
+                      >
+                        <Text style={styles.actionText}>
+                          {t("mobile.customerCall")}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={onTextCustomer}
+                        style={styles.contactAction}
+                      >
+                        <Text style={styles.actionText}>
+                          {t("mobile.customerSms")}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </>
+                ) : null}
+              </InfoCard>
+            ) : null}
 
             {appointment.status === "completed" && onPaymentSave ? (
               <InfoCard>
@@ -206,9 +286,19 @@ export function AppointmentDetailsModal({
                   {actions.map((action) => (
                     <Pressable
                       accessibilityRole="button"
-                      disabled={isSaving}
+                      disabled={isSaving || Boolean(activeStatusConfirmation)}
                       key={action.status}
-                      onPress={() => void onStatusChange(action.status)}
+                      onPress={() => {
+                        if (action.destructive) {
+                          setStatusConfirmation({
+                            appointmentId: appointment.id,
+                            appointmentStatus: appointment.status,
+                            status: action.status,
+                          });
+                        } else {
+                          void onStatusChange(action.status);
+                        }
+                      }}
                       style={({ pressed }) => [
                         styles.action,
                         action.destructive && styles.destructiveAction,
@@ -226,6 +316,41 @@ export function AppointmentDetailsModal({
                       </Text>
                     </Pressable>
                   ))}
+                  {activeStatusConfirmation ? (
+                    <View accessibilityRole="alert" style={styles.confirmation}>
+                      <Text style={styles.helper}>
+                        {t("mobile.cancelBookingConfirmDescription")}
+                      </Text>
+                      <View style={styles.contactActions}>
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={isSaving}
+                          onPress={() => setStatusConfirmation(null)}
+                          style={styles.contactAction}
+                        >
+                          <Text style={styles.actionText}>
+                            {t("common.cancel")}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={isSaving}
+                          onPress={() => {
+                            const confirmation = activeStatusConfirmation;
+                            setStatusConfirmation(null);
+                            if (confirmation.appointmentId === appointment.id) {
+                              void onStatusChange(confirmation.status);
+                            }
+                          }}
+                          style={[styles.contactAction, styles.confirmCancel]}
+                        >
+                          <Text style={styles.confirmCancelText}>
+                            {t("mobile.cancelBooking")}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ) : null}
                 </View>
               ) : (
                 <Text style={styles.helper}>{t("mobile.noStatusActions")}</Text>
@@ -399,7 +524,29 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     minHeight: 48,
   },
+  contactActions: { flexDirection: "row", gap: 10, marginTop: 12 },
+  confirmation: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.surface,
+    gap: 4,
+    padding: 12,
+  },
+  contactAction: {
+    alignItems: "center",
+    backgroundColor: colors.action,
+    borderRadius: radii.control,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 8,
+  },
   customerName: { ...typography.heading, color: colors.primaryText },
+  confirmCancel: { backgroundColor: colors.dangerSoft },
+  confirmCancelText: {
+    ...typography.label,
+    color: colors.danger,
+    fontWeight: "700",
+  },
   destructiveAction: { backgroundColor: colors.dangerSoft },
   destructiveActionText: { color: colors.danger },
   detailLabel: { ...typography.caption, color: colors.secondaryText },
@@ -427,6 +574,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: 16,
   },
+  phone: { ...typography.body, color: colors.primaryText },
   sectionTitle: {
     ...typography.section,
     color: colors.primaryText,
