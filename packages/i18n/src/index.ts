@@ -139,6 +139,8 @@ export type MessageKey =
   | "mobile.shareSheetOpened"
   | "mobile.shareSheetFailed"
   | "mobile.today"
+  | "mobile.previousDay"
+  | "mobile.nextDay"
   | "mobile.todayLoadFailed"
   | "mobile.todayRetry"
   | "mobile.calendar"
@@ -252,6 +254,7 @@ export type MessageKey =
   | "mobile.paymentSaveFailed"
   | "mobile.nextBooking"
   | "mobile.noBookingsToday"
+  | "mobile.noBookingsOnDay"
   | "mobile.daySchedule"
   | "mobile.firstService"
   | "mobile.noServices"
@@ -521,6 +524,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Не удалось подготовить ссылку или открыть отправку. Она не отмечена как отправленная; попробуйте ещё раз.",
     "mobile.today": "Сегодня",
+    "mobile.previousDay": "Предыдущий день",
+    "mobile.nextDay": "Следующий день",
     "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
@@ -649,6 +654,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaveFailed": "Не удалось сохранить оплату.",
     "mobile.nextBooking": "Следующая запись",
     "mobile.noBookingsToday": "На сегодня записей нет.",
+    "mobile.noBookingsOnDay": "На эту дату записей нет.",
     "mobile.daySchedule": "Расписание дня",
     "mobile.firstService": "Первая услуга",
     "mobile.noServices": "Активных услуг пока нет.",
@@ -928,6 +934,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Odkaz se nepodařilo připravit nebo otevřít sdílení. Odeslání není potvrzeno; zkuste to znovu.",
     "mobile.today": "Dnes",
+    "mobile.previousDay": "Předchozí den",
+    "mobile.nextDay": "Následující den",
     "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
@@ -1058,6 +1066,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaveFailed": "Platbu se nepodařilo uložit.",
     "mobile.nextBooking": "Další rezervace",
     "mobile.noBookingsToday": "Na dnešek nemáte žádné rezervace.",
+    "mobile.noBookingsOnDay": "Na tento den nejsou žádné rezervace.",
     "mobile.daySchedule": "Denní rozvrh",
     "mobile.firstService": "První služba",
     "mobile.noServices": "Zatím nemáte žádné aktivní služby.",
@@ -1337,6 +1346,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "We couldn't prepare the link or open sharing. It is not marked as sent; try again.",
     "mobile.today": "Today",
+    "mobile.previousDay": "Previous day",
+    "mobile.nextDay": "Next day",
     "mobile.todayLoadFailed": "The schedule could not be loaded.",
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
@@ -1467,6 +1478,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaveFailed": "Could not save payment.",
     "mobile.nextBooking": "Next booking",
     "mobile.noBookingsToday": "There are no bookings today.",
+    "mobile.noBookingsOnDay": "There are no bookings for this date.",
     "mobile.daySchedule": "Day schedule",
     "mobile.firstService": "Your first service",
     "mobile.noServices": "No active services yet.",

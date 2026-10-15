@@ -23,7 +23,6 @@ import {
   setMasterAppointmentPaidAmount,
   setMasterAppointmentStatus,
 } from "../features/appointments/manualBooking";
-import { useMasterAppointments } from "../features/appointments/useMasterAppointments";
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useCalendarData } from "../features/calendar/useCalendarData";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
@@ -106,16 +105,6 @@ export function DashboardScreen({
   const [feedback, setFeedback] = useState<string | null>(null);
   const dismissFeedback = useCallback(() => setFeedback(null), []);
   const t = useMemo(() => createTranslator(locale), [locale]);
-  const {
-    appointments,
-    error: appointmentsError,
-    isLoading: appointmentsLoading,
-    reload: reloadAppointments,
-  } = useMasterAppointments({
-    client,
-    timezone: workspace.timezone,
-    workspaceId: workspace.id,
-  });
   const calendar = useCalendarData({
     client,
     timezone: workspace.timezone,
@@ -143,6 +132,11 @@ export function DashboardScreen({
     setActiveTab("profile");
   }
 
+  function changeTab(tab: MobileTab) {
+    if (tab === "today") calendar.goToTodayDay();
+    setActiveTab(tab);
+  }
+
   const bookingUrl = buildBookingUrl(mobileEnv.bookingWebUrl, workspace.slug);
 
   async function updateAppointmentStatus(status: AppointmentStatus) {
@@ -152,13 +146,9 @@ export function DashboardScreen({
     setAppointmentActionError(false);
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
-      const refreshed = await reloadAppointments();
       await calendar.reload();
       if (status === "completed") {
-        const updated = refreshed?.find(
-          ({ id }) => id === selectedAppointment.id,
-        );
-        setSelectedAppointment(updated ?? { ...selectedAppointment, status });
+        setSelectedAppointment({ ...selectedAppointment, status });
       } else {
         setSelectedAppointment(null);
         setFeedback(t("mobile.appointmentStatusUpdated"));
@@ -180,14 +170,8 @@ export function DashboardScreen({
         selectedAppointment.id,
         amount,
       );
-      const refreshed = await reloadAppointments();
       await calendar.reload();
-      setSelectedAppointment(
-        refreshed?.find(({ id }) => id === selectedAppointment.id) ?? {
-          ...selectedAppointment,
-          paid_amount: amount,
-        },
-      );
+      setSelectedAppointment({ ...selectedAppointment, paid_amount: amount });
       setFeedback(t("mobile.paymentSaved"));
       return true;
     } catch {
@@ -268,11 +252,15 @@ export function DashboardScreen({
             locale={locale}
             onOpenProfile={openProfile}
             demoData={demoData}
-            masterAppointments={appointments}
-            appointmentsError={appointmentsError}
-            appointmentsLoading={appointmentsLoading}
-            onRetryAppointments={() => void reloadAppointments()}
+            masterAppointments={calendar.appointments}
+            appointmentsError={calendar.error}
+            appointmentsLoading={calendar.isLoading}
+            onRetryAppointments={() => void calendar.reload()}
+            onGoToToday={calendar.goToTodayDay}
+            onNextDay={calendar.goToNextDay}
+            onPreviousDay={calendar.goToPreviousDay}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
+            selectedDate={calendar.selectedDate}
             t={t}
             workspace={workspace}
           />
@@ -350,7 +338,7 @@ export function DashboardScreen({
         <BottomNavigation
           activeTab={activeTab === "profile" ? null : activeTab}
           labels={navigationLabels}
-          onTabChange={setActiveTab}
+          onTabChange={changeTab}
         />
       </SafeAreaView>
       <NewBookingNotice
@@ -395,7 +383,6 @@ export function DashboardScreen({
             setManualBookingCustomer(null);
           }}
           onCreated={async () => {
-            await reloadAppointments();
             await calendar.reload();
             setFeedback(t("mobile.manualBookingCreated"));
             analytics.track(analyticsEvents.appointmentCreated, {

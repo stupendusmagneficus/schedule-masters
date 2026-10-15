@@ -51,6 +51,12 @@ describe("calendar navigation", () => {
     expect(addCalendarDays("2030-01-01", -1)).toBe("2029-12-31");
     expect(moveCalendarDate("2030-01-31", "month", 1)).toBe("2030-02-01");
   });
+
+  it("moves one day across month and year boundaries without a date limit", () => {
+    expect(moveCalendarDate("2030-03-01", "day", -1)).toBe("2030-02-28");
+    expect(moveCalendarDate("2030-12-31", "day", 1)).toBe("2031-01-01");
+    expect(addCalendarDays("2026-10-15", -365)).toBe("2025-10-15");
+  });
 });
 
 describe("calendar date validation", () => {

@@ -15,6 +15,7 @@ import {
 } from "../availability/personalBlocks";
 import { createWorkspaceRequestGuard } from "../workspace/workspaceRequestGuard";
 import {
+  addCalendarDays,
   type CalendarDateRange,
   type CalendarView,
   getCalendarDateRange,
@@ -35,8 +36,11 @@ type UseCalendarDataParams = {
 export type CalendarDataController = CalendarData & {
   readonly error: string | null;
   readonly goToNext: () => void;
+  readonly goToNextDay: () => void;
   readonly goToPrevious: () => void;
+  readonly goToPreviousDay: () => void;
   readonly goToToday: () => void;
+  readonly goToTodayDay: () => void;
   readonly isLoading: boolean;
   readonly isSaving: boolean;
   readonly range: CalendarDateRange;
@@ -163,6 +167,24 @@ export function useCalendarData({
     if (client) setIsLoading(true);
     setSelectedDateState(getTodayCalendarDate(timezone));
   }, [client, timezone]);
+  const goToPreviousDay = useCallback(() => {
+    if (client) setIsLoading(true);
+    setViewState("day");
+    setSelectedDateState((current) => addCalendarDays(current, -1));
+  }, [client]);
+  const goToNextDay = useCallback(() => {
+    if (client) setIsLoading(true);
+    setViewState("day");
+    setSelectedDateState((current) => addCalendarDays(current, 1));
+  }, [client]);
+  const goToTodayDay = useCallback(() => {
+    const today = getTodayCalendarDate(timezone);
+    if (client && (view !== "day" || selectedDate !== today)) {
+      setIsLoading(true);
+    }
+    setViewState("day");
+    setSelectedDateState(today);
+  }, [client, selectedDate, timezone, view]);
   const setSelectedDate = useCallback(
     (date: string) => {
       if (!isCalendarDate(date)) return;
@@ -183,8 +205,11 @@ export function useCalendarData({
     ...data,
     error,
     goToNext,
+    goToNextDay,
     goToPrevious,
+    goToPreviousDay,
     goToToday,
+    goToTodayDay,
     isLoading,
     isSaving,
     range,

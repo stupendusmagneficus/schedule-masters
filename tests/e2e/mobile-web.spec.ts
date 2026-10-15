@@ -29,6 +29,58 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("navigates to another day and returns to Today", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toHaveCSS(
+      "text-align",
+      "center",
+    );
+    const twoDaysAgo = await page.evaluate(() => {
+      const parts = new Intl.DateTimeFormat("en", {
+        day: "numeric",
+        month: "numeric",
+        timeZone: "Europe/Prague",
+        year: "numeric",
+      }).formatToParts(new Date());
+      const part = (type: Intl.DateTimeFormatPartTypes) =>
+        Number(parts.find((value) => value.type === type)?.value);
+      const date = new Date(
+        Date.UTC(part("year"), part("month") - 1, part("day") - 2, 12),
+      );
+      return new Intl.DateTimeFormat("cs-CZ", {
+        day: "numeric",
+        month: "long",
+        timeZone: "Europe/Prague",
+        year: "numeric",
+      }).format(date);
+    });
+    const previousDayButton = page.getByRole("button", {
+      name: "Předchozí den",
+    });
+    await previousDayButton.click();
+    await previousDayButton.click();
+
+    await expect(page.getByRole("heading", { name: twoDaysAgo })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Dnes", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("Anna K.", { exact: true })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Dnes", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
+    await expect(
+      page.getByText("Anna K.", { exact: true }).first(),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Následující den" }).click();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toHaveCount(0);
+    await page.getByRole("tab", { name: "Dnes" }).click();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
+  });
+
   test("opens the customer directory and keeps its empty state contained on mobile", async ({
     page,
   }) => {
