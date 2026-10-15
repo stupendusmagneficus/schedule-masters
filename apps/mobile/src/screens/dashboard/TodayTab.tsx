@@ -18,6 +18,7 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
+import { DashboardActionCard } from "../../components/DashboardActionCard";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { SummaryMetrics } from "../../components/SummaryMetrics";
@@ -204,73 +205,39 @@ export function TodayTab({
       ) : null}
 
       {!demoData && showBookingRequests ? (
-        <Pressable
+        <DashboardActionCard
           accessibilityLabel={
             bookingRequestCount === null
               ? t("mobile.bookingRequests")
               : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
           }
-          accessibilityRole="button"
-          onPress={onOpenBookingRequests}
-          style={({ pressed }) => [
-            styles.bookingRequestsAction,
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={styles.bookingRequestsCopy}>
-            <Text style={styles.bookingRequestsTitle}>
-              {t("mobile.bookingRequests")}
-            </Text>
-          </View>
-          {bookingRequestsLoading && bookingRequestCount === null ? (
-            <ActivityIndicator color={colors.accent} />
-          ) : bookingRequestsError ? (
-            <View style={styles.requestError}>
-              <MaterialCommunityIcons
-                accessibilityElementsHidden
-                color={colors.danger}
-                name="alert-circle-outline"
-                size={20}
-              />
-              <Text style={styles.requestErrorText}>{t("common.error")}</Text>
-            </View>
-          ) : bookingRequestCount !== null ? (
-            <View style={styles.requestCount}>
-              <Text style={styles.requestCountText}>{bookingRequestCount}</Text>
-            </View>
-          ) : null}
-        </Pressable>
-      ) : null}
-
-      {!demoData ? (
-        <Pressable
-          accessibilityLabel={
-            waitingListCount === null
-              ? t("mobile.waitingList")
-              : `${t("mobile.waitingList")}: ${waitingListCount}`
+          description={
+            bookingRequestsError ? (
+              <View style={styles.requestError}>
+                <MaterialCommunityIcons
+                  accessibilityElementsHidden
+                  color={colors.danger}
+                  name="alert-circle-outline"
+                  size={20}
+                />
+                <Text style={styles.requestErrorText}>{t("common.error")}</Text>
+              </View>
+            ) : undefined
           }
-          accessibilityRole="button"
-          onPress={onOpenWaitingList}
-          style={({ pressed }) => [
-            styles.bookingRequestsAction,
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={styles.bookingRequestsCopy}>
-            <Text style={styles.bookingRequestsTitle}>
-              {t("mobile.waitingList")}
-            </Text>
-          </View>
-          {waitingListLoading && waitingListCount === null ? (
-            <ActivityIndicator color={colors.accent} />
-          ) : waitingListError ? (
-            <Text style={styles.requestErrorText}>{t("common.error")}</Text>
-          ) : waitingListCount !== null ? (
-            <View style={styles.requestCount}>
-              <Text style={styles.requestCountText}>{waitingListCount}</Text>
-            </View>
-          ) : null}
-        </Pressable>
+          onPress={onOpenBookingRequests}
+          title={t("mobile.bookingRequests")}
+          trailing={
+            bookingRequestsLoading && bookingRequestCount === null ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
+              <View style={styles.requestCount}>
+                <Text style={styles.requestCountText}>
+                  {bookingRequestCount}
+                </Text>
+              </View>
+            ) : null
+          }
+        />
       ) : null}
 
       {demoData && (
@@ -337,6 +304,40 @@ export function TodayTab({
           )}
         </InfoCard>
       ) : null}
+
+      {!demoData ? (
+        <DashboardActionCard
+          accessibilityLabel={
+            waitingListCount === null
+              ? t("mobile.waitingList")
+              : `${t("mobile.waitingList")}: ${waitingListCount}`
+          }
+          description={
+            waitingListError ? (
+              <View style={styles.requestError}>
+                <MaterialCommunityIcons
+                  accessibilityElementsHidden
+                  color={colors.danger}
+                  name="alert-circle-outline"
+                  size={20}
+                />
+                <Text style={styles.requestErrorText}>{t("common.error")}</Text>
+              </View>
+            ) : undefined
+          }
+          onPress={onOpenWaitingList}
+          title={t("mobile.waitingList")}
+          trailing={
+            waitingListLoading && waitingListCount === null ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : waitingListError ? null : waitingListCount !== null ? (
+              <View style={styles.requestCount}>
+                <Text style={styles.requestCountText}>{waitingListCount}</Text>
+              </View>
+            ) : null
+          }
+        />
+      ) : null}
     </View>
   );
 }
@@ -370,23 +371,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appointmentsList: { gap: 12 },
-  bookingRequestsAction: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 56,
-    paddingHorizontal: 16,
-  },
-  bookingRequestsCopy: { flex: 1 },
-  bookingRequestsTitle: {
-    ...typography.body,
-    color: colors.primaryText,
-    fontWeight: "700",
-  },
   requestCount: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,
@@ -401,11 +385,19 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: "700",
   },
-  requestError: { alignItems: "center", flexDirection: "row", gap: 4 },
+  requestError: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+    maxWidth: "100%",
+    minWidth: 0,
+  },
   requestErrorText: {
     ...typography.caption,
     color: colors.danger,
+    flexShrink: 1,
     fontWeight: "700",
+    textAlign: "left",
   },
   scheduleCard: { marginTop: 8 },
   freeSlotsAction: {
