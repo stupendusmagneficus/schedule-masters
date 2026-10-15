@@ -202,6 +202,9 @@ test.describe("public booking web", () => {
       .first()
       .click();
     await page.getByLabel("Name").fill("Test client");
+    await page
+      .getByRole("textbox", { name: /Email/ })
+      .fill("test@example.test");
     await page.getByRole("button", { name: "Confirm booking" }).click();
 
     await expect(
@@ -212,6 +215,8 @@ test.describe("public booking web", () => {
       p_slug: "elena-beauty",
       p_service_id: "service-1",
       p_name: "Test client",
+      p_email: "test@example.test",
+      p_locale: "en",
     });
     expect(bookingRequests[0]?.p_idempotency_key).toEqual(expect.any(String));
   });
@@ -228,6 +233,9 @@ test.describe("public booking web", () => {
       .first()
       .click();
     await page.getByLabel("Name").fill("Test client");
+    await page
+      .getByRole("textbox", { name: /Email/ })
+      .fill("test@example.test");
     await page.getByRole("button", { name: "Confirm booking" }).click();
 
     await expect(
@@ -295,14 +303,25 @@ test.describe("public booking web", () => {
     ).toBeVisible();
   });
 
-  test("keeps email and phone optional", async ({ page }) => {
+  test("requires email for a request and keeps phone optional", async ({
+    page,
+  }) => {
     await page.goto("/?demo=1");
 
-    await expect(page.getByLabel("Email (optional)")).not.toHaveAttribute(
+    await expect(page.getByRole("textbox", { name: /Email/ })).toHaveAttribute(
       "required",
     );
     await expect(page.getByLabel("Phone (optional)")).not.toHaveAttribute(
       "required",
+    );
+    await page
+      .getByRole("button", { name: /\d{1,2}:\d{2} (AM|PM)/ })
+      .first()
+      .click();
+    await page.getByLabel("Name").fill("Test client");
+    await page.getByRole("button", { name: "Confirm booking" }).click();
+    await expect(page.locator("p[role=alert]")).toContainText(
+      "Enter your email to send the request.",
     );
   });
 });

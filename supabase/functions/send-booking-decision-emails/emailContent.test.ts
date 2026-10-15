@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import { createBookingDecisionEmail } from "./emailContent.ts";
+
+Deno.test("accepted email contains the confirmed slot in the request locale", () => {
+  const email = createBookingDecisionEmail({
+    decision: "accepted",
+    locale: "cz",
+    recipient: "client@example.test",
+    serviceName: "Manikúra",
+    startsAt: "2030-01-03T09:00:00.000Z",
+    timezone: "Europe/Prague",
+    workspaceName: "Studio <Yahor>",
+  });
+
+  assert.equal(email.subject, "Vaše rezervace je potvrzena");
+  assert.match(email.text, /Služba: Manikúra/);
+  assert.match(email.text, /Datum:/);
+  assert.match(email.html, /Studio &lt;Yahor&gt;/);
+});
+
+Deno.test("declined email does not imply that another slot is available", () => {
+  const email = createBookingDecisionEmail({
+    decision: "declined",
+    locale: "en",
+    recipient: "client@example.test",
+    serviceName: "Manicure",
+    startsAt: "2030-01-03T09:00:00.000Z",
+    timezone: "Europe/Prague",
+    workspaceName: "Studio",
+  });
+
+  assert.equal(email.subject, "Your appointment was not confirmed");
+  assert.match(email.text, /This appointment could not be confirmed/);
+  assert.equal(email.text.includes("Service:"), false);
+  assert.equal(email.text.includes("available"), false);
+});
+
+Deno.test("Russian content is translated and interpolated data is escaped", () => {
+  const email = createBookingDecisionEmail({
+    decision: "accepted",
+    locale: "ru",
+    recipient: "client@example.test",
+    serviceName: "Маникюр <script>",
+    startsAt: "2030-01-03T09:00:00.000Z",
+    timezone: "Europe/Prague",
+    workspaceName: "Студия",
+  });
+
+  assert.equal(email.subject, "Запись подтверждена");
+  assert.match(email.text, /Услуга: Маникюр <script>/);
+  assert.equal(email.html.includes("<script>"), false);
+});

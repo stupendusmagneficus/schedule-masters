@@ -147,6 +147,7 @@ export type Database = {
           cancelled_at: string | null
           completed_at: string | null
           confirmed_at: string | null
+          customer_locale: string
           created_at: string
           currency_snapshot: string
           customer_id: string
@@ -179,6 +180,7 @@ export type Database = {
           customer_id: string
           customer_note?: string | null
           customer_notification_consent_at?: string | null
+          customer_locale?: string
           duration_minutes_snapshot: number
           ends_at: string
           id?: string
@@ -206,6 +208,7 @@ export type Database = {
           customer_id?: string
           customer_note?: string | null
           customer_notification_consent_at?: string | null
+          customer_locale?: string
           duration_minutes_snapshot?: number
           ends_at?: string
           id?: string
@@ -404,6 +407,81 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "booking_links_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_decision_email_outbox: {
+        Row: {
+          appointment_id: string
+          attempts: number
+          created_at: string
+          decision: string
+          id: string
+          last_error: string | null
+          locale: string
+          next_attempt_at: string
+          processing_at: string | null
+          provider_accepted_at: string | null
+          recipient: string
+          service_name: string
+          starts_at: string
+          status: string
+          timezone: string
+          workspace_id: string
+          workspace_name: string
+        }
+        Insert: {
+          appointment_id: string
+          attempts?: number
+          created_at?: string
+          decision: string
+          id?: string
+          last_error?: string | null
+          locale: string
+          next_attempt_at?: string
+          processing_at?: string | null
+          provider_accepted_at?: string | null
+          recipient: string
+          service_name: string
+          starts_at: string
+          status?: string
+          timezone: string
+          workspace_id: string
+          workspace_name: string
+        }
+        Update: {
+          appointment_id?: string
+          attempts?: number
+          created_at?: string
+          decision?: string
+          id?: string
+          last_error?: string | null
+          locale?: string
+          next_attempt_at?: string
+          processing_at?: string | null
+          provider_accepted_at?: string | null
+          recipient?: string
+          service_name?: string
+          starts_at?: string
+          status?: string
+          timezone?: string
+          workspace_id?: string
+          workspace_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_decision_email_outbox_appointment_id_workspace_id_fkey"
+            columns: ["appointment_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "booking_decision_email_outbox_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -845,6 +923,20 @@ export type Database = {
         Returns: Json
       }
       check_public_booking_request: { Args: never; Returns: undefined }
+      claim_booking_decision_emails: {
+        Args: { p_batch_size?: number }
+        Returns: {
+          attempts: number
+          decision: string
+          id: string
+          locale: string
+          recipient: string
+          service_name: string
+          starts_at: string
+          timezone: string
+          workspace_name: string
+        }[]
+      }
       create_customer_appointment_link: {
         Args: {
           p_appointment_id: string
@@ -898,6 +990,7 @@ export type Database = {
           p_customer_note?: string
           p_email: string
           p_idempotency_key?: string
+          p_locale?: string
           p_name: string
           p_phone: string
           p_service_id: string
@@ -905,6 +998,15 @@ export type Database = {
           p_starts_at: string
         }
         Returns: Json
+      }
+      finish_booking_decision_email: {
+        Args: {
+          p_error?: string
+          p_id: string
+          p_retryable?: boolean
+          p_success: boolean
+        }
+        Returns: string
       }
       delete_master_availability_block: {
         Args: { p_block_id: string; p_workspace_id: string }
@@ -1026,6 +1128,10 @@ export type Database = {
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
+      }
+      mark_pending_booking_emails_not_configured: {
+        Args: never
+        Returns: number
       }
       list_master_waiting_list: {
         Args: { p_workspace_id: string }

@@ -238,7 +238,11 @@ export function DashboardScreen({
     setSavingRequestId(appointmentId);
     setBookingRequestActionError(false);
     try {
-      await setMasterAppointmentStatus(client, appointmentId, status);
+      const result = await setMasterAppointmentStatus(
+        client,
+        appointmentId,
+        status,
+      );
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (
         status === "cancelled_by_master" ||
@@ -247,7 +251,11 @@ export function DashboardScreen({
         setBookingRequestsVisible(false);
         await loadWaitingListMatches(appointmentId);
       }
-      setFeedback(t("mobile.bookingRequestUpdated"));
+      setFeedback(
+        result.notificationStatus === "not_configured"
+          ? t("mobile.bookingRequestEmailNotConfigured")
+          : t("mobile.bookingRequestUpdated"),
+      );
       return true;
     } catch {
       setBookingRequestActionError(true);

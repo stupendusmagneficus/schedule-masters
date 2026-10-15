@@ -32,6 +32,30 @@ describe("Supabase public booking contract", () => {
   });
 
   integrationTest(
+    "rejects public booking requests without a valid email address",
+    async () => {
+      if (!supabase) return;
+
+      for (const [index, email] of ["", "invalid-email"].entries()) {
+        const response = await supabase.rpc("create_public_booking", {
+          p_email: email,
+          p_idempotency_key: `missing-email-${Date.now()}-${index}`,
+          p_name: "Missing email client",
+          p_phone: "",
+          p_service_id: serviceId,
+          p_slug: "demo-studio",
+          p_starts_at: "2030-01-03T09:00:00.000Z",
+        });
+
+        expect(response.data).toBeNull();
+        expect(response.error?.message).toContain(
+          "Valid customer email is required",
+        );
+      }
+    },
+  );
+
+  integrationTest(
     "enforces public booking boundaries and idempotency",
     async () => {
       if (!supabase) return;
@@ -1064,6 +1088,7 @@ describe("Supabase public booking contract", () => {
       expect(
         (
           await admin.from("customers").insert({
+            email: `lifecycle-client-${suffix}@example.test`,
             id: customerId,
             name: "Lifecycle customer",
             workspace_id: workspaceId,
@@ -1111,6 +1136,18 @@ describe("Supabase public booking contract", () => {
         id: appointmentId,
         status: "confirmed",
       });
+      const acceptedNotification = await admin
+        .from("booking_decision_email_outbox")
+        .select("decision, recipient, status")
+        .eq("appointment_id", appointmentId);
+      expect(acceptedNotification.error).toBeNull();
+      expect(acceptedNotification.data).toEqual([
+        {
+          decision: "accepted",
+          recipient: `lifecycle-client-${suffix}@example.test`,
+          status: "not_configured",
+        },
+      ]);
 
       const completed = await user.client.rpc("set_appointment_status", {
         p_appointment_id: appointmentId,
@@ -1166,6 +1203,51 @@ describe("Supabase public booking contract", () => {
       expect(invalidTransition.data).toBeNull();
       expect(invalidTransition.error?.message).toContain(
         "Invalid appointment status transition",
+      );
+
+      const declinedAppointment = await admin
+        .from("appointments")
+        .insert({
+          currency_snapshot: "CZK",
+          customer_id: customerId,
+          duration_minutes_snapshot: 60,
+          ends_at: "2030-04-03T23:30:00.000Z",
+          occupied_range: "[2030-04-03T22:30:00.000Z,2030-04-03T23:30:00.000Z)",
+          price_amount_snapshot: 700,
+          service_id: serviceId,
+          service_name_snapshot: "Lifecycle service",
+          source: "public_booking",
+          starts_at: "2030-04-03T22:30:00.000Z",
+          status: "pending",
+          workspace_id: workspaceId,
+        })
+        .select("id")
+        .single();
+      expect(declinedAppointment.error).toBeNull();
+      const declinedId = declinedAppointment.data?.id;
+      if (!declinedId) throw new Error("Declined appointment was not created");
+
+      const declined = await user.client.rpc("set_appointment_status", {
+        p_appointment_id: declinedId,
+        p_status: "cancelled_by_master",
+      });
+      expect(declined.error).toBeNull();
+      const declinedAgain = await user.client.rpc("set_appointment_status", {
+        p_appointment_id: declinedId,
+        p_status: "cancelled_by_master",
+      });
+      expect(declinedAgain.error).toBeNull();
+      const decisionNotifications = await admin
+        .from("booking_decision_email_outbox")
+        .select("appointment_id, decision")
+        .in("appointment_id", [appointmentId, declinedId]);
+      expect(decisionNotifications.error).toBeNull();
+      expect(decisionNotifications.data).toHaveLength(2);
+      expect(decisionNotifications.data).toEqual(
+        expect.arrayContaining([
+          { appointment_id: appointmentId, decision: "accepted" },
+          { appointment_id: declinedId, decision: "declined" },
+        ]),
       );
 
       const events = await user.client

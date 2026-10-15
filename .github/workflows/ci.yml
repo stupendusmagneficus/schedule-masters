@@ -143,6 +143,18 @@ jobs:
         if: always()
         run: yarn supabase:stop > /dev/null 2>&1 || true
 
+  booking-email-worker:
+    name: Booking email worker tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Test email content and worker behavior without sending real mail
+        run: deno test supabase/functions/send-booking-decision-emails
+
   e2e:
     name: E2E tests
     runs-on: ubuntu-latest
