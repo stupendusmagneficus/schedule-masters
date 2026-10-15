@@ -1199,17 +1199,13 @@ export type Database = {
           starts_at: string
         }[]
       }
-      move_booking_request_to_waiting_list: {
-        Args: { p_appointment_id: string; p_workspace_id: string }
-        Returns: string
-      }
       mark_pending_booking_emails_not_configured: {
         Args: never
         Returns: number
       }
-      remove_all_master_waiting_list_entries: {
-        Args: { p_workspace_id: string }
-        Returns: number
+      move_booking_request_to_waiting_list: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: string
       }
       record_customer_link_share: {
         Args: {
@@ -1218,6 +1214,10 @@ export type Database = {
           p_status: Database["public"]["Enums"]["notification_delivery_status"]
         }
         Returns: undefined
+      }
+      remove_all_master_waiting_list_entries: {
+        Args: { p_workspace_id: string }
+        Returns: number
       }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }
