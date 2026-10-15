@@ -1,5 +1,10 @@
 import type { Database } from "@schedule-app/api";
-import { formatDate, type SupportedLocale } from "@schedule-app/i18n";
+import {
+  formatAccessibleDate,
+  formatCompactDate,
+  formatCompactDateRange,
+  type SupportedLocale,
+} from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -196,44 +201,62 @@ export function useCalendarData({
 export function getCalendarDateLabel(
   selectedDate: string,
   locale: SupportedLocale,
+  timezone = "Europe/Prague",
 ): string {
-  return formatDate(new Date(`${selectedDate}T12:00:00.000Z`), locale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-    weekday: "long",
+  return formatCompactDate(new Date(`${selectedDate}T12:00:00.000Z`), locale, {
+    timeZone: timezone,
   });
 }
 
 export function getCalendarWeekLabel(
   selectedDate: string,
   locale: SupportedLocale,
+  timezone = "Europe/Prague",
 ): string {
   const range = getCalendarDateRange(selectedDate, "week");
-  const options: Intl.DateTimeFormatOptions = {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  };
-  return `${formatDate(new Date(`${range.fromDate}T12:00:00.000Z`), locale, options)} – ${formatDate(new Date(`${range.toDate}T12:00:00.000Z`), locale, options)}`;
+  return formatCompactDateRange(
+    new Date(`${range.fromDate}T12:00:00.000Z`),
+    new Date(`${range.toDate}T12:00:00.000Z`),
+    locale,
+    { timeZone: timezone },
+  );
 }
 
 export function getCalendarFeedLabel(
   selectedDate: string,
   locale: SupportedLocale,
+  timezone = "Europe/Prague",
 ): string {
   const { toDate } = getCalendarDateRange(selectedDate, "feed");
-  const options: Intl.DateTimeFormatOptions = {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  };
-  const format = (value: string) =>
-    formatDate(new Date(value.concat("T12:00:00.000Z")), locale, options);
-  return [format(selectedDate), format(toDate)].join(" – ");
+  return formatCompactDateRange(
+    new Date(`${selectedDate}T12:00:00.000Z`),
+    new Date(`${toDate}T12:00:00.000Z`),
+    locale,
+    { timeZone: timezone },
+  );
+}
+
+export function getAccessibleCalendarLabel(
+  selectedDate: string,
+  view: "day" | "week" | "feed",
+  locale: SupportedLocale,
+  timezone = "Europe/Prague",
+): string {
+  const range = getCalendarDateRange(
+    selectedDate,
+    view === "day" ? "day" : view,
+  );
+  const from = formatAccessibleDate(
+    new Date(`${range.fromDate}T12:00:00.000Z`),
+    locale,
+    timezone,
+  );
+  if (range.fromDate === range.toDate) return from;
+  return `${from} – ${formatAccessibleDate(
+    new Date(`${range.toDate}T12:00:00.000Z`),
+    locale,
+    timezone,
+  )}`;
 }
 
 export function getCalendarDayCount(range: CalendarDateRange): number {

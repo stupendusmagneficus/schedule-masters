@@ -7,6 +7,7 @@ type DashboardPageHeaderProps = {
   readonly actionLabel: string;
   readonly onAction: () => void;
   readonly subtitle?: string;
+  readonly subtitleAccessibilityLabel?: string;
   readonly title: string;
 };
 
@@ -14,6 +15,7 @@ export function DashboardPageHeader({
   actionLabel,
   onAction,
   subtitle,
+  subtitleAccessibilityLabel,
   title,
 }: DashboardPageHeaderProps) {
   return (
@@ -22,7 +24,14 @@ export function DashboardPageHeader({
         <Text accessibilityRole="header" numberOfLines={2} style={styles.title}>
           {title}
         </Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {subtitle ? (
+          <Text
+            accessibilityLabel={subtitleAccessibilityLabel}
+            style={styles.subtitle}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
       <DashboardHeaderAction
         accessibilityLabel={actionLabel}

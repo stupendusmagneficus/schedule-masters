@@ -1,5 +1,5 @@
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatDate } from "@schedule-app/i18n";
+import { formatAccessibleDate, formatDate } from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { getAppointmentStatusLabel } from "../../components/AppointmentStatusBadge";
@@ -77,7 +77,7 @@ export function WeekCalendar({
       <View style={styles.monthGrid}>
         {monthDays.map((day) => (
           <Pressable
-            accessibilityLabel={formatDateLabel(day.date, locale)}
+            accessibilityLabel={formatDateLabel(day.date, locale, timezone)}
             accessibilityRole="button"
             key={day.date}
             onPress={() => onPressDay?.(day.date)}
@@ -107,7 +107,7 @@ export function WeekCalendar({
         <View style={styles.dayHeaderColumns}>
           {days.map((day) => (
             <Pressable
-              accessibilityLabel={formatDateLabel(day.date, locale)}
+              accessibilityLabel={formatDateLabel(day.date, locale, timezone)}
               accessibilityRole="button"
               key={day.date}
               onPress={() => onPressDay?.(day.date)}
@@ -162,8 +162,8 @@ export function WeekCalendar({
             <View
               accessibilityLabel={
                 day.isClosed
-                  ? `${formatDateLabel(day.date, locale)}, ${t("mobile.calendarClosed")}`
-                  : formatDateLabel(day.date, locale)
+                  ? `${formatDateLabel(day.date, locale, timezone)}, ${t("mobile.calendarClosed")}`
+                  : formatDateLabel(day.date, locale, timezone)
               }
               key={day.date}
               style={[
@@ -174,7 +174,7 @@ export function WeekCalendar({
               {timeSlots.map((minute) => (
                 <Pressable
                   accessibilityHint={t("mobile.calendarTapToBook")}
-                  accessibilityLabel={`${formatTimelineTime(minute)}, ${formatDateLabel(day.date, locale)}`}
+                  accessibilityLabel={`${formatTimelineTime(minute)}, ${formatDateLabel(day.date, locale, timezone)}`}
                   accessibilityRole="button"
                   disabled={day.isClosed || !onPressTime}
                   key={minute}
@@ -297,13 +297,16 @@ function createCompactSlots(startMinute: number, endMinute: number): number[] {
   );
 }
 
-function formatDateLabel(date: string, locale: SupportedLocale): string {
-  return formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    weekday: "short",
-  });
+function formatDateLabel(
+  date: string,
+  locale: SupportedLocale,
+  timezone: string,
+): string {
+  return formatAccessibleDate(
+    new Date(`${date}T12:00:00.000Z`),
+    locale,
+    timezone,
+  );
 }
 
 function formatTime(

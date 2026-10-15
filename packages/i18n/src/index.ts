@@ -1649,6 +1649,82 @@ export function formatDate(
   return new Intl.DateTimeFormat(getIntlLocale(locale), options).format(value);
 }
 
+export type CompactDateOptions = {
+  readonly includeYear?: boolean;
+  readonly referenceDate?: Date;
+  readonly timeZone?: string;
+};
+
+const defaultDateTimeZone = "Europe/Prague";
+
+export function formatCompactDate(
+  value: Date | number,
+  locale: SupportedLocale,
+  options: CompactDateOptions = {},
+): string {
+  const timeZone = options.timeZone ?? defaultDateTimeZone;
+  const date = value instanceof Date ? value : new Date(value);
+  const referenceDate = options.referenceDate ?? new Date();
+  const year = getDateYear(date, timeZone);
+  const currentYear = getDateYear(referenceDate, timeZone);
+
+  return formatDate(date, locale, {
+    day: "numeric",
+    month: "short",
+    timeZone,
+    ...(options.includeYear || year !== currentYear ? { year: "numeric" } : {}),
+  });
+}
+
+export function formatCompactDateRange(
+  from: Date | number,
+  to: Date | number,
+  locale: SupportedLocale,
+  options: CompactDateOptions = {},
+): string {
+  const timeZone = options.timeZone ?? defaultDateTimeZone;
+  const fromDate = from instanceof Date ? from : new Date(from);
+  const toDate = to instanceof Date ? to : new Date(to);
+  const referenceDate = options.referenceDate ?? new Date();
+  const fromYear = getDateYear(fromDate, timeZone);
+  const toYear = getDateYear(toDate, timeZone);
+  const currentYear = getDateYear(referenceDate, timeZone);
+  const includeYear =
+    options.includeYear ||
+    fromYear !== toYear ||
+    fromYear !== currentYear ||
+    toYear !== currentYear;
+  const format = (date: Date) =>
+    formatDate(date, locale, {
+      day: "numeric",
+      month: "short",
+      timeZone,
+      ...(includeYear ? { year: "numeric" as const } : {}),
+    });
+
+  return `${format(fromDate)} – ${format(toDate)}`;
+}
+
+export function formatAccessibleDate(
+  value: Date | number,
+  locale: SupportedLocale,
+  timeZone = defaultDateTimeZone,
+): string {
+  return formatDate(value, locale, {
+    dateStyle: "full",
+    timeZone,
+  });
+}
+
+function getDateYear(value: Date, timeZone: string): number {
+  return Number(
+    new Intl.DateTimeFormat("en", {
+      timeZone,
+      year: "numeric",
+    }).format(value),
+  );
+}
+
 export function formatTime(
   value: Date | number,
   locale: SupportedLocale,

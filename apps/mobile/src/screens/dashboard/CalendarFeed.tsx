@@ -11,6 +11,7 @@ import {
   type CalendarFeedFilter,
   type CalendarFeedGroup,
   formatCalendarFeedDate,
+  getCalendarFeedDateAccessibilityLabel,
 } from "../../features/calendar/calendarFeed";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -53,8 +54,16 @@ export function CalendarFeed({
         <View accessibilityRole="list" style={styles.groups}>
           {groups.map((group) => (
             <View key={group.date} style={styles.group}>
-              <Text style={styles.dateHeading}>
-                {formatCalendarFeedDate(group.date, locale)}
+              <Text
+                accessibilityLabel={getCalendarFeedDateAccessibilityLabel(
+                  group.date,
+                  locale,
+                  timezone,
+                )}
+                accessibilityRole="header"
+                style={styles.dateHeading}
+              >
+                {formatCalendarFeedDate(group.date, locale, timezone)}
               </Text>
               <View style={styles.items}>
                 {group.items.map((item) => {
