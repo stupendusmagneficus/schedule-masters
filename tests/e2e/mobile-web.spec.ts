@@ -31,7 +31,9 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByText(/0,00\s*Kč/)).toBeVisible();
   });
 
-  test("navigates to another day and returns to Today", async ({ page }) => {
+  test("keeps day browsing in Calendar instead of the Today header", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto("/?demo=1");
 
@@ -40,45 +42,11 @@ test.describe("mobile web smoke", () => {
       "text-align",
       "center",
     );
-    const dayHeaderGeometry = await page.evaluate(() => {
-      const heading = document.querySelector('[role="heading"]');
-      const previous = document.querySelector('[aria-label="Předchozí den"]');
-      const next = document.querySelector('[aria-label="Následující den"]');
-      if (!heading || !previous || !next) return null;
-      const bounds = (element: Element) => element.getBoundingClientRect();
-      const headingBounds = bounds(heading);
-      const previousBounds = bounds(previous);
-      const nextBounds = bounds(next);
-      return {
-        headingBottom: headingBounds.bottom,
-        headingLeft: headingBounds.left,
-        headingRight: headingBounds.right,
-        headingTop: headingBounds.top,
-        nextTop: nextBounds.top,
-        nextLeft: nextBounds.left,
-        previousBottom: previousBounds.bottom,
-        previousRight: previousBounds.right,
-        previousTop: previousBounds.top,
-      };
-    });
-    expect(dayHeaderGeometry).not.toBeNull();
-    expect(dayHeaderGeometry?.previousTop).toBeLessThan(
-      dayHeaderGeometry?.headingBottom ?? 0,
-    );
-    expect(dayHeaderGeometry?.previousBottom).toBeGreaterThan(
-      dayHeaderGeometry?.headingTop ?? Number.POSITIVE_INFINITY,
-    );
-    expect(dayHeaderGeometry?.nextTop).toBeLessThan(
-      dayHeaderGeometry?.headingBottom ?? 0,
-    );
-    expect(dayHeaderGeometry?.previousRight).toBeLessThanOrEqual(
-      dayHeaderGeometry?.headingLeft ?? 0,
-    );
-    expect(dayHeaderGeometry?.nextLeft).toBeGreaterThanOrEqual(
-      dayHeaderGeometry?.headingRight ?? Number.POSITIVE_INFINITY,
-    );
-    const initialPreviousTop = dayHeaderGeometry?.previousTop;
-    const twoDaysAgo = await page.evaluate(() => {
+    await expect(
+      page.getByRole("button", { name: "Předchozí den" }),
+    ).toHaveCount(0);
+
+    const yesterday = await page.evaluate(() => {
       const parts = new Intl.DateTimeFormat("en", {
         day: "numeric",
         month: "numeric",
@@ -88,7 +56,7 @@ test.describe("mobile web smoke", () => {
       const part = (type: Intl.DateTimeFormatPartTypes) =>
         Number(parts.find((value) => value.type === type)?.value);
       const date = new Date(
-        Date.UTC(part("year"), part("month") - 1, part("day") - 2, 12),
+        Date.UTC(part("year"), part("month") - 1, part("day") - 1, 12),
       );
       return new Intl.DateTimeFormat("cs-CZ", {
         day: "numeric",
@@ -97,32 +65,21 @@ test.describe("mobile web smoke", () => {
         year: "numeric",
       }).format(date);
     });
-    const previousDayButton = page.getByRole("button", {
-      name: "Předchozí den",
-    });
-    await previousDayButton.click();
-    await previousDayButton.click();
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("button", { name: "Předchozí datum" }).click();
+    await expect(page.getByText(yesterday, { exact: true })).toBeVisible();
+    await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+    await page
+      .getByRole("button", { name: "Dnes", exact: true })
+      .first()
+      .click();
+    await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
 
-    await expect(page.getByRole("heading", { name: twoDaysAgo })).toBeVisible();
-    const selectedDayArrowTop = await previousDayButton.evaluate(
-      (button) => button.getBoundingClientRect().top,
-    );
-    expect(selectedDayArrowTop).toBe(initialPreviousTop);
-    await expect(
-      page.getByRole("button", { name: "Dnes", exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Anna K.", { exact: true })).toHaveCount(0);
-
-    await page.getByRole("button", { name: "Dnes", exact: true }).click();
+    await page.getByRole("tab", { name: "Dnes" }).click();
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
     await expect(
       page.getByText("Anna K.", { exact: true }).first(),
     ).toBeVisible();
-
-    await page.getByRole("button", { name: "Následující den" }).click();
-    await expect(page.getByRole("heading", { name: "Dnes" })).toHaveCount(0);
-    await page.getByRole("tab", { name: "Dnes" }).click();
-    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
   });
 
   test("opens the customer directory and keeps its empty state contained on mobile", async ({
@@ -391,7 +348,7 @@ test.describe("mobile web smoke", () => {
     await page.getByRole("tab", { name: "Kalendář" }).click();
 
     const modeTabs = page.getByRole("tablist").first().getByRole("tab");
-    await expect(modeTabs).toHaveCount(4);
+    await expect(modeTabs).toHaveCount(3);
     const tops = await modeTabs.evaluateAll((elements) =>
       elements.map((element) => element.getBoundingClientRect().top),
     );
@@ -409,55 +366,44 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
   });
 
-  test("renders the chronological feed without horizontal overflow", async ({
-    page,
-  }) => {
+  test("keeps week selection in week view", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
-    await page.getByRole("tab", { name: "Přehled" }).click();
-
-    await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
-    await expect(
-      page.getByText("Gel manicure", { exact: true }).first(),
-    ).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Budoucí" })).toHaveAttribute(
-      "aria-selected",
-      "true",
+    await page.getByRole("tab", { name: "Týden" }).click();
+    const dateLabel = await page
+      .getByTestId("calendar-week-date")
+      .evaluateAll((buttons) => {
+        const unselectedDate = buttons.find(
+          (button) =>
+            getComputedStyle(button).backgroundColor !== "rgb(244, 247, 245)",
+        );
+        return unselectedDate?.getAttribute("aria-label") ?? null;
+      });
+    expect(dateLabel).not.toBeNull();
+    const dateInAnotherWeek = page.locator(
+      `[data-testid="calendar-week-date"][aria-label="${dateLabel}"]`,
     );
-    await page.getByRole("tab", { name: "Vše" }).click();
-    await expect(page.getByText("Maria P.", { exact: true })).toBeVisible();
+    await dateInAnotherWeek.click();
 
-    const hasHorizontalOverflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth + 1,
+    await expect(dateInAnotherWeek).toHaveCSS(
+      "background-color",
+      "rgb(244, 247, 245)",
     );
-    expect(hasHorizontalOverflow).toBe(false);
   });
 
-  test("finds an available slot from the calendar and continues to booking", async ({
+  test("keeps the free-slots shortcut on Today, not in Calendar", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
+    await expect(
+      page.getByRole("button", { name: "Volné termíny" }),
+    ).toBeVisible();
     await page.getByRole("tab", { name: "Kalendář" }).click();
-    await page.getByRole("button", { name: "Volné termíny" }).click();
-
     await expect(
-      page.getByText("Volné termíny", { exact: true }).last(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "11:00", exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "11:00", exact: true }).click();
-    await page.getByRole("button", { name: "Objednat klienta" }).click();
-
-    await expect(
-      page.getByText(
-        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
-      ),
-    ).toBeVisible();
+      page.getByRole("button", { name: "Volné termíny" }),
+    ).toHaveCount(0);
   });
 
   test("opens free slots from Today with the selected date and continues to booking entry", async ({
@@ -465,7 +411,6 @@ test.describe("mobile web smoke", () => {
   }) => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.goto("/?demo=1");
-    await page.getByRole("button", { name: "Následující den" }).click();
 
     const selectedDate = await page.evaluate(() => {
       const parts = new Intl.DateTimeFormat("en", {
@@ -477,7 +422,7 @@ test.describe("mobile web smoke", () => {
       const part = (type: Intl.DateTimeFormatPartTypes) =>
         Number(parts.find((value) => value.type === type)?.value);
       const date = new Date(
-        Date.UTC(part("year"), part("month") - 1, part("day") + 1, 12),
+        Date.UTC(part("year"), part("month") - 1, part("day"), 12),
       );
       return new Intl.DateTimeFormat("cs-CZ", {
         day: "numeric",
@@ -486,9 +431,7 @@ test.describe("mobile web smoke", () => {
         year: "numeric",
       }).format(date);
     });
-    await expect(
-      page.getByRole("heading", { name: selectedDate }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
 
     const freeSlotsButton = page.getByRole("button", {
       name: "Volné termíny",
@@ -515,9 +458,7 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
 
     await page.getByRole("button", { name: "Zrušit" }).click();
-    await expect(
-      page.getByRole("heading", { name: selectedDate }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
 
     await page.getByRole("button", { name: "Volné termíny" }).click();
     await page.getByRole("button", { name: "11:00", exact: true }).click();

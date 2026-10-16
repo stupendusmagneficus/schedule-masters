@@ -424,11 +424,8 @@ export function DashboardScreen({
             onOpenWaitingList={() => {
               setWaitingListVisible(true);
             }}
-            onGoToToday={calendar.goToTodayDay}
-            onNextDay={calendar.goToNextDay}
             hasActiveServices={bookingServices.length > 0}
             onOpenFreeSlots={() => setFreeSlotsVisible(true)}
-            onPreviousDay={calendar.goToPreviousDay}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             selectedDate={calendar.selectedDate}
             t={t}
@@ -442,11 +439,6 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
-            onOpenFreeSlots={
-              bookingServices.length > 0
-                ? () => setFreeSlotsVisible(true)
-                : undefined
-            }
             onFeedback={setFeedback}
             onSelectTime={(date, startsAt) =>
               client

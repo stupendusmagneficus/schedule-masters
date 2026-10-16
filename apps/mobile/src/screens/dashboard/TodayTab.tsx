@@ -48,11 +48,8 @@ type TodayTabProps = DashboardTabProps & {
   readonly onRetryAppointments?: () => void;
   readonly onOpenBookingRequests: () => void;
   readonly onOpenWaitingList: () => void;
-  readonly onGoToToday: () => void;
-  readonly onNextDay: () => void;
   readonly hasActiveServices: boolean;
   readonly onOpenFreeSlots: () => void;
-  readonly onPreviousDay: () => void;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly selectedDate: string;
   readonly workspace: Workspace;
@@ -74,10 +71,7 @@ export function TodayTab({
   defaultCurrency,
   onOpenBookingRequests,
   onOpenWaitingList,
-  onGoToToday,
-  onNextDay,
   onOpenFreeSlots,
-  onPreviousDay,
   onSelectAppointment,
   hasActiveServices,
   selectedDate,
@@ -121,45 +115,13 @@ export function TodayTab({
     <View style={styles.content}>
       <DashboardPageHeader
         centeredTitle
-        leadingAction={{
-          accessibilityLabel: t("mobile.previousDay"),
-          icon: "arrow-left",
-          onPress: onPreviousDay,
-        }}
-        trailingAction={{
-          accessibilityLabel: t("mobile.nextDay"),
-          icon: "arrow-right",
-          onPress: onNextDay,
-        }}
-        subtitleAction={
-          isToday
-            ? undefined
-            : {
-                accessibilityLabel: t("mobile.today"),
-                label: t("mobile.today"),
-                onPress: onGoToToday,
-              }
-        }
-        subtitle={isToday ? dateLabel : undefined}
-        subtitleAccessibilityLabel={
-          isToday
-            ? formatAccessibleDate(
-                selectedDateValue,
-                locale,
-                workspace.timezone,
-              )
-            : undefined
-        }
-        title={isToday ? t("mobile.today") : dateLabel}
-        titleAccessibilityLabel={
-          isToday
-            ? t("mobile.today")
-            : formatAccessibleDate(
-                selectedDateValue,
-                locale,
-                workspace.timezone,
-              )
-        }
+        subtitle={dateLabel}
+        subtitleAccessibilityLabel={formatAccessibleDate(
+          selectedDateValue,
+          locale,
+          workspace.timezone,
+        )}
+        title={t("mobile.today")}
       />
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>

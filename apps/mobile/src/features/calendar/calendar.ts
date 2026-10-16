@@ -1,6 +1,6 @@
 import { formatDateInTimeZone } from "../availability/personalBlocks";
 
-export const calendarViews = ["day", "week", "month", "feed"] as const;
+export const calendarViews = ["day", "week", "month"] as const;
 
 export type CalendarView = (typeof calendarViews)[number];
 
@@ -35,7 +35,7 @@ export function getCalendarDateRange(
     return { fromDate, toDate };
   }
 
-  return { fromDate: selectedDate, toDate: addCalendarDays(selectedDate, 89) };
+  return { fromDate: selectedDate, toDate: selectedDate };
 }
 
 export function moveCalendarDate(
@@ -45,8 +45,6 @@ export function moveCalendarDate(
 ): string {
   if (view === "day") return addCalendarDays(selectedDate, direction);
   if (view === "week") return addCalendarDays(selectedDate, direction * 7);
-  if (view === "feed") return addCalendarDays(selectedDate, direction * 30);
-
   const date = parseCalendarDate(selectedDate);
   return toCalendarDate(
     new Date(

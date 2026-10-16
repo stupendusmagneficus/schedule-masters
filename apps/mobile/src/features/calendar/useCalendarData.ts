@@ -15,7 +15,6 @@ import {
 } from "../availability/personalBlocks";
 import { createWorkspaceRequestGuard } from "../workspace/workspaceRequestGuard";
 import {
-  addCalendarDays,
   type CalendarDateRange,
   type CalendarView,
   getCalendarDateRange,
@@ -36,9 +35,7 @@ type UseCalendarDataParams = {
 export type CalendarDataController = CalendarData & {
   readonly error: string | null;
   readonly goToNext: () => void;
-  readonly goToNextDay: () => void;
   readonly goToPrevious: () => void;
-  readonly goToPreviousDay: () => void;
   readonly goToToday: () => void;
   readonly goToTodayDay: () => void;
   readonly isLoading: boolean;
@@ -167,16 +164,6 @@ export function useCalendarData({
     if (client) setIsLoading(true);
     setSelectedDateState(getTodayCalendarDate(timezone));
   }, [client, timezone]);
-  const goToPreviousDay = useCallback(() => {
-    if (client) setIsLoading(true);
-    setViewState("day");
-    setSelectedDateState((current) => addCalendarDays(current, -1));
-  }, [client]);
-  const goToNextDay = useCallback(() => {
-    if (client) setIsLoading(true);
-    setViewState("day");
-    setSelectedDateState((current) => addCalendarDays(current, 1));
-  }, [client]);
   const goToTodayDay = useCallback(() => {
     const today = getTodayCalendarDate(timezone);
     if (client && (view !== "day" || selectedDate !== today)) {
@@ -205,9 +192,7 @@ export function useCalendarData({
     ...data,
     error,
     goToNext,
-    goToNextDay,
     goToPrevious,
-    goToPreviousDay,
     goToToday,
     goToTodayDay,
     isLoading,
@@ -247,30 +232,13 @@ export function getCalendarWeekLabel(
   );
 }
 
-export function getCalendarFeedLabel(
-  selectedDate: string,
-  locale: SupportedLocale,
-  timezone = "Europe/Prague",
-): string {
-  const { toDate } = getCalendarDateRange(selectedDate, "feed");
-  return formatCompactDateRange(
-    new Date(`${selectedDate}T12:00:00.000Z`),
-    new Date(`${toDate}T12:00:00.000Z`),
-    locale,
-    { timeZone: timezone },
-  );
-}
-
 export function getAccessibleCalendarLabel(
   selectedDate: string,
-  view: "day" | "week" | "feed",
+  view: "day" | "week",
   locale: SupportedLocale,
   timezone = "Europe/Prague",
 ): string {
-  const range = getCalendarDateRange(
-    selectedDate,
-    view === "day" ? "day" : view,
-  );
+  const range = getCalendarDateRange(selectedDate, view);
   const from = formatAccessibleDate(
     new Date(`${range.fromDate}T12:00:00.000Z`),
     locale,
