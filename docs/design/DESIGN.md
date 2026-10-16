@@ -31,7 +31,7 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
 4. **Approachable authority.** Green primary actions communicate the next step; graphite content and neutral secondary actions keep the interface calm.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
-6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
+6. **Language-safe.** RU, CZ, EN, SK and UK labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
 8. **Calendar actions stay close.** Creating an appointment and creating a break must be available from the same calendar action, without navigating through settings.
 9. **Shadcn-inspired simplicity.** Use green primary actions, neutral secondary actions, pill controls, 16px

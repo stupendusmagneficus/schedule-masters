@@ -8,8 +8,10 @@ import {
   formatCurrency,
   formatDate,
   formatTime,
+  getIntlLocale,
   resolveLocale,
   translate,
+  translationKeys,
 } from "./index";
 
 describe("locale resolution", () => {
@@ -17,6 +19,12 @@ describe("locale resolution", () => {
     expect(resolveLocale("ru-RU")).toBe("ru");
     expect(resolveLocale("cs-CZ")).toBe("cz");
     expect(resolveLocale("en-US")).toBe("en");
+    expect(resolveLocale("sk-SK")).toBe("sk");
+    expect(resolveLocale("uk-UA")).toBe("uk");
+    expect(resolveLocale("sk_sk")).toBe("sk");
+    expect(resolveLocale("uk_ua")).toBe("uk");
+    expect(detectLocale("sk-SK")).toBe("sk");
+    expect(detectLocale("uk-UA")).toBe("uk");
   });
 
   it("uses English as the fallback locale", () => {
@@ -36,6 +44,8 @@ describe("translations and formatting", () => {
     expect(translate("ru", "common.language")).toBe("Язык");
     expect(translate("cz", "common.language")).toBe("Jazyk");
     expect(translate("en", "common.language")).toBe("Language");
+    expect(translate("sk", "common.language")).toBe("Jazyk");
+    expect(translate("uk", "common.language")).toBe("Мова");
   });
 
   it("uses the correct action prompt for each authentication mode", () => {
@@ -47,6 +57,25 @@ describe("translations and formatting", () => {
     );
   });
 
+  it.each(["sk", "uk"] as const)(
+    "keeps every message and interpolation for %s",
+    (locale) => {
+      for (const key of translationKeys) {
+        const translated = translate(locale, key);
+        const source = translate("en", key);
+        const placeholders = (value: string) =>
+          [...value.matchAll(/\{[^}]+\}/g)]
+            .map(([placeholder]) => placeholder)
+            .sort();
+
+        expect(translated.trim(), `${locale}: ${key}`).not.toBe("");
+        expect(placeholders(translated), `${locale}: ${key}`).toEqual(
+          placeholders(source),
+        );
+      }
+    },
+  );
+
   it("gives an actionable Czech message when sign in fails", () => {
     expect(translate("cz", "auth.invalidCredentials")).toBe(
       "Přihlášení se nepodařilo. Zkontrolujte e-mail a heslo a zkuste to znovu.",
@@ -57,6 +86,15 @@ describe("translations and formatting", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);
     expect(formatCurrency(149, "cz")).toContain("149");
+  });
+
+  it("uses Slovak and Ukrainian Intl locales for dates and currency", () => {
+    expect(getIntlLocale("sk")).toBe("sk-SK");
+    expect(getIntlLocale("uk")).toBe("uk-UA");
+    expect(formatDate(date, "sk")).toContain("2026");
+    expect(formatDate(date, "uk")).toContain("2026");
+    expect(formatCurrency(149, "sk")).toContain("149");
+    expect(formatCurrency(149, "uk")).toContain("149");
   });
 });
 

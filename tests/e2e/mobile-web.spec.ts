@@ -227,6 +227,33 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("saves the Ukrainian locale across reloads without narrow-screen overflow", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
+    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
+    await expect(page.getByRole("radiogroup").getByRole("radio")).toHaveCount(
+      5,
+    );
+    const localePickerFits = await page
+      .getByRole("radiogroup")
+      .evaluate(
+        (group) =>
+          group.getBoundingClientRect().right <=
+          document.documentElement.clientWidth,
+      );
+    expect(localePickerFits).toBe(true);
+    await page.getByRole("radio", { name: "UK" }).click();
+
+    await expect(page.getByText("Мова", { exact: true })).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "uk");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "uk");
+    await expect(page.getByRole("tab", { name: "Профіль" })).toBeVisible();
+  });
+
   test("opens a searchable, categorized service catalog from Profile", async ({
     page,
   }) => {

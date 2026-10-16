@@ -1,4 +1,7 @@
-export const supportedLocales = ["ru", "cz", "en"] as const;
+import { slovakMessages } from "./locales/sk";
+import { ukrainianMessages } from "./locales/uk";
+
+export const supportedLocales = ["ru", "cz", "en", "sk", "uk"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const fallbackLocale: SupportedLocale = "en";
@@ -8,6 +11,8 @@ const intlLocales: Record<SupportedLocale, string> = {
   ru: "ru-RU",
   cz: "cs-CZ",
   en: "en-US",
+  sk: "sk-SK",
+  uk: "uk-UA",
 };
 
 export type MessageKey =
@@ -431,7 +436,7 @@ export type MessageKey =
   | "booking.manageCompleted"
   | "booking.manageActionFailed";
 
-type Messages = Record<MessageKey, string>;
+export type Messages = Record<MessageKey, string>;
 
 const messages: Record<SupportedLocale, Messages> = {
   ru: {
@@ -1929,7 +1934,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageCompleted": "Completed",
     "booking.manageActionFailed": "We couldn't update the booking. Try again.",
   },
+  sk: slovakMessages,
+  uk: ukrainianMessages,
 };
+
+export const translationKeys = Object.keys(messages.en) as MessageKey[];
 
 export function resolveLocale(
   value: string | null | undefined,
@@ -1950,6 +1959,14 @@ export function resolveLocale(
 
   if (normalized === "en" || normalized.startsWith("en-")) {
     return "en";
+  }
+
+  if (normalized === "sk" || normalized.startsWith("sk-")) {
+    return "sk";
+  }
+
+  if (normalized === "uk" || normalized.startsWith("uk-")) {
+    return "uk";
   }
 
   return fallbackLocale;
@@ -2083,4 +2100,6 @@ export const localeLabels: Record<SupportedLocale, string> = {
   ru: "RU",
   cz: "CZ",
   en: "EN",
+  sk: "SK",
+  uk: "UK",
 };
