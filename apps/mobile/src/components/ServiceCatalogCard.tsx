@@ -4,13 +4,14 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 import type { ServiceDraft } from "../features/services/serviceCatalog";
 import type { ServiceCatalogController } from "../features/services/useServiceCatalog";
-import { colors, radii } from "../theme/tokens";
+import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service } from "../types";
+import { ActionButton } from "./ActionButton";
 import { InfoCard } from "./InfoCard";
 import { ServiceEditorModal } from "./ServiceEditorModal";
 
@@ -78,14 +79,13 @@ export function ServiceCatalogCard({
             <Text style={styles.helper}>{t("mobile.servicesDescription")}</Text>
           </View>
           {editable ? (
-            <Pressable
-              accessibilityRole="button"
+            <ActionButton
               disabled={controller.isSaving}
+              label={t("mobile.serviceAdd")}
               onPress={openCreate}
-              style={styles.addButton}
-            >
-              <Text style={styles.addButtonText}>{t("mobile.serviceAdd")}</Text>
-            </Pressable>
+              size="compact"
+              variant="primary"
+            />
           ) : null}
         </View>
 
@@ -96,6 +96,7 @@ export function ServiceCatalogCard({
             {visibleServices.map((service) => (
               <ServiceRow
                 editable={editable}
+                isSaving={controller.isSaving}
                 key={service.id}
                 locale={locale}
                 onArchive={archive}
@@ -132,6 +133,7 @@ export function ServiceCatalogCard({
 
 function ServiceRow({
   editable,
+  isSaving,
   locale,
   onArchive,
   onEdit,
@@ -140,6 +142,7 @@ function ServiceRow({
   t,
 }: {
   readonly editable: boolean;
+  readonly isSaving: boolean;
   readonly locale: SupportedLocale;
   readonly onArchive: (service: Service) => void;
   readonly onEdit: (service: Service) => void;
@@ -176,17 +179,22 @@ function ServiceRow({
       </View>
       {editable ? (
         <View style={styles.rowActions}>
-          <Pressable accessibilityRole="button" onPress={() => onEdit(service)}>
-            <Text style={styles.actionText}>{t("mobile.serviceEdit")}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
+          <ActionButton
+            disabled={isSaving}
+            label={t("mobile.serviceEdit")}
+            onPress={() => onEdit(service)}
+            size="compact"
+            variant="secondary"
+          />
+          <ActionButton
+            disabled={isSaving}
+            label={t(
+              isActive ? "mobile.serviceArchive" : "mobile.serviceRestore",
+            )}
             onPress={() => (isActive ? onArchive(service) : onRestore(service))}
-          >
-            <Text style={styles.actionText}>
-              {t(isActive ? "mobile.serviceArchive" : "mobile.serviceRestore")}
-            </Text>
-          </Pressable>
+            size="compact"
+            variant={isActive ? "destructive" : "secondary"}
+          />
         </View>
       ) : null}
     </View>
@@ -194,22 +202,6 @@ function ServiceRow({
 }
 
 const styles = StyleSheet.create({
-  actionText: {
-    ...typography.caption,
-    color: colors.accent,
-    fontWeight: "700",
-  },
-  addButton: {
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  addButtonText: {
-    ...typography.caption,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
   archivedRow: { opacity: 0.65 },
   description: {
     ...typography.caption,

@@ -143,6 +143,7 @@ export type MessageKey =
   | "mobile.waitingListRemoveAll"
   | "mobile.waitingListRemoveAllPrompt"
   | "mobile.waitingListRemoveAllConfirm"
+  | "mobile.waitingListRemovePrompt"
   | "mobile.waitingListStatusActive"
   | "mobile.waitingListStatusBooked"
   | "mobile.waitingListStatusRemoved"
@@ -592,6 +593,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListRemoveAllPrompt":
       "Удалить все активные записи ({count})? Их история сохранится.",
     "mobile.waitingListRemoveAllConfirm": "Удалить все записи",
+    "mobile.waitingListRemovePrompt": "Удалить {name} из листа ожидания?",
     "mobile.waitingListStatusActive": "Ожидает",
     "mobile.waitingListStatusBooked": "Записан",
     "mobile.waitingListStatusRemoved": "Удалён",
@@ -1081,6 +1083,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListRemoveAllPrompt":
       "Odebrat všechny aktivní záznamy ({count})? Historie zůstane zachována.",
     "mobile.waitingListRemoveAllConfirm": "Odebrat všechny záznamy",
+    "mobile.waitingListRemovePrompt":
+      "Odebrat klienta {name} ze seznamu náhradníků?",
     "mobile.waitingListStatusActive": "Čeká",
     "mobile.waitingListStatusBooked": "Objednán",
     "mobile.waitingListStatusRemoved": "Odebrán",
@@ -1569,6 +1573,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListRemoveAllPrompt":
       "Remove all {count} active entries? Their history will remain.",
     "mobile.waitingListRemoveAllConfirm": "Remove all entries",
+    "mobile.waitingListRemovePrompt": "Remove {name} from the waiting list?",
     "mobile.waitingListStatusActive": "Waiting",
     "mobile.waitingListStatusBooked": "Booked",
     "mobile.waitingListStatusRemoved": "Removed",

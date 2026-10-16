@@ -36,6 +36,7 @@ import type { CustomerProfile } from "../features/customers/customerDirectory";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
+import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 import { ServicePickerField } from "./ServicePickerField";
@@ -335,22 +336,22 @@ export function ManualBookingModal({
               disabled={isLoadingSlots || !selectedService || !draft.startsAt}
               label={t("common.next")}
               onPress={handleNext}
-              primary
+              variant="primary"
             />
           ) : step === "customer" ? (
             <ActionButton
               label={t("common.next")}
               onPress={handleNext}
-              primary
+              variant="primary"
             />
           ) : (
             <ActionButton
               disabled={isSaving}
-              label={
-                isSaving ? t("common.loading") : t("mobile.manualBookingCreate")
-              }
+              label={t("mobile.manualBookingCreate")}
+              loading={isSaving}
+              loadingLabel={t("common.loading")}
               onPress={() => void handleSubmit()}
-              primary
+              variant="primary"
             />
           )}
         </View>
@@ -769,37 +770,6 @@ function ModeButton({
   );
 }
 
-function ActionButton({
-  disabled = false,
-  label,
-  onPress,
-  primary = false,
-}: {
-  readonly disabled?: boolean;
-  readonly label: string;
-  readonly onPress: () => void;
-  readonly primary?: boolean;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        primary ? styles.primaryButton : styles.secondaryButton,
-        pressed && primary && styles.primaryButtonPressed,
-        disabled && styles.disabled,
-      ]}
-    >
-      <Text
-        style={primary ? styles.primaryButtonText : styles.secondaryButtonText}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 function createInitialDraft(
   service: Service | null,
   date: string,
@@ -863,7 +833,6 @@ const styles = StyleSheet.create({
     color: colors.secondaryText,
     marginBottom: 8,
   },
-  disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginBottom: 10 },
   field: { gap: 6, marginTop: 16 },
   footerContent: { gap: 4 },
@@ -917,16 +886,6 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   optionTitle: { ...typography.label, color: colors.primaryText },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 14,
-  },
-  primaryButtonPressed: { backgroundColor: colors.actionPressed },
-  primaryButtonText: { ...typography.label, color: colors.actionText },
   progress: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -953,16 +912,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   progressNumberActive: { color: colors.inverse },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 14,
-  },
-  secondaryButtonText: { ...typography.label, color: colors.primaryText },
   sectionTitle: {
     ...typography.label,
     color: colors.primaryText,

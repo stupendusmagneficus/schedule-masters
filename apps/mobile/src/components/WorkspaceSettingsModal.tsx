@@ -3,7 +3,6 @@ import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,6 +20,7 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Workspace } from "../types";
+import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 
@@ -124,23 +124,14 @@ export function WorkspaceSettingsModal({
               {t(serverError)}
             </Text>
           ) : null}
-          <Pressable
-            accessibilityRole="button"
+          <ActionButton
             disabled={isSaving}
+            label={t("workspace.settingsSave")}
+            loading={isSaving}
+            loadingLabel={t("workspace.settingsSaving")}
             onPress={() => void handleSave()}
-            style={({ pressed }) => [
-              styles.saveButton,
-              pressed && styles.saveButtonPressed,
-              isSaving && styles.disabled,
-            ]}
-          >
-            {isSaving ? <ActivityIndicator color={colors.actionText} /> : null}
-            <Text style={styles.saveButtonText}>
-              {isSaving
-                ? t("workspace.settingsSaving")
-                : t("workspace.settingsSave")}
-            </Text>
-          </Pressable>
+            variant="primary"
+          />
         </View>
       }
     >
@@ -284,7 +275,6 @@ const styles = StyleSheet.create({
   dayText: { ...typography.label, color: colors.primaryText },
   dayTextSelected: { color: colors.inverse },
   description: { ...typography.body, color: colors.secondaryText },
-  disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
   field: { gap: 8 },
   footer: { gap: 8 },
@@ -300,22 +290,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
   },
   label: { ...typography.label, color: colors.primaryText },
-  saveButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 14,
-  },
-  saveButtonPressed: { backgroundColor: colors.actionPressed },
-  saveButtonText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
   section: { gap: 10 },
   timeField: { flex: 1, minWidth: 140 },
   timeRow: { flexDirection: "row", flexWrap: "wrap", gap: 12 },

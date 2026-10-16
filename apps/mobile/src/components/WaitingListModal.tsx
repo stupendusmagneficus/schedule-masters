@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,6 +29,7 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service } from "../types";
+import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 import { InfoCard } from "./InfoCard";
@@ -222,6 +224,24 @@ export function WaitingListModal({
     } finally {
       setSaving(false);
     }
+  }
+
+  function confirmRemove(entry: MasterWaitingListEntry) {
+    Alert.alert(
+      t("common.delete"),
+      t("mobile.waitingListRemovePrompt").replace(
+        "{name}",
+        entry.customer_name,
+      ),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: () => void remove(entry),
+        },
+      ],
+    );
   }
 
   async function removeAll() {
@@ -462,8 +482,7 @@ export function WaitingListModal({
               </Text>
             ) : null}
             {actionError === "duplicate" ? (
-              <Pressable
-                accessibilityRole="button"
+              <ActionButton
                 onPress={() => {
                   setFormMode("existing");
                   setEditing(null);
@@ -475,38 +494,30 @@ export function WaitingListModal({
                   setDraft((current) => ({ ...current, customerId: null }));
                   setActionError(null);
                 }}
-                style={styles.secondaryButton}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("mobile.waitingListAddExisting")}
-                </Text>
-              </Pressable>
+                label={t("mobile.waitingListAddExisting")}
+                variant="secondary"
+              />
             ) : null}
             <View style={styles.formActions}>
-              <Pressable
-                accessibilityRole="button"
+              <ActionButton
                 disabled={
                   saving || !draft.customerName.trim() || !draft.serviceId
                 }
+                label={t("common.save")}
+                loading={saving}
+                loadingLabel={t("common.loading")}
                 onPress={() => void save()}
-                style={styles.primaryButton}
-              >
-                <Text style={styles.primaryText}>
-                  {saving ? t("common.loading") : t("common.save")}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
+                variant="primary"
+              />
+              <ActionButton
+                disabled={saving}
+                label={t("common.cancel")}
                 onPress={() => {
                   setFormMode(null);
                   setEditing(null);
                 }}
-                style={styles.secondaryButton}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {t("common.cancel")}
-                </Text>
-              </Pressable>
+                variant="neutral"
+              />
             </View>
           </InfoCard>
         ) : (
@@ -581,25 +592,22 @@ export function WaitingListModal({
                   ) : null}
                   {entry.status === "active" ? (
                     <View style={styles.actions}>
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={() => startEdit(entry)}
-                        style={styles.secondaryButton}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {t("common.edit")}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
+                      <ActionButton
                         disabled={saving}
-                        onPress={() => void remove(entry)}
-                        style={styles.secondaryButton}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {t("common.delete")}
-                        </Text>
-                      </Pressable>
+                        onPress={() => startEdit(entry)}
+                        label={t("common.edit")}
+                        size="compact"
+                        variant="secondary"
+                      />
+                      <ActionButton
+                        disabled={saving}
+                        label={t("common.delete")}
+                        loading={saving}
+                        loadingLabel={t("common.loading")}
+                        onPress={() => confirmRemove(entry)}
+                        size="compact"
+                        variant="destructive"
+                      />
                     </View>
                   ) : null}
                 </InfoCard>
@@ -626,64 +634,48 @@ export function WaitingListModal({
                   )}
                 </Text>
                 <View style={styles.actions}>
-                  <Pressable
-                    accessibilityRole="button"
+                  <ActionButton
                     disabled={saving}
+                    label={t("common.cancel")}
                     onPress={() => setConfirmRemoveAll(false)}
-                    style={styles.secondaryButton}
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {t("common.cancel")}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
+                    style={styles.actionButton}
+                    variant="neutral"
+                  />
+                  <ActionButton
                     disabled={saving}
+                    label={t("mobile.waitingListRemoveAllConfirm")}
+                    loading={saving}
+                    loadingLabel={t("common.loading")}
                     onPress={() => void removeAll()}
-                    style={styles.removeAllButton}
-                  >
-                    <Text style={styles.removeAllText}>
-                      {saving
-                        ? t("common.loading")
-                        : t("mobile.waitingListRemoveAllConfirm")}
-                    </Text>
-                  </Pressable>
+                    style={styles.actionButton}
+                    variant="destructiveConfirm"
+                  />
                 </View>
               </InfoCard>
             ) : null}
             {entries.some((entry) => entry.status === "active") ? (
-              <Pressable
-                accessibilityRole="button"
+              <ActionButton
                 disabled={saving}
+                label={t("mobile.waitingListRemoveAll")}
                 onPress={() => {
                   setConfirmRemoveAll(true);
                   setActionError(null);
                 }}
-                style={styles.removeAllButton}
-              >
-                <Text style={styles.removeAllText}>
-                  {t("mobile.waitingListRemoveAll")}
-                </Text>
-              </Pressable>
+                variant="destructive"
+              />
             ) : null}
-            <Pressable
-              accessibilityRole="button"
+            <ActionButton
+              disabled={saving}
               onPress={() => startNew("existing")}
-              style={styles.primaryButton}
-            >
-              <Text style={styles.primaryText}>
-                {t("mobile.waitingListAddExisting")}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
+              label={t("mobile.waitingListAddExisting")}
+              variant="primary"
+            />
+            <ActionButton
+              disabled={saving}
               onPress={() => startNew("new")}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("mobile.waitingListAddNew")}
-              </Text>
-            </Pressable>
+              label={t("mobile.waitingListAddNew")}
+              variant="secondary"
+            />
           </>
         )}
       </ScrollView>
@@ -749,29 +741,6 @@ const styles = StyleSheet.create({
   selectedChipText: { color: colors.accent, fontWeight: "700" },
   row: { flexDirection: "row", gap: 10 },
   half: { flex: 1 },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.pill,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  removeAllButton: {
-    alignItems: "center",
-    backgroundColor: colors.dangerSoft,
-    borderColor: colors.danger,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  removeAllText: {
-    ...typography.caption,
-    color: colors.danger,
-    fontWeight: "700",
-  },
   selectedCustomer: {
     ...typography.caption,
     backgroundColor: colors.accentSoft,
@@ -779,21 +748,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
     padding: 10,
   },
-  primaryText: { ...typography.label, color: colors.surface },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  secondaryButtonText: {
-    ...typography.caption,
-    color: colors.primaryText,
-    fontWeight: "600",
-  },
+  actionButton: { flex: 1 },
   actions: { flexDirection: "row", gap: 8, marginTop: 10 },
   formActions: { gap: 12, marginTop: 16 },
   entryCard: { gap: 8, padding: 12 },
