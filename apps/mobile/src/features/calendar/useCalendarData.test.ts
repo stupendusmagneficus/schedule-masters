@@ -1,4 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("react-native", () => ({
+  AppState: {
+    addEventListener: () => ({ remove: vi.fn() }),
+    currentState: "active",
+  },
+}));
 
 import {
   getAccessibleCalendarLabel,

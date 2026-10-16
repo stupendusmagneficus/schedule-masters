@@ -6,7 +6,8 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppState } from "react-native";
 
 import {
   createPersonalBlock,
@@ -23,7 +24,13 @@ import {
   isCalendarDate,
   moveCalendarDate,
 } from "./calendar";
-import { type CalendarData, listCalendarData } from "./calendarData";
+import type { CalendarData } from "./calendarData";
+import {
+  getCachedCalendarData,
+  hasCachedCalendarData,
+  invalidateCalendarDataCache,
+  loadCachedCalendarData,
+} from "./calendarDataCache";
 
 type UseCalendarDataParams = {
   readonly client: SupabaseClient<Database> | null;
@@ -32,6 +39,10 @@ type UseCalendarDataParams = {
   readonly timezone: string;
   readonly workspaceId: string;
 };
+
+function invokeLatestReload(ref: { readonly current: () => Promise<void> }) {
+  void ref.current();
+}
 
 export type CalendarDataController = CalendarData & {
   readonly error: string | null;
@@ -80,46 +91,130 @@ export function useCalendarData({
     [selectedDate, view],
   );
 
-  const reload = useCallback(async () => {
-    const requestId = requestGuard.begin();
+  const loadCurrentRange = useCallback(
+    async (refresh = false) => {
+      const requestId = requestGuard.begin();
 
-    if (view === "month") {
-      if (requestGuard.isCurrent(requestId)) {
-        setError(null);
-        setIsLoading(false);
+      if (refresh && client) {
+        invalidateCalendarDataCache(client, workspaceId);
       }
-      return;
-    }
 
-    if (!client) {
-      if (requestGuard.isCurrent(requestId)) {
-        setData({ appointments: [], blocks: [] });
-        setIsLoading(false);
+      if (view === "month") {
+        if (requestGuard.isCurrent(requestId)) {
+          setError(null);
+          setIsLoading(false);
+        }
+        return;
       }
-      return;
-    }
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      const nextData = await listCalendarData(client, workspaceId, range);
-      if (requestGuard.isCurrent(requestId)) setData(nextData);
-    } catch (loadError) {
-      if (requestGuard.isCurrent(requestId)) {
-        setError(loadError instanceof Error ? loadError.message : "unknown");
+      if (!client) {
+        if (requestGuard.isCurrent(requestId)) {
+          setData({ appointments: [], blocks: [] });
+          setIsLoading(false);
+        }
+        return;
       }
-    } finally {
-      if (requestGuard.isCurrent(requestId)) setIsLoading(false);
-    }
-  }, [client, range, requestGuard, view, workspaceId]);
+
+      const cachedData = getCachedCalendarData(
+        client,
+        workspaceId,
+        timezone,
+        range,
+      );
+      if (cachedData) {
+        if (requestGuard.isCurrent(requestId)) {
+          setData(cachedData);
+          setError(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setData({ appointments: [], blocks: [] });
+      setIsLoading(true);
+      setError(null);
+      try {
+        const nextData = await loadCachedCalendarData(
+          client,
+          workspaceId,
+          timezone,
+          range,
+        );
+        if (requestGuard.isCurrent(requestId)) setData(nextData);
+      } catch (loadError) {
+        if (requestGuard.isCurrent(requestId)) {
+          setError(loadError instanceof Error ? loadError.message : "unknown");
+        }
+      } finally {
+        if (requestGuard.isCurrent(requestId)) setIsLoading(false);
+      }
+    },
+    [client, range, requestGuard, timezone, view, workspaceId],
+  );
+
+  const reload = useCallback(() => loadCurrentRange(true), [loadCurrentRange]);
+  const reloadRef = useRef(reload);
+  reloadRef.current = reload;
 
   useEffect(() => {
-    void reload();
+    void loadCurrentRange();
     return () => {
       requestGuard.invalidate(requestGuard.begin());
       operationGuard.invalidate(operationGuard.begin());
     };
-  }, [operationGuard, reload, requestGuard]);
+  }, [loadCurrentRange, operationGuard, requestGuard]);
+
+  useEffect(() => {
+    if (!client) return;
+    const channel = client
+      .channel(`master-calendar-data:${workspaceId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          filter: `workspace_id=eq.${workspaceId}`,
+          schema: "public",
+          table: "appointments",
+        },
+        () => invokeLatestReload(reloadRef),
+      )
+      .subscribe();
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [client, workspaceId]);
+
+  useEffect(() => {
+    if (!client) return;
+    let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
+    const { data: authSubscription } = client.auth.onAuthStateChange(
+      (event) => {
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
+        invalidateCalendarDataCache(client, workspaceId, undefined, false);
+        setData({ appointments: [], blocks: [] });
+        if (event === "SIGNED_IN") {
+          reloadTimeout = setTimeout(() => invokeLatestReload(reloadRef), 0);
+        } else {
+          setIsLoading(false);
+        }
+      },
+    );
+    return () => {
+      if (reloadTimeout) clearTimeout(reloadTimeout);
+      authSubscription.subscription.unsubscribe();
+    };
+  }, [client, workspaceId]);
+
+  useEffect(() => {
+    if (!client) return;
+    let wasActive = AppState.currentState === "active";
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      const resumed = nextState === "active" && !wasActive;
+      wasActive = nextState === "active";
+      if (resumed) invokeLatestReload(reloadRef);
+    });
+    return () => subscription.remove();
+  }, [client]);
 
   const saveBlock = useCallback(
     async (draft: PersonalBlockDraft) => {
@@ -189,39 +284,102 @@ export function useCalendarData({
   );
 
   const goToPrevious = useCallback(() => {
-    if (client) setIsLoading(true);
-    setSelectedDateState((current) => moveCalendarDate(current, view, -1));
-  }, [client, view]);
+    const nextDate = moveCalendarDate(selectedDate, view, -1);
+    setIsLoading(
+      Boolean(
+        client &&
+          view !== "month" &&
+          !hasCachedCalendarData(
+            client,
+            workspaceId,
+            timezone,
+            getCalendarDateRange(nextDate, view),
+          ),
+      ),
+    );
+    setSelectedDateState(nextDate);
+  }, [client, selectedDate, timezone, view, workspaceId]);
   const goToNext = useCallback(() => {
-    if (client) setIsLoading(true);
-    setSelectedDateState((current) => moveCalendarDate(current, view, 1));
-  }, [client, view]);
+    const nextDate = moveCalendarDate(selectedDate, view, 1);
+    setIsLoading(
+      Boolean(
+        client &&
+          view !== "month" &&
+          !hasCachedCalendarData(
+            client,
+            workspaceId,
+            timezone,
+            getCalendarDateRange(nextDate, view),
+          ),
+      ),
+    );
+    setSelectedDateState(nextDate);
+  }, [client, selectedDate, timezone, view, workspaceId]);
   const goToToday = useCallback(() => {
-    if (client) setIsLoading(true);
-    setSelectedDateState(getTodayCalendarDate(timezone));
-  }, [client, timezone]);
+    const today = getTodayCalendarDate(timezone);
+    setIsLoading(
+      Boolean(
+        client &&
+          view !== "month" &&
+          !hasCachedCalendarData(
+            client,
+            workspaceId,
+            timezone,
+            getCalendarDateRange(today, view),
+          ),
+      ),
+    );
+    setSelectedDateState(today);
+  }, [client, timezone, view, workspaceId]);
   const goToTodayDay = useCallback(() => {
     const today = getTodayCalendarDate(timezone);
-    if (client && (view !== "day" || selectedDate !== today)) {
-      setIsLoading(true);
-    }
+    setIsLoading(
+      Boolean(
+        client &&
+          !hasCachedCalendarData(
+            client,
+            workspaceId,
+            timezone,
+            getCalendarDateRange(today, "day"),
+          ),
+      ),
+    );
     setViewState("day");
     setSelectedDateState(today);
-  }, [client, selectedDate, timezone, view]);
+  }, [client, timezone, workspaceId]);
   const setSelectedDate = useCallback(
     (date: string) => {
       if (!isCalendarDate(date)) return;
-      if (client && date !== selectedDate) setIsLoading(true);
+      if (client && date !== selectedDate && view !== "month") {
+        setIsLoading(
+          !hasCachedCalendarData(
+            client,
+            workspaceId,
+            timezone,
+            getCalendarDateRange(date, view),
+          ),
+        );
+      }
       setSelectedDateState(date);
     },
-    [client, selectedDate],
+    [client, selectedDate, timezone, view, workspaceId],
   );
   const setView = useCallback(
     (nextView: CalendarView) => {
-      if (client && nextView !== view) setIsLoading(true);
+      if (client && nextView !== view) {
+        setIsLoading(
+          nextView !== "month" &&
+            !hasCachedCalendarData(
+              client,
+              workspaceId,
+              timezone,
+              getCalendarDateRange(selectedDate, nextView),
+            ),
+        );
+      }
       setViewState(nextView);
     },
-    [client, view],
+    [client, selectedDate, timezone, view, workspaceId],
   );
 
   return {
