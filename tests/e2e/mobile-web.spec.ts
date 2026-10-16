@@ -207,6 +207,26 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("opens language and public booking link from Profile settings", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Profil" }).click();
+
+    await expect(
+      page.getByRole("button", { name: "Nastavení", exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Nastavení" }),
+    ).toBeVisible();
+    await expect(page.getByText("Jazyk", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Veřejný odkaz pro rezervace", { exact: true }),
+    ).toBeVisible();
+  });
+
   test("renders the day calendar timeline and its empty-slot action", async ({
     page,
   }) => {

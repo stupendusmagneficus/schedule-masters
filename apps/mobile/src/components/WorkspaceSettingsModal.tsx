@@ -26,6 +26,7 @@ import { FullscreenModal } from "./FullscreenModal";
 
 type WorkspaceSettingsModalProps = {
   readonly client: SupabaseClient<Database>;
+  readonly closeIcon?: "close" | "chevron-left";
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onSaved: (draft: WorkspaceSettingsDraft) => void;
@@ -49,6 +50,7 @@ const dayOptions: ReadonlyArray<{
 
 export function WorkspaceSettingsModal({
   client,
+  closeIcon = "close",
   locale,
   onClose,
   onSaved,
@@ -108,7 +110,10 @@ export function WorkspaceSettingsModal({
   return (
     <FullscreenModal
       closeDisabled={isSaving}
-      closeLabel={t("common.cancel")}
+      closeLabel={t(
+        closeIcon === "chevron-left" ? "common.back" : "common.cancel",
+      )}
+      closeIcon={closeIcon}
       onClose={onClose}
       title={t("workspace.settingsTitle")}
       visible={visible}

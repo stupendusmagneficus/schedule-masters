@@ -1,15 +1,15 @@
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
-import { LocalePicker } from "../../components/LocalePicker";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
-import { WorkspaceSettingsModal } from "../../components/WorkspaceSettingsModal";
+import { SettingsModal } from "../../components/SettingsModal";
 import type { ServiceCatalogController } from "../../features/services/useServiceCatalog";
 import type { WorkspaceSettingsDraft } from "../../features/workspace/workspaceSettings";
-import { colors, radii } from "../../theme/tokens";
+import { colors } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
@@ -45,70 +45,48 @@ export function ProfileTab({
   t,
   workspace,
 }: ProfileTabProps) {
-  const [isWorkspaceSettingsVisible, setWorkspaceSettingsVisible] =
-    useState(false);
+  const [isSettingsVisible, setSettingsVisible] = useState(false);
+
   return (
     <View style={styles.content}>
       <DashboardPageHeader
         subtitle={workspace.name}
         title={t("mobile.profile")}
       />
-      {canManageWorkspace && client ? (
-        <InfoCard>
-          <Text style={styles.sectionTitle}>
-            {t("workspace.settingsTitle")}
-          </Text>
-          <Text style={styles.helper}>
-            {t("workspace.settingsDescription")}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setWorkspaceSettingsVisible(true)}
-            style={styles.settingsButton}
-          >
-            <Text style={styles.settingsButtonText}>
-              {t("workspace.settingsEdit")}
-            </Text>
-          </Pressable>
-          <WorkspaceSettingsModal
-            client={client}
-            locale={locale}
-            onClose={() => setWorkspaceSettingsVisible(false)}
-            onSaved={onWorkspaceSaved}
-            t={t}
-            visible={isWorkspaceSettingsVisible}
-            workspace={workspace}
+      <InfoCard style={styles.settingsCard}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("mobile.settings")}
+          onPress={() => setSettingsVisible(true)}
+          style={styles.settingsEntry}
+        >
+          <MaterialCommunityIcons
+            color={colors.primaryText}
+            name="cog-outline"
+            size={24}
           />
-        </InfoCard>
-      ) : null}
+          <View style={styles.settingsCopy}>
+            <Text style={styles.settingsTitle}>{t("mobile.settings")}</Text>
+            <Text style={styles.helper}>{t("mobile.settingsDescription")}</Text>
+          </View>
+          <MaterialCommunityIcons
+            color={colors.secondaryText}
+            name="chevron-right"
+            size={24}
+          />
+        </Pressable>
+      </InfoCard>
       <ServiceCatalogCard
         controller={serviceCatalog}
         editable={canManageServices}
         locale={locale}
         t={t}
       />
-      <InfoCard>
-        <Text style={styles.sectionTitle}>{t("common.language")}</Text>
-        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
-      </InfoCard>
-      <InfoCard>
-        <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={bookingUrl}
-          onPress={onOpenBookingLink}
-        >
-          <Text style={styles.link}>{bookingUrl}</Text>
-        </Pressable>
-        <Text style={styles.helper}>
-          {t("mobile.publicBookingDescription")}
-        </Text>
-      </InfoCard>
-      {signOutFailed && (
+      {signOutFailed ? (
         <Text accessibilityRole="alert" style={styles.signOutError}>
           {t("auth.signOutFailed")}
         </Text>
-      )}
+      ) : null}
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ disabled: isSigningOut }}
@@ -120,6 +98,19 @@ export function ProfileTab({
           {isSigningOut ? t("common.loading") : t("mobile.signOut")}
         </Text>
       </Pressable>
+      <SettingsModal
+        bookingUrl={bookingUrl}
+        canManageWorkspace={canManageWorkspace}
+        client={client}
+        locale={locale}
+        onClose={() => setSettingsVisible(false)}
+        onLocaleChange={onLocaleChange}
+        onOpenBookingLink={onOpenBookingLink}
+        onWorkspaceSaved={onWorkspaceSaved}
+        t={t}
+        visible={isSettingsVisible}
+        workspace={workspace}
+      />
     </View>
   );
 }
@@ -128,38 +119,28 @@ const styles = StyleSheet.create({
   content: { gap: 16 },
   disabledButton: { opacity: 0.6 },
   helper: { ...typography.body, color: colors.secondaryText },
-  link: {
-    color: colors.accent,
-    marginBottom: 8,
-    ...typography.label,
-    fontWeight: "700",
-  },
-  sectionTitle: {
-    color: colors.primaryText,
-    marginBottom: 12,
-    ...typography.section,
-  },
-  settingsButton: {
+  settingsCard: { padding: 0 },
+  settingsCopy: { flex: 1, gap: 4 },
+  settingsEntry: {
     alignItems: "center",
-    backgroundColor: colors.accent,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    marginTop: 12,
-    minHeight: 44,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 76,
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  settingsButtonText: {
-    ...typography.label,
-    color: colors.actionText,
+  settingsTitle: {
+    ...typography.section,
+    color: colors.primaryText,
     fontWeight: "700",
   },
   signOutButton: {
     alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
+    borderColor: colors.danger,
+    borderRadius: 999,
     borderWidth: 1,
-    minHeight: 48,
     justifyContent: "center",
+    minHeight: 48,
   },
   signOutError: { ...typography.body, color: colors.danger },
   signOutText: { ...typography.label, color: colors.danger, fontWeight: "700" },
