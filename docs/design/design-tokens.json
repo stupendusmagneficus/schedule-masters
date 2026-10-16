@@ -50,8 +50,10 @@
     "schedule": {
       "booked": { "value": "#EAF0EE", "type": "color" },
       "bookedBorder": { "value": "#44615A", "type": "color" },
-      "break": { "value": "#F0F2F0", "type": "color" },
-      "breakBorder": { "value": "#B8C2BB", "type": "color" },
+      "onlineBooking": { "value": "#F0EDF5", "type": "color" },
+      "onlineBookingBorder": { "value": "#705983", "type": "color" },
+      "break": { "value": "#F5F1E9", "type": "color" },
+      "breakBorder": { "value": "#897C63", "type": "color" },
       "free": { "value": "#FFFFFF", "type": "color" }
     }
   },

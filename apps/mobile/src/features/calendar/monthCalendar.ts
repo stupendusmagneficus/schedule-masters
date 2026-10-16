@@ -17,10 +17,21 @@ export type MonthCalendarDay = {
   readonly isToday: boolean;
 };
 
+export type CalendarWorkloadLevel = "low" | "medium" | "high";
+
+export function getCalendarWorkloadLevel(
+  bookingCount: number,
+): CalendarWorkloadLevel {
+  if (bookingCount >= 5) return "high";
+  if (bookingCount >= 3) return "medium";
+  return "low";
+}
+
 type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly blocks: readonly PersonalBlock[];
+  readonly monthDate: string;
   readonly selectedDate: string;
   readonly timezone: string;
   readonly todayDate: string;
@@ -30,19 +41,17 @@ export function buildMonthCalendar({
   appointments,
   availabilityRules,
   blocks,
+  monthDate,
   selectedDate,
   timezone,
   todayDate,
 }: BuildMonthCalendarParams): MonthCalendarDay[] {
-  const monthRange = getCalendarDateRange(selectedDate, "month");
+  const monthRange = getCalendarDateRange(monthDate, "month");
   const gridStart = addCalendarDays(
     monthRange.fromDate,
     1 - getIsoDayOfWeek(monthRange.fromDate),
   );
-  const gridEnd = addCalendarDays(
-    monthRange.toDate,
-    7 - getIsoDayOfWeek(monthRange.toDate),
-  );
+  const gridEnd = addCalendarDays(gridStart, 41);
   const dataByDate = new Map<
     string,
     {

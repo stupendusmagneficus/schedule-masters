@@ -15,6 +15,8 @@ export const colors = {
   pendingSoft: "#FFF4D6",
   pendingText: "#8A5A12",
   primaryText: "#202522",
+  scheduleOnline: "#705983",
+  scheduleOnlineSoft: "#F0EDF5",
   secondaryText: "#68716C",
   subtleSurface: "#F0F2F0",
   surface: "#FFFFFF",

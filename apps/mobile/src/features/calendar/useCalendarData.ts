@@ -83,6 +83,14 @@ export function useCalendarData({
   const reload = useCallback(async () => {
     const requestId = requestGuard.begin();
 
+    if (view === "month") {
+      if (requestGuard.isCurrent(requestId)) {
+        setError(null);
+        setIsLoading(false);
+      }
+      return;
+    }
+
     if (!client) {
       if (requestGuard.isCurrent(requestId)) {
         setData({ appointments: [], blocks: [] });
@@ -103,7 +111,7 @@ export function useCalendarData({
     } finally {
       if (requestGuard.isCurrent(requestId)) setIsLoading(false);
     }
-  }, [client, range, requestGuard, workspaceId]);
+  }, [client, range, requestGuard, view, workspaceId]);
 
   useEffect(() => {
     void reload();

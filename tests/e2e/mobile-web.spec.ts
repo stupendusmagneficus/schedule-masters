@@ -362,15 +362,66 @@ test.describe("mobile web smoke", () => {
     expect(new Set(tops).size).toBe(1);
   });
 
-  test("opens a selected month date in the day calendar with one tap", async ({
+  test("selects a month date and opens it separately in the day calendar", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("tab", { name: "Měsíc" }).click();
     await page.getByRole("button", { name: /14\. října 2026/ }).click();
+    await expect(
+      page.getByRole("button", { name: "Otevřít den", exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Otevřít den", exact: true })
+      .click();
 
     await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+  });
+
+  test("fills the calendar area with a virtualized, scrollable month window", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("tab", { name: "Měsíc" }).click();
+    await expect(page.getByTestId("calendar-month-sheet")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Vyberte datum" }),
+    ).toBeVisible();
+    const monthList = page.getByTestId("calendar-month-list");
+    await expect(
+      monthList.getByText("říjen 2026", { exact: true }),
+    ).toHaveCount(1);
+    await expect(
+      monthList.getByText("listopad 2026", { exact: true }),
+    ).toBeVisible();
+
+    await expect(monthList).toBeVisible();
+    const dimensions = await monthList.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+    expect(dimensions.clientHeight).toBeGreaterThan(200);
+    expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
+
+    const nextMonthDate = page
+      .getByRole("button", {
+        name: /1\. listopadu 2026/,
+      })
+      .last();
+    await nextMonthDate.scrollIntoViewIfNeeded();
+    const scrollTopBeforeSelection = await monthList.evaluate(
+      (element) => element.scrollTop,
+    );
+    await nextMonthDate.click();
+    await expect(
+      page.getByRole("button", { name: "Otevřít den", exact: true }),
+    ).toBeVisible();
+    expect(
+      await monthList.evaluate((element) => element.scrollTop),
+    ).toBeGreaterThanOrEqual(scrollTopBeforeSelection - 4);
   });
 
   test("keeps week selection in week view", async ({ page }) => {
