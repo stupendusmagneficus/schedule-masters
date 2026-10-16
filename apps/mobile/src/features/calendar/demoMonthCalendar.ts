@@ -33,6 +33,9 @@ export function buildDemoMonthCalendar(
 
   return days.map((day) => {
     const bookings = demoByDate.get(day.date) ?? [];
+    const acceptedBookings = bookings.filter(
+      (booking) => booking.status === "confirmed",
+    );
     const expectedRevenueByCurrency: Record<string, number> = {};
     if (bookings.length) {
       expectedRevenueByCurrency.CZK = bookings.reduce(
@@ -42,9 +45,20 @@ export function buildDemoMonthCalendar(
     }
     return {
       ...day,
-      bookingCount: bookings.length,
+      bookingCount: acceptedBookings.length,
       expectedRevenueByCurrency,
       isSelected: day.date === selectedDate,
+      workloadPercent: Math.min(
+        100,
+        Math.round(
+          (acceptedBookings.reduce(
+            (sum, booking) => sum + booking.durationMinutes,
+            0,
+          ) /
+            (13 * 60)) *
+            100,
+        ),
+      ),
     };
   });
 }

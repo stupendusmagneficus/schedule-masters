@@ -9,6 +9,7 @@ import {
   type PersonalBlock,
 } from "../availability/personalBlocks";
 import { addCalendarDays, getCalendarDateRange } from "./calendar";
+import { calculateCalendarWorkload } from "./calendarWorkload";
 import { getDayTimelineSlotStart, timeToMinutes } from "./dayTimeline";
 
 export type WeekCalendarEvent = {
@@ -28,7 +29,9 @@ export type WeekCalendarDay = {
   readonly endMinute: number;
   readonly events: readonly WeekCalendarEvent[];
   readonly isClosed: boolean;
+  readonly bookingCount: number;
   readonly startMinute: number;
+  readonly workloadPercent: number | null;
 };
 
 export type WeekCalendarMonthDay = {
@@ -64,12 +67,33 @@ export function buildWeekCalendar({
       (candidate) => candidate.dayOfWeek === getIsoDayOfWeek(date),
     );
 
+    const workload = calculateCalendarWorkload({
+      appointments,
+      availabilityRule: rule,
+      blocks,
+      date,
+      timezone,
+    });
+
     return {
+      bookingCount: appointments.filter((appointment) => {
+        if (
+          formatDateInTimeZone(new Date(appointment.starts_at), timezone) !==
+          date
+        ) {
+          return false;
+        }
+        return (
+          appointment.status === "confirmed" ||
+          appointment.status === "completed"
+        );
+      }).length,
       date,
       endMinute: rule ? timeToMinutes(rule.endLocalTime) : 20 * 60,
       events: [] as WeekCalendarEvent[],
       isClosed: !rule,
       startMinute: rule ? timeToMinutes(rule.startLocalTime) : 8 * 60,
+      workloadPercent: workload.percent,
     };
   });
   const daysByDate = new Map(days.map((day) => [day.date, day]));
@@ -147,12 +171,32 @@ export function buildDemoWeekCalendar(
       id: appointment.id,
       kind: "appointment",
       startAt,
+      status: appointment.status,
       subtitle: appointment.serviceName,
       title: appointment.clientName,
     });
   });
 
-  return days;
+  return days.map((day) => {
+    const acceptedEvents = day.events.filter(
+      (event) => event.status === "confirmed" || event.status === "completed",
+    );
+    const bookedMinutes = acceptedEvents.reduce(
+      (total, event) =>
+        total +
+        (new Date(event.endAt).getTime() - new Date(event.startAt).getTime()) /
+          60_000,
+      0,
+    );
+    return {
+      ...day,
+      bookingCount: acceptedEvents.length,
+      workloadPercent: Math.min(
+        100,
+        Math.round((bookedMinutes / (13 * 60)) * 100),
+      ),
+    };
+  });
 }
 
 export function buildWeekCalendarMonth(

@@ -244,6 +244,10 @@ export type MessageKey =
   | "mobile.monthOpenDay"
   | "mobile.weekBookings"
   | "mobile.weekNoBookings"
+  | "mobile.calendarWorkload"
+  | "mobile.calendarLoadLow"
+  | "mobile.calendarLoadMedium"
+  | "mobile.calendarLoadHigh"
   | "mobile.profile"
   | "mobile.newBooking"
   | "mobile.newBookingNoticeTitle"
@@ -718,6 +722,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthOpenDay": "Открыть день",
     "mobile.weekBookings": "записей",
     "mobile.weekNoBookings": "Нет записей",
+    "mobile.calendarWorkload": "загрузка",
+    "mobile.calendarLoadLow": "низкая <30%",
+    "mobile.calendarLoadMedium": "средняя 30–69%",
+    "mobile.calendarLoadHigh": "высокая ≥70%",
     "mobile.profile": "Профиль",
     "mobile.newBooking": "Новая запись",
     "mobile.newBookingNoticeTitle": "Новая запись",
@@ -1218,6 +1226,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthOpenDay": "Otevřít den",
     "mobile.weekBookings": "rezervací",
     "mobile.weekNoBookings": "Žádné rezervace",
+    "mobile.calendarWorkload": "vytížení",
+    "mobile.calendarLoadLow": "nízké <30 %",
+    "mobile.calendarLoadMedium": "střední 30–69 %",
+    "mobile.calendarLoadHigh": "vysoké ≥70 %",
     "mobile.profile": "Profil",
     "mobile.newBooking": "Nová rezervace",
     "mobile.newBookingNoticeTitle": "Nová rezervace",
@@ -1716,6 +1728,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthOpenDay": "Open day",
     "mobile.weekBookings": "bookings",
     "mobile.weekNoBookings": "No bookings",
+    "mobile.calendarWorkload": "workload",
+    "mobile.calendarLoadLow": "low <30%",
+    "mobile.calendarLoadMedium": "medium 30–69%",
+    "mobile.calendarLoadHigh": "high ≥70%",
     "mobile.profile": "Profile",
     "mobile.newBooking": "New booking",
     "mobile.newBookingNoticeTitle": "New booking",

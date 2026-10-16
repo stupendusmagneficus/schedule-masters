@@ -16,13 +16,12 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  getCalendarWorkloadLevel,
-  type MonthCalendarDay,
-} from "../../features/calendar/monthCalendar";
+import { getCalendarWorkloadLevel } from "../../features/calendar/calendarWorkload";
+import type { MonthCalendarDay } from "../../features/calendar/monthCalendar";
 import type { CalendarMonthEntry } from "../../features/calendar/useCalendarMonthWindow";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
+import { CalendarWorkloadLegend } from "./CalendarWorkloadLegend";
 import type { DashboardTabProps } from "./types";
 
 const MONTH_ROW_HEIGHT = 336;
@@ -99,6 +98,7 @@ export function MonthCalendar({
 
   return (
     <View style={styles.root}>
+      <CalendarWorkloadLegend t={t} />
       <FlatList
         ref={listRef}
         data={months}
@@ -156,6 +156,9 @@ export function MonthCalendar({
                   : t("mobile.monthNoBookings")}
               {selectedDay.blockCount > 0
                 ? ` · ${selectedDay.blockCount} ${t("mobile.monthBlocks")}`
+                : ""}
+              {selectedDay.workloadPercent !== null
+                ? ` · ${selectedDay.workloadPercent}% ${t("mobile.calendarWorkload")}`
                 : ""}
             </Text>
             <Text style={styles.summaryRevenue}>
@@ -241,15 +244,15 @@ function MonthGrid({
                 day.isSelected && styles.selectedDay,
               ]}
             >
-              {day.bookingCount > 0 ? (
+              {day.bookingCount > 0 && day.workloadPercent !== null ? (
                 <View
                   accessibilityElementsHidden
                   style={[
                     getWorkloadRingStyle(
-                      day.bookingCount,
+                      day.workloadPercent,
                       day.isSelected
                         ? colors.actionText
-                        : getWorkloadColor(day.bookingCount),
+                        : getWorkloadColor(day.workloadPercent),
                     ),
                   ]}
                 />
@@ -271,7 +274,9 @@ function MonthGrid({
                       {
                         color: day.isSelected
                           ? colors.actionText
-                          : getWorkloadColor(day.bookingCount),
+                          : day.workloadPercent === null
+                            ? colors.secondaryText
+                            : getWorkloadColor(day.workloadPercent),
                       },
                     ]}
                   >
@@ -323,8 +328,8 @@ function formatRevenue(day: MonthCalendarDay, locale: SupportedLocale): string {
     .join(" · ");
 }
 
-function getWorkloadColor(bookingCount: number): string {
-  switch (getCalendarWorkloadLevel(bookingCount)) {
+function getWorkloadColor(workloadPercent: number | null): string {
+  switch (getCalendarWorkloadLevel(workloadPercent)) {
     case "high":
       return colors.danger;
     case "medium":
@@ -334,13 +339,14 @@ function getWorkloadColor(bookingCount: number): string {
   }
 }
 
-function getWorkloadRingStyle(bookingCount: number, color: string) {
+function getWorkloadRingStyle(workloadPercent: number | null, color: string) {
+  const percent = workloadPercent ?? 0;
   return [
     styles.workloadRing,
     {
-      borderBottomColor: bookingCount >= 3 ? color : "transparent",
-      borderLeftColor: bookingCount >= 4 ? color : "transparent",
-      borderRightColor: bookingCount >= 2 ? color : "transparent",
+      borderBottomColor: percent >= 50 ? color : "transparent",
+      borderLeftColor: percent >= 75 ? color : "transparent",
+      borderRightColor: percent >= 25 ? color : "transparent",
       borderTopColor: color,
     },
   ];
@@ -364,6 +370,9 @@ function getDayAccessibilityLabel(
       ? `${day.bookingCount} ${t("mobile.monthBookings")}`
       : t("mobile.monthNoBookings"),
     day.blockCount ? `${day.blockCount} ${t("mobile.monthBlocks")}` : "",
+    day.workloadPercent !== null
+      ? `${day.workloadPercent}% ${t("mobile.calendarWorkload")}`
+      : "",
   ];
   return parts.filter(Boolean).join(", ");
 }

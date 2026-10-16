@@ -5,6 +5,7 @@ import {
   type PersonalBlock,
 } from "../availability/personalBlocks";
 import { addCalendarDays, getCalendarDateRange } from "./calendar";
+import { calculateCalendarWorkload } from "./calendarWorkload";
 
 export type MonthCalendarDay = {
   readonly bookingCount: number;
@@ -15,17 +16,8 @@ export type MonthCalendarDay = {
   readonly isCurrentMonth: boolean;
   readonly isSelected: boolean;
   readonly isToday: boolean;
+  readonly workloadPercent: number | null;
 };
-
-export type CalendarWorkloadLevel = "low" | "medium" | "high";
-
-export function getCalendarWorkloadLevel(
-  bookingCount: number,
-): CalendarWorkloadLevel {
-  if (bookingCount >= 5) return "high";
-  if (bookingCount >= 3) return "medium";
-  return "low";
-}
 
 type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
@@ -60,7 +52,9 @@ export function buildMonthCalendar({
       revenue: Record<string, number>;
     }
   >();
-  const rulesByDay = new Set(availabilityRules.map((rule) => rule.dayOfWeek));
+  const rulesByDay = new Map(
+    availabilityRules.map((rule) => [rule.dayOfWeek, rule]),
+  );
 
   for (const appointment of appointments) {
     const date = formatDateInTimeZone(
@@ -69,8 +63,8 @@ export function buildMonthCalendar({
     );
     const entry = getOrCreateDay(dataByDate, date);
     if (
-      appointment.status !== "cancelled_by_customer" &&
-      appointment.status !== "cancelled_by_master"
+      appointment.status === "confirmed" ||
+      appointment.status === "completed"
     ) {
       entry.bookingCount += 1;
     }
@@ -93,15 +87,24 @@ export function buildMonthCalendar({
   const days: MonthCalendarDay[] = [];
   for (let date = gridStart; date <= gridEnd; date = addCalendarDays(date, 1)) {
     const data = dataByDate.get(date);
+    const availabilityRule = rulesByDay.get(getIsoDayOfWeek(date));
+    const workload = calculateCalendarWorkload({
+      appointments,
+      availabilityRule,
+      blocks,
+      date,
+      timezone,
+    });
     days.push({
       bookingCount: data?.bookingCount ?? 0,
       blockCount: data?.blockCount ?? 0,
       date,
       expectedRevenueByCurrency: data?.revenue ?? {},
-      isClosed: !rulesByDay.has(getIsoDayOfWeek(date)),
+      isClosed: !availabilityRule,
       isCurrentMonth: date >= monthRange.fromDate && date <= monthRange.toDate,
       isSelected: date === selectedDate,
       isToday: date === todayDate,
+      workloadPercent: workload.percent,
     });
   }
 

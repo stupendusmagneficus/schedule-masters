@@ -31,8 +31,15 @@ const block = {
 
 describe("week calendar", () => {
   it("creates seven Monday-to-Sunday days with events grouped by local date", () => {
+    const pending = {
+      ...appointment,
+      ends_at: "2030-01-09T12:00:00.000Z",
+      id: "appointment-pending",
+      starts_at: "2030-01-09T11:00:00.000Z",
+      status: "pending",
+    } as MasterAppointment;
     const week = buildWeekCalendar({
-      appointments: [appointment],
+      appointments: [appointment, pending],
       availabilityRules: [
         { dayOfWeek: 3, endLocalTime: "18:00", startLocalTime: "09:00" },
         { dayOfWeek: 4, endLocalTime: "18:00", startLocalTime: "09:00" },
@@ -62,6 +69,11 @@ describe("week calendar", () => {
     });
     expect(week[0]?.isClosed).toBe(true);
     expect(week[2]?.isClosed).toBe(false);
+    expect(week[2]).toMatchObject({
+      bookingCount: 1,
+      workloadPercent: 11,
+    });
+    expect(week[0]).toMatchObject({ bookingCount: 0, workloadPercent: null });
   });
 
   it("distributes demo appointments across the selected week", () => {
