@@ -386,6 +386,8 @@ export const ukrainianMessages: Messages = {
   "mobile.personalBlockSaveChanges": "Зберегти зміни",
   "mobile.personalBlockAdd": "Додати перерву",
   "mobile.personalBlockDelete": "Видалити",
+  "mobile.personalBlockDeleteConfirm":
+    "Перерву буде видалено, і цей час знову стане доступним для запису.",
   "mobile.personalBlockOverlap":
     "Цей час перетинається з наявним записом або блокуванням.",
   "mobile.personalBlockCreated": "Особисте блокування додано",

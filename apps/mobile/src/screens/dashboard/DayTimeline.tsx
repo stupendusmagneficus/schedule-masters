@@ -117,7 +117,13 @@ function TimelineEvent({
   const content = (
     <>
       <View style={styles.eventHeader}>
-        <Text numberOfLines={1} style={styles.eventTitle}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.eventTitle,
+            event.kind === "block" && styles.blockEventText,
+          ]}
+        >
           {event.title}
         </Text>
         {appointment ? (
@@ -127,7 +133,13 @@ function TimelineEvent({
           />
         ) : null}
       </View>
-      <Text numberOfLines={1} style={styles.eventSubtitle}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.eventSubtitle,
+          event.kind === "block" && styles.blockEventText,
+        ]}
+      >
         {event.subtitle || t("mobile.personalBlocks")}
       </Text>
     </>
@@ -195,9 +207,10 @@ const styles = StyleSheet.create({
   },
   blockDot: { backgroundColor: colors.secondaryText },
   blockEvent: {
-    backgroundColor: colors.subtleSurface,
-    borderLeftColor: colors.secondaryText,
+    backgroundColor: colors.dangerSoft,
+    borderLeftColor: colors.danger,
   },
+  blockEventText: { color: colors.danger },
   closedState: {
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,

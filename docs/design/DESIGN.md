@@ -166,7 +166,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 2. Date navigation with a clear selected date.
 3. Working-hours timeline with 30-minute visual increments.
 4. Appointment blocks sized according to service duration.
-5. Break blocks and unavailable time visibly distinct from booked time.
+5. Break blocks and unavailable time visibly distinct from booked time, using a soft danger surface and red edge/text to communicate that the time is blocked without turning the calendar into a high-saturation alert.
 6. Free slots visibly distinct from booked time and remain tappable.
 7. Bottom/right primary action for adding an appointment or break.
 

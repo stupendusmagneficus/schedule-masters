@@ -355,6 +355,16 @@ export function CalendarTab({
         isSaving={calendar.isSaving}
         locale={locale}
         onClose={() => setBlockModalVisible(false)}
+        onDelete={
+          editingBlockId
+            ? async () => {
+                await calendar.removeBlock(editingBlockId);
+                setBlockModalVisible(false);
+                setEditingBlockId(null);
+                onFeedback(t("mobile.personalBlockDeleted"));
+              }
+            : undefined
+        }
         onSave={async (draft: PersonalBlockDraft) => {
           if (editingBlockId) {
             await calendar.updateBlock(editingBlockId, draft);

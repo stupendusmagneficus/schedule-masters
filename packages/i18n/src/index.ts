@@ -340,6 +340,7 @@ export type MessageKey =
   | "mobile.personalBlockSaveChanges"
   | "mobile.personalBlockAdd"
   | "mobile.personalBlockDelete"
+  | "mobile.personalBlockDeleteConfirm"
   | "mobile.personalBlockOverlap"
   | "mobile.personalBlockCreated"
   | "mobile.personalBlockUpdated"
@@ -824,6 +825,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockSaveChanges": "Сохранить изменения",
     "mobile.personalBlockAdd": "Добавить перерыв",
     "mobile.personalBlockDelete": "Удалить",
+    "mobile.personalBlockDeleteConfirm":
+      "Пауза будет удалена, и это время снова станет доступно для записи.",
     "mobile.personalBlockOverlap":
       "Это время пересекается с существующей записью или блоком.",
     "mobile.personalBlockCreated": "Личный блок добавлен",
@@ -1316,6 +1319,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockSaveChanges": "Uložit změny",
     "mobile.personalBlockAdd": "Přidat pauzu",
     "mobile.personalBlockDelete": "Smazat",
+    "mobile.personalBlockDeleteConfirm":
+      "Přestávka bude odstraněna a tento čas bude znovu dostupný pro rezervace.",
     "mobile.personalBlockOverlap":
       "Čas se překrývá s existující rezervací nebo blokem.",
     "mobile.personalBlockCreated": "Osobní blok byl přidán",
@@ -1810,6 +1815,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockSaveChanges": "Save changes",
     "mobile.personalBlockAdd": "Add break",
     "mobile.personalBlockDelete": "Delete",
+    "mobile.personalBlockDeleteConfirm":
+      "This break will be removed and the time will become available for bookings again.",
     "mobile.personalBlockOverlap":
       "This time overlaps an existing booking or block.",
     "mobile.personalBlockCreated": "Personal block added",

@@ -388,6 +388,8 @@ export const slovakMessages: Messages = {
   "mobile.personalBlockSaveChanges": "Uložiť zmeny",
   "mobile.personalBlockAdd": "Pridať prestávku",
   "mobile.personalBlockDelete": "Odstrániť",
+  "mobile.personalBlockDeleteConfirm":
+    "Prestávka sa odstráni a tento čas bude opäť dostupný na rezervácie.",
   "mobile.personalBlockOverlap":
     "Tento čas sa prekrýva s existujúcou rezerváciou alebo blokom.",
   "mobile.personalBlockCreated": "Osobný blok bol pridaný",

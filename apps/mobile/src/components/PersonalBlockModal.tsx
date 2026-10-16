@@ -17,6 +17,7 @@ import {
 } from "../features/availability/personalBlocks";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 
@@ -27,6 +28,7 @@ type PersonalBlockModalProps = {
   readonly isSaving: boolean;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
+  readonly onDelete?: () => Promise<void>;
   readonly onSave: (draft: PersonalBlockDraft) => Promise<void>;
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -39,6 +41,7 @@ export function PersonalBlockModal({
   isSaving,
   locale,
   onClose,
+  onDelete,
   onSave,
   t,
   visible,
@@ -46,11 +49,14 @@ export function PersonalBlockModal({
   const [draft, setDraft] = useState<PersonalBlockDraft>(initialDraft);
   const [validationError, setValidationError] =
     useState<ReturnType<typeof validatePersonalBlockDraft>>(null);
+  const [isDeleteConfirmationVisible, setDeleteConfirmationVisible] =
+    useState(false);
 
   useEffect(() => {
     if (!visible) return;
     setDraft(initialDraft);
     setValidationError(null);
+    setDeleteConfirmationVisible(false);
   }, [initialDraft, visible]);
 
   async function handleSave() {
@@ -60,6 +66,15 @@ export function PersonalBlockModal({
 
     try {
       await onSave(draft);
+    } catch {
+      // The parent exposes the server error through the error prop.
+    }
+  }
+
+  async function handleDelete() {
+    if (!onDelete) return;
+    try {
+      await onDelete();
     } catch {
       // The parent exposes the server error through the error prop.
     }
@@ -108,6 +123,37 @@ export function PersonalBlockModal({
                   )}
             </Text>
           </Pressable>
+          {isEditing && onDelete ? (
+            isDeleteConfirmationVisible ? (
+              <View style={styles.deleteConfirmation}>
+                <Text
+                  accessibilityRole="alert"
+                  style={styles.deleteConfirmationText}
+                >
+                  {t("mobile.personalBlockDeleteConfirm")}
+                </Text>
+                <ActionButton
+                  disabled={isSaving}
+                  label={t("common.cancel")}
+                  onPress={() => setDeleteConfirmationVisible(false)}
+                  variant="secondary"
+                />
+                <ActionButton
+                  disabled={isSaving}
+                  label={t("mobile.personalBlockDelete")}
+                  onPress={() => void handleDelete()}
+                  variant="destructiveConfirm"
+                />
+              </View>
+            ) : (
+              <ActionButton
+                disabled={isSaving}
+                label={t("mobile.personalBlockDelete")}
+                onPress={() => setDeleteConfirmationVisible(true)}
+                variant="destructive"
+              />
+            )
+          ) : null}
         </View>
       }
     >
@@ -223,6 +269,16 @@ const styles = StyleSheet.create({
   description: {
     ...typography.body,
     color: colors.secondaryText,
+  },
+  deleteConfirmation: {
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radii.surface,
+    gap: 8,
+    padding: 12,
+  },
+  deleteConfirmationText: {
+    ...typography.caption,
+    color: colors.danger,
   },
   disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginBottom: 8 },

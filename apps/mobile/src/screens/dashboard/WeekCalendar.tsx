@@ -261,7 +261,11 @@ function WeekCalendarEventCard({
     22,
   );
   const statusColor =
-    event.status === "pending" ? colors.pendingText : colors.accent;
+    event.kind === "block"
+      ? colors.danger
+      : event.status === "pending"
+        ? colors.pendingText
+        : colors.accent;
   const accessibilityLabel =
     event.appointment && event.status
       ? `${event.title}, ${event.subtitle}, ${getAppointmentStatusLabel(event.status, t)}`
@@ -276,11 +280,23 @@ function WeekCalendarEventCard({
           style={[styles.eventStatusDot, { backgroundColor: statusColor }]}
         />
       </View>
-      <Text numberOfLines={1} style={styles.eventTitle}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.eventTitle,
+          event.kind === "block" && styles.blockEventText,
+        ]}
+      >
         {event.title}
       </Text>
       {height >= 48 ? (
-        <Text numberOfLines={1} style={styles.eventSubtitle}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.eventSubtitle,
+            event.kind === "block" && styles.blockEventText,
+          ]}
+        >
           {event.subtitle || t("mobile.personalBlocks")}
         </Text>
       ) : null}
@@ -402,9 +418,10 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.accent,
   },
   blockEvent: {
-    backgroundColor: colors.subtleSurface,
-    borderLeftColor: colors.secondaryText,
+    backgroundColor: colors.dangerSoft,
+    borderLeftColor: colors.danger,
   },
+  blockEventText: { color: colors.danger },
   closedColumn: { backgroundColor: colors.canvas },
   dayHeaderColumns: { flex: 1, flexDirection: "row", minWidth: 0 },
   event: {
