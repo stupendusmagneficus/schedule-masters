@@ -265,6 +265,7 @@ export const slovakMessages: Messages = {
   "mobile.calendarPreviousWeek": "Predchádzajúci týždeň",
   "mobile.calendarNextWeek": "Nasledujúci týždeň",
   "mobile.calendarTapToBook": "Ťuknutím vytvoríte rezerváciu",
+  "mobile.calendarSlotActionTitle": "Čo chcete pridať?",
   "mobile.calendarDayView": "Deň",
   "mobile.calendarWeekView": "Týždeň",
   "mobile.calendarMonthView": "Mesiac",
@@ -369,6 +370,7 @@ export const slovakMessages: Messages = {
   "mobile.personalBlockEmpty":
     "V najbližších dňoch nemáte žiadne osobné bloky.",
   "mobile.personalBlockTitle": "Zablokovať čas",
+  "mobile.personalBlockEditTitle": "Upraviť prestávku",
   "mobile.personalBlockDescription":
     "Pridajte prestávku alebo osobnú úlohu. Tento čas nebude dostupný na rezerváciu.",
   "mobile.personalBlockDate": "Dátum",
@@ -383,11 +385,13 @@ export const slovakMessages: Messages = {
   "mobile.personalBlockReason": "Názov alebo dôvod",
   "mobile.personalBlockReasonPlaceholder": "Napríklad obed",
   "mobile.personalBlockCreate": "Zablokovať čas",
+  "mobile.personalBlockSaveChanges": "Uložiť zmeny",
   "mobile.personalBlockAdd": "Pridať prestávku",
   "mobile.personalBlockDelete": "Odstrániť",
   "mobile.personalBlockOverlap":
     "Tento čas sa prekrýva s existujúcou rezerváciou alebo blokom.",
   "mobile.personalBlockCreated": "Osobný blok bol pridaný",
+  "mobile.personalBlockUpdated": "Prestávka bola upravená",
   "mobile.personalBlockDeleted": "Osobný blok bol odstránený",
   "mobile.datePickerChoose": "Vybrať dátum",
   "mobile.datePickerToday": "Dnes",

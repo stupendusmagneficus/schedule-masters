@@ -231,6 +231,7 @@ export type MessageKey =
   | "mobile.calendarPreviousWeek"
   | "mobile.calendarNextWeek"
   | "mobile.calendarTapToBook"
+  | "mobile.calendarSlotActionTitle"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
@@ -323,6 +324,7 @@ export type MessageKey =
   | "mobile.personalBlocks"
   | "mobile.personalBlockEmpty"
   | "mobile.personalBlockTitle"
+  | "mobile.personalBlockEditTitle"
   | "mobile.personalBlockDescription"
   | "mobile.personalBlockDate"
   | "mobile.personalBlockDatePlaceholder"
@@ -335,10 +337,12 @@ export type MessageKey =
   | "mobile.personalBlockReason"
   | "mobile.personalBlockReasonPlaceholder"
   | "mobile.personalBlockCreate"
+  | "mobile.personalBlockSaveChanges"
   | "mobile.personalBlockAdd"
   | "mobile.personalBlockDelete"
   | "mobile.personalBlockOverlap"
   | "mobile.personalBlockCreated"
+  | "mobile.personalBlockUpdated"
   | "mobile.personalBlockDeleted"
   | "mobile.datePickerChoose"
   | "mobile.datePickerToday"
@@ -696,6 +700,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Предыдущая неделя",
     "mobile.calendarNextWeek": "Следующая неделя",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
+    "mobile.calendarSlotActionTitle": "Что добавить на это время?",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
@@ -801,6 +806,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlocks": "Личные блоки",
     "mobile.personalBlockEmpty": "Личных блоков на ближайшие дни нет.",
     "mobile.personalBlockTitle": "Закрыть время",
+    "mobile.personalBlockEditTitle": "Изменить паузу",
     "mobile.personalBlockDescription":
       "Добавьте перерыв или личное дело. Это время исчезнет из доступных окон.",
     "mobile.personalBlockDate": "Дата",
@@ -815,11 +821,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockReason": "Название или причина",
     "mobile.personalBlockReasonPlaceholder": "Например, обед",
     "mobile.personalBlockCreate": "Закрыть время",
+    "mobile.personalBlockSaveChanges": "Сохранить изменения",
     "mobile.personalBlockAdd": "Добавить перерыв",
     "mobile.personalBlockDelete": "Удалить",
     "mobile.personalBlockOverlap":
       "Это время пересекается с существующей записью или блоком.",
     "mobile.personalBlockCreated": "Личный блок добавлен",
+    "mobile.personalBlockUpdated": "Пауза обновлена",
     "mobile.personalBlockDeleted": "Личный блок удалён",
     "mobile.datePickerChoose": "Выберите дату",
     "mobile.datePickerToday": "Сегодня",
@@ -1186,6 +1194,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Předchozí týden",
     "mobile.calendarNextWeek": "Následující týden",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
+    "mobile.calendarSlotActionTitle": "Co přidat v tomto čase?",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
@@ -1290,6 +1299,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlocks": "Osobní bloky",
     "mobile.personalBlockEmpty": "Na nejbližší dny nemáte žádné osobní bloky.",
     "mobile.personalBlockTitle": "Uzavřít čas",
+    "mobile.personalBlockEditTitle": "Upravit přestávku",
     "mobile.personalBlockDescription":
       "Přidejte pauzu nebo osobní záležitost. Čas zmizí z volných termínů.",
     "mobile.personalBlockDate": "Datum",
@@ -1303,11 +1313,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockReason": "Název nebo důvod",
     "mobile.personalBlockReasonPlaceholder": "Například oběd",
     "mobile.personalBlockCreate": "Uzavřít čas",
+    "mobile.personalBlockSaveChanges": "Uložit změny",
     "mobile.personalBlockAdd": "Přidat pauzu",
     "mobile.personalBlockDelete": "Smazat",
     "mobile.personalBlockOverlap":
       "Čas se překrývá s existující rezervací nebo blokem.",
     "mobile.personalBlockCreated": "Osobní blok byl přidán",
+    "mobile.personalBlockUpdated": "Přestávka byla upravena",
     "mobile.personalBlockDeleted": "Osobní blok byl smazán",
     "mobile.datePickerChoose": "Vyberte datum",
     "mobile.datePickerToday": "Dnes",
@@ -1674,6 +1686,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Previous week",
     "mobile.calendarNextWeek": "Next week",
     "mobile.calendarTapToBook": "Tap to create a booking",
+    "mobile.calendarSlotActionTitle": "What would you like to add?",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",
@@ -1779,6 +1792,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockEmpty":
       "There are no personal blocks in the next few days.",
     "mobile.personalBlockTitle": "Block time",
+    "mobile.personalBlockEditTitle": "Edit break",
     "mobile.personalBlockDescription":
       "Add a break or personal task. This time will disappear from available slots.",
     "mobile.personalBlockDate": "Date",
@@ -1793,11 +1807,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.personalBlockReason": "Name or reason",
     "mobile.personalBlockReasonPlaceholder": "For example, lunch",
     "mobile.personalBlockCreate": "Block time",
+    "mobile.personalBlockSaveChanges": "Save changes",
     "mobile.personalBlockAdd": "Add break",
     "mobile.personalBlockDelete": "Delete",
     "mobile.personalBlockOverlap":
       "This time overlaps an existing booking or block.",
     "mobile.personalBlockCreated": "Personal block added",
+    "mobile.personalBlockUpdated": "Break updated",
     "mobile.personalBlockDeleted": "Personal block deleted",
     "mobile.datePickerChoose": "Choose a date",
     "mobile.datePickerToday": "Today",

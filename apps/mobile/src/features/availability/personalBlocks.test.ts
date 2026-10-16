@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatDateInTimeZone,
+  getPersonalBlockDraft,
+  getPersonalBlockDraftForSlot,
   validatePersonalBlockDraft,
 } from "./personalBlocks";
 
@@ -42,5 +44,37 @@ describe("formatDateInTimeZone", () => {
         "Europe/Prague",
       ),
     ).toBe("2030-01-04");
+  });
+});
+
+describe("personal block calendar drafts", () => {
+  it("prefills a pause from a calendar slot in the workspace timezone", () => {
+    expect(
+      getPersonalBlockDraftForSlot("2030-01-03T11:00:00.000Z", "Europe/Prague"),
+    ).toEqual({
+      date: "2030-01-03",
+      endTime: "12:30",
+      reason: "",
+      startTime: "12:00",
+    });
+  });
+
+  it("loads a saved pause into the edit form in local time", () => {
+    expect(
+      getPersonalBlockDraft(
+        {
+          ends_at: "2030-01-03T12:00:00.000Z",
+          id: "block-1",
+          reason: "Lunch",
+          starts_at: "2030-01-03T11:00:00.000Z",
+        },
+        "Europe/Prague",
+      ),
+    ).toEqual({
+      date: "2030-01-03",
+      endTime: "13:00",
+      reason: "Lunch",
+      startTime: "12:00",
+    });
   });
 });

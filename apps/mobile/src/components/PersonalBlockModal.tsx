@@ -22,7 +22,8 @@ import { FullscreenModal } from "./FullscreenModal";
 
 type PersonalBlockModalProps = {
   readonly error: string | null;
-  readonly initialDate: string;
+  readonly initialDraft: PersonalBlockDraft;
+  readonly isEditing?: boolean;
   readonly isSaving: boolean;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
@@ -33,7 +34,8 @@ type PersonalBlockModalProps = {
 
 export function PersonalBlockModal({
   error,
-  initialDate,
+  initialDraft,
+  isEditing = false,
   isSaving,
   locale,
   onClose,
@@ -41,17 +43,15 @@ export function PersonalBlockModal({
   t,
   visible,
 }: PersonalBlockModalProps) {
-  const [draft, setDraft] = useState<PersonalBlockDraft>(() =>
-    createInitialDraft(initialDate),
-  );
+  const [draft, setDraft] = useState<PersonalBlockDraft>(initialDraft);
   const [validationError, setValidationError] =
     useState<ReturnType<typeof validatePersonalBlockDraft>>(null);
 
   useEffect(() => {
     if (!visible) return;
-    setDraft(createInitialDraft(initialDate));
+    setDraft(initialDraft);
     setValidationError(null);
-  }, [initialDate, visible]);
+  }, [initialDraft, visible]);
 
   async function handleSave() {
     const nextValidationError = validatePersonalBlockDraft(draft);
@@ -71,10 +71,15 @@ export function PersonalBlockModal({
 
   return (
     <FullscreenModal
-      closeLabel={t("common.cancel")}
+      closeLabel={t(isEditing ? "common.back" : "common.cancel")}
       closeDisabled={isSaving}
       onClose={onClose}
-      title={t("mobile.personalBlockTitle")}
+      closeIcon={isEditing ? "chevron-left" : "close"}
+      title={
+        isEditing
+          ? t("mobile.personalBlockEditTitle")
+          : t("mobile.personalBlockTitle")
+      }
       visible={visible}
       footer={
         <View style={styles.actions}>
@@ -94,7 +99,13 @@ export function PersonalBlockModal({
             ]}
           >
             <Text style={styles.primaryButtonText}>
-              {isSaving ? t("common.loading") : t("mobile.personalBlockCreate")}
+              {isSaving
+                ? t("common.loading")
+                : t(
+                    isEditing
+                      ? "mobile.personalBlockSaveChanges"
+                      : "mobile.personalBlockCreate",
+                  )}
             </Text>
           </Pressable>
         </View>
@@ -187,10 +198,6 @@ function Field({
       />
     </View>
   );
-}
-
-function createInitialDraft(date: string): PersonalBlockDraft {
-  return { date, endTime: "13:00", reason: "", startTime: "12:00" };
 }
 
 function validationMessage(

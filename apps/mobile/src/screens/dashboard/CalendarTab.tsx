@@ -14,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { CalendarSlotActionModal } from "../../components/CalendarSlotActionModal";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
@@ -22,6 +23,11 @@ import type { MasterAppointment } from "../../features/appointments/manualBookin
 import type {
   PersonalBlock,
   PersonalBlockDraft,
+} from "../../features/availability/personalBlocks";
+import {
+  createDefaultPersonalBlockDraft,
+  getPersonalBlockDraft,
+  getPersonalBlockDraftForSlot,
 } from "../../features/availability/personalBlocks";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import {
@@ -76,6 +82,22 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
+  const [blockDraft, setBlockDraft] = useState(() =>
+    createDefaultPersonalBlockDraft(calendar.selectedDate),
+  );
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [slotAction, setSlotAction] = useState<{
+    readonly date: string;
+    readonly startsAt: string;
+  } | null>(null);
+  const openBlockEditor = (
+    initialDraft: PersonalBlockDraft,
+    blockId: string | null = null,
+  ) => {
+    setBlockDraft(initialDraft);
+    setEditingBlockId(blockId);
+    setBlockModalVisible(true);
+  };
   const dateLabel =
     calendar.view === "week"
       ? getCalendarWeekLabel(calendar.selectedDate, locale, workspace.timezone)
@@ -189,6 +211,12 @@ export function CalendarTab({
               isCurrentWeek={isCurrentWeek}
               onNext={calendar.goToNext}
               onPressAppointment={onSelectAppointment}
+              onPressBlock={(block) =>
+                openBlockEditor(
+                  getPersonalBlockDraft(block, workspace.timezone),
+                  block.id,
+                )
+              }
               onPrevious={calendar.goToPrevious}
               onPressDay={(date) => {
                 calendar.setSelectedDate(date);
@@ -198,14 +226,14 @@ export function CalendarTab({
               onPressTime={
                 onSelectTime
                   ? (date, minute) =>
-                      onSelectTime(
+                      setSlotAction({
                         date,
-                        getDayTimelineSlotStart(
+                        startsAt: getDayTimelineSlotStart(
                           date,
                           minute,
                           workspace.timezone,
                         ),
-                      )
+                      })
                   : undefined
               }
               selectedDate={calendar.selectedDate}
@@ -230,17 +258,23 @@ export function CalendarTab({
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
+              onPressBlock={(block) =>
+                openBlockEditor(
+                  getPersonalBlockDraft(block, workspace.timezone),
+                  block.id,
+                )
+              }
               onPressEmptySlot={
                 onSelectTime
                   ? (minute) =>
-                      onSelectTime(
-                        calendar.selectedDate,
-                        getDayTimelineSlotStart(
+                      setSlotAction({
+                        date: calendar.selectedDate,
+                        startsAt: getDayTimelineSlotStart(
                           calendar.selectedDate,
                           minute,
                           workspace.timezone,
                         ),
-                      )
+                      })
                   : undefined
               }
               t={t}
@@ -272,7 +306,11 @@ export function CalendarTab({
             <Pressable
               accessibilityRole="button"
               disabled={!client}
-              onPress={() => setBlockModalVisible(true)}
+              onPress={() =>
+                openBlockEditor(
+                  createDefaultPersonalBlockDraft(calendar.selectedDate),
+                )
+              }
               style={({ pressed }) => [
                 styles.addButton,
                 !client && styles.disabled,
@@ -312,17 +350,56 @@ export function CalendarTab({
       </View>
       <PersonalBlockModal
         error={calendar.error}
-        initialDate={calendar.selectedDate}
+        initialDraft={blockDraft}
+        isEditing={editingBlockId !== null}
         isSaving={calendar.isSaving}
         locale={locale}
         onClose={() => setBlockModalVisible(false)}
         onSave={async (draft: PersonalBlockDraft) => {
-          await calendar.saveBlock(draft);
+          if (editingBlockId) {
+            await calendar.updateBlock(editingBlockId, draft);
+          } else {
+            await calendar.saveBlock(draft);
+          }
           setBlockModalVisible(false);
-          onFeedback(t("mobile.personalBlockCreated"));
+          setEditingBlockId(null);
+          onFeedback(
+            t(
+              editingBlockId
+                ? "mobile.personalBlockUpdated"
+                : "mobile.personalBlockCreated",
+            ),
+          );
         }}
         t={t}
         visible={isBlockModalVisible}
+      />
+      <CalendarSlotActionModal
+        canCreateBreak={Boolean(client)}
+        onAddBreak={() => {
+          if (!slotAction) return;
+          openBlockEditor(
+            getPersonalBlockDraftForSlot(
+              slotAction.startsAt,
+              workspace.timezone,
+            ),
+          );
+        }}
+        onAddBooking={() => {
+          if (slotAction) onSelectTime?.(slotAction.date, slotAction.startsAt);
+        }}
+        onClose={() => setSlotAction(null)}
+        t={t}
+        timeLabel={
+          slotAction
+            ? formatTime(new Date(slotAction.startsAt), locale, {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: workspace.timezone,
+              })
+            : ""
+        }
+        visible={slotAction !== null}
       />
     </>
   );

@@ -1051,6 +1051,17 @@ export type Database = {
         Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
       }
+      update_master_availability_block: {
+        Args: {
+          p_block_id: string
+          p_date: string
+          p_end_local_time: string
+          p_reason?: string
+          p_start_local_time: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       enforce_public_booking_quota: {
         Args: { p_workspace_id: string }
         Returns: undefined

@@ -6,6 +6,7 @@ import {
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import type { PersonalBlock } from "../../features/availability/personalBlocks";
 import {
   type DayTimeline as DayTimelineData,
   type DayTimelineEvent,
@@ -17,6 +18,7 @@ import { typography } from "../../theme/typography";
 
 type DayTimelineProps = {
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly onPressEmptySlot?: (minute: number) => void;
   readonly t: (key: MessageKey) => string;
   readonly timeline: DayTimelineData;
@@ -24,6 +26,7 @@ type DayTimelineProps = {
 
 export function DayTimeline({
   onPressAppointment,
+  onPressBlock,
   onPressEmptySlot,
   t,
   timeline,
@@ -66,6 +69,7 @@ export function DayTimeline({
               event={event}
               key={event.id}
               onPressAppointment={onPressAppointment}
+              onPressBlock={onPressBlock}
               t={t}
               timeline={timeline}
             />
@@ -89,11 +93,13 @@ export function DayTimeline({
 function TimelineEvent({
   event,
   onPressAppointment,
+  onPressBlock,
   t,
   timeline,
 }: {
   readonly event: DayTimelineEvent;
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly t: DayTimelineProps["t"];
   readonly timeline: DayTimelineData;
 }) {
@@ -127,12 +133,38 @@ function TimelineEvent({
     </>
   );
 
-  if (!appointment || !onPressAppointment) {
+  if (event.kind === "block") {
+    if (event.block && onPressBlock) {
+      return (
+        <Pressable
+          accessibilityLabel={`${event.title}, ${t("mobile.personalBlockEditTitle")}`}
+          accessibilityRole="button"
+          onPress={() => onPressBlock(event.block as PersonalBlock)}
+          style={({ pressed }) => [
+            styles.event,
+            styles.blockEvent,
+            { height, top },
+            pressed && styles.eventPressed,
+          ]}
+        >
+          {content}
+        </Pressable>
+      );
+    }
+
     return (
       <View
         accessibilityLabel={`${event.title}, ${t("mobile.personalBlocks")}`}
         style={[styles.event, styles.blockEvent, { height, top }]}
       >
+        {content}
+      </View>
+    );
+  }
+
+  if (!appointment || !onPressAppointment) {
+    return (
+      <View style={[styles.event, styles.appointmentEvent, { height, top }]}>
         {content}
       </View>
     );

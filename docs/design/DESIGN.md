@@ -172,7 +172,8 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 
 **Interaction rules:**
 
-- Selecting an empty slot opens the booking flow with the slot preselected.
+- Selecting an empty slot offers a new booking or a pause, with the selected date and time prefilled.
+- Selecting a pause in the day or week calendar opens its editable details; updates use the workspace timezone and reject overlaps.
 - The add action supports both a client appointment and a personal break from the same entry point.
 - Selecting a booking opens details and actions for reschedule/cancel according to the booking lifecycle.
 - Unavailable time and breaks are visually muted and not selectable.

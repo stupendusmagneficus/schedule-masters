@@ -12,6 +12,7 @@ import {
   createPersonalBlock,
   deletePersonalBlock,
   type PersonalBlockDraft,
+  updatePersonalBlock,
 } from "../availability/personalBlocks";
 import { createWorkspaceRequestGuard } from "../workspace/workspaceRequestGuard";
 import {
@@ -44,6 +45,10 @@ export type CalendarDataController = CalendarData & {
   readonly reload: () => Promise<void>;
   readonly removeBlock: (blockId: string) => Promise<void>;
   readonly saveBlock: (draft: PersonalBlockDraft) => Promise<void>;
+  readonly updateBlock: (
+    blockId: string,
+    draft: PersonalBlockDraft,
+  ) => Promise<void>;
   readonly selectedDate: string;
   readonly setSelectedDate: (date: string) => void;
   readonly setView: (view: CalendarView) => void;
@@ -152,6 +157,29 @@ export function useCalendarData({
     [client, operationGuard, reload, workspaceId],
   );
 
+  const updateBlock = useCallback(
+    async (blockId: string, draft: PersonalBlockDraft) => {
+      if (!client) return;
+      const requestId = operationGuard.begin();
+      setIsSaving(true);
+      setError(null);
+      try {
+        await updatePersonalBlock(client, workspaceId, blockId, draft);
+        await reload();
+      } catch (updateError) {
+        if (operationGuard.isCurrent(requestId)) {
+          setError(
+            updateError instanceof Error ? updateError.message : "unknown",
+          );
+        }
+        throw updateError;
+      } finally {
+        if (operationGuard.isCurrent(requestId)) setIsSaving(false);
+      }
+    },
+    [client, operationGuard, reload, workspaceId],
+  );
+
   const goToPrevious = useCallback(() => {
     if (client) setIsLoading(true);
     setSelectedDateState((current) => moveCalendarDate(current, view, -1));
@@ -204,6 +232,7 @@ export function useCalendarData({
     selectedDate,
     setSelectedDate,
     setView,
+    updateBlock,
     view,
   };
 }
