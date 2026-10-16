@@ -392,28 +392,18 @@ test.describe("mobile web smoke", () => {
     );
   });
 
-  test("finds an available slot from the calendar and continues to booking", async ({
+  test("keeps the free-slots shortcut on Today, not in Calendar", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
+    await expect(
+      page.getByRole("button", { name: "Volné termíny" }),
+    ).toBeVisible();
     await page.getByRole("tab", { name: "Kalendář" }).click();
-    await page.getByRole("button", { name: "Volné termíny" }).click();
-
     await expect(
-      page.getByText("Volné termíny", { exact: true }).last(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "11:00", exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "11:00", exact: true }).click();
-    await page.getByRole("button", { name: "Objednat klienta" }).click();
-
-    await expect(
-      page.getByText(
-        "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
-      ),
-    ).toBeVisible();
+      page.getByRole("button", { name: "Volné termíny" }),
+    ).toHaveCount(0);
   });
 
   test("opens free slots from Today with the selected date and continues to booking entry", async ({

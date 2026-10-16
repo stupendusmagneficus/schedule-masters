@@ -2,6 +2,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import type { MessageKey } from "@schedule-app/i18n";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     width: 44,
   },
   arrowButtonPressed: { backgroundColor: colors.subtleSurface },
-  container: { gap: 4 },
+  container: { gap: 4, marginBottom: spacing.section },
   copy: { alignItems: "center", flex: 1, minWidth: 0 },
   disabled: { opacity: 0.5 },
   row: { alignItems: "center", flexDirection: "row", gap: 8 },

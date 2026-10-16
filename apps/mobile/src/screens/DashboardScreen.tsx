@@ -439,11 +439,6 @@ export function DashboardScreen({
             demoData={demoData}
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
-            onOpenFreeSlots={
-              bookingServices.length > 0
-                ? () => setFreeSlotsVisible(true)
-                : undefined
-            }
             onFeedback={setFeedback}
             onSelectTime={(date, startsAt) =>
               client
