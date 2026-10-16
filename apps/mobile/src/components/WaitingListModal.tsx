@@ -37,6 +37,7 @@ type WaitingListModalProps = {
   readonly defaultDate: string;
   readonly entries: readonly MasterWaitingListEntry[];
   readonly error: string | null;
+  readonly hasData: boolean;
   readonly isLoading: boolean;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
@@ -53,6 +54,7 @@ export function WaitingListModal({
   defaultDate,
   entries,
   error,
+  hasData,
   isLoading,
   locale,
   onClose,
@@ -509,22 +511,30 @@ export function WaitingListModal({
           </InfoCard>
         ) : (
           <>
-            {isLoading && entries.length === 0 ? (
+            {error && hasData ? (
+              <InfoCard style={styles.staleNotice}>
+                <Text accessibilityRole="alert" style={styles.error}>
+                  {t("mobile.waitingListStale")}
+                </Text>
+                <Pressable accessibilityRole="button" onPress={onReload}>
+                  <Text style={styles.retry}>{t("common.retry")}</Text>
+                </Pressable>
+              </InfoCard>
+            ) : null}
+            {isLoading && !hasData ? (
               <View style={styles.loading}>
                 <ActivityIndicator color={colors.accent} />
                 <Text style={styles.secondary}>{t("common.loading")}</Text>
               </View>
-            ) : error ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={onReload}
-                style={styles.empty}
-              >
-                <Text style={styles.error}>
+            ) : error && !hasData ? (
+              <InfoCard style={styles.empty}>
+                <Text accessibilityRole="alert" style={styles.error}>
                   {t("mobile.waitingListLoadFailed")}
                 </Text>
-                <Text style={styles.secondary}>{t("common.retry")}</Text>
-              </Pressable>
+                <Pressable accessibilityRole="button" onPress={onReload}>
+                  <Text style={styles.retry}>{t("common.retry")}</Text>
+                </Pressable>
+              </InfoCard>
             ) : entries.length === 0 ? (
               <InfoCard>
                 <Text style={styles.body}>{t("mobile.waitingListEmpty")}</Text>
@@ -716,6 +726,7 @@ const styles = StyleSheet.create({
   body: { ...typography.body, color: colors.primaryText, fontWeight: "600" },
   secondary: { ...typography.caption, color: colors.secondaryText },
   error: { ...typography.label, color: colors.danger },
+  retry: { ...typography.label, color: colors.accent, marginTop: 4 },
   customerOption: {
     borderBottomColor: colors.border,
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -800,4 +811,5 @@ const styles = StyleSheet.create({
   },
   loading: { alignItems: "center", flexDirection: "row", gap: 10, padding: 16 },
   empty: { gap: 6, padding: 16 },
+  staleNotice: { gap: 6 },
 });

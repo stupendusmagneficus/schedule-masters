@@ -6,6 +6,7 @@ import {
   getWaitingListCustomerSearchQuery,
   listMasterWaitingList,
   listMasterWaitingListMatches,
+  loadMasterWaitingListOnce,
   moveBookingRequestToWaitingList,
   removeAllMasterWaitingListEntries,
   saveMasterWaitingListEntry,
@@ -27,6 +28,24 @@ describe("master waiting list API", () => {
     expect(rpc).toHaveBeenCalledWith("list_master_waiting_list", {
       p_workspace_id: "workspace-a",
     });
+  });
+
+  it("coalesces concurrent list requests for the same client and workspace", async () => {
+    let resolveRequest!: (value: { data: never[]; error: null }) => void;
+    const pendingRequest = new Promise<{ data: never[]; error: null }>(
+      (resolve) => {
+        resolveRequest = resolve;
+      },
+    );
+    const rpc = vi.fn().mockReturnValue(pendingRequest);
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+    const firstRequest = loadMasterWaitingListOnce(client, "workspace-a");
+    const duplicateRequest = loadMasterWaitingListOnce(client, "workspace-a");
+
+    expect(duplicateRequest).toBe(firstRequest);
+    expect(rpc).toHaveBeenCalledTimes(1);
+    resolveRequest({ data: [], error: null });
+    await expect(firstRequest).resolves.toEqual([]);
   });
 
   it("passes only an exact released appointment as the matching context", async () => {

@@ -18,6 +18,10 @@ export type WaitingListDraft = {
 };
 
 type WaitingListClient = SupabaseClient<Database>;
+const inFlightWaitingListRequests = new WeakMap<
+  WaitingListClient,
+  Map<string, Promise<MasterWaitingListEntry[]>>
+>();
 
 export function getWaitingListCustomerSearchQuery(
   value: string,
@@ -35,6 +39,30 @@ export async function listMasterWaitingList(
   });
   if (error) throw new Error(error.message);
   return data ?? [];
+}
+
+export function loadMasterWaitingListOnce(
+  client: WaitingListClient,
+  workspaceId: string,
+): Promise<MasterWaitingListEntry[]> {
+  let workspaceRequests = inFlightWaitingListRequests.get(client);
+  if (!workspaceRequests) {
+    workspaceRequests = new Map();
+    inFlightWaitingListRequests.set(client, workspaceRequests);
+  }
+
+  const existingRequest = workspaceRequests.get(workspaceId);
+  if (existingRequest) return existingRequest;
+
+  const request = listMasterWaitingList(client, workspaceId);
+  workspaceRequests.set(workspaceId, request);
+  const clearRequest = () => {
+    if (workspaceRequests.get(workspaceId) === request) {
+      workspaceRequests.delete(workspaceId);
+    }
+  };
+  void request.then(clearRequest, clearRequest);
+  return request;
 }
 
 export async function listMasterWaitingListMatches(

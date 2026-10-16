@@ -137,6 +137,7 @@ export type MessageKey =
   | "mobile.waitingListNote"
   | "mobile.waitingListEmpty"
   | "mobile.waitingListLoadFailed"
+  | "mobile.waitingListStale"
   | "mobile.waitingListSaveFailed"
   | "mobile.waitingListDuplicateCustomer"
   | "mobile.waitingListRemoveAll"
@@ -582,6 +583,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListNote": "Заметка",
     "mobile.waitingListEmpty": "Лист ожидания пока пуст.",
     "mobile.waitingListLoadFailed": "Не удалось загрузить лист ожидания.",
+    "mobile.waitingListStale":
+      "Не удалось обновить. Показаны последние загруженные данные.",
     "mobile.waitingListSaveFailed": "Не удалось сохранить изменения.",
     "mobile.waitingListDuplicateCustomer":
       "Клиент с таким email или телефоном уже существует. Найдите и выберите его в списке.",
@@ -1069,6 +1072,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListNote": "Poznámka",
     "mobile.waitingListEmpty": "Seznam náhradníků je zatím prázdný.",
     "mobile.waitingListLoadFailed": "Seznam náhradníků se nepodařilo načíst.",
+    "mobile.waitingListStale":
+      "Aktualizace se nezdařila. Zobrazuji poslední načtené údaje.",
     "mobile.waitingListSaveFailed": "Změny se nepodařilo uložit.",
     "mobile.waitingListDuplicateCustomer":
       "Klient s tímto e-mailem nebo telefonem již existuje. Najděte ho a vyberte ze seznamu.",
@@ -1555,6 +1560,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListNote": "Note",
     "mobile.waitingListEmpty": "The waiting list is empty.",
     "mobile.waitingListLoadFailed": "Couldn't load the waiting list.",
+    "mobile.waitingListStale":
+      "Couldn't refresh. Showing the last loaded data.",
     "mobile.waitingListSaveFailed": "Couldn't save the changes.",
     "mobile.waitingListDuplicateCustomer":
       "A client with this email or phone already exists. Find and select them from the list.",
