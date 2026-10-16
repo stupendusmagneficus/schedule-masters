@@ -17,3 +17,37 @@ export async function listMasterPendingBookingRequests(
   if (error) throw new Error(error.message);
   return data ?? [];
 }
+
+export function subscribeToMasterPendingBookingRequestChanges(
+  client: BookingRequestsClient,
+  workspaceId: string,
+  onChange: () => void,
+): () => void {
+  const channel = client
+    .channel(`master-pending-booking-requests:${workspaceId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        filter: `workspace_id=eq.${workspaceId}`,
+        schema: "public",
+        table: "appointments",
+      },
+      (payload) => {
+        const nextSource = (payload.new as { source?: unknown } | null)?.source;
+        const previousSource = (payload.old as { source?: unknown } | null)
+          ?.source;
+        if (
+          nextSource === "public_booking" ||
+          previousSource === "public_booking"
+        ) {
+          onChange();
+        }
+      },
+    )
+    .subscribe();
+
+  return () => {
+    void client.removeChannel(channel);
+  };
+}

@@ -416,11 +416,9 @@ export function DashboardScreen({
             onOpenBookingRequests={() => {
               setBookingRequestActionError(false);
               setBookingRequestsVisible(true);
-              void bookingRequests.reload();
             }}
             onOpenWaitingList={() => {
               setWaitingListVisible(true);
-              void waitingList.reload();
             }}
             onGoToToday={calendar.goToTodayDay}
             onNextDay={calendar.goToNextDay}
