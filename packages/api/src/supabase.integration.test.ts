@@ -1148,6 +1148,35 @@ describe("Supabase public booking contract", () => {
           status: "not_configured",
         },
       ]);
+      const excludedFromSmokeTest = await admin.rpc(
+        "claim_booking_decision_emails_for_delivery",
+        {
+          p_batch_size: 20,
+          p_recipient_allowlist: ["controlled-inbox@example.test"],
+        },
+      );
+      expect(excludedFromSmokeTest.error).toBeNull();
+      expect(excludedFromSmokeTest.data).toEqual([]);
+      const queuedNotification = await admin
+        .from("booking_decision_email_outbox")
+        .select("status")
+        .eq("appointment_id", appointmentId)
+        .single();
+      expect(queuedNotification.data?.status).toBe("not_configured");
+      const includedInSmokeTest = await admin.rpc(
+        "claim_booking_decision_emails_for_delivery",
+        {
+          p_batch_size: 20,
+          p_recipient_allowlist: [`lifecycle-client-${suffix}@example.test`],
+        },
+      );
+      expect(includedInSmokeTest.error).toBeNull();
+      expect(includedInSmokeTest.data).toEqual([
+        expect.objectContaining({
+          decision: "accepted",
+          recipient: `lifecycle-client-${suffix}@example.test`,
+        }),
+      ]);
 
       const completed = await user.client.rpc("set_appointment_status", {
         p_appointment_id: appointmentId,
@@ -1249,6 +1278,36 @@ describe("Supabase public booking contract", () => {
           { appointment_id: declinedId, decision: "declined" },
         ]),
       );
+      const oldFinalizedAt = new Date(
+        Date.now() - 31 * 24 * 60 * 60 * 1000,
+      ).toISOString();
+      const finalizedNotification = await admin
+        .from("booking_decision_email_outbox")
+        .update({
+          finalized_at: oldFinalizedAt,
+          status: "accepted_by_provider",
+        })
+        .eq("appointment_id", appointmentId);
+      expect(finalizedNotification.error).toBeNull();
+      const oldUnconfiguredNotification = await admin
+        .from("booking_decision_email_outbox")
+        .update({
+          created_at: new Date(
+            Date.now() - 91 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        })
+        .eq("appointment_id", declinedId);
+      expect(oldUnconfiguredNotification.error).toBeNull();
+      const purgedNotifications = await admin.rpc(
+        "purge_expired_booking_decision_emails",
+      );
+      expect(purgedNotifications.error).toBeNull();
+      expect(purgedNotifications.data).toBe(2);
+      const remainingNotifications = await admin
+        .from("booking_decision_email_outbox")
+        .select("id")
+        .in("appointment_id", [appointmentId, declinedId]);
+      expect(remainingNotifications.data).toEqual([]);
 
       const events = await user.client
         .from("appointment_events")

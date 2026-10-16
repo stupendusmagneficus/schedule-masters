@@ -19,6 +19,30 @@ type Dependencies = {
   readonly fetcher?: typeof fetch;
 };
 
+function getTestRecipientAllowlist(env: Environment): string[] | null {
+  const configured = env.get("BOOKING_EMAIL_TEST_RECIPIENTS");
+  if (configured === undefined) return null;
+
+  const recipients = [
+    ...new Set(
+      configured
+        .split(",")
+        .map((recipient) => recipient.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+  if (
+    recipients.length === 0 ||
+    recipients.some(
+      (recipient) =>
+        recipient.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient),
+    )
+  ) {
+    throw new Error("invalid_test_recipient_allowlist");
+  }
+  return recipients;
+}
+
 function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
     headers: { "content-type": "application/json" },
@@ -44,6 +68,12 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
     const emailApiKey = env.get("RESEND_API_KEY");
     const from = env.get("BOOKING_EMAIL_FROM");
     const enabled = env.get("BOOKING_EMAIL_DELIVERY_ENABLED") === "true";
+    let testRecipientAllowlist: string[] | null;
+    try {
+      testRecipientAllowlist = getTestRecipientAllowlist(env);
+    } catch {
+      return jsonResponse({ error: "invalid_test_recipient_allowlist" }, 503);
+    }
     if (!enabled || !emailApiKey || !from) {
       const response = await callRpc(
         fetcher,
@@ -62,8 +92,11 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
       fetcher,
       supabaseUrl,
       serviceRoleKey,
-      "claim_booking_decision_emails",
-      { p_batch_size: 20 },
+      "claim_booking_decision_emails_for_delivery",
+      {
+        p_batch_size: 20,
+        p_recipient_allowlist: testRecipientAllowlist,
+      },
     );
     if (!claimResponse.ok) {
       return jsonResponse({ error: "queue_claim_failed" }, 502);
