@@ -232,53 +232,68 @@ function MonthGrid({
             onPress={() => onSelectDate(day.date)}
             style={({ pressed }) => [
               styles.dayCell,
-              day.isClosed && styles.closedDay,
               !day.isCurrentMonth && styles.outsideDay,
-              day.isToday && styles.todayDay,
-              day.isSelected && styles.selectedDay,
               pressed && styles.pressed,
             ]}
           >
-            <Text
+            <View
               style={[
-                styles.dayNumber,
-                !day.isCurrentMonth && styles.outsideDayText,
-                day.isSelected && styles.selectedDayText,
+                styles.dayCircle,
+                day.isClosed && styles.closedDay,
+                day.isToday && styles.todayDay,
+                day.isSelected && styles.selectedDay,
               ]}
             >
-              {Number(day.date.slice(-2))}
-            </Text>
-            <View style={styles.indicators}>
               {day.bookingCount > 0 ? (
-                <Text
+                <View
+                  accessibilityElementsHidden
                   style={[
-                    styles.bookingCount,
-                    day.isSelected && styles.selectedIndicator,
+                    getWorkloadRingStyle(day.bookingCount),
+                    day.isSelected && styles.workloadRingSelected,
                   ]}
-                >
-                  {day.bookingCount}
-                </Text>
+                />
               ) : null}
-              {day.blockCount > 0 ? (
-                <Text
-                  style={[
-                    styles.blockCount,
-                    day.isSelected && styles.selectedIndicator,
-                  ]}
-                >
-                  {day.blockCount}
-                </Text>
-              ) : null}
-              {day.isClosed ? (
-                <Text
-                  style={[
-                    styles.closedIndicator,
-                    day.isSelected && styles.selectedIndicator,
-                  ]}
-                >
-                  ×
-                </Text>
-              ) : null}
+              <Text
+                style={[
+                  styles.dayNumber,
+                  !day.isCurrentMonth && styles.outsideDayText,
+                  day.isSelected && styles.selectedDayText,
+                ]}
+              >
+                {Number(day.date.slice(-2))}
+              </Text>
+              <View style={styles.indicators}>
+                {day.bookingCount > 0 ? (
+                  <Text
+                    style={[
+                      styles.bookingCount,
+                      day.isSelected && styles.selectedIndicator,
+                    ]}
+                  >
+                    {day.bookingCount}
+                  </Text>
+                ) : null}
+                {day.blockCount > 0 ? (
+                  <Text
+                    style={[
+                      styles.blockCount,
+                      day.isSelected && styles.selectedIndicator,
+                    ]}
+                  >
+                    {day.blockCount}
+                  </Text>
+                ) : null}
+                {day.isClosed ? (
+                  <Text
+                    style={[
+                      styles.closedIndicator,
+                      day.isSelected && styles.selectedIndicator,
+                    ]}
+                  >
+                    ×
+                  </Text>
+                ) : null}
+              </View>
             </View>
           </Pressable>
         ))}
@@ -301,6 +316,16 @@ function formatRevenue(day: MonthCalendarDay, locale: SupportedLocale): string {
   return currencies
     .map(([currency, amount]) => formatCurrency(amount, locale, currency))
     .join(" · ");
+}
+
+function getWorkloadRingStyle(bookingCount: number) {
+  return [
+    styles.workloadRing,
+    styles.workloadRingOne,
+    bookingCount >= 2 && styles.workloadRingTwo,
+    bookingCount >= 3 && styles.workloadRingThree,
+    bookingCount >= 4 && styles.workloadRingFour,
+  ];
 }
 
 function getDayAccessibilityLabel(
@@ -355,12 +380,20 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     alignItems: "center",
-    borderColor: "transparent",
+    height: 42,
+    justifyContent: "center",
+    width: "14.2857%",
+  },
+  dayCircle: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
     borderRadius: radii.control,
     borderWidth: 1,
     height: 42,
     justifyContent: "center",
-    width: "14.2857%",
+    position: "relative",
+    width: 42,
   },
   dayNumber: { color: colors.primaryText, fontSize: 12, lineHeight: 15 },
   error: { ...typography.caption, color: colors.danger },
@@ -441,4 +474,23 @@ const styles = StyleSheet.create({
     width: "14.2857%",
   },
   weekdayRow: { flexDirection: "row", height: 20, marginBottom: 4 },
+  workloadRing: {
+    borderRadius: radii.control,
+    borderWidth: 2,
+    height: 38,
+    left: 1,
+    position: "absolute",
+    top: 1,
+    width: 38,
+  },
+  workloadRingFour: { borderLeftColor: colors.accent },
+  workloadRingOne: {
+    borderBottomColor: "transparent",
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: colors.accent,
+  },
+  workloadRingSelected: { borderColor: colors.actionText },
+  workloadRingThree: { borderBottomColor: colors.accent },
+  workloadRingTwo: { borderRightColor: colors.accent },
 });

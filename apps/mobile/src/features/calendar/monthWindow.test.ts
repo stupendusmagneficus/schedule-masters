@@ -7,6 +7,7 @@ import {
   isMonthRequestCurrent,
   prependCalendarMonths,
   shiftCalendarMonth,
+  shouldResetCalendarMonthWindow,
 } from "./monthWindow";
 
 describe("calendar month windows", () => {
@@ -22,6 +23,21 @@ describe("calendar month windows", () => {
   it("moves months across year boundaries in both directions", () => {
     expect(shiftCalendarMonth("2026-01", -1)).toBe("2025-12");
     expect(shiftCalendarMonth("2025-12", 1)).toBe("2026-01");
+  });
+
+  it("keeps the current scroll window when the selected date is already visible", () => {
+    expect(
+      shouldResetCalendarMonthWindow(
+        ["2026-10", "2026-11", "2026-12"],
+        "2026-11",
+      ),
+    ).toBe(false);
+    expect(
+      shouldResetCalendarMonthWindow(
+        ["2026-10", "2026-11", "2026-12"],
+        "2027-01",
+      ),
+    ).toBe(true);
   });
 
   it("pages both edges without duplicates and bounds the rendered window", () => {

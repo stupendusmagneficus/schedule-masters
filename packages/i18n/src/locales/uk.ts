@@ -234,6 +234,7 @@ export const ukrainianMessages: Messages = {
   "mobile.todayLoadFailed": "Не вдалося завантажити розклад.",
   "mobile.todayRetry": "Спробувати ще раз",
   "mobile.calendar": "Календар",
+  "mobile.calendarSelectDate": "Виберіть дату",
   "mobile.customers": "Клієнти",
   "mobile.customerSearch": "Ім’я, телефон або електронна пошта",
   "mobile.customerEmpty":

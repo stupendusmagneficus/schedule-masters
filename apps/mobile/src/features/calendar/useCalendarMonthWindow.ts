@@ -12,6 +12,7 @@ import {
   isMonthRequestCurrent,
   MONTH_WINDOW_PAGE_SIZE,
   prependCalendarMonths,
+  shouldResetCalendarMonthWindow,
 } from "./monthWindow";
 
 const MONTH_CACHE_SIZE = 13;
@@ -37,6 +38,7 @@ export function useCalendarMonthWindow({
   workspaceId,
 }: UseCalendarMonthWindowParams) {
   const selectedMonth = getCalendarMonth(selectedDate);
+  const previousSelectedMonth = useRef(selectedMonth);
   const [months, setMonths] = useState(() =>
     createInitialMonthWindow(selectedDate),
   );
@@ -81,7 +83,11 @@ export function useCalendarMonthWindow({
   });
 
   useEffect(() => {
-    setMonths(createInitialMonthWindow(`${selectedMonth}-01`));
+    if (previousSelectedMonth.current === selectedMonth) return;
+    previousSelectedMonth.current = selectedMonth;
+    if (shouldResetCalendarMonthWindow(activeMonths.current, selectedMonth)) {
+      setMonths(createInitialMonthWindow(`${selectedMonth}-01`));
+    }
   }, [selectedMonth]);
 
   const loadMonth = useCallback(

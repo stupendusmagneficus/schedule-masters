@@ -4,6 +4,7 @@ import { buildMonthCalendar, type MonthCalendarDay } from "./monthCalendar";
 
 export function buildDemoMonthCalendar(
   appointments: readonly DemoAppointment[],
+  monthDate: string,
   selectedDate: string,
   todayDate: string,
 ): MonthCalendarDay[] {
@@ -15,11 +16,11 @@ export function buildDemoMonthCalendar(
       startLocalTime: "08:00",
     })),
     blocks: [],
-    selectedDate,
+    selectedDate: `${monthDate.slice(0, 7)}-15`,
     timezone: "UTC",
     todayDate,
   });
-  const monthStart = getCalendarDateRange(selectedDate, "month").fromDate;
+  const monthStart = getCalendarDateRange(monthDate, "month").fromDate;
   const demoByDate = new Map<string, DemoAppointment[]>();
 
   appointments.forEach((appointment, index) => {
@@ -42,6 +43,7 @@ export function buildDemoMonthCalendar(
       ...day,
       bookingCount: bookings.length,
       expectedRevenueByCurrency,
+      isSelected: day.date === selectedDate,
     };
   });
 }

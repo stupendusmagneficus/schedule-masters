@@ -2,11 +2,10 @@ import type { Database } from "@schedule-app/api";
 import {
   formatAccessibleDate,
   formatCompactDate,
-  formatDate,
   formatTime,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +23,7 @@ import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
+import type { CalendarView } from "../../features/calendar/calendar";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import {
   buildDayTimeline,
@@ -50,6 +50,7 @@ import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
+import { CalendarMonthPickerSheet } from "./CalendarMonthPickerSheet";
 import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 import { DayTimeline } from "./DayTimeline";
 import { MonthCalendar } from "./MonthCalendar";
@@ -80,6 +81,12 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
+  const previousNonMonthView = useRef<CalendarView>("day");
+  const openMonthPicker = () => {
+    if (calendar.view !== "month") previousNonMonthView.current = calendar.view;
+    calendar.setView("month");
+  };
+  const closeMonthPicker = () => calendar.setView(previousNonMonthView.current);
   const dateLabel =
     calendar.view === "week"
       ? getCalendarWeekLabel(calendar.selectedDate, locale, workspace.timezone)
@@ -119,6 +126,7 @@ export function CalendarTab({
       ? buildDemoMonthCalendar(
           demoData.appointments,
           `${entry.month}-15`,
+          calendar.selectedDate,
           todayDate,
         )
       : buildMonthCalendar({
@@ -131,12 +139,6 @@ export function CalendarTab({
         });
     return { ...entry, days };
   });
-  const monthTitle = formatDate(
-    new Date(`${calendar.selectedDate.slice(0, 7)}-15T12:00:00.000Z`),
-    locale,
-    { month: "long", timeZone: "UTC", year: "numeric" },
-  );
-
   const weekRange = calendar.range;
   const isCurrentWeek =
     calendar.view === "week" &&
@@ -168,138 +170,126 @@ export function CalendarTab({
               <CalendarViewButton
                 active={calendar.view === "month"}
                 label={t("mobile.calendarMonthView")}
-                onPress={() => calendar.setView("month")}
+                onPress={openMonthPicker}
               />
             </View>
           </View>
         </View>
-        <InfoCard
-          style={[
-            styles.calendarCard,
-            calendar.view === "week" && styles.weekInfoCard,
-            calendar.view === "month" && styles.monthInfoCard,
-            calendar.view === "month" && styles.fullscreenMonthCard,
-          ]}
-        >
-          {calendar.view === "day" ? (
-            <CalendarPeriodNavigation
-              disabled={navigationDisabled}
-              nextLabel={t("mobile.calendarNext")}
-              onNext={calendar.goToNext}
-              onPrevious={calendar.goToPrevious}
-              onToday={
-                calendar.selectedDate === todayDate
-                  ? undefined
-                  : calendar.goToToday
-              }
-              previousLabel={t("mobile.calendarPrevious")}
-              subtitle={dateLabel}
-              subtitleAccessibilityLabel={getAccessibleCalendarLabel(
-                calendar.selectedDate,
-                "day",
-                locale,
-                workspace.timezone,
-              )}
-              t={t}
-              title={t("mobile.daySchedule")}
-              todayLabel={t("mobile.today")}
-            />
-          ) : null}
-          {calendar.view === "week" ? (
-            <WeekCalendar
-              days={week}
-              disabled={navigationDisabled}
-              locale={locale}
-              isCurrentWeek={isCurrentWeek}
-              onNext={calendar.goToNext}
-              onPressAppointment={onSelectAppointment}
-              onPrevious={calendar.goToPrevious}
-              onPressDay={(date) => {
-                calendar.setSelectedDate(date);
-              }}
-              onToday={calendar.goToToday}
-              weekLabel={dateLabel}
-              onPressTime={
-                onSelectTime
-                  ? (date, minute) =>
-                      onSelectTime(
-                        date,
-                        getDayTimelineSlotStart(
-                          date,
-                          minute,
-                          workspace.timezone,
-                        ),
-                      )
-                  : undefined
-              }
-              selectedDate={calendar.selectedDate}
-              t={t}
-              timezone={workspace.timezone}
-            />
-          ) : calendar.view === "month" ? (
-            <>
+        {calendar.view !== "month" ? (
+          <InfoCard
+            style={[
+              styles.calendarCard,
+              calendar.view === "week" && styles.weekInfoCard,
+            ]}
+          >
+            {calendar.view === "day" ? (
               <CalendarPeriodNavigation
                 disabled={navigationDisabled}
-                nextLabel={t("mobile.calendarNextMonth")}
+                nextLabel={t("mobile.calendarNext")}
                 onNext={calendar.goToNext}
                 onPrevious={calendar.goToPrevious}
                 onToday={
-                  calendar.selectedDate.slice(0, 7) === todayDate.slice(0, 7)
+                  calendar.selectedDate === todayDate
                     ? undefined
                     : calendar.goToToday
                 }
-                previousLabel={t("mobile.calendarPreviousMonth")}
+                previousLabel={t("mobile.calendarPrevious")}
+                subtitle={dateLabel}
+                subtitleAccessibilityLabel={getAccessibleCalendarLabel(
+                  calendar.selectedDate,
+                  "day",
+                  locale,
+                  workspace.timezone,
+                )}
                 t={t}
-                title={monthTitle}
+                title={t("mobile.daySchedule")}
                 todayLabel={t("mobile.today")}
               />
-              <MonthCalendar
-                key={monthWindow.selectedMonth}
-                isLoadingNext={monthWindow.isLoadingNext}
-                isLoadingPrevious={monthWindow.isLoadingPrevious}
-                loadNext={monthWindow.loadNext}
-                loadPrevious={monthWindow.loadPrevious}
+            ) : null}
+            {calendar.view === "week" ? (
+              <WeekCalendar
+                days={week}
+                disabled={navigationDisabled}
                 locale={locale}
-                months={monthItems}
-                onOpenSelectedDay={() => calendar.setView("day")}
-                onSelectDate={calendar.setSelectedDate}
+                isCurrentWeek={isCurrentWeek}
+                onNext={calendar.goToNext}
+                onPressAppointment={onSelectAppointment}
+                onPrevious={calendar.goToPrevious}
+                onPressDay={(date) => {
+                  calendar.setSelectedDate(date);
+                }}
+                onToday={calendar.goToToday}
+                weekLabel={dateLabel}
+                onPressTime={
+                  onSelectTime
+                    ? (date, minute) =>
+                        onSelectTime(
+                          date,
+                          getDayTimelineSlotStart(
+                            date,
+                            minute,
+                            workspace.timezone,
+                          ),
+                        )
+                    : undefined
+                }
                 selectedDate={calendar.selectedDate}
                 t={t}
                 timezone={workspace.timezone}
               />
-            </>
-          ) : (
-            <DayTimeline
-              onPressAppointment={onSelectAppointment}
-              onPressEmptySlot={
-                onSelectTime
-                  ? (minute) =>
-                      onSelectTime(
-                        calendar.selectedDate,
-                        getDayTimelineSlotStart(
+            ) : (
+              <DayTimeline
+                onPressAppointment={onSelectAppointment}
+                onPressEmptySlot={
+                  onSelectTime
+                    ? (minute) =>
+                        onSelectTime(
                           calendar.selectedDate,
-                          minute,
-                          workspace.timezone,
-                        ),
-                      )
-                  : undefined
-              }
-              t={t}
-              timeline={timeline}
-            />
-          )}
-          {calendar.isLoading && !demoData && calendar.view !== "month" ? (
-            <View
-              accessibilityLiveRegion="polite"
-              style={styles.calendarLoadingOverlay}
-            >
-              <ActivityIndicator color={colors.accent} size="small" />
-              <Text style={styles.calendarLoadingText}>
-                {t("common.loading")}
-              </Text>
-            </View>
-          ) : null}
-        </InfoCard>
+                          getDayTimelineSlotStart(
+                            calendar.selectedDate,
+                            minute,
+                            workspace.timezone,
+                          ),
+                        )
+                    : undefined
+                }
+                t={t}
+                timeline={timeline}
+              />
+            )}
+            {calendar.isLoading && !demoData ? (
+              <View
+                accessibilityLiveRegion="polite"
+                style={styles.calendarLoadingOverlay}
+              >
+                <ActivityIndicator color={colors.accent} size="small" />
+                <Text style={styles.calendarLoadingText}>
+                  {t("common.loading")}
+                </Text>
+              </View>
+            ) : null}
+          </InfoCard>
+        ) : null}
+        <CalendarMonthPickerSheet
+          closeLabel={t("common.close")}
+          onClose={closeMonthPicker}
+          title={t("mobile.calendarSelectDate")}
+          visible={calendar.view === "month"}
+        >
+          <MonthCalendar
+            isLoadingNext={monthWindow.isLoadingNext}
+            isLoadingPrevious={monthWindow.isLoadingPrevious}
+            loadNext={monthWindow.loadNext}
+            loadPrevious={monthWindow.loadPrevious}
+            locale={locale}
+            months={monthItems}
+            onOpenSelectedDay={() => calendar.setView("day")}
+            onSelectDate={calendar.setSelectedDate}
+            selectedDate={calendar.selectedDate}
+            t={t}
+            timezone={workspace.timezone}
+          />
+        </CalendarMonthPickerSheet>
         {calendar.view !== "month" ? (
           <InfoCard>
             <View style={styles.sectionHeader}>
@@ -564,6 +554,4 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   weekInfoCard: { padding: 12 },
-  monthInfoCard: { padding: 14 },
-  fullscreenMonthCard: { flex: 1, minHeight: 0, padding: 14 },
 });

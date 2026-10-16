@@ -379,6 +379,10 @@ test.describe("mobile web smoke", () => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("tab", { name: "Měsíc" }).click();
+    await expect(page.getByTestId("calendar-month-sheet")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Vyberte datum" }),
+    ).toBeVisible();
 
     const monthList = page.getByTestId("calendar-month-list");
     await expect(monthList).toBeVisible();
@@ -388,6 +392,23 @@ test.describe("mobile web smoke", () => {
     }));
     expect(dimensions.clientHeight).toBeGreaterThan(200);
     expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
+
+    const nextMonthDate = page
+      .getByRole("button", {
+        name: /1\. listopadu 2026/,
+      })
+      .last();
+    await nextMonthDate.scrollIntoViewIfNeeded();
+    const scrollTopBeforeSelection = await monthList.evaluate(
+      (element) => element.scrollTop,
+    );
+    await nextMonthDate.click();
+    await expect(
+      page.getByRole("button", { name: "Otevřít den", exact: true }),
+    ).toBeVisible();
+    expect(
+      await monthList.evaluate((element) => element.scrollTop),
+    ).toBeGreaterThanOrEqual(scrollTopBeforeSelection - 4);
   });
 
   test("keeps week selection in week view", async ({ page }) => {

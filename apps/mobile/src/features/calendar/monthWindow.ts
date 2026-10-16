@@ -8,6 +8,13 @@ export function getCalendarMonth(date: string): string {
   return date.slice(0, 7);
 }
 
+export function shouldResetCalendarMonthWindow(
+  months: readonly string[],
+  selectedMonth: string,
+): boolean {
+  return !months.includes(selectedMonth);
+}
+
 export function shiftCalendarMonth(month: string, offset: number): string {
   if (!/^\d{4}-\d{2}$/.test(month) || !Number.isInteger(offset)) {
     throw new Error("Invalid calendar month");

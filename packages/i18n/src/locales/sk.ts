@@ -235,6 +235,7 @@ export const slovakMessages: Messages = {
   "mobile.todayLoadFailed": "Rozvrh sa nepodarilo načítať.",
   "mobile.todayRetry": "Skúsiť znova",
   "mobile.calendar": "Kalendár",
+  "mobile.calendarSelectDate": "Vyberte dátum",
   "mobile.customers": "Klienti",
   "mobile.customerSearch": "Meno, telefón alebo e-mail",
   "mobile.customerEmpty":

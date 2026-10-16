@@ -206,6 +206,7 @@ export type MessageKey =
   | "mobile.todayLoadFailed"
   | "mobile.todayRetry"
   | "mobile.calendar"
+  | "mobile.calendarSelectDate"
   | "mobile.customers"
   | "mobile.customerSearch"
   | "mobile.customerEmpty"
@@ -668,6 +669,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
+    "mobile.calendarSelectDate": "Выберите дату",
     "mobile.customers": "Клиенты",
     "mobile.customerSearch": "Имя, телефон или email",
     "mobile.customerEmpty": "Клиентов пока нет. Они появятся после записей.",
@@ -1157,6 +1159,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
+    "mobile.calendarSelectDate": "Vyberte datum",
     "mobile.customers": "Klienti",
     "mobile.customerSearch": "Jméno, telefon nebo e-mail",
     "mobile.customerEmpty":
@@ -1645,6 +1648,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "The schedule could not be loaded.",
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
+    "mobile.calendarSelectDate": "Choose a date",
     "mobile.customers": "Customers",
     "mobile.customerSearch": "Name, phone, or email",
     "mobile.customerEmpty":
