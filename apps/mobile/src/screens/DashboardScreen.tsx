@@ -148,6 +148,7 @@ export function DashboardScreen({
     client,
     enabled: activeTab === "calendar" && calendar.view === "month",
     selectedDate: calendar.selectedDate,
+    timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
   const bookingRequests = useBookingRequests({

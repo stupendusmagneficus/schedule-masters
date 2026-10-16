@@ -3,8 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCalendarDateRange } from "./calendar";
 import type { CalendarData } from "./calendarData";
-import { listCalendarData } from "./calendarData";
-import { CalendarMonthCache } from "./calendarMonthCache";
+import {
+  invalidateCalendarDataCache,
+  loadCachedCalendarData,
+  subscribeToCalendarDataInvalidation,
+} from "./calendarDataCache";
 import {
   appendCalendarMonths,
   createInitialMonthWindow,
@@ -14,8 +17,6 @@ import {
   prependCalendarMonths,
   shouldResetCalendarMonthWindow,
 } from "./monthWindow";
-
-const MONTH_CACHE_SIZE = 13;
 
 export type CalendarMonthEntry = {
   readonly month: string;
@@ -28,6 +29,7 @@ type UseCalendarMonthWindowParams = {
   readonly client: SupabaseClient<Database> | null;
   readonly enabled: boolean;
   readonly selectedDate: string;
+  readonly timezone: string;
   readonly workspaceId: string;
 };
 
@@ -35,6 +37,7 @@ export function useCalendarMonthWindow({
   client,
   enabled,
   selectedDate,
+  timezone,
   workspaceId,
 }: UseCalendarMonthWindowParams) {
   const selectedMonth = getCalendarMonth(selectedDate);
@@ -51,8 +54,6 @@ export function useCalendarMonthWindow({
   const [isLoadingNext, setIsLoadingNext] = useState(false);
   const loadingPreviousRef = useRef(false);
   const loadingNextRef = useRef(false);
-  const cache = useRef(new CalendarMonthCache<CalendarData>(MONTH_CACHE_SIZE));
-  const inFlight = useRef(new Map<string, Promise<CalendarData>>());
   const requestGeneration = useRef(0);
   const isMounted = useRef(true);
   const scope = useRef<{
@@ -77,8 +78,6 @@ export function useCalendarMonthWindow({
     }
     scope.current = { client, workspaceId };
     requestGeneration.current += 1;
-    cache.current.clear();
-    inFlight.current.clear();
     setEntries({});
   });
 
@@ -91,43 +90,30 @@ export function useCalendarMonthWindow({
   }, [selectedMonth]);
 
   const loadMonth = useCallback(
-    async (month: string) => {
+    async (month: string, refresh = false) => {
       if (!client || !enabled) return;
-      const cacheKey = `${workspaceId}:${month}`;
-      const cached = cache.current.get(cacheKey);
-      if (cached) {
-        setEntries((current) => ({
-          ...current,
-          [month]: { data: cached, hasError: false, isLoading: false, month },
-        }));
-        return;
-      }
-
+      const range = getCalendarDateRange(`${month}-01`, "month");
+      if (refresh) invalidateCalendarDataCache(client, workspaceId, range);
       const generation = requestGeneration.current;
       setEntries((current) => ({
         ...current,
         [month]: {
           data: current[month]?.data ?? null,
           hasError: false,
-          isLoading: true,
+          isLoading: current[month]?.data === null || !current[month],
           month,
         },
       }));
-      let request = inFlight.current.get(cacheKey);
-      if (!request) {
-        request = listCalendarData(
-          client,
-          workspaceId,
-          getCalendarDateRange(`${month}-01`, "month"),
-        );
-        inFlight.current.set(cacheKey, request);
-      }
 
       try {
-        const data = await request;
+        const data = await loadCachedCalendarData(
+          client,
+          workspaceId,
+          timezone,
+          range,
+        );
         if (!isMounted.current || requestGeneration.current !== generation)
           return;
-        cache.current.set(cacheKey, data);
         if (
           !isMonthRequestCurrent(
             generation,
@@ -162,14 +148,29 @@ export function useCalendarMonthWindow({
             },
           }));
         }
-      } finally {
-        if (inFlight.current.get(cacheKey) === request) {
-          inFlight.current.delete(cacheKey);
-        }
       }
     },
-    [client, enabled, workspaceId],
+    [client, enabled, timezone, workspaceId],
   );
+
+  useEffect(() => {
+    if (!client || !enabled) return;
+    return subscribeToCalendarDataInvalidation(
+      client,
+      workspaceId,
+      timezone,
+      (range) => {
+        for (const month of months) {
+          const monthRange = getCalendarDateRange(`${month}-01`, "month");
+          const overlaps =
+            !range ||
+            (range.fromDate <= monthRange.toDate &&
+              monthRange.fromDate <= range.toDate);
+          if (overlaps) void loadMonth(month);
+        }
+      },
+    );
+  }, [client, enabled, loadMonth, months, timezone, workspaceId]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -188,7 +189,9 @@ export function useCalendarMonthWindow({
       ),
     );
     await Promise.all(
-      nextMonths.slice(0, MONTH_WINDOW_PAGE_SIZE).map(loadMonth),
+      nextMonths
+        .slice(0, MONTH_WINDOW_PAGE_SIZE)
+        .map((month) => loadMonth(month)),
     );
     loadingPreviousRef.current = false;
     setIsLoadingPrevious(false);
@@ -205,18 +208,18 @@ export function useCalendarMonthWindow({
         Object.entries(current).filter(([month]) => nextMonths.includes(month)),
       ),
     );
-    await Promise.all(nextMonths.slice(-MONTH_WINDOW_PAGE_SIZE).map(loadMonth));
+    await Promise.all(
+      nextMonths
+        .slice(-MONTH_WINDOW_PAGE_SIZE)
+        .map((month) => loadMonth(month)),
+    );
     loadingNextRef.current = false;
     setIsLoadingNext(false);
   }, [enabled, loadMonth, months]);
 
   const reload = useCallback(async () => {
-    for (const month of months) {
-      cache.current.delete(`${workspaceId}:${month}`);
-      inFlight.current.delete(`${workspaceId}:${month}`);
-    }
-    await Promise.all(months.map(loadMonth));
-  }, [loadMonth, months, workspaceId]);
+    await Promise.all(months.map((month) => loadMonth(month, true)));
+  }, [loadMonth, months]);
 
   const monthEntries = useMemo(
     () =>
