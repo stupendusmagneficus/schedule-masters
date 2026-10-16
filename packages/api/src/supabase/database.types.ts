@@ -730,6 +730,7 @@ export type Database = {
           id: string
           note: string | null
           service_id: string
+          source_appointment_id: string | null
           status: Database["public"]["Enums"]["waiting_list_status"]
           updated_at: string
           workspace_id: string
@@ -747,6 +748,7 @@ export type Database = {
           id?: string
           note?: string | null
           service_id: string
+          source_appointment_id?: string | null
           status?: Database["public"]["Enums"]["waiting_list_status"]
           updated_at?: string
           workspace_id: string
@@ -764,6 +766,7 @@ export type Database = {
           id?: string
           note?: string | null
           service_id?: string
+          source_appointment_id?: string | null
           status?: Database["public"]["Enums"]["waiting_list_status"]
           updated_at?: string
           workspace_id?: string
@@ -788,6 +791,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiting_list_entries_source_appointment_id_fkey"
+            columns: ["source_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
           {
@@ -976,6 +986,20 @@ export type Database = {
           p_workspace_id: string
         }
         Returns: Json
+      }
+      create_master_waiting_list_customer: {
+        Args: {
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_desired_date: string
+          p_desired_time_from?: string
+          p_desired_time_to?: string
+          p_note?: string
+          p_service_id: string
+          p_workspace_id: string
+        }
+        Returns: string
       }
       create_master_waiting_list_entry: {
         Args: {
@@ -1179,6 +1203,10 @@ export type Database = {
         Args: never
         Returns: number
       }
+      move_booking_request_to_waiting_list: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: string
+      }
       record_customer_link_share: {
         Args: {
           p_appointment_id: string
@@ -1186,6 +1214,10 @@ export type Database = {
           p_status: Database["public"]["Enums"]["notification_delivery_status"]
         }
         Returns: undefined
+      }
+      remove_all_master_waiting_list_entries: {
+        Args: { p_workspace_id: string }
+        Returns: number
       }
       reschedule_appointment: {
         Args: { p_appointment_id: string; p_starts_at: string }

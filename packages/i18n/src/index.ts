@@ -118,8 +118,14 @@ export type MessageKey =
   | "mobile.bookingRequests"
   | "mobile.waitingList"
   | "mobile.waitingListAdd"
+  | "mobile.waitingListAddExisting"
+  | "mobile.waitingListAddNew"
   | "mobile.waitingListEdit"
   | "mobile.waitingListCustomer"
+  | "mobile.waitingListSearchCustomerLabel"
+  | "mobile.waitingListSearchCustomer"
+  | "mobile.waitingListCustomerName"
+  | "mobile.waitingListSelectedCustomer"
   | "mobile.waitingListEmail"
   | "mobile.waitingListPhone"
   | "mobile.waitingListContactRequired"
@@ -132,6 +138,10 @@ export type MessageKey =
   | "mobile.waitingListEmpty"
   | "mobile.waitingListLoadFailed"
   | "mobile.waitingListSaveFailed"
+  | "mobile.waitingListDuplicateCustomer"
+  | "mobile.waitingListRemoveAll"
+  | "mobile.waitingListRemoveAllPrompt"
+  | "mobile.waitingListRemoveAllConfirm"
   | "mobile.waitingListStatusActive"
   | "mobile.waitingListStatusBooked"
   | "mobile.waitingListStatusRemoved"
@@ -144,6 +154,10 @@ export type MessageKey =
   | "mobile.bookingRequestAccept"
   | "mobile.bookingRequestDecline"
   | "mobile.bookingRequestDeclinePrompt"
+  | "mobile.bookingRequestMoveToWaitingList"
+  | "mobile.bookingRequestMoveToWaitingListPrompt"
+  | "mobile.bookingRequestMoveToWaitingListConfirm"
+  | "mobile.bookingRequestMovedToWaitingList"
   | "mobile.bookingRequestActionFailed"
   | "mobile.bookingRequestUpdated"
   | "mobile.bookingRequestEmailNotConfigured"
@@ -546,8 +560,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequests": "Заявки",
     "mobile.waitingList": "Лист ожидания",
     "mobile.waitingListAdd": "Добавить в лист ожидания",
+    "mobile.waitingListAddExisting": "Добавить существующего клиента",
+    "mobile.waitingListAddNew": "Создать нового клиента",
     "mobile.waitingListEdit": "Запись в листе ожидания",
     "mobile.waitingListCustomer": "Клиент или новый контакт",
+    "mobile.waitingListSearchCustomerLabel": "Поиск клиента",
+    "mobile.waitingListSearchCustomer":
+      "Введите имя, телефон или email для поиска клиента",
+    "mobile.waitingListCustomerName": "Имя клиента",
+    "mobile.waitingListSelectedCustomer": "Выбран клиент: {name}",
     "mobile.waitingListEmail": "Email клиента",
     "mobile.waitingListPhone": "Телефон клиента",
     "mobile.waitingListContactRequired":
@@ -562,6 +583,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListEmpty": "Лист ожидания пока пуст.",
     "mobile.waitingListLoadFailed": "Не удалось загрузить лист ожидания.",
     "mobile.waitingListSaveFailed": "Не удалось сохранить изменения.",
+    "mobile.waitingListDuplicateCustomer":
+      "Клиент с таким email или телефоном уже существует. Найдите и выберите его в списке.",
+    "mobile.waitingListRemoveAll": "Удалить все",
+    "mobile.waitingListRemoveAllPrompt":
+      "Удалить все активные записи ({count})? Их история сохранится.",
+    "mobile.waitingListRemoveAllConfirm": "Удалить все записи",
     "mobile.waitingListStatusActive": "Ожидает",
     "mobile.waitingListStatusBooked": "Записан",
     "mobile.waitingListStatusRemoved": "Удалён",
@@ -577,6 +604,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestAccept": "Подтвердить",
     "mobile.bookingRequestDecline": "Отклонить",
     "mobile.bookingRequestDeclinePrompt": "Отклонить эту заявку?",
+    "mobile.bookingRequestMoveToWaitingList": "В лист ожидания",
+    "mobile.bookingRequestMoveToWaitingListPrompt":
+      "Заявка будет отклонена, а клиент и услуга добавлены в лист ожидания.",
+    "mobile.bookingRequestMoveToWaitingListConfirm": "Перенести",
+    "mobile.bookingRequestMovedToWaitingList":
+      "Заявка отклонена, клиент добавлен в лист ожидания.",
     "mobile.bookingRequestActionFailed":
       "Не удалось обновить заявку. Возможно, её статус уже изменился. Обновите список.",
     "mobile.bookingRequestUpdated": "Решение по заявке сохранено.",
@@ -1014,8 +1047,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequests": "Žádosti",
     "mobile.waitingList": "Seznam náhradníků",
     "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
+    "mobile.waitingListAddExisting": "Přidat stávajícího klienta",
+    "mobile.waitingListAddNew": "Vytvořit nového klienta",
     "mobile.waitingListEdit": "Záznam v seznamu náhradníků",
     "mobile.waitingListCustomer": "Klient nebo nový kontakt",
+    "mobile.waitingListSearchCustomerLabel": "Vyhledat klienta",
+    "mobile.waitingListSearchCustomer":
+      "Zadejte jméno, telefon nebo e-mail a vyhledejte klienta",
+    "mobile.waitingListCustomerName": "Jméno klienta",
+    "mobile.waitingListSelectedCustomer": "Vybraný klient: {name}",
     "mobile.waitingListEmail": "E-mail klienta",
     "mobile.waitingListPhone": "Telefon klienta",
     "mobile.waitingListContactRequired":
@@ -1030,6 +1070,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListEmpty": "Seznam náhradníků je zatím prázdný.",
     "mobile.waitingListLoadFailed": "Seznam náhradníků se nepodařilo načíst.",
     "mobile.waitingListSaveFailed": "Změny se nepodařilo uložit.",
+    "mobile.waitingListDuplicateCustomer":
+      "Klient s tímto e-mailem nebo telefonem již existuje. Najděte ho a vyberte ze seznamu.",
+    "mobile.waitingListRemoveAll": "Odebrat všechny",
+    "mobile.waitingListRemoveAllPrompt":
+      "Odebrat všechny aktivní záznamy ({count})? Historie zůstane zachována.",
+    "mobile.waitingListRemoveAllConfirm": "Odebrat všechny záznamy",
     "mobile.waitingListStatusActive": "Čeká",
     "mobile.waitingListStatusBooked": "Objednán",
     "mobile.waitingListStatusRemoved": "Odebrán",
@@ -1044,6 +1090,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestAccept": "Potvrdit",
     "mobile.bookingRequestDecline": "Odmítnout",
     "mobile.bookingRequestDeclinePrompt": "Odmítnout tuto žádost?",
+    "mobile.bookingRequestMoveToWaitingList": "Do seznamu náhradníků",
+    "mobile.bookingRequestMoveToWaitingListPrompt":
+      "Žádost bude odmítnuta a klient se službou přidán do seznamu náhradníků.",
+    "mobile.bookingRequestMoveToWaitingListConfirm": "Přesunout",
+    "mobile.bookingRequestMovedToWaitingList":
+      "Žádost byla odmítnuta a klient přidán do seznamu náhradníků.",
     "mobile.bookingRequestActionFailed":
       "Žádost se nepodařilo aktualizovat. Její stav se možná změnil. Obnovte seznam.",
     "mobile.bookingRequestUpdated": "Rozhodnutí o žádosti bylo uloženo.",
@@ -1481,8 +1533,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequests": "Requests",
     "mobile.waitingList": "Waiting list",
     "mobile.waitingListAdd": "Add to waiting list",
+    "mobile.waitingListAddExisting": "Add existing client",
+    "mobile.waitingListAddNew": "Create new client",
     "mobile.waitingListEdit": "Waiting list entry",
     "mobile.waitingListCustomer": "Customer or new contact",
+    "mobile.waitingListSearchCustomerLabel": "Search for a client",
+    "mobile.waitingListSearchCustomer":
+      "Enter a name, phone, or email to search for a client",
+    "mobile.waitingListCustomerName": "Customer name",
+    "mobile.waitingListSelectedCustomer": "Selected client: {name}",
     "mobile.waitingListEmail": "Customer email",
     "mobile.waitingListPhone": "Customer phone",
     "mobile.waitingListContactRequired":
@@ -1497,6 +1556,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.waitingListEmpty": "The waiting list is empty.",
     "mobile.waitingListLoadFailed": "Couldn't load the waiting list.",
     "mobile.waitingListSaveFailed": "Couldn't save the changes.",
+    "mobile.waitingListDuplicateCustomer":
+      "A client with this email or phone already exists. Find and select them from the list.",
+    "mobile.waitingListRemoveAll": "Remove all",
+    "mobile.waitingListRemoveAllPrompt":
+      "Remove all {count} active entries? Their history will remain.",
+    "mobile.waitingListRemoveAllConfirm": "Remove all entries",
     "mobile.waitingListStatusActive": "Waiting",
     "mobile.waitingListStatusBooked": "Booked",
     "mobile.waitingListStatusRemoved": "Removed",
@@ -1511,6 +1576,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestAccept": "Confirm",
     "mobile.bookingRequestDecline": "Decline",
     "mobile.bookingRequestDeclinePrompt": "Decline this request?",
+    "mobile.bookingRequestMoveToWaitingList": "Move to waiting list",
+    "mobile.bookingRequestMoveToWaitingListPrompt":
+      "This request will be declined, and the client and service added to the waiting list.",
+    "mobile.bookingRequestMoveToWaitingListConfirm": "Move",
+    "mobile.bookingRequestMovedToWaitingList":
+      "Request declined and client added to the waiting list.",
     "mobile.bookingRequestActionFailed":
       "Couldn't update the request. Its status may have changed. Refresh the list.",
     "mobile.bookingRequestUpdated": "Your decision was saved.",

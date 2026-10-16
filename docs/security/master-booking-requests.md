@@ -32,6 +32,14 @@ duplicate jobs if the status request is retried. The transactional email
 worker processes this outbox using provider idempotency keys, retries transient
 provider failures up to five attempts, and stores only safe error codes.
 
+The master may also transfer a pending public request to the waiting list. This
+operation atomically creates a workspace-scoped waiting-list entry from the
+request's customer, service, and requested local time, then declines the
+original request through the normal status lifecycle. Retrying the action
+returns the same entry; it does not create another one. The customer receives
+no separate waiting-list notification, and the UI does not imply that the
+waiting-list slot is reserved.
+
 Outbox states deliberately distinguish `not_configured` from `pending`,
 `processing`, `accepted_by_provider`, and `failed`. `accepted_by_provider` means
 the email provider accepted the message; it does not claim that the recipient's

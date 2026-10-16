@@ -30,6 +30,7 @@ type BookingRequestsModalProps = {
     appointmentId: string,
     status: AppointmentStatus,
   ) => Promise<boolean>;
+  readonly onMoveToWaitingList: (appointmentId: string) => Promise<boolean>;
   readonly onRetry: () => void;
   readonly requests: readonly MasterPendingBookingRequest[];
   readonly savingRequestId: string | null;
@@ -45,6 +46,7 @@ export function BookingRequestsModal({
   locale,
   onClose,
   onRespond,
+  onMoveToWaitingList,
   onRetry,
   requests,
   savingRequestId,
@@ -52,10 +54,13 @@ export function BookingRequestsModal({
   timezone,
   visible,
 }: BookingRequestsModalProps) {
-  const [rejectionId, setRejectionId] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<{
+    readonly appointmentId: string;
+    readonly type: "decline" | "waiting-list";
+  } | null>(null);
 
   useEffect(() => {
-    if (!visible) setRejectionId(null);
+    if (!visible) setConfirmation(null);
   }, [visible]);
 
   return (
@@ -104,7 +109,8 @@ export function BookingRequestsModal({
         ) : (
           requests.map((request) => {
             const isSaving = savingRequestId === request.id;
-            const isConfirmingRejection = rejectionId === request.id;
+            const activeConfirmation =
+              confirmation?.appointmentId === request.id ? confirmation : null;
             return (
               <InfoCard key={request.id} style={styles.requestCard}>
                 <View style={styles.header}>
@@ -150,16 +156,20 @@ export function BookingRequestsModal({
                     </Text>
                   ) : null}
                 </View>
-                {isConfirmingRejection ? (
+                {activeConfirmation ? (
                   <View style={styles.confirmation}>
                     <Text style={styles.helper}>
-                      {t("mobile.bookingRequestDeclinePrompt")}
+                      {t(
+                        activeConfirmation.type === "decline"
+                          ? "mobile.bookingRequestDeclinePrompt"
+                          : "mobile.bookingRequestMoveToWaitingListPrompt",
+                      )}
                     </Text>
                     <View style={styles.actions}>
                       <Pressable
                         accessibilityRole="button"
                         disabled={savingRequestId !== null}
-                        onPress={() => setRejectionId(null)}
+                        onPress={() => setConfirmation(null)}
                         style={({ pressed }) => [
                           styles.secondaryButton,
                           pressed && styles.pressed,
@@ -173,11 +183,14 @@ export function BookingRequestsModal({
                         accessibilityRole="button"
                         disabled={isSaving || savingRequestId !== null}
                         onPress={async () => {
-                          if (
-                            await onRespond(request.id, "cancelled_by_master")
-                          ) {
-                            setRejectionId(null);
-                          }
+                          const succeeded =
+                            activeConfirmation.type === "decline"
+                              ? await onRespond(
+                                  request.id,
+                                  "cancelled_by_master",
+                                )
+                              : await onMoveToWaitingList(request.id);
+                          if (succeeded) setConfirmation(null);
                         }}
                         style={({ pressed }) => [
                           styles.declineButton,
@@ -185,7 +198,11 @@ export function BookingRequestsModal({
                         ]}
                       >
                         <Text style={styles.declineButtonText}>
-                          {t("mobile.bookingRequestDecline")}
+                          {t(
+                            activeConfirmation.type === "decline"
+                              ? "mobile.bookingRequestDecline"
+                              : "mobile.bookingRequestMoveToWaitingListConfirm",
+                          )}
                         </Text>
                       </Pressable>
                     </View>
@@ -195,7 +212,12 @@ export function BookingRequestsModal({
                     <Pressable
                       accessibilityRole="button"
                       disabled={savingRequestId !== null}
-                      onPress={() => setRejectionId(request.id)}
+                      onPress={() =>
+                        setConfirmation({
+                          appointmentId: request.id,
+                          type: "decline",
+                        })
+                      }
                       style={({ pressed }) => [
                         styles.secondaryButton,
                         pressed && styles.pressed,
@@ -225,6 +247,26 @@ export function BookingRequestsModal({
                     </Pressable>
                   </View>
                 )}
+                {!activeConfirmation ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={savingRequestId !== null}
+                    onPress={() =>
+                      setConfirmation({
+                        appointmentId: request.id,
+                        type: "waiting-list",
+                      })
+                    }
+                    style={({ pressed }) => [
+                      styles.waitingListButton,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={styles.waitingListButtonText}>
+                      {t("mobile.bookingRequestMoveToWaitingList")}
+                    </Text>
+                  </Pressable>
+                ) : null}
               </InfoCard>
             );
           })
@@ -268,8 +310,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.dangerSoft,
     borderRadius: radii.control,
+    flex: 1,
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 14,
   },
   declineButtonText: {
@@ -306,4 +349,20 @@ const styles = StyleSheet.create({
   },
   serviceName: { ...typography.metadata, color: colors.secondaryText },
   state: { alignItems: "center", gap: 12, padding: 24 },
+  waitingListButton: {
+    alignItems: "center",
+    alignSelf: "stretch",
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 8,
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  waitingListButtonText: {
+    ...typography.label,
+    color: colors.primaryText,
+    fontWeight: "600",
+  },
 });

@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   name: { ...typography.body, color: colors.primaryText, fontWeight: "700" },
   button: {
     alignItems: "center",
-    backgroundColor: colors.primaryText,
+    backgroundColor: colors.action,
     borderRadius: radii.pill,
     justifyContent: "center",
     marginTop: 6,

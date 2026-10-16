@@ -19,23 +19,31 @@ export function useWaitingList({
   const [entries, setEntries] = useState<MasterWaitingListEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(client && enabled));
+  const [loadedWorkspaceId, setLoadedWorkspaceId] = useState<string | null>(
+    null,
+  );
   const [requestGuard] = useState(createWorkspaceRequestGuard);
+  const hasCurrentWorkspaceData = loadedWorkspaceId === workspaceId;
 
   const reload = useCallback(async () => {
     const requestId = requestGuard.begin();
-    if (!client || !enabled) {
+    if (!client) {
       if (requestGuard.isCurrent(requestId)) {
         setEntries([]);
         setError(null);
         setIsLoading(false);
+        setLoadedWorkspaceId(null);
       }
       return;
     }
-    setIsLoading(true);
+    if (!hasCurrentWorkspaceData) setIsLoading(true);
     setError(null);
     try {
       const nextEntries = await listMasterWaitingList(client, workspaceId);
-      if (requestGuard.isCurrent(requestId)) setEntries(nextEntries);
+      if (requestGuard.isCurrent(requestId)) {
+        setEntries(nextEntries);
+        setLoadedWorkspaceId(workspaceId);
+      }
     } catch (loadError) {
       if (requestGuard.isCurrent(requestId)) {
         setError(loadError instanceof Error ? loadError.message : "unknown");
@@ -43,17 +51,23 @@ export function useWaitingList({
     } finally {
       if (requestGuard.isCurrent(requestId)) setIsLoading(false);
     }
-  }, [client, enabled, requestGuard, workspaceId]);
+  }, [client, hasCurrentWorkspaceData, requestGuard, workspaceId]);
 
   useEffect(() => {
-    void reload();
-    const refreshTimer =
-      client && enabled ? setInterval(() => void reload(), 60_000) : undefined;
-    return () => {
-      if (refreshTimer) clearInterval(refreshTimer);
-      requestGuard.invalidate(requestGuard.begin());
-    };
-  }, [client, enabled, reload, requestGuard]);
+    if (enabled && !hasCurrentWorkspaceData) void reload();
+  }, [enabled, hasCurrentWorkspaceData, reload]);
 
-  return { entries, error, isLoading, reload };
+  useEffect(
+    () => () => {
+      requestGuard.invalidate(requestGuard.begin());
+    },
+    [requestGuard],
+  );
+
+  return {
+    entries: hasCurrentWorkspaceData ? entries : [],
+    error: hasCurrentWorkspaceData ? error : null,
+    isLoading: isLoading && !hasCurrentWorkspaceData,
+    reload,
+  };
 }

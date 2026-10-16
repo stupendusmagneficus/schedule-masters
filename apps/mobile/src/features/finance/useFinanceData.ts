@@ -17,23 +17,47 @@ import {
 type UseFinanceDataParams = {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
+  readonly enabled: boolean;
   readonly month: string;
+  readonly refreshVersion: number;
   readonly timezone: string;
   readonly workspaceId: string;
 };
 
+export function shouldLoadFinanceData({
+  enabled,
+  hasCurrentData,
+  loadedRefreshVersion,
+  refreshVersion,
+}: {
+  readonly enabled: boolean;
+  readonly hasCurrentData: boolean;
+  readonly loadedRefreshVersion: number;
+  readonly refreshVersion: number;
+}) {
+  return (
+    enabled && (!hasCurrentData || loadedRefreshVersion !== refreshVersion)
+  );
+}
+
 export function useFinanceData({
   client,
   demoData,
+  enabled,
   month,
+  refreshVersion,
   timezone,
   workspaceId,
 }: UseFinanceDataParams) {
   const [appointments, setAppointments] = useState<MasterAppointment[]>([]);
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(client));
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const [loadedRefreshVersion, setLoadedRefreshVersion] = useState(-1);
   const requestId = useRef(0);
   const range = getCalendarDateRange(month, "month");
+  const queryKey = `${workspaceId}:${range.fromDate}:${range.toDate}`;
+  const hasCurrentData = loadedKey === queryKey;
 
   const reload = useCallback(async () => {
     const currentRequestId = ++requestId.current;
@@ -46,6 +70,8 @@ export function useFinanceData({
       );
       if (month.slice(0, 7) < currentMonth) {
         setAppointments([]);
+        setLoadedKey(queryKey);
+        setLoadedRefreshVersion(refreshVersion);
         setIsLoading(false);
         return;
       }
@@ -82,17 +108,21 @@ export function useFinanceData({
           };
         }),
       );
+      setLoadedKey(queryKey);
+      setLoadedRefreshVersion(refreshVersion);
       setIsLoading(false);
       return;
     }
 
     if (!client) {
       setAppointments([]);
+      setLoadedKey(null);
+      setLoadedRefreshVersion(refreshVersion);
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    if (!hasCurrentData) setIsLoading(true);
     try {
       const result = await listMasterAppointments(
         client,
@@ -100,28 +130,66 @@ export function useFinanceData({
         range.fromDate,
         range.toDate,
       );
-      if (requestId.current === currentRequestId) setAppointments(result);
+      if (requestId.current === currentRequestId) {
+        setAppointments(result);
+        setLoadedKey(queryKey);
+      }
     } catch {
-      if (requestId.current === currentRequestId) setError(true);
+      if (requestId.current === currentRequestId) {
+        setError(true);
+        setLoadedKey(queryKey);
+      }
     } finally {
-      if (requestId.current === currentRequestId) setIsLoading(false);
+      if (requestId.current === currentRequestId) {
+        setLoadedRefreshVersion(refreshVersion);
+        setIsLoading(false);
+      }
     }
   }, [
     client,
     demoData,
+    hasCurrentData,
     month,
+    queryKey,
     range.fromDate,
     range.toDate,
+    refreshVersion,
     timezone,
     workspaceId,
   ]);
 
   useEffect(() => {
+    if (!client && !demoData) return;
+    if (
+      !shouldLoadFinanceData({
+        enabled,
+        hasCurrentData,
+        loadedRefreshVersion,
+        refreshVersion,
+      })
+    ) {
+      return;
+    }
     void reload();
     return () => {
       requestId.current += 1;
     };
-  }, [reload]);
+  }, [
+    client,
+    demoData,
+    enabled,
+    hasCurrentData,
+    loadedRefreshVersion,
+    refreshVersion,
+    reload,
+  ]);
 
-  return { appointments, error, isLoading, reload };
+  return {
+    appointments: hasCurrentData ? appointments : [],
+    error: hasCurrentData ? error : false,
+    isLoading:
+      !hasCurrentData &&
+      (isLoading || (enabled && Boolean(client || demoData))),
+    reload,
+  };
 }

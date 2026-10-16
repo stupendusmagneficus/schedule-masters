@@ -41,6 +41,7 @@ import { useWaitingList } from "../features/waitingList/useWaitingList";
 import {
   listMasterWaitingListMatches,
   type MasterWaitingListMatch,
+  moveBookingRequestToWaitingList,
   setMasterWaitingListEntryStatus,
 } from "../features/waitingList/waitingList";
 import { analytics, analyticsEvents } from "../lib/analytics";
@@ -87,6 +88,7 @@ export function DashboardScreen({
   workspace,
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
+  const [financeRefreshVersion, setFinanceRefreshVersion] = useState(0);
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -188,6 +190,7 @@ export function DashboardScreen({
     setAppointmentActionError(false);
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
+      setFinanceRefreshVersion((version) => version + 1);
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (status === "completed") {
         setSelectedAppointment({ ...selectedAppointment, status });
@@ -243,6 +246,7 @@ export function DashboardScreen({
         appointmentId,
         status,
       );
+      setFinanceRefreshVersion((version) => version + 1);
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (
         status === "cancelled_by_master" ||
@@ -266,6 +270,30 @@ export function DashboardScreen({
     }
   }
 
+  async function moveBookingRequestIntoWaitingList(
+    appointmentId: string,
+  ): Promise<boolean> {
+    if (!client) return false;
+    setSavingRequestId(appointmentId);
+    setBookingRequestActionError(false);
+    try {
+      await moveBookingRequestToWaitingList(
+        client,
+        workspace.id,
+        appointmentId,
+      );
+      await Promise.all([bookingRequests.reload(), waitingList.reload()]);
+      setFeedback(t("mobile.bookingRequestMovedToWaitingList"));
+      return true;
+    } catch {
+      setBookingRequestActionError(true);
+      await bookingRequests.reload();
+      return false;
+    } finally {
+      setSavingRequestId(null);
+    }
+  }
+
   async function saveAppointmentPayment(amount: number): Promise<boolean> {
     if (!client || !selectedAppointment) return false;
     setUpdatingAppointment(true);
@@ -276,6 +304,7 @@ export function DashboardScreen({
         selectedAppointment.id,
         amount,
       );
+      setFinanceRefreshVersion((version) => version + 1);
       await calendar.reload();
       setSelectedAppointment(null);
       setFeedback(t("mobile.paymentSaved"));
@@ -391,11 +420,9 @@ export function DashboardScreen({
             onOpenBookingRequests={() => {
               setBookingRequestActionError(false);
               setBookingRequestsVisible(true);
-              void bookingRequests.reload();
             }}
             onOpenWaitingList={() => {
               setWaitingListVisible(true);
-              void waitingList.reload();
             }}
             onGoToToday={calendar.goToTodayDay}
             onNextDay={calendar.goToNextDay}
@@ -430,15 +457,15 @@ export function DashboardScreen({
             workspace={workspace}
           />
         )}
-        {activeTab === "finances" && (
-          <FinancesTab
-            client={client}
-            demoData={demoData}
-            locale={locale}
-            t={t}
-            workspace={workspace}
-          />
-        )}
+        <FinancesTab
+          client={client}
+          demoData={demoData}
+          locale={locale}
+          refreshVersion={financeRefreshVersion}
+          t={t}
+          visible={activeTab === "finances"}
+          workspace={workspace}
+        />
         <CustomersTab
           client={client}
           locale={locale}
@@ -527,6 +554,7 @@ export function DashboardScreen({
             setSelectedWaitingListMatch(null);
           }}
           onCreated={async (appointmentId) => {
+            setFinanceRefreshVersion((version) => version + 1);
             await calendar.reload();
             let waitlistStatusSaved = true;
             if (selectedWaitingListMatch) {
@@ -594,6 +622,7 @@ export function DashboardScreen({
         isLoading={bookingRequests.isLoading}
         locale={locale}
         onClose={() => setBookingRequestsVisible(false)}
+        onMoveToWaitingList={moveBookingRequestIntoWaitingList}
         onRespond={respondToBookingRequest}
         onRetry={() => void bookingRequests.reload()}
         requests={bookingRequests.requests}

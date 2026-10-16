@@ -7,7 +7,7 @@
 This document defines the product visual language for Schedule Masters. It applies to the master mobile app and the public booking web experience. Future screens and UI changes must follow these rules and reuse the shared theme tokens and components. Update the system itself when a product need requires a new pattern; do not create one-off visual exceptions silently.
 
 The approved direction is **Shadcn-inspired schedule operations**: neutral
-surfaces, high-contrast graphite actions, one restrained green brand accent,
+surfaces, high-contrast green primary actions, graphite content and secondary actions,
 thin borders, compact typography and pill controls adapted for a master's
 daily workflow.
 
@@ -29,12 +29,12 @@ This is a visual reference, not a copy of Fresha. We do not reuse its logo, exac
 1. **Today first.** The first screen must help a master understand the day within seconds.
 2. **Spacious scanning.** Show useful information in clear white surfaces with enough room for quick reading.
 3. **One primary action.** Every screen has one obvious next action, such as adding a booking or selecting a time.
-4. **Approachable authority.** Graphite actions create trust while one restrained green accent communicates availability and progress.
+4. **Approachable authority.** Green primary actions communicate the next step; graphite content and neutral secondary actions keep the interface calm.
 5. **Fast feedback.** Loading, empty, error, success, pressed and disabled states are designed as first-class states.
 6. **Language-safe.** RU, CZ and EN labels must fit without changing the core layout. Czech is represented by the `cs` HTML locale while the product locale remains `cz`.
 7. **Accessible by default.** Text contrast, 44pt minimum touch targets, visible focus, VoiceOver labels and reduced motion are mandatory.
 8. **Calendar actions stay close.** Creating an appointment and creating a break must be available from the same calendar action, without navigating through settings.
-9. **Shadcn-inspired simplicity.** Use graphite actions, pill controls, 16px
+9. **Shadcn-inspired simplicity.** Use green primary actions, neutral secondary actions, pill controls, 16px
    cards, semantic status colors and a 4px spacing rhythm. Do not add
    gradients, decorative blobs or competing accent colors.
 
@@ -68,13 +68,13 @@ The canonical machine-readable values are in [`design-tokens.json`](./design-tok
 
 ### Color
 
-The palette uses an off-white canvas, crisp white information blocks, graphite
-actions and one controlled green accent. Thin borders and minimal shadows
+The palette uses an off-white canvas, crisp white information blocks, green
+primary actions and graphite content. Thin borders and minimal shadows
 provide hierarchy without heavy chrome.
 
 - `brand.primary` — links, active states and selected controls.
 - `brand.primaryStrong` — pressed states and high-emphasis links.
-- `brand.action` — deep slate primary action surfaces.
+- `brand.action` — green primary action surfaces; `brand.actionPressed` is the darker pressed state.
 - `brand.accent` / `brand.accentSoft` — the restrained green used for available
   time, active navigation, successful actions and progress.
 - `surface.canvas` — warm off-white application background.
@@ -106,12 +106,12 @@ Use a 4px base scale. Standard screen padding is 16px on mobile and 32px on desk
 ### Shadcn-inspired surface rules
 
 - **Master Dashboard and Calendar:** off-white canvas, crisp white panels,
-  graphite actions, a restrained green accent, thin borders, comfortable metadata
+  green primary actions, graphite content, a restrained green accent, thin borders, comfortable metadata
   and no decorative gradients.
 - **Mobile navigation:** one white outer pill with a soft green pill beneath
   the active tab. The active icon and label use deep slate, while inactive items
   remain neutral. The active indicator moves with a short, functional native
-  animation; the booking CTA floats above the navigation as a graphite pill.
+  animation; the booking CTA floats above the navigation as a green pill.
 - **Master forms and settings:** high-contrast labels, clear focus borders and compact controls with predictable dimensions.
 - **Public Booking Page:** the same off-white canvas with crisp white panels and
   more welcoming spacing, while retaining the same semantic tokens and accessibility rules.

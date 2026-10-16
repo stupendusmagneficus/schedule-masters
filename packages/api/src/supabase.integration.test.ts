@@ -2057,6 +2057,63 @@ describe("master waiting list RPC", () => {
           },
         );
         expect(archivedServiceEntry.error).toBeNull();
+        const newCustomerEntry = await user.client.rpc(
+          "create_master_waiting_list_customer",
+          {
+            p_customer_email: `new-waiting-${suffix}@example.test`,
+            p_customer_name: "New waiting customer",
+            p_customer_phone: "+420 777 123 456",
+            p_desired_date: "2030-01-05",
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(newCustomerEntry.error).toBeNull();
+        const createdCustomerEntry = await admin
+          .from("waiting_list_entries")
+          .select("customer_id, customer_name")
+          .eq("id", newCustomerEntry.data as string)
+          .single();
+        expect(createdCustomerEntry.error).toBeNull();
+        expect(createdCustomerEntry.data?.customer_id).toBeTruthy();
+        const createdCustomer = await admin
+          .from("customers")
+          .select("email, normalized_email, normalized_phone")
+          .eq("id", createdCustomerEntry.data?.customer_id ?? "")
+          .single();
+        expect(createdCustomer.data).toEqual({
+          email: `new-waiting-${suffix}@example.test`,
+          normalized_email: `new-waiting-${suffix}@example.test`,
+          normalized_phone: "420777123456",
+        });
+        const duplicateCustomer = await user.client.rpc(
+          "create_master_waiting_list_customer",
+          {
+            p_customer_email: `NEW-WAITING-${suffix}@example.test`,
+            p_customer_name: "Duplicate waiting customer",
+            p_customer_phone: "",
+            p_desired_date: "2030-01-06",
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(duplicateCustomer.error?.message).toContain(
+          "Customer contact already exists",
+        );
+        const existingContact = await user.client.rpc(
+          "create_master_waiting_list_customer",
+          {
+            p_customer_email: "anna@example.test",
+            p_customer_name: "Legacy duplicate",
+            p_customer_phone: "",
+            p_desired_date: "2030-01-07",
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(existingContact.error?.message).toContain(
+          "Customer contact already exists",
+        );
         expect(
           (
             await admin
@@ -2160,7 +2217,7 @@ describe("master waiting list RPC", () => {
           p_workspace_id: workspaceId,
         });
         expect(list.error).toBeNull();
-        expect(list.data).toHaveLength(3);
+        expect(list.data).toHaveLength(4);
         expect(list.data?.find(({ id }) => id === entry.data)?.status).toBe(
           "booked",
         );
@@ -2168,6 +2225,76 @@ describe("master waiting list RPC", () => {
           p_workspace_id: otherWorkspaceId,
         });
         expect(denied.error?.code).toBe("42501");
+
+        const requestId = randomUUID();
+        expect(
+          (
+            await admin.from("appointments").insert({
+              id: requestId,
+              workspace_id: workspaceId,
+              customer_id: customerId,
+              service_id: serviceId,
+              service_name_snapshot: "Manicure",
+              duration_minutes_snapshot: 60,
+              price_amount_snapshot: 1000,
+              currency_snapshot: "CZK",
+              starts_at: "2030-01-04T08:00:00.000Z",
+              ends_at: "2030-01-04T09:00:00.000Z",
+              occupied_range:
+                "[2030-01-04T08:00:00.000Z,2030-01-04T09:00:00.000Z)",
+              status: "pending",
+              source: "public_booking",
+            })
+          ).error,
+        ).toBeNull();
+        const movedEntry = await user.client.rpc(
+          "move_booking_request_to_waiting_list",
+          { p_appointment_id: requestId, p_workspace_id: workspaceId },
+        );
+        expect(movedEntry.error).toBeNull();
+        const deniedMove = await user.client.rpc(
+          "move_booking_request_to_waiting_list",
+          { p_appointment_id: requestId, p_workspace_id: otherWorkspaceId },
+        );
+        expect(deniedMove.error?.code).toBe("42501");
+        const movedAgain = await user.client.rpc(
+          "move_booking_request_to_waiting_list",
+          { p_appointment_id: requestId, p_workspace_id: workspaceId },
+        );
+        expect(movedAgain.data).toBe(movedEntry.data);
+        const movedRequest = await admin
+          .from("appointments")
+          .select("status")
+          .eq("id", requestId)
+          .single();
+        expect(movedRequest.data?.status).toBe("cancelled_by_master");
+        const notification = await admin
+          .from("booking_decision_email_outbox")
+          .select("decision, recipient")
+          .eq("appointment_id", requestId)
+          .single();
+        expect(notification.data).toEqual({
+          decision: "declined",
+          recipient: "anna@example.test",
+        });
+
+        const removedCount = await user.client.rpc(
+          "remove_all_master_waiting_list_entries",
+          { p_workspace_id: workspaceId },
+        );
+        expect(removedCount.data).toBe(4);
+        const deniedBulkRemove = await user.client.rpc(
+          "remove_all_master_waiting_list_entries",
+          { p_workspace_id: otherWorkspaceId },
+        );
+        expect(deniedBulkRemove.error?.code).toBe("42501");
+        const remainingEntries = await admin
+          .from("waiting_list_entries")
+          .select("status")
+          .eq("workspace_id", workspaceId);
+        expect(
+          remainingEntries.data?.filter(({ status }) => status === "active"),
+        ).toHaveLength(0);
       } finally {
         await admin
           .from("workspaces")
