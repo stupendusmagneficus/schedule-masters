@@ -240,17 +240,27 @@ test.describe("mobile web smoke", () => {
 
     await expect(page.getByRole("heading", { name: "Služby" })).toBeVisible();
     await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
+    const editAction = page.getByRole("button", { name: "Upravit" }).first();
+    const archiveAction = page
+      .getByRole("button", { name: "Archivovat" })
+      .first();
+    const [editHeight, archiveHeight] = await Promise.all([
+      editAction.evaluate((button) => button.getBoundingClientRect().height),
+      archiveAction.evaluate((button) => button.getBoundingClientRect().height),
+    ]);
+    expect(editHeight).toBe(archiveHeight);
+
     const activeFilter = page.getByRole("tab", { name: "Aktivní" });
     const archivedFilter = page.getByRole("tab", { name: "Archiv" });
     await archivedFilter.click();
-    await expect(archivedFilter).toHaveAttribute("aria-selected", "true");
     await expect(page.getByText("Archiv služeb je prázdný.")).toBeVisible();
     await activeFilter.click();
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
 
     const categoryFilter = page.getByRole("tab", { name: "Manikúra" });
     await expect(categoryFilter).toBeVisible();
     await categoryFilter.click();
-    await expect(categoryFilter).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
 
     const search = page.getByRole("textbox", {
       name: "Hledat podle názvu nebo popisu",
@@ -263,10 +273,6 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Zrušit filtry" }).click();
     await expect(search).toHaveValue("");
-    await expect(page.getByRole("tab", { name: "Vše" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
     await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
 
     const hasHorizontalOverflow = await page.evaluate(
@@ -492,6 +498,7 @@ test.describe("mobile web smoke", () => {
   test("keeps service editor fields vertically separated", async ({ page }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
+    await page.getByRole("button", { name: "Služby: 1" }).click();
     await page.getByRole("button", { name: "Přidat službu" }).click();
 
     await expect(

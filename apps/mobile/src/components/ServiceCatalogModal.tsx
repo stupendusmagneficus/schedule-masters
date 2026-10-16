@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   nameLine: { alignItems: "flex-start", flexDirection: "row", gap: 8 },
   resetButton: { marginTop: 12 },
   retryButton: { alignSelf: "flex-start", marginTop: 8 },
-  rowAction: { flex: 1 },
+  rowAction: { flex: 1, height: 48, minHeight: 48 },
   rowActions: { flexDirection: "row", gap: 8, marginTop: 12 },
   rowCopy: { gap: 4, minWidth: 0 },
   searchField: {
