@@ -227,6 +227,26 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
+  test("keeps Profile settings and services entries the same height", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Profil", exact: true }).click();
+
+    const settingsEntry = page.getByRole("button", {
+      name: "Nastavení",
+      exact: true,
+    });
+    const servicesEntry = page.getByRole("button", { name: "Služby: 1" });
+    const [settingsHeight, servicesHeight] = await Promise.all([
+      settingsEntry.evaluate((button) => button.getBoundingClientRect().height),
+      servicesEntry.evaluate((button) => button.getBoundingClientRect().height),
+    ]);
+
+    expect(settingsHeight).toBe(servicesHeight);
+  });
+
   test("saves the Ukrainian locale across reloads without narrow-screen overflow", async ({
     page,
   }) => {
