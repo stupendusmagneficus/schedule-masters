@@ -25,10 +25,56 @@ export type ServiceValidationError =
   | "priceAmount"
   | "sortOrder";
 
+export type ServiceCatalogStatus = "active" | "archived";
+
+export type ServiceCatalogFilters = {
+  readonly category: string | null;
+  readonly query: string;
+  readonly status: ServiceCatalogStatus;
+};
+
 type ServiceClient = SupabaseClient<Database>;
 
 const serviceFields =
   "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at";
+
+export function getServiceCategories(services: readonly Service[]): string[] {
+  return [
+    ...new Set(
+      services.map((service) => service.category?.trim() ?? "").filter(Boolean),
+    ),
+  ].sort((left, right) => left.localeCompare(right));
+}
+
+export function filterServices(
+  services: readonly Service[],
+  filters: ServiceCatalogFilters,
+): Service[] {
+  const query = normalizeSearchText(filters.query);
+
+  return services.filter((service) => {
+    const isActive = service.is_active && !service.archived_at;
+    if (filters.status === "active" ? !isActive : isActive) return false;
+
+    if (filters.category !== null) {
+      const category = service.category?.trim() ?? "";
+      if (category !== filters.category) return false;
+    }
+
+    if (!query) return true;
+    return [service.name, service.description ?? ""].some((value) =>
+      normalizeSearchText(value).includes(query),
+    );
+  });
+}
+
+function normalizeSearchText(value: string): string {
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase();
+}
 
 export function createServiceDraft(service?: Service | null): ServiceDraft {
   return {

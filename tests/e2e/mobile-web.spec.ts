@@ -32,7 +32,7 @@ test.describe("mobile web smoke", () => {
   });
 
   test("navigates to another day and returns to Today", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+    await page.setViewportSize({ width: 320, height: 720 });
     await page.goto("/?demo=1");
 
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
@@ -225,6 +225,65 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByText("Veřejný odkaz pro rezervace", { exact: true }),
     ).toBeVisible();
+  });
+
+  test("opens a searchable, categorized service catalog from Profile", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Profil" }).click();
+
+    const servicesEntry = page.getByRole("button", { name: "Služby: 1" });
+    await expect(servicesEntry).toBeVisible();
+    await servicesEntry.click();
+
+    await expect(page.getByRole("heading", { name: "Služby" })).toBeVisible();
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
+    const activeFilter = page.getByRole("tab", { name: "Aktivní" });
+    const archivedFilter = page.getByRole("tab", { name: "Archiv" });
+    await archivedFilter.click();
+    await expect(archivedFilter).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("Archiv služeb je prázdný.")).toBeVisible();
+    await activeFilter.click();
+
+    const categoryFilter = page.getByRole("tab", { name: "Manikúra" });
+    await expect(categoryFilter).toBeVisible();
+    await categoryFilter.click();
+    await expect(categoryFilter).toHaveAttribute("aria-selected", "true");
+
+    const search = page.getByRole("textbox", {
+      name: "Hledat podle názvu nebo popisu",
+    });
+    await search.fill("clean finish");
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
+    await search.fill("no matching service");
+    await expect(
+      page.getByText("Žádné služby nebyly nalezeny.", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Zrušit filtry" }).click();
+    await expect(search).toHaveValue("");
+    await expect(page.getByRole("tab", { name: "Vše" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
+    const hasWideHorizontalOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1,
+    );
+    expect(hasWideHorizontalOverflow).toBe(false);
   });
 
   test("renders the day calendar timeline and its empty-slot action", async ({

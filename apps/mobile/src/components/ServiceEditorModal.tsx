@@ -2,6 +2,7 @@ import type { MessageKey } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,6 +23,7 @@ import { ActionButton } from "./ActionButton";
 import { FullscreenModal } from "./FullscreenModal";
 
 type ServiceEditorModalProps = {
+  readonly categories: readonly string[];
   readonly error: string | null;
   readonly isSaving: boolean;
   readonly onClose: () => void;
@@ -32,6 +34,7 @@ type ServiceEditorModalProps = {
 };
 
 export function ServiceEditorModal({
+  categories,
   error,
   isSaving,
   onClose,
@@ -122,11 +125,58 @@ export function ServiceEditorModal({
             onChangeText={(name) => updateDraft({ name })}
             value={draft.name}
           />
-          <Field
-            label={t("mobile.serviceCategory")}
-            onChangeText={(category) => updateDraft({ category })}
-            value={draft.category}
-          />
+          <View style={styles.categoryField}>
+            <Text style={styles.label}>{t("mobile.serviceCategory")}</Text>
+            {categories.length > 0 ? (
+              <>
+                <Text style={styles.categoryHint}>
+                  {t("mobile.serviceCategoryHint")}
+                </Text>
+                <ScrollView
+                  contentContainerStyle={styles.categoryOptions}
+                  horizontal
+                  keyboardShouldPersistTaps="handled"
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {categories.map((category) => {
+                    const selected =
+                      draft.category.trim().toLocaleLowerCase() ===
+                      category.toLocaleLowerCase();
+                    return (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        key={category}
+                        onPress={() => updateDraft({ category })}
+                        style={[
+                          styles.categoryOption,
+                          selected && styles.categoryOptionSelected,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.categoryOptionText,
+                            selected && styles.categoryOptionTextSelected,
+                          ]}
+                        >
+                          {category}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            ) : null}
+            <TextInput
+              accessibilityLabel={t("mobile.serviceCategory")}
+              autoCapitalize="sentences"
+              onChangeText={(category) => updateDraft({ category })}
+              placeholder={t("mobile.serviceCategoryPlaceholder")}
+              placeholderTextColor={colors.secondaryText}
+              style={styles.input}
+              value={draft.category}
+            />
+          </View>
           <Field
             error={validationError === "description"}
             label={t("mobile.serviceDescription")}
@@ -265,6 +315,24 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", gap: 12 },
   actions: { gap: 12 },
   body: { flex: 1 },
+  categoryField: { gap: 8, marginTop: 16 },
+  categoryHint: { ...typography.caption, color: colors.secondaryText },
+  categoryOptions: { flexDirection: "row", gap: 8 },
+  categoryOption: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  categoryOptionSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  categoryOptionText: { ...typography.label, color: colors.primaryText },
+  categoryOptionTextSelected: { color: colors.accent, fontWeight: "700" },
   description: {
     ...typography.body,
     color: colors.secondaryText,
