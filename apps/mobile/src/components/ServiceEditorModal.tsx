@@ -2,7 +2,6 @@ import type { MessageKey } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +18,7 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service } from "../types";
+import { ActionButton } from "./ActionButton";
 import { FullscreenModal } from "./FullscreenModal";
 
 type ServiceEditorModalProps = {
@@ -88,30 +88,22 @@ export function ServiceEditorModal({
             </Text>
           ) : null}
           <View style={styles.actionRow}>
-            <Pressable
-              accessibilityRole="button"
+            <ActionButton
               disabled={isSaving}
+              label={t("common.cancel")}
               onPress={onClose}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("common.cancel")}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
+              style={styles.actionButton}
+              variant="neutral"
+            />
+            <ActionButton
               disabled={isSaving}
+              label={t("mobile.serviceSave")}
+              loading={isSaving}
+              loadingLabel={t("common.loading")}
               onPress={() => void handleSave()}
-              style={({ pressed }) => [
-                styles.primaryButton,
-                pressed && styles.primaryButtonPressed,
-                isSaving && styles.disabled,
-              ]}
-            >
-              <Text style={styles.primaryButtonText}>
-                {isSaving ? t("common.loading") : t("mobile.serviceSave")}
-              </Text>
-            </Pressable>
+              style={styles.actionButton}
+              variant="primary"
+            />
           </View>
         </View>
       }
@@ -278,7 +270,6 @@ const styles = StyleSheet.create({
     color: colors.secondaryText,
     marginBottom: 8,
   },
-  disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
   field: { gap: 8, marginTop: 16 },
   form: { padding: 20, paddingBottom: 40 },
@@ -306,28 +297,8 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     textAlignVertical: "top",
   },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  primaryButtonPressed: { backgroundColor: colors.actionPressed },
-  primaryButtonText: { ...typography.label, color: colors.actionText },
+  actionButton: { flex: 1 },
   row: { flexDirection: "row", gap: 12 },
   rowField: { flex: 1, minWidth: 0 },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  secondaryButtonText: { ...typography.label, color: colors.primaryText },
   title: { ...typography.section, color: colors.primaryText },
 });
