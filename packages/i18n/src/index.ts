@@ -322,7 +322,6 @@ export type MessageKey =
   | "mobile.publicBookingLink"
   | "mobile.publicBookingDescription"
   | "mobile.settings"
-  | "mobile.settingsDescription"
   | "mobile.personalBlocks"
   | "mobile.personalBlockEmpty"
   | "mobile.personalBlockTitle"
@@ -803,8 +802,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingDescription":
       "Клиенты могут выбрать услугу и свободное время.",
     "mobile.settings": "Настройки",
-    "mobile.settingsDescription":
-      "Рабочее пространство, язык и ссылка для клиентов.",
     "mobile.personalBlocks": "Личные блоки",
     "mobile.personalBlockEmpty": "Личных блоков на ближайшие дни нет.",
     "mobile.personalBlockTitle": "Закрыть время",
@@ -1297,8 +1294,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingDescription":
       "Klienti si mohou vybrat službu a volný termín.",
     "mobile.settings": "Nastavení",
-    "mobile.settingsDescription":
-      "Pracovní prostor, jazyk a odkaz pro klienty.",
     "mobile.personalBlocks": "Osobní bloky",
     "mobile.personalBlockEmpty": "Na nejbližší dny nemáte žádné osobní bloky.",
     "mobile.personalBlockTitle": "Uzavřít čas",
@@ -1790,8 +1785,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.publicBookingDescription":
       "Clients can choose a service and available time.",
     "mobile.settings": "Settings",
-    "mobile.settingsDescription":
-      "Workspace, language, and the link you share with clients.",
     "mobile.personalBlocks": "Personal blocks",
     "mobile.personalBlockEmpty":
       "There are no personal blocks in the next few days.",

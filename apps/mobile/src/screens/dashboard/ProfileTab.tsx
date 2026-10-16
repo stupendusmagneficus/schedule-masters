@@ -62,13 +62,10 @@ export function ProfileTab({
         >
           <MaterialCommunityIcons
             color={colors.primaryText}
-            name="cog-outline"
-            size={24}
+            name="cog"
+            size={22}
           />
-          <View style={styles.settingsCopy}>
-            <Text style={styles.settingsTitle}>{t("mobile.settings")}</Text>
-            <Text style={styles.helper}>{t("mobile.settingsDescription")}</Text>
-          </View>
+          <Text style={styles.settingsTitle}>{t("mobile.settings")}</Text>
           <MaterialCommunityIcons
             color={colors.secondaryText}
             name="chevron-right"
@@ -118,9 +115,7 @@ export function ProfileTab({
 const styles = StyleSheet.create({
   content: { gap: 16 },
   disabledButton: { opacity: 0.6 },
-  helper: { ...typography.body, color: colors.secondaryText },
   settingsCard: { padding: 0 },
-  settingsCopy: { flex: 1, gap: 4 },
   settingsEntry: {
     alignItems: "center",
     flexDirection: "row",
@@ -132,6 +127,7 @@ const styles = StyleSheet.create({
   settingsTitle: {
     ...typography.section,
     color: colors.primaryText,
+    flex: 1,
     fontWeight: "700",
   },
   signOutButton: {

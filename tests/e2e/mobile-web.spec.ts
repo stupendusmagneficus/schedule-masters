@@ -422,6 +422,7 @@ test.describe("mobile web smoke", () => {
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
+    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
 
     await expect(
       page.getByRole("link", {

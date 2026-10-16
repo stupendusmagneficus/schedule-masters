@@ -56,9 +56,6 @@ export function SettingsModal({
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.description}>
-            {t("mobile.settingsDescription")}
-          </Text>
           {canManageWorkspace && client ? (
             <InfoCard>
               <Text style={styles.sectionTitle}>
@@ -119,7 +116,6 @@ const styles = StyleSheet.create({
   action: { marginTop: 16 },
   bookingLink: { marginBottom: 8, minHeight: 44, justifyContent: "center" },
   content: { gap: 16, padding: 16, paddingBottom: 32 },
-  description: { ...typography.body, color: colors.secondaryText },
   helper: { ...typography.body, color: colors.secondaryText },
   link: { ...typography.label, color: colors.accent, fontWeight: "700" },
   sectionTitle: {
