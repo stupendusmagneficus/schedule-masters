@@ -9,8 +9,8 @@
   --line-subtle: #ebefec;
   --accent: #2f7d5c;
   --accent-pressed: #256246;
-  --action: #202522;
-  --action-pressed: #151a17;
+  --action: #2f7d5c;
+  --action-pressed: #256246;
   --action-soft: #e8f2ed;
   --success: #2f7d5c;
   --success-soft: #e8f2ed;
@@ -47,6 +47,11 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .page-shell {
@@ -268,6 +273,16 @@ textarea {
 .secondary-button:hover {
   background: var(--surface-subtle);
   border-color: var(--action);
+}
+
+.danger-button {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.danger-button:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
 }
 
 .confirmation-close-button {
