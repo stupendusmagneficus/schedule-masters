@@ -225,18 +225,48 @@ describe("Supabase public booking contract", () => {
         reason: "Lunch",
       });
 
+      const updatedBlock = await userA.client.rpc(
+        "update_master_availability_block",
+        {
+          p_block_id: blockId as string,
+          p_date: "2030-02-05",
+          p_end_local_time: "15:00",
+          p_reason: "Updated lunch",
+          p_start_local_time: "14:00",
+          p_workspace_id: workspaceA,
+        },
+      );
+      expect(updatedBlock.error).toBeNull();
+      expect(updatedBlock.data).toMatchObject({ reason: "Updated lunch" });
+
       const duplicateBlock = await userA.client.rpc(
         "create_master_availability_block",
         {
           p_date: "2030-02-05",
-          p_end_local_time: "13:30",
+          p_end_local_time: "15:30",
           p_reason: "Overlapping lunch",
-          p_start_local_time: "12:30",
+          p_start_local_time: "14:30",
           p_workspace_id: workspaceA,
         },
       );
       expect(duplicateBlock.error?.message).toContain(
         "overlaps an existing block",
+      );
+
+      const crossWorkspaceUpdate = await userB.client.rpc(
+        "update_master_availability_block",
+        {
+          p_block_id: blockId as string,
+          p_date: "2030-02-05",
+          p_end_local_time: "16:00",
+          p_reason: "Cross-workspace update",
+          p_start_local_time: "15:00",
+          p_workspace_id: workspaceA,
+        },
+      );
+      expect(crossWorkspaceUpdate.data).toBeNull();
+      expect(crossWorkspaceUpdate.error?.message).toContain(
+        "Workspace access denied",
       );
 
       const crossWorkspaceBlock = await userB.client.rpc(

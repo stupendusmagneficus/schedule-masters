@@ -316,6 +316,13 @@ test.describe("mobile web smoke", () => {
       })
       .click();
     await expect(
+      page.getByRole("heading", { name: "Co přidat v tomto čase?" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Přidat pauzu" }).first(),
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "Nová rezervace" }).last().click();
+    await expect(
       page.getByText(
         "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
       ),

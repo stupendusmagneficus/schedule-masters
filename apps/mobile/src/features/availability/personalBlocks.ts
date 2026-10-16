@@ -31,6 +31,12 @@ export function validatePersonalBlockDraft(
   return null;
 }
 
+export function createDefaultPersonalBlockDraft(
+  date: string,
+): PersonalBlockDraft {
+  return { date, endTime: "13:00", reason: "", startTime: "12:00" };
+}
+
 export async function listPersonalBlocks(
   client: PersonalBlockClient,
   workspaceId: string,
@@ -74,6 +80,24 @@ export async function createPersonalBlock(
   if (error) throw new Error(error.message);
 }
 
+export async function updatePersonalBlock(
+  client: PersonalBlockClient,
+  workspaceId: string,
+  blockId: string,
+  draft: PersonalBlockDraft,
+): Promise<void> {
+  const { error } = await client.rpc("update_master_availability_block", {
+    p_block_id: blockId,
+    p_date: draft.date,
+    p_end_local_time: draft.endTime,
+    p_reason: draft.reason.trim() || undefined,
+    p_start_local_time: draft.startTime,
+    p_workspace_id: workspaceId,
+  });
+
+  if (error) throw new Error(error.message);
+}
+
 export async function deletePersonalBlock(
   client: PersonalBlockClient,
   workspaceId: string,
@@ -101,6 +125,42 @@ export function formatDateInTimeZone(date: Date, timezone: string): string {
   );
 
   return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function formatTimeInTimeZone(date: Date, timezone: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    hourCycle: "h23",
+    minute: "2-digit",
+    timeZone: timezone,
+  }).format(date);
+}
+
+export function getPersonalBlockDraft(
+  block: PersonalBlock,
+  timezone: string,
+): PersonalBlockDraft {
+  return {
+    date: formatDateInTimeZone(new Date(block.starts_at), timezone),
+    endTime: formatTimeInTimeZone(new Date(block.ends_at), timezone),
+    reason: block.reason ?? "",
+    startTime: formatTimeInTimeZone(new Date(block.starts_at), timezone),
+  };
+}
+
+export function getPersonalBlockDraftForSlot(
+  startsAt: string,
+  timezone: string,
+  durationMinutes = 30,
+): PersonalBlockDraft {
+  const startsAtDate = new Date(startsAt);
+  const date = formatDateInTimeZone(startsAtDate, timezone);
+  const startTime = formatTimeInTimeZone(startsAtDate, timezone);
+  const [hour, minute] = startTime.split(":").map(Number);
+  const endMinuteOfDay = Math.min(hour * 60 + minute + durationMinutes, 1439);
+  const endTime = `${String(Math.floor(endMinuteOfDay / 60)).padStart(2, "0")}:${String(endMinuteOfDay % 60).padStart(2, "0")}`;
+
+  return { date, endTime, reason: "", startTime };
 }
 
 function addDays(value: string, days: number): string {

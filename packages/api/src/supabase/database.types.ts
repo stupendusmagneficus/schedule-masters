@@ -1266,6 +1266,17 @@ export type Database = {
         Args: { p_action: string; p_token: string }
         Returns: Json
       }
+      update_master_availability_block: {
+        Args: {
+          p_block_id: string
+          p_date: string
+          p_end_local_time: string
+          p_reason?: string
+          p_start_local_time: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       update_master_waiting_list_entry: {
         Args: {
           p_customer_email?: string

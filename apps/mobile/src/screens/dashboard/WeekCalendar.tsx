@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { getAppointmentStatusLabel } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import type { PersonalBlock } from "../../features/availability/personalBlocks";
 import { formatTimelineTime } from "../../features/calendar/dayTimeline";
 import {
   buildWeekCalendarMonth,
@@ -24,6 +25,7 @@ type WeekCalendarProps = {
   readonly locale: SupportedLocale;
   readonly onNext: () => void;
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly onPressDay?: (date: string) => void;
   readonly onPressTime?: (date: string, minute: number) => void;
   readonly onPrevious: () => void;
@@ -41,6 +43,7 @@ export function WeekCalendar({
   locale,
   onNext,
   onPressAppointment,
+  onPressBlock,
   onPressDay,
   onPressTime,
   onPrevious,
@@ -214,6 +217,7 @@ export function WeekCalendar({
                   key={event.id}
                   locale={locale}
                   onPressAppointment={onPressAppointment}
+                  onPressBlock={onPressBlock}
                   t={t}
                   timezone={timezone}
                 />
@@ -233,6 +237,7 @@ function WeekCalendarEventCard({
   gridStartMinute,
   locale,
   onPressAppointment,
+  onPressBlock,
   t,
   timezone,
 }: {
@@ -240,6 +245,7 @@ function WeekCalendarEventCard({
   readonly gridStartMinute: number;
   readonly locale: SupportedLocale;
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly t: WeekCalendarProps["t"];
   readonly timezone: string;
 }) {
@@ -258,7 +264,11 @@ function WeekCalendarEventCard({
   );
   const isOnlineAppointment = event.appointment?.source === "public_booking";
   const statusColor =
-    event.status === "pending" ? colors.pendingText : colors.accent;
+    event.kind === "block"
+      ? colors.danger
+      : event.status === "pending"
+        ? colors.pendingText
+        : colors.accent;
   const accessibilityLabel =
     event.appointment && event.status
       ? `${event.title}, ${event.subtitle}, ${t(event.appointment.source === "public_booking" ? "mobile.calendarOnlineBooking" : "mobile.calendarManualBooking")}, ${getAppointmentStatusLabel(event.status, t)}`
@@ -273,23 +283,61 @@ function WeekCalendarEventCard({
           style={[styles.eventStatusDot, { backgroundColor: statusColor }]}
         />
       </View>
-      <Text numberOfLines={1} style={styles.eventTitle}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.eventTitle,
+          event.kind === "block" && styles.blockEventText,
+        ]}
+      >
         {event.title}
       </Text>
       {height >= 48 ? (
-        <Text numberOfLines={1} style={styles.eventSubtitle}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.eventSubtitle,
+            event.kind === "block" && styles.blockEventText,
+          ]}
+        >
           {event.subtitle || t("mobile.personalBlocks")}
         </Text>
       ) : null}
     </>
   );
 
-  if (!event.appointment || !onPressAppointment) {
+  if (event.kind === "block") {
+    if (event.block && onPressBlock) {
+      return (
+        <Pressable
+          accessibilityLabel={`${accessibilityLabel}, ${t("mobile.personalBlockEditTitle")}`}
+          accessibilityRole="button"
+          onPress={() => onPressBlock(event.block as PersonalBlock)}
+          style={({ pressed }) => [
+            styles.event,
+            styles.blockEvent,
+            { height, top },
+            pressed && styles.pressed,
+          ]}
+        >
+          {content}
+        </Pressable>
+      );
+    }
+
     return (
       <View
         accessibilityLabel={accessibilityLabel}
         style={[styles.event, styles.blockEvent, { height, top }]}
       >
+        {content}
+      </View>
+    );
+  }
+
+  if (!event.appointment || !onPressAppointment) {
+    return (
+      <View style={[styles.event, styles.appointmentEvent, { height, top }]}>
         {content}
       </View>
     );
@@ -379,9 +427,10 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.scheduleOnline,
   },
   blockEvent: {
-    backgroundColor: colors.scheduleBreakSoft,
-    borderLeftColor: colors.scheduleBreak,
+    backgroundColor: colors.dangerSoft,
+    borderLeftColor: colors.danger,
   },
+  blockEventText: { color: colors.danger },
   closedColumn: { backgroundColor: colors.canvas },
   dayHeaderColumns: { flex: 1, flexDirection: "row", minWidth: 0 },
   event: {

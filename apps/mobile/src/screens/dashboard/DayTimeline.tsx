@@ -6,6 +6,7 @@ import {
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import type { PersonalBlock } from "../../features/availability/personalBlocks";
 import {
   type DayTimeline as DayTimelineData,
   type DayTimelineEvent,
@@ -18,6 +19,7 @@ import { CalendarEventLegend } from "./CalendarEventLegend";
 
 type DayTimelineProps = {
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly onPressEmptySlot?: (minute: number) => void;
   readonly t: (key: MessageKey) => string;
   readonly timeline: DayTimelineData;
@@ -25,6 +27,7 @@ type DayTimelineProps = {
 
 export function DayTimeline({
   onPressAppointment,
+  onPressBlock,
   onPressEmptySlot,
   t,
   timeline,
@@ -67,6 +70,7 @@ export function DayTimeline({
               event={event}
               key={event.id}
               onPressAppointment={onPressAppointment}
+              onPressBlock={onPressBlock}
               t={t}
               timeline={timeline}
             />
@@ -81,11 +85,13 @@ export function DayTimeline({
 function TimelineEvent({
   event,
   onPressAppointment,
+  onPressBlock,
   t,
   timeline,
 }: {
   readonly event: DayTimelineEvent;
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
+  readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly t: DayTimelineProps["t"];
   readonly timeline: DayTimelineData;
 }) {
@@ -110,7 +116,13 @@ function TimelineEvent({
   const content = (
     <>
       <View style={styles.eventHeader}>
-        <Text numberOfLines={1} style={styles.eventTitle}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.eventTitle,
+            event.kind === "block" && styles.blockEventText,
+          ]}
+        >
           {event.title}
         </Text>
         {appointment ? (
@@ -120,18 +132,50 @@ function TimelineEvent({
           />
         ) : null}
       </View>
-      <Text numberOfLines={1} style={styles.eventSubtitle}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.eventSubtitle,
+          event.kind === "block" && styles.blockEventText,
+        ]}
+      >
         {event.subtitle || t("mobile.personalBlocks")}
       </Text>
     </>
   );
 
-  if (!appointment || !onPressAppointment) {
+  if (event.kind === "block") {
+    if (event.block && onPressBlock) {
+      return (
+        <Pressable
+          accessibilityLabel={`${event.title}, ${t("mobile.personalBlockEditTitle")}`}
+          accessibilityRole="button"
+          onPress={() => onPressBlock(event.block as PersonalBlock)}
+          style={({ pressed }) => [
+            styles.event,
+            styles.blockEvent,
+            { height, top },
+            pressed && styles.eventPressed,
+          ]}
+        >
+          {content}
+        </Pressable>
+      );
+    }
+
     return (
       <View
         accessibilityLabel={`${event.title}, ${t("mobile.calendarBreak")}`}
         style={[styles.event, styles.blockEvent, { height, top }]}
       >
+        {content}
+      </View>
+    );
+  }
+
+  if (!appointment || !onPressAppointment) {
+    return (
+      <View style={[styles.event, styles.appointmentEvent, { height, top }]}>
         {content}
       </View>
     );
@@ -166,9 +210,10 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.scheduleOnline,
   },
   blockEvent: {
-    backgroundColor: colors.scheduleBreakSoft,
-    borderLeftColor: colors.scheduleBreak,
+    backgroundColor: colors.dangerSoft,
+    borderLeftColor: colors.danger,
   },
+  blockEventText: { color: colors.danger },
   closedState: {
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,

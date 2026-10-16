@@ -168,14 +168,17 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 4. Appointment blocks sized according to service duration; manual bookings use
    the established green, while online bookings use a muted palette-aligned
    violet, with a shared legend in day and week views.
-5. Master-created breaks use a warm neutral treatment, visibly distinct from
-   both booking sources and unavailable time.
+5. Master-created breaks and unavailable time use a soft danger surface and red
+   edge/text to communicate that the time is blocked without turning the
+   calendar into a high-saturation alert. This treatment remains distinct from
+   both booking sources.
 6. Free slots visibly distinct from booked time and remain tappable.
 7. Bottom/right primary action for adding an appointment or break.
 
 **Interaction rules:**
 
-- Selecting an empty slot opens the booking flow with the slot preselected.
+- Selecting an empty slot offers a new booking or a pause, with the selected date and time prefilled.
+- Selecting a pause in the day or week calendar opens its editable details; updates use the workspace timezone and reject overlaps.
 - The add action supports both a client appointment and a personal break from the same entry point.
 - Selecting a booking opens details and actions for reschedule/cancel according to the booking lifecycle.
 - Unavailable time and breaks are visually muted and not selectable.

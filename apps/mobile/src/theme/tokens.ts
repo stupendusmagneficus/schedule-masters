@@ -17,8 +17,6 @@ export const colors = {
   primaryText: "#202522",
   scheduleOnline: "#705983",
   scheduleOnlineSoft: "#F0EDF5",
-  scheduleBreak: "#897C63",
-  scheduleBreakSoft: "#F5F1E9",
   secondaryText: "#68716C",
   subtleSurface: "#F0F2F0",
   surface: "#FFFFFF",

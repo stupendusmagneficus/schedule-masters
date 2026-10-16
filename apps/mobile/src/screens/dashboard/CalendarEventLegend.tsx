@@ -19,10 +19,7 @@ export function CalendarEventLegend({
         color={colors.scheduleOnline}
         label={t("mobile.calendarOnlineBooking")}
       />
-      <LegendItem
-        color={colors.scheduleBreak}
-        label={t("mobile.calendarBreak")}
-      />
+      <LegendItem color={colors.danger} label={t("mobile.calendarBreak")} />
     </View>
   );
 }
