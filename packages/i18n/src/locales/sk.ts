@@ -235,6 +235,7 @@ export const slovakMessages: Messages = {
   "mobile.todayLoadFailed": "Rozvrh sa nepodarilo načítať.",
   "mobile.todayRetry": "Skúsiť znova",
   "mobile.calendar": "Kalendár",
+  "mobile.calendarSelectDate": "Vyberte dátum",
   "mobile.customers": "Klienti",
   "mobile.customerSearch": "Meno, telefón alebo e-mail",
   "mobile.customerEmpty":
@@ -355,6 +356,9 @@ export const slovakMessages: Messages = {
   "mobile.paymentSaved": "Platba bola uložená",
   "mobile.paymentSaveFailed": "Platbu sa nepodarilo uložiť.",
   "mobile.nextBooking": "Nasledujúca rezervácia",
+  "mobile.calendarManualBooking": "Rezervácia od vás",
+  "mobile.calendarOnlineBooking": "Online rezervácia",
+  "mobile.calendarBreak": "Prestávka",
   "mobile.noBookingsToday": "Dnes nemáte žiadne rezervácie.",
   "mobile.noBookingsOnDay": "Na tento dátum nemáte žiadne rezervácie.",
   "mobile.daySchedule": "Denný rozvrh",

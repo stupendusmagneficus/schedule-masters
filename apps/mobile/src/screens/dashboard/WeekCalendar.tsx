@@ -11,6 +11,7 @@ import {
   type WeekCalendarEvent,
 } from "../../features/calendar/weekCalendar";
 import { colors, radii } from "../../theme/tokens";
+import { CalendarEventLegend } from "./CalendarEventLegend";
 import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 
 const compactSlotHeight = 24;
@@ -221,6 +222,7 @@ export function WeekCalendar({
           ))}
         </View>
       </View>
+      <CalendarEventLegend t={t} />
       <Text style={styles.hint}>{t("mobile.calendarTapToBook")}</Text>
     </View>
   );
@@ -254,12 +256,13 @@ function WeekCalendarEventCard({
     ((endMinute - startMinute) / 30) * compactSlotHeight - 2,
     22,
   );
+  const isOnlineAppointment = event.appointment?.source === "public_booking";
   const statusColor =
     event.status === "pending" ? colors.pendingText : colors.accent;
   const accessibilityLabel =
     event.appointment && event.status
-      ? `${event.title}, ${event.subtitle}, ${getAppointmentStatusLabel(event.status, t)}`
-      : `${event.title}, ${event.subtitle || t("mobile.personalBlocks")}`;
+      ? `${event.title}, ${event.subtitle}, ${t(event.appointment.source === "public_booking" ? "mobile.calendarOnlineBooking" : "mobile.calendarManualBooking")}, ${getAppointmentStatusLabel(event.status, t)}`
+      : `${event.title}, ${event.subtitle || t("mobile.calendarBreak")}`;
   const content = (
     <>
       <View style={styles.eventTopLine}>
@@ -299,7 +302,9 @@ function WeekCalendarEventCard({
       onPress={() => onPressAppointment(event.appointment as MasterAppointment)}
       style={({ pressed }) => [
         styles.event,
-        styles.appointmentEvent,
+        isOnlineAppointment
+          ? styles.onlineAppointmentEvent
+          : styles.appointmentEvent,
         { height, top },
         pressed && styles.pressed,
       ]}
@@ -369,9 +374,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSoft,
     borderLeftColor: colors.accent,
   },
+  onlineAppointmentEvent: {
+    backgroundColor: colors.scheduleOnlineSoft,
+    borderLeftColor: colors.scheduleOnline,
+  },
   blockEvent: {
-    backgroundColor: colors.subtleSurface,
-    borderLeftColor: colors.secondaryText,
+    backgroundColor: colors.scheduleBreakSoft,
+    borderLeftColor: colors.scheduleBreak,
   },
   closedColumn: { backgroundColor: colors.canvas },
   dayHeaderColumns: { flex: 1, flexDirection: "row", minWidth: 0 },

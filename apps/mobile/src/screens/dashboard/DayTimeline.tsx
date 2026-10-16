@@ -14,6 +14,7 @@ import {
 } from "../../features/calendar/dayTimeline";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
+import { CalendarEventLegend } from "./CalendarEventLegend";
 
 type DayTimelineProps = {
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
@@ -72,16 +73,7 @@ export function DayTimeline({
           ))}
         </View>
       </View>
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.appointmentDot]} />
-          <Text style={styles.legendText}>{t("mobile.nextBooking")}</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.blockDot]} />
-          <Text style={styles.legendText}>{t("mobile.personalBlocks")}</Text>
-        </View>
-      </View>
+      <CalendarEventLegend t={t} />
     </View>
   );
 }
@@ -108,6 +100,13 @@ function TimelineEvent({
       timelineSlotHeight +
     3;
   const appointment = event.appointment;
+  const appointmentSource = appointment
+    ? t(
+        appointment.source === "public_booking"
+          ? "mobile.calendarOnlineBooking"
+          : "mobile.calendarManualBooking",
+      )
+    : "";
   const content = (
     <>
       <View style={styles.eventHeader}>
@@ -130,7 +129,7 @@ function TimelineEvent({
   if (!appointment || !onPressAppointment) {
     return (
       <View
-        accessibilityLabel={`${event.title}, ${t("mobile.personalBlocks")}`}
+        accessibilityLabel={`${event.title}, ${t("mobile.calendarBreak")}`}
         style={[styles.event, styles.blockEvent, { height, top }]}
       >
         {content}
@@ -140,12 +139,14 @@ function TimelineEvent({
 
   return (
     <Pressable
-      accessibilityLabel={`${appointment.customer_name}, ${getAppointmentStatusLabel(appointment.status, t)}`}
+      accessibilityLabel={`${appointment.customer_name}, ${appointmentSource}, ${getAppointmentStatusLabel(appointment.status, t)}`}
       accessibilityRole="button"
       onPress={() => onPressAppointment(appointment)}
       style={({ pressed }) => [
         styles.event,
         styles.appointmentEvent,
+        appointment.source === "public_booking" &&
+          styles.onlineAppointmentEvent,
         { height, top },
         pressed && styles.eventPressed,
       ]}
@@ -156,15 +157,17 @@ function TimelineEvent({
 }
 
 const styles = StyleSheet.create({
-  appointmentDot: { backgroundColor: colors.accent },
   appointmentEvent: {
     backgroundColor: colors.accentSoft,
     borderLeftColor: colors.accent,
   },
-  blockDot: { backgroundColor: colors.secondaryText },
+  onlineAppointmentEvent: {
+    backgroundColor: colors.scheduleOnlineSoft,
+    borderLeftColor: colors.scheduleOnline,
+  },
   blockEvent: {
-    backgroundColor: colors.subtleSurface,
-    borderLeftColor: colors.secondaryText,
+    backgroundColor: colors.scheduleBreakSoft,
+    borderLeftColor: colors.scheduleBreak,
   },
   closedState: {
     backgroundColor: colors.subtleSurface,
@@ -205,10 +208,6 @@ const styles = StyleSheet.create({
   gridRow: { flexDirection: "row", height: timelineSlotHeight },
   gridRowPressed: { backgroundColor: colors.accentSoft },
   helper: { ...typography.body, color: colors.secondaryText },
-  legend: { flexDirection: "row", gap: 16, marginTop: 12 },
-  legendDot: { borderRadius: 999, height: 8, width: 8 },
-  legendItem: { alignItems: "center", flexDirection: "row", gap: 6 },
-  legendText: { ...typography.caption, color: colors.secondaryText },
   timeColumn: { alignItems: "flex-start", width: 58 },
   timeLabel: { ...typography.caption, color: colors.secondaryText },
   timeline: { overflow: "hidden" },

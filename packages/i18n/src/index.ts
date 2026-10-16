@@ -206,6 +206,7 @@ export type MessageKey =
   | "mobile.todayLoadFailed"
   | "mobile.todayRetry"
   | "mobile.calendar"
+  | "mobile.calendarSelectDate"
   | "mobile.customers"
   | "mobile.customerSearch"
   | "mobile.customerEmpty"
@@ -311,6 +312,9 @@ export type MessageKey =
   | "mobile.paymentSaved"
   | "mobile.paymentSaveFailed"
   | "mobile.nextBooking"
+  | "mobile.calendarManualBooking"
+  | "mobile.calendarOnlineBooking"
+  | "mobile.calendarBreak"
   | "mobile.noBookingsToday"
   | "mobile.noBookingsOnDay"
   | "mobile.daySchedule"
@@ -668,6 +672,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
+    "mobile.calendarSelectDate": "Выберите дату",
     "mobile.customers": "Клиенты",
     "mobile.customerSearch": "Имя, телефон или email",
     "mobile.customerEmpty": "Клиентов пока нет. Они появятся после записей.",
@@ -788,6 +793,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaved": "Оплата сохранена",
     "mobile.paymentSaveFailed": "Не удалось сохранить оплату.",
     "mobile.nextBooking": "Следующая запись",
+    "mobile.calendarManualBooking": "Запись мастера",
+    "mobile.calendarOnlineBooking": "Онлайн-запись",
+    "mobile.calendarBreak": "Перерыв",
     "mobile.noBookingsToday": "На сегодня записей нет.",
     "mobile.noBookingsOnDay": "На эту дату записей нет.",
     "mobile.daySchedule": "Расписание дня",
@@ -1157,6 +1165,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
+    "mobile.calendarSelectDate": "Vyberte datum",
     "mobile.customers": "Klienti",
     "mobile.customerSearch": "Jméno, telefon nebo e-mail",
     "mobile.customerEmpty":
@@ -1277,6 +1286,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaved": "Platba uložena",
     "mobile.paymentSaveFailed": "Platbu se nepodařilo uložit.",
     "mobile.nextBooking": "Další rezervace",
+    "mobile.calendarManualBooking": "Rezervace od vás",
+    "mobile.calendarOnlineBooking": "Online rezervace",
+    "mobile.calendarBreak": "Přestávka",
     "mobile.noBookingsToday": "Na dnešek nemáte žádné rezervace.",
     "mobile.noBookingsOnDay": "Na tento den nejsou žádné rezervace.",
     "mobile.daySchedule": "Denní rozvrh",
@@ -1645,6 +1657,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "The schedule could not be loaded.",
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
+    "mobile.calendarSelectDate": "Choose a date",
     "mobile.customers": "Customers",
     "mobile.customerSearch": "Name, phone, or email",
     "mobile.customerEmpty":
@@ -1765,6 +1778,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.paymentSaved": "Payment saved",
     "mobile.paymentSaveFailed": "Could not save payment.",
     "mobile.nextBooking": "Next booking",
+    "mobile.calendarManualBooking": "Created by you",
+    "mobile.calendarOnlineBooking": "Online booking",
+    "mobile.calendarBreak": "Break",
     "mobile.noBookingsToday": "There are no bookings today.",
     "mobile.noBookingsOnDay": "There are no bookings for this date.",
     "mobile.daySchedule": "Day schedule",

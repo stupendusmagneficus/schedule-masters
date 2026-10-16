@@ -29,6 +29,7 @@ import {
 import { formatDateInTimeZone } from "../features/availability/personalBlocks";
 import { useBookingRequests } from "../features/bookingRequests/useBookingRequests";
 import { useCalendarData } from "../features/calendar/useCalendarData";
+import { useCalendarMonthWindow } from "../features/calendar/useCalendarMonthWindow";
 import { buildCustomerPhoneUrl } from "../features/customers/customerContact";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
 import { useCustomerPhone } from "../features/customers/useCustomerPhone";
@@ -143,6 +144,12 @@ export function DashboardScreen({
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
+  const calendarMonthWindow = useCalendarMonthWindow({
+    client,
+    enabled: activeTab === "calendar" && calendar.view === "month",
+    selectedDate: calendar.selectedDate,
+    workspaceId: workspace.id,
+  });
   const bookingRequests = useBookingRequests({
     client,
     enabled: activeTab === "today" && !demoData,
@@ -153,6 +160,8 @@ export function DashboardScreen({
     enabled: activeTab === "today" && !demoData,
     workspaceId: workspace.id,
   });
+  const isFullscreenMonthCalendar =
+    activeTab === "calendar" && calendar.view === "month";
   const customerPhone = useCustomerPhone({
     client,
     customerId: selectedAppointment?.customer_id ?? null,
@@ -392,7 +401,13 @@ export function DashboardScreen({
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          isFullscreenMonthCalendar && styles.monthCalendarContent,
+        ]}
+        scrollEnabled={!isFullscreenMonthCalendar}
+      >
         {activeTab === "today" && (
           <TodayTab
             locale={locale}
@@ -435,6 +450,7 @@ export function DashboardScreen({
         {activeTab === "calendar" && (
           <CalendarTab
             calendar={calendar}
+            monthWindow={calendarMonthWindow}
             client={client}
             demoData={demoData}
             locale={locale}
@@ -684,5 +700,11 @@ const styles = StyleSheet.create({
     paddingTop: spacing.compact,
   },
   content: { gap: spacing.section, padding: spacing.page, paddingBottom: 128 },
+  monthCalendarContent: {
+    flex: 1,
+    gap: 0,
+    padding: spacing.page,
+    paddingBottom: 88,
+  },
   screen: { backgroundColor: colors.canvas, flex: 1 },
 });
