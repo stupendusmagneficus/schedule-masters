@@ -60,11 +60,6 @@ export function ProfileTab({
           onPress={() => setSettingsVisible(true)}
           style={styles.settingsEntry}
         >
-          <MaterialCommunityIcons
-            color={colors.primaryText}
-            name="cog"
-            size={22}
-          />
           <Text style={styles.settingsTitle}>{t("mobile.settings")}</Text>
           <MaterialCommunityIcons
             color={colors.secondaryText}
