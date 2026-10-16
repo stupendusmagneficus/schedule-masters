@@ -55,7 +55,10 @@ Deno.test("keeps jobs marked not configured until provider setup is enabled", as
 Deno.test("sends through the provider with a stable idempotency key", async () => {
   const calls: { readonly url: string; readonly init?: RequestInit }[] = [];
   const handler = createHandler({
-    env: environment(baseEnvironment),
+    env: environment({
+      ...baseEnvironment,
+      BOOKING_EMAIL_TEST_RECIPIENTS: " Owner@Example.Test, owner@example.test ",
+    }),
     fetcher: async (input, init) => {
       const url = String(input);
       calls.push({ init, url });
@@ -98,7 +101,36 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
     new Headers(providerCall?.init?.headers).get("idempotency-key"),
     "booking-decision-outbox-job-1",
   );
+  const claimCall = calls.find(({ url }) =>
+    url.includes("claim_booking_decision_emails"),
+  );
+  assert.deepEqual(JSON.parse(String(claimCall?.init?.body)), {
+    p_batch_size: 20,
+    p_recipient_allowlist: ["owner@example.test"],
+  });
   assert.equal(calls.length, 3);
+});
+
+Deno.test("rejects an invalid smoke-test allowlist without claiming jobs", async () => {
+  const calls: string[] = [];
+  const handler = createHandler({
+    env: environment({
+      ...baseEnvironment,
+      BOOKING_EMAIL_TEST_RECIPIENTS: "",
+    }),
+    fetcher: async (input) => {
+      calls.push(String(input));
+      return Response.json([]);
+    },
+  });
+
+  const response = await handler(authorizedRequest());
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    error: "invalid_test_recipient_allowlist",
+  });
+  assert.equal(calls.length, 0);
 });
 
 Deno.test("retries transient provider errors and records only a safe error code", async () => {

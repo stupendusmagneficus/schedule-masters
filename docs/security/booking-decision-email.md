@@ -15,9 +15,13 @@
 - The Edge Function `send-booking-decision-emails` uses Resend behind an
   explicit feature flag. It is safe to deploy before provider setup: it leaves
   notifications in `not_configured` and does not call a mail provider.
+- For a production smoke test, `BOOKING_EMAIL_TEST_RECIPIENTS` can restrict
+  which outbox recipients the worker claims. An invalid configured allowlist
+  fails closed; when unset, the worker processes the regular queue.
 - No production delivery is enabled by this code change. See the Linear
-  Infrastructure project task for domain, secrets, scheduling, and smoke-test
-  steps.
+  Infrastructure project task and
+  [production runbook](../operations/booking-decision-email-production.md)
+  for domain, secrets, scheduling, retention, and smoke-test steps.
 
 ## Outbox states
 
@@ -32,6 +36,8 @@
 The worker is invoked by an authenticated scheduler with the Supabase service
 role bearer token. It reads `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 `BOOKING_EMAIL_DELIVERY_ENABLED`, `RESEND_API_KEY`, and `BOOKING_EMAIL_FROM`.
+During the controlled production smoke test only, it may also read
+`BOOKING_EMAIL_TEST_RECIPIENTS` as a comma-separated allowlist.
 Keep the feature flag false and do not set provider secrets until the sending
 domain and production smoke test are ready. Never put secrets in app clients or
 logs.

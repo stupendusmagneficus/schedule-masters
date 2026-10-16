@@ -385,6 +385,7 @@ export type Database = {
           attempts: number
           created_at: string
           decision: string
+          finalized_at: string | null
           id: string
           last_error: string | null
           locale: string
@@ -404,6 +405,7 @@ export type Database = {
           attempts?: number
           created_at?: string
           decision: string
+          finalized_at?: string | null
           id?: string
           last_error?: string | null
           locale: string
@@ -423,6 +425,7 @@ export type Database = {
           attempts?: number
           created_at?: string
           decision?: string
+          finalized_at?: string | null
           id?: string
           last_error?: string | null
           locale?: string
@@ -954,6 +957,20 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      claim_booking_decision_emails_for_delivery: {
+        Args: { p_batch_size?: number; p_recipient_allowlist?: string[] }
+        Returns: {
+          attempts: number
+          decision: string
+          id: string
+          locale: string
+          recipient: string
+          service_name: string
+          starts_at: string
+          timezone: string
+          workspace_name: string
+        }[]
+      }
       create_customer_appointment_link: {
         Args: {
           p_appointment_id: string
@@ -1207,6 +1224,7 @@ export type Database = {
         Args: { p_appointment_id: string; p_workspace_id: string }
         Returns: string
       }
+      purge_expired_booking_decision_emails: { Args: never; Returns: number }
       record_customer_link_share: {
         Args: {
           p_appointment_id: string
