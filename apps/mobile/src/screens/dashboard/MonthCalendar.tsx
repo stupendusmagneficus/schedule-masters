@@ -16,7 +16,10 @@ import {
   Text,
   View,
 } from "react-native";
-import type { MonthCalendarDay } from "../../features/calendar/monthCalendar";
+import {
+  getCalendarWorkloadLevel,
+  type MonthCalendarDay,
+} from "../../features/calendar/monthCalendar";
 import type { CalendarMonthEntry } from "../../features/calendar/useCalendarMonthWindow";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
@@ -120,7 +123,6 @@ export function MonthCalendar({
           <MonthGrid
             days={item.days}
             hasError={item.hasError}
-            isLoading={item.isLoading}
             locale={locale}
             onSelectDate={onSelectDate}
             t={t}
@@ -180,14 +182,12 @@ export function MonthCalendar({
 function MonthGrid({
   days,
   hasError,
-  isLoading,
   locale,
   onSelectDate,
   t,
 }: {
   readonly days: readonly MonthCalendarDay[];
   readonly hasError: boolean;
-  readonly isLoading: boolean;
   readonly locale: SupportedLocale;
   readonly onSelectDate: (date: string) => void;
   readonly t: MonthCalendarProps["t"];
@@ -205,9 +205,6 @@ function MonthGrid({
     <View style={styles.monthRow}>
       <View style={styles.monthHeading}>
         <Text style={styles.monthTitle}>{monthLabel}</Text>
-        {isLoading ? (
-          <ActivityIndicator color={colors.accent} size="small" />
-        ) : null}
         {hasError ? (
           <Text style={styles.error}>{t("common.error")}</Text>
         ) : null}
@@ -248,8 +245,12 @@ function MonthGrid({
                 <View
                   accessibilityElementsHidden
                   style={[
-                    getWorkloadRingStyle(day.bookingCount),
-                    day.isSelected && styles.workloadRingSelected,
+                    getWorkloadRingStyle(
+                      day.bookingCount,
+                      day.isSelected
+                        ? colors.actionText
+                        : getWorkloadColor(day.bookingCount),
+                    ),
                   ]}
                 />
               ) : null}
@@ -267,7 +268,11 @@ function MonthGrid({
                   <Text
                     style={[
                       styles.bookingCount,
-                      day.isSelected && styles.selectedIndicator,
+                      {
+                        color: day.isSelected
+                          ? colors.actionText
+                          : getWorkloadColor(day.bookingCount),
+                      },
                     ]}
                   >
                     {day.bookingCount}
@@ -318,13 +323,26 @@ function formatRevenue(day: MonthCalendarDay, locale: SupportedLocale): string {
     .join(" · ");
 }
 
-function getWorkloadRingStyle(bookingCount: number) {
+function getWorkloadColor(bookingCount: number): string {
+  switch (getCalendarWorkloadLevel(bookingCount)) {
+    case "high":
+      return colors.danger;
+    case "medium":
+      return colors.pendingText;
+    default:
+      return colors.accent;
+  }
+}
+
+function getWorkloadRingStyle(bookingCount: number, color: string) {
   return [
     styles.workloadRing,
-    styles.workloadRingOne,
-    bookingCount >= 2 && styles.workloadRingTwo,
-    bookingCount >= 3 && styles.workloadRingThree,
-    bookingCount >= 4 && styles.workloadRingFour,
+    {
+      borderBottomColor: bookingCount >= 3 ? color : "transparent",
+      borderLeftColor: bookingCount >= 4 ? color : "transparent",
+      borderRightColor: bookingCount >= 2 ? color : "transparent",
+      borderTopColor: color,
+    },
   ];
 }
 
@@ -483,14 +501,4 @@ const styles = StyleSheet.create({
     top: 1,
     width: 38,
   },
-  workloadRingFour: { borderLeftColor: colors.accent },
-  workloadRingOne: {
-    borderBottomColor: "transparent",
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: colors.accent,
-  },
-  workloadRingSelected: { borderColor: colors.actionText },
-  workloadRingThree: { borderBottomColor: colors.accent },
-  workloadRingTwo: { borderRightColor: colors.accent },
 });

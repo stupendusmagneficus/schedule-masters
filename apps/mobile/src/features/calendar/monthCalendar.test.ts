@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { MasterAppointment } from "../appointments/manualBooking";
 import type { PersonalBlock } from "../availability/personalBlocks";
-import { buildMonthCalendar } from "./monthCalendar";
+import { buildMonthCalendar, getCalendarWorkloadLevel } from "./monthCalendar";
 
 const appointment = {
   currency: "CZK",
@@ -54,6 +54,14 @@ describe("month calendar", () => {
       isToday: true,
       isClosed: false,
     });
+  });
+
+  it("maps booking counts to low, medium, and high workload levels", () => {
+    expect(getCalendarWorkloadLevel(1)).toBe("low");
+    expect(getCalendarWorkloadLevel(2)).toBe("low");
+    expect(getCalendarWorkloadLevel(3)).toBe("medium");
+    expect(getCalendarWorkloadLevel(4)).toBe("medium");
+    expect(getCalendarWorkloadLevel(5)).toBe("high");
   });
 
   it("adds leading and trailing days for incomplete weeks across year boundaries", () => {

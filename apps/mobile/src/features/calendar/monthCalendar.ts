@@ -17,6 +17,16 @@ export type MonthCalendarDay = {
   readonly isToday: boolean;
 };
 
+export type CalendarWorkloadLevel = "low" | "medium" | "high";
+
+export function getCalendarWorkloadLevel(
+  bookingCount: number,
+): CalendarWorkloadLevel {
+  if (bookingCount >= 5) return "high";
+  if (bookingCount >= 3) return "medium";
+  return "low";
+}
+
 type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
