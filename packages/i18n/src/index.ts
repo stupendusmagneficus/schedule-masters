@@ -358,10 +358,15 @@ export type MessageKey =
   | "mobile.serviceName"
   | "mobile.serviceChoose"
   | "mobile.serviceSearch"
+  | "mobile.serviceSearchClear"
   | "mobile.serviceSearchEmpty"
+  | "mobile.serviceFiltersClear"
   | "mobile.serviceCategory"
+  | "mobile.serviceCategoryHint"
+  | "mobile.serviceCategoryPlaceholder"
   | "mobile.serviceAllCategories"
   | "mobile.serviceUncategorized"
+  | "mobile.serviceArchiveEmpty"
   | "mobile.serviceDescription"
   | "mobile.serviceDuration"
   | "mobile.servicePrice"
@@ -837,13 +842,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchive": "Архивировать",
     "mobile.serviceRestore": "Восстановить",
     "mobile.serviceEmpty": "Услуг пока нет.",
+    "mobile.serviceArchiveEmpty": "Архив услуг пуст.",
     "mobile.serviceActive": "Активные",
     "mobile.serviceArchived": "Архив",
     "mobile.serviceName": "Название услуги *",
     "mobile.serviceChoose": "Выберите услугу",
-    "mobile.serviceSearch": "Найти услугу",
+    "mobile.serviceSearch": "Поиск по названию или описанию",
+    "mobile.serviceSearchClear": "Очистить поиск",
     "mobile.serviceSearchEmpty": "Услуги не найдены.",
+    "mobile.serviceFiltersClear": "Сбросить фильтры",
     "mobile.serviceCategory": "Категория",
+    "mobile.serviceCategoryHint":
+      "Выберите существующую или введите новую категорию.",
+    "mobile.serviceCategoryPlaceholder": "Например, Маникюр",
     "mobile.serviceAllCategories": "Все",
     "mobile.serviceUncategorized": "Без категории",
     "mobile.serviceDescription": "Описание",
@@ -1327,13 +1338,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchive": "Archivovat",
     "mobile.serviceRestore": "Obnovit",
     "mobile.serviceEmpty": "Zatím nemáte žádné služby.",
+    "mobile.serviceArchiveEmpty": "Archiv služeb je prázdný.",
     "mobile.serviceActive": "Aktivní",
     "mobile.serviceArchived": "Archiv",
     "mobile.serviceName": "Název služby *",
     "mobile.serviceChoose": "Vyberte službu",
-    "mobile.serviceSearch": "Hledat službu",
+    "mobile.serviceSearch": "Hledat podle názvu nebo popisu",
+    "mobile.serviceSearchClear": "Vymazat hledání",
     "mobile.serviceSearchEmpty": "Žádné služby nebyly nalezeny.",
+    "mobile.serviceFiltersClear": "Zrušit filtry",
     "mobile.serviceCategory": "Kategorie",
+    "mobile.serviceCategoryHint":
+      "Vyberte existující kategorii nebo zadejte novou.",
+    "mobile.serviceCategoryPlaceholder": "Například manikúra",
     "mobile.serviceAllCategories": "Vše",
     "mobile.serviceUncategorized": "Bez kategorie",
     "mobile.serviceDescription": "Popis",
@@ -1821,13 +1838,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchive": "Archive",
     "mobile.serviceRestore": "Restore",
     "mobile.serviceEmpty": "No services have been added yet.",
+    "mobile.serviceArchiveEmpty": "The service archive is empty.",
     "mobile.serviceActive": "Active",
     "mobile.serviceArchived": "Archived",
     "mobile.serviceName": "Service name *",
     "mobile.serviceChoose": "Choose a service",
-    "mobile.serviceSearch": "Search services",
+    "mobile.serviceSearch": "Search by name or description",
+    "mobile.serviceSearchClear": "Clear search",
     "mobile.serviceSearchEmpty": "No services found.",
+    "mobile.serviceFiltersClear": "Clear filters",
     "mobile.serviceCategory": "Category",
+    "mobile.serviceCategoryHint":
+      "Choose an existing category or enter a new one.",
+    "mobile.serviceCategoryPlaceholder": "For example, Manicure",
     "mobile.serviceAllCategories": "All",
     "mobile.serviceUncategorized": "Uncategorized",
     "mobile.serviceDescription": "Description",

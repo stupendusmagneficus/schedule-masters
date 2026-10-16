@@ -17,6 +17,7 @@ const demoService: Service = {
   archived_at: null,
   buffer_after_minutes: 0,
   buffer_before_minutes: 0,
+  category: "Manikúra",
   currency: "CZK",
   description: "A complete gel manicure with a clean finish.",
   duration_minutes: 90,
