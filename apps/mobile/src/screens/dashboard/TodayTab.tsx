@@ -220,7 +220,11 @@ export function TodayTab({
                   name="alert-circle-outline"
                   size={20}
                 />
-                <Text style={styles.requestErrorText}>{t("common.error")}</Text>
+                <Text style={styles.requestErrorText}>
+                  {waitingListCount === null
+                    ? t("common.error")
+                    : t("mobile.waitingListStale")}
+                </Text>
               </View>
             ) : undefined
           }
@@ -330,7 +334,7 @@ export function TodayTab({
           trailing={
             waitingListLoading && waitingListCount === null ? (
               <ActivityIndicator color={colors.accent} />
-            ) : waitingListError ? null : waitingListCount !== null ? (
+            ) : waitingListCount !== null ? (
               <View style={styles.requestCount}>
                 <Text style={styles.requestCountText}>{waitingListCount}</Text>
               </View>

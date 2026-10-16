@@ -406,7 +406,7 @@ export function DashboardScreen({
             bookingRequestsError={Boolean(bookingRequests.error)}
             bookingRequestsLoading={bookingRequests.isLoading}
             waitingListCount={
-              waitingList.error ||
+              (waitingList.error && !waitingList.hasData) ||
               (waitingList.isLoading && waitingList.entries.length === 0)
                 ? null
                 : waitingList.entries.filter(
@@ -637,6 +637,7 @@ export function DashboardScreen({
           defaultDate={formatDateInTimeZone(new Date(), workspace.timezone)}
           entries={waitingList.entries}
           error={waitingList.error}
+          hasData={waitingList.hasData}
           isLoading={waitingList.isLoading}
           locale={locale}
           onClose={() => setWaitingListVisible(false)}
