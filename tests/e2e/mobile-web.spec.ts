@@ -355,15 +355,39 @@ test.describe("mobile web smoke", () => {
     expect(new Set(tops).size).toBe(1);
   });
 
-  test("opens a selected month date in the day calendar with one tap", async ({
+  test("selects a month date and opens it separately in the day calendar", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("tab", { name: "Měsíc" }).click();
     await page.getByRole("button", { name: /14\. října 2026/ }).click();
+    await expect(
+      page.getByRole("button", { name: "Otevřít den", exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Otevřít den", exact: true })
+      .click();
 
     await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+  });
+
+  test("fills the calendar area with a virtualized, scrollable month window", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("tab", { name: "Měsíc" }).click();
+
+    const monthList = page.getByTestId("calendar-month-list");
+    await expect(monthList).toBeVisible();
+    const dimensions = await monthList.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+    expect(dimensions.clientHeight).toBeGreaterThan(200);
+    expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
   });
 
   test("keeps week selection in week view", async ({ page }) => {

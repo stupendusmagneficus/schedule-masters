@@ -42,12 +42,12 @@ describe("month calendar", () => {
       todayDate,
     });
 
-  it("builds a Monday-first four-week grid for a complete 28-day month", () => {
+  it("keeps month rows at six weeks for stable virtualized scrolling", () => {
     const days = build("2021-02-09", [], "2021-02-09");
 
-    expect(days).toHaveLength(28);
+    expect(days).toHaveLength(42);
     expect(days[0]?.date).toBe("2021-02-01");
-    expect(days.at(-1)?.date).toBe("2021-02-28");
+    expect(days.at(-1)?.date).toBe("2021-03-14");
     expect(days.find((day) => day.date === "2021-02-09")).toMatchObject({
       isSelected: true,
       isToday: true,
@@ -58,13 +58,13 @@ describe("month calendar", () => {
   it("adds leading and trailing days for incomplete weeks across year boundaries", () => {
     const days = build("2030-01-15");
 
-    expect(days).toHaveLength(35);
+    expect(days).toHaveLength(42);
     expect(days[0]).toMatchObject({
       date: "2029-12-31",
       isCurrentMonth: false,
     });
     expect(days.at(-1)).toMatchObject({
-      date: "2030-02-03",
+      date: "2030-02-10",
       isCurrentMonth: false,
     });
   });

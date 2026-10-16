@@ -2,6 +2,7 @@ import type { Database } from "@schedule-app/api";
 import {
   formatAccessibleDate,
   formatCompactDate,
+  formatDate,
   formatTime,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -40,6 +41,7 @@ import {
   getCalendarDateLabel,
   getCalendarWeekLabel,
 } from "../../features/calendar/useCalendarData";
+import type { useCalendarMonthWindow } from "../../features/calendar/useCalendarMonthWindow";
 import {
   buildDemoWeekCalendar,
   buildWeekCalendar,
@@ -56,6 +58,7 @@ import { WeekCalendar } from "./WeekCalendar";
 
 type CalendarTabProps = DashboardTabProps & {
   readonly calendar: CalendarDataController;
+  readonly monthWindow: ReturnType<typeof useCalendarMonthWindow>;
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
@@ -66,6 +69,7 @@ type CalendarTabProps = DashboardTabProps & {
 
 export function CalendarTab({
   calendar,
+  monthWindow,
   client,
   demoData,
   locale,
@@ -104,20 +108,34 @@ export function CalendarTab({
       });
   const todayDate = getTodayCalendarDate(workspace.timezone);
   const navigationDisabled = !client && !demoData;
-  const month: MonthCalendarDay[] = demoData
-    ? buildDemoMonthCalendar(
-        demoData.appointments,
-        calendar.selectedDate,
-        todayDate,
-      )
-    : buildMonthCalendar({
-        appointments: calendar.appointments,
-        availabilityRules: workspace.availabilityRules,
-        blocks: calendar.blocks,
-        selectedDate: calendar.selectedDate,
-        timezone: workspace.timezone,
-        todayDate,
-      });
+  const monthAppointments = monthWindow.entries.flatMap(
+    (entry) => entry.data?.appointments ?? [],
+  );
+  const monthBlocks = monthWindow.entries.flatMap(
+    (entry) => entry.data?.blocks ?? [],
+  );
+  const monthItems = monthWindow.entries.map((entry) => {
+    const days: MonthCalendarDay[] = demoData
+      ? buildDemoMonthCalendar(
+          demoData.appointments,
+          `${entry.month}-15`,
+          todayDate,
+        )
+      : buildMonthCalendar({
+          appointments: monthAppointments,
+          availabilityRules: workspace.availabilityRules,
+          blocks: monthBlocks,
+          selectedDate: calendar.selectedDate,
+          timezone: workspace.timezone,
+          todayDate,
+        });
+    return { ...entry, days };
+  });
+  const monthTitle = formatDate(
+    new Date(`${calendar.selectedDate.slice(0, 7)}-15T12:00:00.000Z`),
+    locale,
+    { month: "long", timeZone: "UTC", year: "numeric" },
+  );
 
   const weekRange = calendar.range;
   const isCurrentWeek =
@@ -127,7 +145,12 @@ export function CalendarTab({
 
   return (
     <>
-      <View style={styles.content}>
+      <View
+        style={[
+          styles.content,
+          calendar.view === "month" && styles.fullscreenMonthContent,
+        ]}
+      >
         <View>
           <DashboardPageHeader title={t("mobile.calendar")} />
           <View style={styles.calendarToolbar}>
@@ -155,6 +178,7 @@ export function CalendarTab({
             styles.calendarCard,
             calendar.view === "week" && styles.weekInfoCard,
             calendar.view === "month" && styles.monthInfoCard,
+            calendar.view === "month" && styles.fullscreenMonthCard,
           ]}
         >
           {calendar.view === "day" ? (
@@ -213,20 +237,37 @@ export function CalendarTab({
               timezone={workspace.timezone}
             />
           ) : calendar.view === "month" ? (
-            <MonthCalendar
-              days={month}
-              disabled={navigationDisabled}
-              locale={locale}
-              onNext={calendar.goToNext}
-              onOpenSelectedDay={() => calendar.setView("day")}
-              onPrevious={calendar.goToPrevious}
-              onSelectDate={calendar.setSelectedDate}
-              onToday={calendar.goToToday}
-              selectedDate={calendar.selectedDate}
-              t={t}
-              todayDate={todayDate}
-              timezone={workspace.timezone}
-            />
+            <>
+              <CalendarPeriodNavigation
+                disabled={navigationDisabled}
+                nextLabel={t("mobile.calendarNextMonth")}
+                onNext={calendar.goToNext}
+                onPrevious={calendar.goToPrevious}
+                onToday={
+                  calendar.selectedDate.slice(0, 7) === todayDate.slice(0, 7)
+                    ? undefined
+                    : calendar.goToToday
+                }
+                previousLabel={t("mobile.calendarPreviousMonth")}
+                t={t}
+                title={monthTitle}
+                todayLabel={t("mobile.today")}
+              />
+              <MonthCalendar
+                key={monthWindow.selectedMonth}
+                isLoadingNext={monthWindow.isLoadingNext}
+                isLoadingPrevious={monthWindow.isLoadingPrevious}
+                loadNext={monthWindow.loadNext}
+                loadPrevious={monthWindow.loadPrevious}
+                locale={locale}
+                months={monthItems}
+                onOpenSelectedDay={() => calendar.setView("day")}
+                onSelectDate={calendar.setSelectedDate}
+                selectedDate={calendar.selectedDate}
+                t={t}
+                timezone={workspace.timezone}
+              />
+            </>
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
@@ -247,7 +288,7 @@ export function CalendarTab({
               timeline={timeline}
             />
           )}
-          {calendar.isLoading && !demoData ? (
+          {calendar.isLoading && !demoData && calendar.view !== "month" ? (
             <View
               accessibilityLiveRegion="polite"
               style={styles.calendarLoadingOverlay}
@@ -259,56 +300,60 @@ export function CalendarTab({
             </View>
           ) : null}
         </InfoCard>
-        <InfoCard>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionHeaderCopy}>
-              <Text style={styles.sectionTitle}>
-                {t("mobile.personalBlocks")}
-              </Text>
+        {calendar.view !== "month" ? (
+          <InfoCard>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionHeaderCopy}>
+                <Text style={styles.sectionTitle}>
+                  {t("mobile.personalBlocks")}
+                </Text>
+                <Text style={styles.helper}>
+                  {t("mobile.personalBlockDescription")}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                disabled={!client}
+                onPress={() => setBlockModalVisible(true)}
+                style={({ pressed }) => [
+                  styles.addButton,
+                  !client && styles.disabled,
+                  pressed && styles.addButtonPressed,
+                ]}
+              >
+                <Text style={styles.addButtonText}>
+                  {t("mobile.personalBlockAdd")}
+                </Text>
+              </Pressable>
+            </View>
+            {calendar.isLoading ? (
+              <Text style={styles.helper}>{t("common.loading")}</Text>
+            ) : calendar.blocks.length ? (
+              <View style={styles.blocksList}>
+                {calendar.blocks.map((block) => (
+                  <PersonalBlockRow
+                    block={block}
+                    key={block.id}
+                    locale={locale}
+                    onDelete={async (blockId) => {
+                      await calendar.removeBlock(blockId);
+                      onFeedback(t("mobile.personalBlockDeleted"));
+                    }}
+                    t={t}
+                    timezone={workspace.timezone}
+                  />
+                ))}
+              </View>
+            ) : (
               <Text style={styles.helper}>
-                {t("mobile.personalBlockDescription")}
+                {t("mobile.personalBlockEmpty")}
               </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              disabled={!client}
-              onPress={() => setBlockModalVisible(true)}
-              style={({ pressed }) => [
-                styles.addButton,
-                !client && styles.disabled,
-                pressed && styles.addButtonPressed,
-              ]}
-            >
-              <Text style={styles.addButtonText}>
-                {t("mobile.personalBlockAdd")}
-              </Text>
-            </Pressable>
-          </View>
-          {calendar.isLoading ? (
-            <Text style={styles.helper}>{t("common.loading")}</Text>
-          ) : calendar.blocks.length ? (
-            <View style={styles.blocksList}>
-              {calendar.blocks.map((block) => (
-                <PersonalBlockRow
-                  block={block}
-                  key={block.id}
-                  locale={locale}
-                  onDelete={async (blockId) => {
-                    await calendar.removeBlock(blockId);
-                    onFeedback(t("mobile.personalBlockDeleted"));
-                  }}
-                  t={t}
-                  timezone={workspace.timezone}
-                />
-              ))}
-            </View>
-          ) : (
-            <Text style={styles.helper}>{t("mobile.personalBlockEmpty")}</Text>
-          )}
-          {calendar.error && !isBlockModalVisible ? (
-            <Text style={styles.error}>{t("common.error")}</Text>
-          ) : null}
-        </InfoCard>
+            )}
+            {calendar.error && !isBlockModalVisible ? (
+              <Text style={styles.error}>{t("common.error")}</Text>
+            ) : null}
+          </InfoCard>
+        ) : null}
       </View>
       <PersonalBlockModal
         error={calendar.error}
@@ -430,6 +475,7 @@ function PersonalBlockRow({
 
 const styles = StyleSheet.create({
   content: { gap: spacing.section },
+  fullscreenMonthContent: { flex: 1, gap: 8, minHeight: 0 },
   addButton: {
     backgroundColor: colors.action,
     borderRadius: radii.control,
@@ -519,4 +565,5 @@ const styles = StyleSheet.create({
   },
   weekInfoCard: { padding: 12 },
   monthInfoCard: { padding: 14 },
+  fullscreenMonthCard: { flex: 1, minHeight: 0, padding: 14 },
 });

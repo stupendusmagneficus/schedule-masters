@@ -39,10 +39,7 @@ export function buildMonthCalendar({
     monthRange.fromDate,
     1 - getIsoDayOfWeek(monthRange.fromDate),
   );
-  const gridEnd = addCalendarDays(
-    monthRange.toDate,
-    7 - getIsoDayOfWeek(monthRange.toDate),
-  );
+  const gridEnd = addCalendarDays(gridStart, 41);
   const dataByDate = new Map<
     string,
     {
