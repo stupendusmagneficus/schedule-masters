@@ -11,31 +11,43 @@ import {
   type WeekCalendarEvent,
 } from "../../features/calendar/weekCalendar";
 import { colors, radii } from "../../theme/tokens";
-import { typography } from "../../theme/typography";
+import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 
 const compactSlotHeight = 24;
 const calendarTimeGutterWidth = 36;
 
 type WeekCalendarProps = {
   readonly days: readonly WeekCalendarDay[];
+  readonly disabled?: boolean;
+  readonly isCurrentWeek: boolean;
   readonly locale: SupportedLocale;
+  readonly onNext: () => void;
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
   readonly onPressDay?: (date: string) => void;
   readonly onPressTime?: (date: string, minute: number) => void;
+  readonly onPrevious: () => void;
+  readonly onToday: () => void;
   readonly selectedDate: string;
   readonly t: (key: MessageKey) => string;
   readonly timezone: string;
+  readonly weekLabel: string;
 };
 
 export function WeekCalendar({
   days,
+  disabled = false,
+  isCurrentWeek,
   locale,
+  onNext,
   onPressAppointment,
   onPressDay,
   onPressTime,
+  onPrevious,
+  onToday,
   selectedDate,
   t,
   timezone,
+  weekLabel,
 }: WeekCalendarProps) {
   const monthDays = buildWeekCalendarMonth(selectedDate, days);
   const openDays = days.filter((day) => !day.isClosed);
@@ -46,12 +58,11 @@ export function WeekCalendar({
     ...(openDays.length ? openDays : days).map((day) => day.endMinute),
   );
   const timeSlots = createCompactSlots(startMinute, endMinute);
-  const monthLabel = formatDate(
-    new Date(`${selectedDate.slice(0, 7)}-15T12:00:00.000Z`),
-    locale,
-    { month: "long", timeZone: "UTC", year: "numeric" },
+  const totalEvents = days.reduce(
+    (total, day) =>
+      total + day.events.filter((event) => event.kind === "appointment").length,
+    0,
   );
-  const totalEvents = days.reduce((total, day) => total + day.events.length, 0);
 
   return (
     <View
@@ -59,14 +70,22 @@ export function WeekCalendar({
       accessibilityRole="summary"
       style={styles.root}
     >
-      <View style={styles.monthHeader}>
-        <Text style={styles.monthTitle}>{monthLabel}</Text>
-        <Text style={styles.monthSummary}>
-          {totalEvents
+      <CalendarPeriodNavigation
+        disabled={disabled}
+        nextLabel={t("mobile.calendarNextWeek")}
+        onNext={onNext}
+        onPrevious={onPrevious}
+        onToday={isCurrentWeek ? undefined : onToday}
+        previousLabel={t("mobile.calendarPreviousWeek")}
+        subtitle={
+          totalEvents
             ? `${totalEvents} ${t("mobile.weekBookings")}`
-            : t("mobile.weekNoBookings")}
-        </Text>
-      </View>
+            : t("mobile.weekNoBookings")
+        }
+        t={t}
+        title={weekLabel}
+        todayLabel={t("mobile.today")}
+      />
       <View style={styles.monthWeekdays}>
         {monthDays.slice(0, 7).map((day) => (
           <Text key={day.date} style={styles.monthWeekday}>
@@ -79,8 +98,10 @@ export function WeekCalendar({
           <Pressable
             accessibilityLabel={formatDateLabel(day.date, locale, timezone)}
             accessibilityRole="button"
+            accessibilityState={{ selected: day.isSelectedWeek }}
             key={day.date}
             onPress={() => onPressDay?.(day.date)}
+            testID="calendar-week-date"
             style={({ pressed }) => [
               styles.monthDay,
               !day.isCurrentMonth && styles.monthDayOutside,
@@ -423,18 +444,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   monthGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 10 },
-  monthHeader: {
-    alignItems: "baseline",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  monthSummary: { ...typography.caption, color: colors.secondaryText },
-  monthTitle: {
-    ...typography.section,
-    color: colors.primaryText,
-    fontSize: 18,
-  },
   monthWeekday: {
     color: colors.secondaryText,
     fontSize: 9,

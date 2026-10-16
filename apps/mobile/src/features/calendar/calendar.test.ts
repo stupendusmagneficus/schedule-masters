@@ -28,13 +28,6 @@ describe("calendar date ranges", () => {
       toDate: "2030-02-28",
     });
   });
-
-  it("uses a bounded upcoming range for the feed view", () => {
-    expect(getCalendarDateRange("2030-02-12", "feed")).toEqual({
-      fromDate: "2030-02-12",
-      toDate: "2030-05-12",
-    });
-  });
 });
 
 describe("calendar navigation", () => {
@@ -42,7 +35,6 @@ describe("calendar navigation", () => {
     ["day", "2030-01-08", "2030-01-09"],
     ["week", "2030-01-08", "2030-01-15"],
     ["month", "2030-01-08", "2030-02-01"],
-    ["feed", "2030-01-08", "2030-02-07"],
   ] as const)("moves forward in the %s view", (view, date, expected) => {
     expect(moveCalendarDate(date, view, 1)).toBe(expected);
   });

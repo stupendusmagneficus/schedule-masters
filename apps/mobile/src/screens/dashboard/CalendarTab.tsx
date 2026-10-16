@@ -23,19 +23,11 @@ import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
-import {
-  addCalendarDays,
-  getTodayCalendarDate,
-} from "../../features/calendar/calendar";
-import {
-  buildCalendarFeed,
-  type CalendarFeedFilter,
-} from "../../features/calendar/calendarFeed";
+import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
   getDayTimelineSlotStart,
-  timeToMinutes,
 } from "../../features/calendar/dayTimeline";
 import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
 import {
@@ -46,7 +38,6 @@ import {
   type CalendarDataController,
   getAccessibleCalendarLabel,
   getCalendarDateLabel,
-  getCalendarFeedLabel,
   getCalendarWeekLabel,
 } from "../../features/calendar/useCalendarData";
 import {
@@ -57,7 +48,7 @@ import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
-import { CalendarFeed } from "./CalendarFeed";
+import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 import { DayTimeline } from "./DayTimeline";
 import { MonthCalendar } from "./MonthCalendar";
 import type { DashboardTabProps } from "./types";
@@ -87,21 +78,10 @@ export function CalendarTab({
   workspace,
 }: CalendarTabProps) {
   const [isBlockModalVisible, setBlockModalVisible] = useState(false);
-  const [feedFilter, setFeedFilter] = useState<CalendarFeedFilter>("future");
   const dateLabel =
     calendar.view === "week"
       ? getCalendarWeekLabel(calendar.selectedDate, locale, workspace.timezone)
-      : calendar.view === "feed"
-        ? getCalendarFeedLabel(
-            calendar.selectedDate,
-            locale,
-            workspace.timezone,
-          )
-        : getCalendarDateLabel(
-            calendar.selectedDate,
-            locale,
-            workspace.timezone,
-          );
+      : getCalendarDateLabel(calendar.selectedDate, locale, workspace.timezone);
   const timeline = demoData
     ? buildDemoDayTimeline(demoData.appointments)
     : buildDayTimeline({
@@ -141,57 +121,17 @@ export function CalendarTab({
         todayDate,
       });
 
-  const feedAppointments = demoData
-    ? demoData.appointments.map((appointment, index) => {
-        const date = addCalendarDays(calendar.selectedDate, index + 1);
-        const startsAt = getDayTimelineSlotStart(
-          date,
-          timeToMinutes(appointment.startsAt),
-          workspace.timezone,
-        );
-        return {
-          currency: demoData.primaryService.currency,
-          customer_id: appointment.id,
-          customer_name: appointment.clientName,
-          duration_minutes: appointment.durationMinutes,
-          ends_at: new Date(
-            new Date(startsAt).getTime() + appointment.durationMinutes * 60_000,
-          ).toISOString(),
-          id: appointment.id,
-          is_new_customer: false,
-          is_returning_customer: false,
-          paid_amount: 0,
-          price_amount: appointment.priceAmount,
-          service_name: appointment.serviceName,
-          source: "master_created" as const,
-          starts_at: startsAt,
-          status: appointment.status,
-        };
-      })
-    : calendar.appointments;
-  const feedGroups = buildCalendarFeed({
-    appointments: feedAppointments,
-    blocks: demoData ? [] : calendar.blocks,
-    filter: feedFilter,
-    timezone: workspace.timezone,
-  });
+  const weekRange = calendar.range;
+  const isCurrentWeek =
+    calendar.view === "week" &&
+    todayDate >= weekRange.fromDate &&
+    todayDate <= weekRange.toDate;
 
   return (
     <>
       <View style={styles.content}>
         <View>
-          <DashboardPageHeader
-            subtitle={dateLabel}
-            subtitleAccessibilityLabel={getAccessibleCalendarLabel(
-              calendar.selectedDate,
-              calendar.view === "week" || calendar.view === "feed"
-                ? calendar.view
-                : "day",
-              locale,
-              workspace.timezone,
-            )}
-            title={t("mobile.calendar")}
-          />
+          <DashboardPageHeader title={t("mobile.calendar")} />
           <View style={styles.calendarToolbar}>
             <View accessibilityRole="tablist" style={styles.viewSwitcher}>
               <CalendarViewButton
@@ -209,60 +149,6 @@ export function CalendarTab({
                 label={t("mobile.calendarMonthView")}
                 onPress={() => calendar.setView("month")}
               />
-              <CalendarViewButton
-                active={calendar.view === "feed"}
-                label={t("mobile.calendarFeedView")}
-                onPress={() => calendar.setView("feed")}
-              />
-            </View>
-            <View style={styles.dateNavigation}>
-              <Pressable
-                accessibilityLabel={
-                  calendar.view === "month"
-                    ? t("mobile.calendarPreviousMonth")
-                    : t("mobile.calendarPrevious")
-                }
-                accessibilityRole="button"
-                disabled={navigationDisabled}
-                onPress={calendar.goToPrevious}
-                style={({ pressed }) => [
-                  styles.navigationButton,
-                  navigationDisabled && styles.disabled,
-                  pressed && styles.navigationButtonPressed,
-                ]}
-              >
-                <Text style={styles.navigationButtonText}>‹</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel={t("mobile.today")}
-                accessibilityRole="button"
-                disabled={navigationDisabled}
-                onPress={calendar.goToToday}
-                style={({ pressed }) => [
-                  styles.todayButton,
-                  navigationDisabled && styles.disabled,
-                  pressed && styles.navigationButtonPressed,
-                ]}
-              >
-                <Text style={styles.todayButtonText}>{t("mobile.today")}</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel={
-                  calendar.view === "month"
-                    ? t("mobile.calendarNextMonth")
-                    : t("mobile.calendarNext")
-                }
-                accessibilityRole="button"
-                disabled={navigationDisabled}
-                onPress={calendar.goToNext}
-                style={({ pressed }) => [
-                  styles.navigationButton,
-                  navigationDisabled && styles.disabled,
-                  pressed && styles.navigationButtonPressed,
-                ]}
-              >
-                <Text style={styles.navigationButtonText}>›</Text>
-              </Pressable>
             </View>
           </View>
         </View>
@@ -285,17 +171,43 @@ export function CalendarTab({
           ]}
         >
           {calendar.view === "day" ? (
-            <Text style={styles.sectionTitle}>{t("mobile.daySchedule")}</Text>
+            <CalendarPeriodNavigation
+              disabled={navigationDisabled}
+              nextLabel={t("mobile.calendarNext")}
+              onNext={calendar.goToNext}
+              onPrevious={calendar.goToPrevious}
+              onToday={
+                calendar.selectedDate === todayDate
+                  ? undefined
+                  : calendar.goToToday
+              }
+              previousLabel={t("mobile.calendarPrevious")}
+              subtitle={dateLabel}
+              subtitleAccessibilityLabel={getAccessibleCalendarLabel(
+                calendar.selectedDate,
+                "day",
+                locale,
+                workspace.timezone,
+              )}
+              t={t}
+              title={t("mobile.daySchedule")}
+              todayLabel={t("mobile.today")}
+            />
           ) : null}
           {calendar.view === "week" ? (
             <WeekCalendar
               days={week}
+              disabled={navigationDisabled}
               locale={locale}
+              isCurrentWeek={isCurrentWeek}
+              onNext={calendar.goToNext}
               onPressAppointment={onSelectAppointment}
+              onPrevious={calendar.goToPrevious}
               onPressDay={(date) => {
                 calendar.setSelectedDate(date);
-                calendar.setView("day");
               }}
+              onToday={calendar.goToToday}
+              weekLabel={dateLabel}
               onPressTime={
                 onSelectTime
                   ? (date, minute) =>
@@ -316,40 +228,18 @@ export function CalendarTab({
           ) : calendar.view === "month" ? (
             <MonthCalendar
               days={month}
+              disabled={navigationDisabled}
               locale={locale}
+              onNext={calendar.goToNext}
               onOpenSelectedDay={() => calendar.setView("day")}
+              onPrevious={calendar.goToPrevious}
               onSelectDate={calendar.setSelectedDate}
+              onToday={calendar.goToToday}
               selectedDate={calendar.selectedDate}
               t={t}
+              todayDate={todayDate}
               timezone={workspace.timezone}
             />
-          ) : calendar.view === "feed" ? (
-            calendar.error && !demoData ? (
-              <View style={styles.feedError}>
-                <Text style={styles.error}>
-                  {t("mobile.calendarFeedError")}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => void calendar.reload()}
-                  style={styles.feedRetryButton}
-                >
-                  <Text style={styles.feedRetryText}>
-                    {t("mobile.calendarFeedRetry")}
-                  </Text>
-                </Pressable>
-              </View>
-            ) : (
-              <CalendarFeed
-                filter={feedFilter}
-                groups={feedGroups}
-                locale={locale}
-                onChangeFilter={setFeedFilter}
-                onPressAppointment={onSelectAppointment}
-                t={t}
-                timezone={workspace.timezone}
-              />
-            )
           ) : (
             <DayTimeline
               onPressAppointment={onSelectAppointment}
@@ -619,55 +509,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   disabled: { opacity: 0.6 },
-  dateNavigation: {
-    alignItems: "center",
-    alignSelf: "flex-end",
-    flexDirection: "row",
-    gap: 4,
-  },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
-  feedError: { alignItems: "center", gap: 8, paddingVertical: 16 },
-  feedRetryButton: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: radii.control,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  feedRetryText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
   helper: { ...typography.body, color: colors.secondaryText },
-  navigationButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    height: 44,
-    justifyContent: "center",
-    width: 44,
-  },
-  navigationButtonPressed: { backgroundColor: colors.subtleSurface },
-  navigationButtonText: {
-    color: colors.primaryText,
-    fontSize: 24,
-    lineHeight: 26,
-  },
-  todayButton: {
-    alignItems: "center",
-    backgroundColor: colors.accentSoft,
-    borderRadius: radii.control,
-    height: 44,
-    justifyContent: "center",
-    minWidth: 80,
-    paddingHorizontal: 10,
-  },
-  todayButtonText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
   sectionTitle: {
     color: colors.primaryText,
     marginBottom: 10,

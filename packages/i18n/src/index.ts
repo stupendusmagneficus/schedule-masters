@@ -203,8 +203,6 @@ export type MessageKey =
   | "mobile.shareSheetOpened"
   | "mobile.shareSheetFailed"
   | "mobile.today"
-  | "mobile.previousDay"
-  | "mobile.nextDay"
   | "mobile.todayLoadFailed"
   | "mobile.todayRetry"
   | "mobile.calendar"
@@ -230,17 +228,12 @@ export type MessageKey =
   | "mobile.calendarClosedDescription"
   | "mobile.calendarPrevious"
   | "mobile.calendarNext"
+  | "mobile.calendarPreviousWeek"
+  | "mobile.calendarNextWeek"
   | "mobile.calendarTapToBook"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
-  | "mobile.calendarFeedView"
-  | "mobile.calendarFeedAll"
-  | "mobile.calendarFeedFuture"
-  | "mobile.calendarFeedEmpty"
-  | "mobile.calendarFeedEmptyFuture"
-  | "mobile.calendarFeedError"
-  | "mobile.calendarFeedRetry"
   | "mobile.calendarPreviousMonth"
   | "mobile.calendarNextMonth"
   | "mobile.monthBookings"
@@ -672,8 +665,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Не удалось подготовить ссылку или открыть отправку. Она не отмечена как отправленная; попробуйте ещё раз.",
     "mobile.today": "Сегодня",
-    "mobile.previousDay": "Предыдущий день",
-    "mobile.nextDay": "Следующий день",
     "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
@@ -702,17 +693,12 @@ const messages: Record<SupportedLocale, Messages> = {
       "На этот день рабочие часы не настроены.",
     "mobile.calendarPrevious": "Предыдущая дата",
     "mobile.calendarNext": "Следующая дата",
+    "mobile.calendarPreviousWeek": "Предыдущая неделя",
+    "mobile.calendarNextWeek": "Следующая неделя",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
-    "mobile.calendarFeedView": "Лента",
-    "mobile.calendarFeedAll": "Все",
-    "mobile.calendarFeedFuture": "Будущие",
-    "mobile.calendarFeedEmpty": "В этом диапазоне записей и блоков нет.",
-    "mobile.calendarFeedEmptyFuture": "Будущих записей и блоков нет.",
-    "mobile.calendarFeedError": "Не удалось загрузить записи и блоки.",
-    "mobile.calendarFeedRetry": "Повторить",
     "mobile.calendarPreviousMonth": "Предыдущий месяц",
     "mobile.calendarNextMonth": "Следующий месяц",
     "mobile.monthBookings": "записей",
@@ -1168,8 +1154,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "Odkaz se nepodařilo připravit nebo otevřít sdílení. Odeslání není potvrzeno; zkuste to znovu.",
     "mobile.today": "Dnes",
-    "mobile.previousDay": "Předchozí den",
-    "mobile.nextDay": "Následující den",
     "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
@@ -1199,19 +1183,12 @@ const messages: Record<SupportedLocale, Messages> = {
       "Pro tento den nejsou nastavené pracovní hodiny.",
     "mobile.calendarPrevious": "Předchozí datum",
     "mobile.calendarNext": "Následující datum",
+    "mobile.calendarPreviousWeek": "Předchozí týden",
+    "mobile.calendarNextWeek": "Následující týden",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
-    "mobile.calendarFeedView": "Přehled",
-    "mobile.calendarFeedAll": "Vše",
-    "mobile.calendarFeedFuture": "Budoucí",
-    "mobile.calendarFeedEmpty":
-      "V tomto období nejsou žádné rezervace ani bloky.",
-    "mobile.calendarFeedEmptyFuture":
-      "Nemáte žádné budoucí rezervace ani bloky.",
-    "mobile.calendarFeedError": "Rezervace a bloky se nepodařilo načíst.",
-    "mobile.calendarFeedRetry": "Zkusit znovu",
     "mobile.calendarPreviousMonth": "Předchozí měsíc",
     "mobile.calendarNextMonth": "Následující měsíc",
     "mobile.monthBookings": "rezervací",
@@ -1665,8 +1642,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareSheetFailed":
       "We couldn't prepare the link or open sharing. It is not marked as sent; try again.",
     "mobile.today": "Today",
-    "mobile.previousDay": "Previous day",
-    "mobile.nextDay": "Next day",
     "mobile.todayLoadFailed": "The schedule could not be loaded.",
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
@@ -1696,19 +1671,12 @@ const messages: Record<SupportedLocale, Messages> = {
       "Working hours are not configured for this day.",
     "mobile.calendarPrevious": "Previous date",
     "mobile.calendarNext": "Next date",
+    "mobile.calendarPreviousWeek": "Previous week",
+    "mobile.calendarNextWeek": "Next week",
     "mobile.calendarTapToBook": "Tap to create a booking",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",
-    "mobile.calendarFeedView": "Feed",
-    "mobile.calendarFeedAll": "All",
-    "mobile.calendarFeedFuture": "Upcoming",
-    "mobile.calendarFeedEmpty":
-      "There are no bookings or blocks in this range.",
-    "mobile.calendarFeedEmptyFuture":
-      "There are no upcoming bookings or blocks.",
-    "mobile.calendarFeedError": "Bookings and blocks could not be loaded.",
-    "mobile.calendarFeedRetry": "Try again",
     "mobile.calendarPreviousMonth": "Previous month",
     "mobile.calendarNextMonth": "Next month",
     "mobile.monthBookings": "bookings",

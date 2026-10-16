@@ -10,25 +10,36 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { MonthCalendarDay } from "../../features/calendar/monthCalendar";
 import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
+import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 import type { DashboardTabProps } from "./types";
 
 type MonthCalendarProps = {
   readonly days: readonly MonthCalendarDay[];
+  readonly disabled?: boolean;
   readonly locale: SupportedLocale;
+  readonly onNext: () => void;
   readonly onOpenSelectedDay: () => void;
+  readonly onPrevious: () => void;
   readonly onSelectDate: (date: string) => void;
+  readonly onToday: () => void;
   readonly selectedDate: string;
   readonly t: DashboardTabProps["t"];
+  readonly todayDate: string;
   readonly timezone: string;
 };
 
 export function MonthCalendar({
   days,
+  disabled = false,
   locale,
+  onNext,
   onOpenSelectedDay,
+  onPrevious,
   onSelectDate,
+  onToday,
   selectedDate,
   t,
+  todayDate,
   timezone,
 }: MonthCalendarProps) {
   const selectedDay = days.find((day) => day.date === selectedDate);
@@ -44,7 +55,21 @@ export function MonthCalendar({
       accessibilityLabel={t("mobile.calendarMonthView")}
       style={styles.root}
     >
-      <Text style={styles.monthTitle}>{monthLabel}</Text>
+      <CalendarPeriodNavigation
+        disabled={disabled}
+        nextLabel={t("mobile.calendarNextMonth")}
+        onNext={onNext}
+        onPrevious={onPrevious}
+        onToday={
+          selectedDate.slice(0, 7) === todayDate.slice(0, 7)
+            ? undefined
+            : onToday
+        }
+        previousLabel={t("mobile.calendarPreviousMonth")}
+        t={t}
+        title={monthLabel}
+        todayLabel={t("mobile.today")}
+      />
       <View style={styles.weekdayRow}>
         {weekdays.map((day) => (
           <Text key={day.date} style={styles.weekday}>
@@ -248,12 +273,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   monthGrid: { flexDirection: "row", flexWrap: "wrap" },
-  monthTitle: {
-    color: colors.primaryText,
-    marginBottom: 10,
-    textAlign: "center",
-    ...typography.section,
-  },
   openDayButton: {
     alignItems: "center",
     backgroundColor: colors.action,
