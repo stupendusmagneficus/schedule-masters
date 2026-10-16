@@ -16,6 +16,7 @@ export function buildDemoMonthCalendar(
       startLocalTime: "08:00",
     })),
     blocks: [],
+    monthDate,
     selectedDate: `${monthDate.slice(0, 7)}-15`,
     timezone: "UTC",
     todayDate,

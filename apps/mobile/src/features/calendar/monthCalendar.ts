@@ -21,6 +21,7 @@ type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly blocks: readonly PersonalBlock[];
+  readonly monthDate: string;
   readonly selectedDate: string;
   readonly timezone: string;
   readonly todayDate: string;
@@ -30,11 +31,12 @@ export function buildMonthCalendar({
   appointments,
   availabilityRules,
   blocks,
+  monthDate,
   selectedDate,
   timezone,
   todayDate,
 }: BuildMonthCalendarParams): MonthCalendarDay[] {
-  const monthRange = getCalendarDateRange(selectedDate, "month");
+  const monthRange = getCalendarDateRange(monthDate, "month");
   const gridStart = addCalendarDays(
     monthRange.fromDate,
     1 - getIsoDayOfWeek(monthRange.fromDate),

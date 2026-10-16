@@ -37,6 +37,7 @@ describe("month calendar", () => {
         { dayOfWeek: 2, endLocalTime: "18:00", startLocalTime: "09:00" },
       ],
       blocks: [],
+      monthDate: selectedDate,
       selectedDate,
       timezone: "UTC",
       todayDate,
@@ -81,6 +82,7 @@ describe("month calendar", () => {
         { dayOfWeek: 2, endLocalTime: "18:00", startLocalTime: "09:00" },
       ],
       blocks: [block],
+      monthDate: "2030-02-12",
       selectedDate: "2030-02-12",
       timezone: "UTC",
       todayDate: "2030-02-12",
@@ -91,6 +93,31 @@ describe("month calendar", () => {
       blockCount: 1,
       expectedRevenueByCurrency: { CZK: 700 },
     });
+  });
+
+  it("builds each list row for its own month while retaining the selected date", () => {
+    const buildRow = (monthDate: string) =>
+      buildMonthCalendar({
+        appointments: [],
+        availabilityRules: [],
+        blocks: [],
+        monthDate,
+        selectedDate: "2026-10-16",
+        timezone: "UTC",
+        todayDate: "2026-10-16",
+      });
+
+    const october = buildRow("2026-10-15");
+    const november = buildRow("2026-11-15");
+
+    expect(
+      october.find((day) => day.date === "2026-10-01")?.isCurrentMonth,
+    ).toBe(true);
+    expect(
+      november.find((day) => day.date === "2026-11-01")?.isCurrentMonth,
+    ).toBe(true);
+    expect(october.find((day) => day.isSelected)?.date).toBe("2026-10-16");
+    expect(november.find((day) => day.isSelected)).toBeUndefined();
   });
 
   it("represents an empty month’s days as free or closed, not as missing cells", () => {

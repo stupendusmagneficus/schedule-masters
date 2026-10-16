@@ -133,6 +133,7 @@ export function CalendarTab({
           appointments: monthAppointments,
           availabilityRules: workspace.availabilityRules,
           blocks: monthBlocks,
+          monthDate: `${entry.month}-15`,
           selectedDate: calendar.selectedDate,
           timezone: workspace.timezone,
           todayDate,

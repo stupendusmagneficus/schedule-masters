@@ -383,8 +383,14 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByRole("heading", { name: "Vyberte datum" }),
     ).toBeVisible();
-
     const monthList = page.getByTestId("calendar-month-list");
+    await expect(
+      monthList.getByText("říjen 2026", { exact: true }),
+    ).toHaveCount(1);
+    await expect(
+      monthList.getByText("listopad 2026", { exact: true }),
+    ).toBeVisible();
+
     await expect(monthList).toBeVisible();
     const dimensions = await monthList.evaluate((element) => ({
       clientHeight: element.clientHeight,
