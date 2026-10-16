@@ -42,18 +42,19 @@ selection, navigation, and icon-only variants above.
 | Public booking and self-service | Select service/slot, submit booking, confirm/cancel a booking | `apps/booking-web/app/page.tsx`, `CustomerAppointmentPage.tsx` |
 | Setup and authentication | Continue setup, sign in/up, resend email, return to app | `SetupScreen`, setup steps, `AuthForm`, `EmailConfirmationScreen` |
 
-All app-owned React Native controls are currently hand-built `Pressable`
-elements; there is no universal button component. This makes semantic
-consistency and targeted migrations the main risks. The web app has
-`.primary-button` and `.secondary-button` CSS classes, but its `--action`
-variable was graphite even though the approved design token is green.
+The shared mobile `ActionButton` now provides semantic primary, secondary,
+destructive, neutral, and quiet variants. Many existing app-owned actions are
+still hand-built `Pressable` elements, so migrate them by feature instead of
+changing every screen in one pass. The web app has `.primary-button` and
+`.secondary-button` CSS classes; its `--action` variable now matches the
+approved green design token.
 
 ## Prioritized implementation plan
 
 | Priority | Scope | Decision / outcome |
 | --- | --- | --- |
-| P1 — current | [SCH-103](https://linear.app/schedule-app-master/issue/SCH-103/zadat-edinuyu-ierarhiyu-knopok-i-privesti-klyuchevye-cta): core action colors and booking-request decisions | Align web primary token with green; make accept and decline equal peers (green filled / red outlined); make waiting-list move a green outlined secondary. |
-| P1 | [SCH-104](https://linear.app/schedule-app-master/issue/SCH-104/unificirovat-knopki-zhiznennogo-cikla-zapisi): appointment lifecycle | Standardize payment save, completion, no-show, cancel and confirmation actions; keep cancellation clearly destructive and preserve successful-save feedback. |
+| P1 — complete | [SCH-103](https://linear.app/schedule-app-master/issue/SCH-103/zadat-edinuyu-ierarhiyu-knopok-i-privesti-klyuchevye-cta): core action colors and booking-request decisions | Align web primary token with green; make accept and decline equal peers (green filled / red outlined); make waiting-list move a green outlined secondary. |
+| P1 — current | [SCH-104](https://linear.app/schedule-app-master/issue/SCH-104/unificirovat-knopki-zhiznennogo-cikla-zapisi): appointment lifecycle | Use the shared button variants for payment save, completion, no-show, cancel and confirmation actions; keep cancellation clearly destructive and preserve successful-save feedback. |
 | P1 | [SCH-105](https://linear.app/schedule-app-master/issue/SCH-105/unificirovat-knopki-sozdaniya-i-redaktirovaniya-dannyh): booking and CRUD forms | Standardize create/save/edit/cancel actions across manual booking, service catalog, customers, workspace settings and waiting-list forms. |
 | P2 | [SCH-106](https://linear.app/schedule-app-master/issue/SCH-106/unificirovat-knopki-kalendarya-i-dashboard-utilities): calendar and dashboard utility controls | Audit free slots, date arrows, filters, view selectors and empty/error retry actions; separate navigation and selection from CTA styling. |
 | P2 | [SCH-107](https://linear.app/schedule-app-master/issue/SCH-107/soglasovat-ierarhiyu-knopok-publichnoj-zapisi-i-self-service): public booking and customer self-service | Align select/continue/submit and manage appointment confirm/cancel treatment across web and mobile tokens. |

@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { getAppointmentStatusActions } from "../features/appointments/appointmentActions";
 import type {
   AppointmentStatus,
   MasterAppointment,
@@ -18,6 +19,7 @@ import type {
 import { parseAppointmentPayment } from "../features/finance/appointmentPayment";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
@@ -76,6 +78,9 @@ export function AppointmentDetailsModal({
   );
   const [paymentDraft, setPaymentDraft] = useState<string | null>(null);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<AppointmentStatus | null>(
+    null,
+  );
   const [statusConfirmation, setStatusConfirmation] =
     useState<StatusConfirmation | null>(null);
   const activeStatusConfirmation =
@@ -85,7 +90,18 @@ export function AppointmentDetailsModal({
     statusConfirmation.appointmentStatus === appointment.status
       ? statusConfirmation
       : null;
-  const actions = appointment ? getStatusActions(appointment.status, t) : [];
+  const actions = appointment
+    ? getAppointmentStatusActions(appointment.status, t)
+    : [];
+
+  async function saveStatus(status: AppointmentStatus) {
+    setPendingStatus(status);
+    try {
+      await onStatusChange(status);
+    } finally {
+      setPendingStatus(null);
+    }
+  }
 
   return (
     <FullscreenModal
@@ -129,7 +145,7 @@ export function AppointmentDetailsModal({
                       ]}
                     >
                       <MaterialCommunityIcons
-                        color={colors.danger}
+                        color={colors.secondaryText}
                         name="refresh"
                         size={22}
                       />
@@ -246,9 +262,10 @@ export function AppointmentDetailsModal({
                   style={styles.paymentInput}
                   value={paymentDraft ?? String(appointment.paid_amount ?? 0)}
                 />
-                <Pressable
-                  accessibilityRole="button"
+                <ActionButton
                   disabled={isSaving}
+                  label={t("mobile.paymentSave")}
+                  loading={isSaving}
                   onPress={async () => {
                     const amount = parseAppointmentPayment(
                       paymentDraft ?? String(appointment.paid_amount ?? 0),
@@ -265,16 +282,8 @@ export function AppointmentDetailsModal({
                       setPaymentMessage(t("mobile.paymentSaveFailed"));
                     }
                   }}
-                  style={({ pressed }) => [
-                    styles.action,
-                    isSaving && styles.disabled,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={styles.actionText}>
-                    {t("mobile.paymentSave")}
-                  </Text>
-                </Pressable>
+                  variant="primary"
+                />
                 {paymentMessage ? (
                   <Text
                     accessibilityRole="alert"
@@ -293,37 +302,24 @@ export function AppointmentDetailsModal({
             {actions.length > 0 || error ? (
               <View style={styles.actions}>
                 {actions.map((action) => (
-                  <Pressable
-                    accessibilityRole="button"
+                  <ActionButton
                     disabled={isSaving || Boolean(activeStatusConfirmation)}
+                    label={action.label}
+                    loading={isSaving && pendingStatus === action.status}
                     key={action.status}
                     onPress={() => {
-                      if (action.destructive) {
+                      if (action.variant === "destructive") {
                         setStatusConfirmation({
                           appointmentId: appointment.id,
                           appointmentStatus: appointment.status,
                           status: action.status,
                         });
                       } else {
-                        void onStatusChange(action.status);
+                        void saveStatus(action.status);
                       }
                     }}
-                    style={({ pressed }) => [
-                      styles.action,
-                      action.destructive && styles.destructiveAction,
-                      isSaving && styles.disabled,
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.actionText,
-                        action.destructive && styles.destructiveActionText,
-                      ]}
-                    >
-                      {action.label}
-                    </Text>
-                  </Pressable>
+                    variant={action.variant}
+                  />
                 ))}
                 {activeStatusConfirmation ? (
                   <View accessibilityRole="alert" style={styles.confirmation}>
@@ -331,32 +327,30 @@ export function AppointmentDetailsModal({
                       {t("mobile.cancelBookingConfirmDescription")}
                     </Text>
                     <View style={styles.confirmationActions}>
-                      <Pressable
-                        accessibilityRole="button"
+                      <ActionButton
                         disabled={isSaving}
+                        label={t("common.cancel")}
                         onPress={() => setStatusConfirmation(null)}
-                        style={styles.contactAction}
-                      >
-                        <Text style={styles.actionText}>
-                          {t("common.cancel")}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
+                        style={styles.confirmationAction}
+                        variant="neutral"
+                      />
+                      <ActionButton
                         disabled={isSaving}
+                        label={t("mobile.cancelBooking")}
+                        loading={
+                          isSaving &&
+                          pendingStatus === activeStatusConfirmation.status
+                        }
                         onPress={() => {
                           const confirmation = activeStatusConfirmation;
                           setStatusConfirmation(null);
                           if (confirmation.appointmentId === appointment.id) {
-                            void onStatusChange(confirmation.status);
+                            void saveStatus(confirmation.status);
                           }
                         }}
-                        style={[styles.contactAction, styles.confirmCancel]}
-                      >
-                        <Text style={styles.confirmCancelText}>
-                          {t("mobile.cancelBooking")}
-                        </Text>
-                      </Pressable>
+                        style={styles.confirmationAction}
+                        variant="destructive"
+                      />
                     </View>
                   </View>
                 ) : null}
@@ -391,9 +385,10 @@ export function AppointmentDetailsModal({
                   </View>
                   <Text style={styles.helper}>{t("mobile.shareConsent")}</Text>
                 </Pressable>
-                <Pressable
-                  accessibilityRole="button"
+                <ActionButton
                   disabled={isSaving}
+                  label={t("mobile.shareAppointment")}
+                  loading={isSaving}
                   onPress={async () => {
                     if (!consentConfirmed) {
                       setShareState("failed");
@@ -403,16 +398,8 @@ export function AppointmentDetailsModal({
                       (await onShare(consentConfirmed)) ? "opened" : "failed",
                     );
                   }}
-                  style={({ pressed }) => [
-                    styles.action,
-                    isSaving && styles.disabled,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={styles.actionText}>
-                    {t("mobile.shareAppointment")}
-                  </Text>
-                </Pressable>
+                  variant="secondary"
+                />
                 {shareState !== "idle" ? (
                   <Text
                     accessibilityRole={
@@ -457,56 +444,7 @@ function DetailRow({
   );
 }
 
-function getStatusActions(
-  status: AppointmentStatus,
-  t: AppointmentDetailsModalProps["t"],
-): readonly {
-  readonly destructive?: boolean;
-  readonly label: string;
-  readonly status: AppointmentStatus;
-}[] {
-  switch (status) {
-    case "pending":
-      return [
-        { label: t("mobile.confirmBooking"), status: "confirmed" },
-        {
-          destructive: true,
-          label: t("mobile.cancelBooking"),
-          status: "cancelled_by_master",
-        },
-      ];
-    case "confirmed":
-      return [
-        { label: t("mobile.completeBooking"), status: "completed" },
-        { label: t("mobile.markNoShow"), status: "no_show" },
-        {
-          destructive: true,
-          label: t("mobile.cancelBooking"),
-          status: "cancelled_by_master",
-        },
-      ];
-    case "cancelled_by_customer":
-    case "cancelled_by_master":
-    case "completed":
-    case "no_show":
-      return [];
-  }
-}
-
 const styles = StyleSheet.create({
-  action: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  actionText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
   actions: { gap: 10 },
   content: { gap: 16, padding: 16, paddingBottom: 32 },
   checkbox: {
@@ -544,28 +482,14 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 12,
   },
-  contactAction: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
+  confirmationAction: {
     flex: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 8,
   },
   customerName: {
     ...typography.heading,
     color: colors.primaryText,
     flexShrink: 1,
   },
-  confirmCancel: { backgroundColor: colors.dangerSoft },
-  confirmCancelText: {
-    ...typography.label,
-    color: colors.danger,
-    fontWeight: "700",
-  },
-  destructiveAction: { backgroundColor: colors.dangerSoft },
-  destructiveActionText: { color: colors.danger },
   detailLabel: { ...typography.caption, color: colors.secondaryText },
   detailRow: {
     borderTopColor: colors.borderSubtle,
@@ -575,7 +499,6 @@ const styles = StyleSheet.create({
   },
   detailValue: { ...typography.body, color: colors.primaryText },
   details: { marginTop: 12 },
-  disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
   header: { gap: 6 },
   iconAction: {
