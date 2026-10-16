@@ -3,7 +3,6 @@ import { formatDate, formatTime } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,8 +10,9 @@ import {
 } from "react-native";
 import type { AppointmentStatus } from "../features/appointments/manualBooking";
 import type { MasterPendingBookingRequest } from "../features/bookingRequests/bookingRequests";
-import { colors, radii } from "../theme/tokens";
+import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
@@ -87,18 +87,11 @@ export function BookingRequestsModal({
             <Text accessibilityRole="alert" style={styles.error}>
               {t("mobile.bookingRequestsLoadFailed")}
             </Text>
-            <Pressable
-              accessibilityRole="button"
+            <ActionButton
+              label={t("common.retry")}
               onPress={onRetry}
-              style={({ pressed }) => [
-                styles.secondaryButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.secondaryButtonText}>
-                {t("common.retry")}
-              </Text>
-            </Pressable>
+              variant="secondary"
+            />
           </View>
         ) : requests.length === 0 ? (
           <InfoCard>
@@ -166,22 +159,21 @@ export function BookingRequestsModal({
                       )}
                     </Text>
                     <View style={styles.actions}>
-                      <Pressable
-                        accessibilityRole="button"
+                      <ActionButton
                         disabled={savingRequestId !== null}
+                        label={t("common.cancel")}
                         onPress={() => setConfirmation(null)}
-                        style={({ pressed }) => [
-                          styles.secondaryButton,
-                          pressed && styles.pressed,
-                        ]}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {t("common.cancel")}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        disabled={isSaving || savingRequestId !== null}
+                        style={styles.actionButton}
+                        variant="neutral"
+                      />
+                      <ActionButton
+                        disabled={savingRequestId !== null}
+                        label={t(
+                          activeConfirmation.type === "decline"
+                            ? "mobile.bookingRequestDecline"
+                            : "mobile.bookingRequestMoveToWaitingListConfirm",
+                        )}
+                        loading={isSaving}
                         onPress={async () => {
                           const succeeded =
                             activeConfirmation.type === "decline"
@@ -192,80 +184,52 @@ export function BookingRequestsModal({
                               : await onMoveToWaitingList(request.id);
                           if (succeeded) setConfirmation(null);
                         }}
-                        style={({ pressed }) => [
-                          styles.declineButton,
-                          pressed && styles.pressed,
-                        ]}
-                      >
-                        <Text style={styles.declineButtonText}>
-                          {t(
-                            activeConfirmation.type === "decline"
-                              ? "mobile.bookingRequestDecline"
-                              : "mobile.bookingRequestMoveToWaitingListConfirm",
-                          )}
-                        </Text>
-                      </Pressable>
+                        style={styles.actionButton}
+                        variant={
+                          activeConfirmation.type === "decline"
+                            ? "destructive"
+                            : "secondary"
+                        }
+                      />
                     </View>
                   </View>
                 ) : (
                   <View style={styles.actions}>
-                    <Pressable
-                      accessibilityRole="button"
+                    <ActionButton
                       disabled={savingRequestId !== null}
+                      label={t("mobile.bookingRequestDecline")}
                       onPress={() =>
                         setConfirmation({
                           appointmentId: request.id,
                           type: "decline",
                         })
                       }
-                      style={({ pressed }) => [
-                        styles.secondaryButton,
-                        pressed && styles.pressed,
-                      ]}
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {t("mobile.bookingRequestDecline")}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      accessibilityRole="button"
+                      style={styles.actionButton}
+                      variant="destructive"
+                    />
+                    <ActionButton
                       disabled={savingRequestId !== null}
+                      label={t("mobile.bookingRequestAccept")}
+                      loading={isSaving}
                       onPress={() => void onRespond(request.id, "confirmed")}
-                      style={({ pressed }) => [
-                        styles.acceptButton,
-                        savingRequestId !== null && styles.disabled,
-                        pressed && styles.pressed,
-                      ]}
-                    >
-                      {isSaving ? (
-                        <ActivityIndicator color={colors.actionText} />
-                      ) : (
-                        <Text style={styles.acceptButtonText}>
-                          {t("mobile.bookingRequestAccept")}
-                        </Text>
-                      )}
-                    </Pressable>
+                      style={styles.actionButton}
+                      variant="primary"
+                    />
                   </View>
                 )}
                 {!activeConfirmation ? (
-                  <Pressable
-                    accessibilityRole="button"
+                  <ActionButton
                     disabled={savingRequestId !== null}
+                    label={t("mobile.bookingRequestMoveToWaitingList")}
                     onPress={() =>
                       setConfirmation({
                         appointmentId: request.id,
                         type: "waiting-list",
                       })
                     }
-                    style={({ pressed }) => [
-                      styles.waitingListButton,
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    <Text style={styles.waitingListButtonText}>
-                      {t("mobile.bookingRequestMoveToWaitingList")}
-                    </Text>
-                  </Pressable>
+                    style={styles.waitingListButton}
+                    variant="secondary"
+                  />
                 ) : null}
               </InfoCard>
             );
@@ -277,20 +241,7 @@ export function BookingRequestsModal({
 }
 
 const styles = StyleSheet.create({
-  acceptButton: {
-    alignItems: "center",
-    backgroundColor: colors.accent,
-    borderRadius: radii.control,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 14,
-  },
-  acceptButtonText: {
-    ...typography.label,
-    color: colors.inverse,
-    fontWeight: "700",
-  },
+  actionButton: { flex: 1 },
   actions: { flexDirection: "row", gap: 8 },
   confirmation: {
     borderTopColor: colors.borderSubtle,
@@ -306,63 +257,23 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     fontWeight: "700",
   },
-  declineButton: {
-    alignItems: "center",
-    backgroundColor: colors.dangerSoft,
-    borderRadius: radii.control,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 14,
-  },
-  declineButtonText: {
-    ...typography.label,
-    color: colors.danger,
-    fontWeight: "700",
-  },
   detailValue: {
     ...typography.metadata,
     color: colors.primaryText,
     fontWeight: "600",
   },
   details: { gap: 2, marginVertical: 6 },
-  disabled: { opacity: 0.6 },
   emptyTitle: { ...typography.body, color: colors.secondaryText },
   error: { ...typography.body, color: colors.danger, marginTop: 8 },
   header: { alignItems: "center", flexDirection: "row", gap: 8 },
   helper: { ...typography.body, color: colors.secondaryText },
-  pressed: { opacity: 0.78 },
   requestCopy: { flex: 1, gap: 4 },
   requestCard: { padding: 12 },
-  secondaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.subtleSurface,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  secondaryButtonText: {
-    ...typography.label,
-    color: colors.primaryText,
-    fontWeight: "700",
-  },
   serviceName: { ...typography.metadata, color: colors.secondaryText },
   state: { alignItems: "center", gap: 12, padding: 24 },
   waitingListButton: {
-    alignItems: "center",
     alignSelf: "stretch",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: 1,
-    justifyContent: "center",
     marginTop: 8,
     minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  waitingListButtonText: {
-    ...typography.label,
-    color: colors.primaryText,
-    fontWeight: "600",
   },
 });

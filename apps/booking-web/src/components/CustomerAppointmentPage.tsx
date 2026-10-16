@@ -158,7 +158,7 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
             ) : null}
             {appointment.canCancel ? (
               <button
-                className="secondary-button"
+                className="secondary-button danger-button"
                 disabled={isSaving}
                 onClick={() => void updateAppointment("cancel")}
                 type="button"
