@@ -165,8 +165,11 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 1. Day/week switcher, with day view as the MVP default.
 2. Date navigation with a clear selected date.
 3. Working-hours timeline with 30-minute visual increments.
-4. Appointment blocks sized according to service duration.
-5. Break blocks and unavailable time visibly distinct from booked time.
+4. Appointment blocks sized according to service duration; manual bookings use
+   the established green, while online bookings use a muted palette-aligned
+   violet, with a shared legend in day and week views.
+5. Master-created breaks use a warm neutral treatment, visibly distinct from
+   both booking sources and unavailable time.
 6. Free slots visibly distinct from booked time and remain tappable.
 7. Bottom/right primary action for adding an appointment or break.
 
@@ -176,7 +179,7 @@ Motion is functional only: 160ms for micro-interactions and 220ms for panels or 
 - The add action supports both a client appointment and a personal break from the same entry point.
 - Selecting a booking opens details and actions for reschedule/cancel according to the booking lifecycle.
 - Unavailable time and breaks are visually muted and not selectable.
-- Appointment blocks may show a short status label (new, confirmed, cancelled) but must not rely on color alone.
+- Appointment blocks may show a short status label (new, confirmed, cancelled) but must not rely on color alone. Keep the source legend visible in day and week views and expose the source in the event's accessible label.
 
 **Responsive behavior:**
 
