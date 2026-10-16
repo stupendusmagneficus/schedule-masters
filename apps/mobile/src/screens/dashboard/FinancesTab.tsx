@@ -33,6 +33,8 @@ import type { DashboardTabProps } from "./types";
 type FinancesTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
+  readonly refreshVersion: number;
+  readonly visible: boolean;
   readonly workspace: Workspace;
 };
 
@@ -40,7 +42,9 @@ export function FinancesTab({
   client,
   demoData,
   locale,
+  refreshVersion,
   t,
+  visible,
   workspace,
 }: FinancesTabProps) {
   const [month, setMonth] = useState(() => {
@@ -50,7 +54,9 @@ export function FinancesTab({
   const financeData = useFinanceData({
     client,
     demoData,
+    enabled: visible,
     month,
+    refreshVersion,
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
@@ -76,7 +82,7 @@ export function FinancesTab({
   });
 
   return (
-    <View style={styles.content}>
+    <View style={[styles.content, !visible && styles.hidden]}>
       <DashboardPageHeader
         subtitle={t("mobile.financeSummaryTitle")}
         title={t("mobile.finances")}
@@ -278,6 +284,7 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing.section,
   },
+  hidden: { display: "none" },
   expectedDot: { backgroundColor: colors.primaryText },
   helper: { ...typography.caption, color: colors.secondaryText, marginTop: 4 },
   incomeColumn: { flex: 1, minWidth: 0 },

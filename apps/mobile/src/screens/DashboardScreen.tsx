@@ -88,6 +88,7 @@ export function DashboardScreen({
   workspace,
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
+  const [financeRefreshVersion, setFinanceRefreshVersion] = useState(0);
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -189,6 +190,7 @@ export function DashboardScreen({
     setAppointmentActionError(false);
     try {
       await setMasterAppointmentStatus(client, selectedAppointment.id, status);
+      setFinanceRefreshVersion((version) => version + 1);
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (status === "completed") {
         setSelectedAppointment({ ...selectedAppointment, status });
@@ -244,6 +246,7 @@ export function DashboardScreen({
         appointmentId,
         status,
       );
+      setFinanceRefreshVersion((version) => version + 1);
       await Promise.all([calendar.reload(), bookingRequests.reload()]);
       if (
         status === "cancelled_by_master" ||
@@ -301,6 +304,7 @@ export function DashboardScreen({
         selectedAppointment.id,
         amount,
       );
+      setFinanceRefreshVersion((version) => version + 1);
       await calendar.reload();
       setSelectedAppointment(null);
       setFeedback(t("mobile.paymentSaved"));
@@ -453,15 +457,15 @@ export function DashboardScreen({
             workspace={workspace}
           />
         )}
-        {activeTab === "finances" && (
-          <FinancesTab
-            client={client}
-            demoData={demoData}
-            locale={locale}
-            t={t}
-            workspace={workspace}
-          />
-        )}
+        <FinancesTab
+          client={client}
+          demoData={demoData}
+          locale={locale}
+          refreshVersion={financeRefreshVersion}
+          t={t}
+          visible={activeTab === "finances"}
+          workspace={workspace}
+        />
         <CustomersTab
           client={client}
           locale={locale}
@@ -550,6 +554,7 @@ export function DashboardScreen({
             setSelectedWaitingListMatch(null);
           }}
           onCreated={async (appointmentId) => {
+            setFinanceRefreshVersion((version) => version + 1);
             await calendar.reload();
             let waitlistStatusSaved = true;
             if (selectedWaitingListMatch) {
