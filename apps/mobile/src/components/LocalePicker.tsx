@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 44,
-    minWidth: 52,
-    paddingHorizontal: 10,
+    minWidth: 44,
+    paddingHorizontal: 8,
   },
   container: { flexDirection: "row", gap: 8 },
   selectedButton: {

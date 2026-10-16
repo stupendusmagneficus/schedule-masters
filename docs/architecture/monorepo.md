@@ -11,7 +11,7 @@ Applications own routing, platform adapters, and presentation. They must not imp
 
 - `@schedule-app/domain`: pure domain contracts and status values.
 - `@schedule-app/validation`: Zod schemas at input boundaries.
-- `@schedule-app/i18n`: RU/CZ/EN locale foundation.
+- `@schedule-app/i18n`: RU/CZ/EN/SK/UK locale foundation; Czech remains the product default.
 - `@schedule-app/api`: typed data-access boundary; no credentials or implementation yet.
 - `@schedule-app/types`: shared technical type placeholders.
 - `@schedule-app/config`: shared TypeScript, lint, formatting, and test configuration.

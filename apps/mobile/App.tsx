@@ -6,7 +6,7 @@ import {
   defaultLocale,
   type SupportedLocale,
 } from "@schedule-app/i18n";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Linking, Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -28,6 +28,10 @@ import {
   getCurrentWebOrigin,
   getEmailRedirectTo,
 } from "./src/features/auth/authRedirect";
+import {
+  loadLocalePreference,
+  saveLocalePreference,
+} from "./src/features/locale/localePreference";
 import { useMasterWorkspace } from "./src/features/workspace/useMasterWorkspace";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
@@ -46,6 +50,7 @@ export default function App() {
 function AppContent() {
   const demoMode = isDemoMode();
   const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
+  const localeWasChanged = useRef(false);
   const [authState, dispatchAuth] = useReducer(
     reduceAuthFlow,
     initialAuthFlowState,
@@ -64,6 +69,31 @@ function AppContent() {
     },
   );
   const t = useMemo(() => createTranslator(locale), [locale]);
+
+  useEffect(() => {
+    let active = true;
+    void loadLocalePreference().then((savedLocale) => {
+      if (active && !localeWasChanged.current) setLocale(savedLocale);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const runtime = globalThis as typeof globalThis & {
+      document?: { documentElement: { lang: string } };
+    };
+    if (Platform.OS === "web" && runtime.document) {
+      runtime.document.documentElement.lang = locale === "cz" ? "cs" : locale;
+    }
+  }, [locale]);
+
+  function handleLocaleChange(nextLocale: SupportedLocale) {
+    localeWasChanged.current = true;
+    setLocale(nextLocale);
+    void saveLocalePreference(nextLocale);
+  }
 
   useEffect(() => {
     if (demoMode) return;
@@ -169,7 +199,7 @@ function AppContent() {
         demoData={demoData}
         isSigningOut={false}
         locale={locale}
-        onLocaleChange={setLocale}
+        onLocaleChange={handleLocaleChange}
         onSignOut={() => undefined}
         signOutFailed={false}
         canManageServices
@@ -190,7 +220,7 @@ function AppContent() {
         onAuthenticated={(nextSession) => {
           dispatchAuth({ session: nextSession, type: "authenticated" });
         }}
-        onLocaleChange={setLocale}
+        onLocaleChange={handleLocaleChange}
         sessionRestoreFailed={sessionRestoreFailed}
       />
     );
@@ -223,7 +253,7 @@ function AppContent() {
       client={supabase}
       isSigningOut={signingOut}
       locale={locale}
-      onLocaleChange={setLocale}
+      onLocaleChange={handleLocaleChange}
       onSignOut={() => void signOut()}
       signOutFailed={signOutFailed}
       canManageWorkspace={workspaceState.memberRole === "owner"}
