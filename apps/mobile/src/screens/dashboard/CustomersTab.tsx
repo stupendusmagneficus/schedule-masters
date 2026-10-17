@@ -26,8 +26,12 @@ import {
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
-import { buildCustomerPhoneUrl } from "../../features/customers/customerContact";
+import {
+  buildCustomerEmailUrl,
+  buildCustomerPhoneUrl,
+} from "../../features/customers/customerContact";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
+import { anonymizeCustomer } from "../../features/customers/customerDirectory";
 import { useCustomerDirectory } from "../../features/customers/useCustomerDirectory";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -65,6 +69,28 @@ export function CustomersTab({
   const customerCallUrl = selected?.phone
     ? buildCustomerPhoneUrl(selected.phone, "call")
     : null;
+  const customerEmailUrl = selected?.email
+    ? buildCustomerEmailUrl(selected.email)
+    : null;
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeletingCustomer, setDeletingCustomer] = useState(false);
+  const [deleteCustomerError, setDeleteCustomerError] = useState(false);
+
+  async function deleteSelectedCustomer() {
+    if (!client || !selected) return;
+    setDeletingCustomer(true);
+    setDeleteCustomerError(false);
+    try {
+      await anonymizeCustomer(client, workspace.id, selected.id);
+      setShowDeleteConfirmation(false);
+      directory.selectCustomer(null);
+      await directory.reload();
+    } catch {
+      setDeleteCustomerError(true);
+    } finally {
+      setDeletingCustomer(false);
+    }
+  }
 
   if (selected) {
     return (
@@ -72,7 +98,11 @@ export function CustomersTab({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${t("common.back")}: ${t("mobile.customers")}`}
-          onPress={() => directory.selectCustomer(null)}
+          onPress={() => {
+            setShowDeleteConfirmation(false);
+            setDeleteCustomerError(false);
+            directory.selectCustomer(null);
+          }}
           style={styles.backButton}
         >
           <MaterialCommunityIcons
@@ -148,7 +178,29 @@ export function CustomersTab({
             </View>
           ) : null}
           {selected.email ? (
-            <Text style={styles.body}>{selected.email}</Text>
+            <View style={styles.contactActionRow}>
+              <Text numberOfLines={1} style={styles.body}>
+                {selected.email}
+              </Text>
+              {customerEmailUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerEmail")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerEmailUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="email-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
           {!selected.phone && !selected.email ? (
             <Text style={styles.helper}>—</Text>
@@ -214,6 +266,41 @@ export function CustomersTab({
             </InfoCard>
           </Pressable>
         ))}
+        {showDeleteConfirmation ? (
+          <InfoCard style={styles.deleteConfirmation}>
+            <Text style={styles.body}>{t("mobile.customerDeleteConfirm")}</Text>
+            {deleteCustomerError ? (
+              <Text accessibilityRole="alert" style={styles.error}>
+                {t("mobile.customerDeleteFailed")}
+              </Text>
+            ) : null}
+            <View style={styles.deleteActions}>
+              <ActionButton
+                disabled={isDeletingCustomer}
+                label={t("mobile.customerDeleteCancel")}
+                onPress={() => setShowDeleteConfirmation(false)}
+                size="compact"
+                variant="quiet"
+              />
+              <ActionButton
+                label={t("mobile.customerDeleteConfirmAction")}
+                loading={isDeletingCustomer}
+                loadingLabel={t("mobile.customerDeleteSaving")}
+                onPress={() => void deleteSelectedCustomer()}
+                size="compact"
+                variant="destructiveConfirm"
+              />
+            </View>
+          </InfoCard>
+        ) : (
+          <ActionButton
+            label={t("mobile.customerDelete")}
+            onPress={() => setShowDeleteConfirmation(true)}
+            size="compact"
+            style={styles.deleteCustomerButton}
+            variant="destructive"
+          />
+        )}
       </View>
     );
   }
@@ -396,6 +483,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   contactActions: { flexDirection: "row", gap: 4 },
+  deleteActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.control,
+    justifyContent: "flex-end",
+  },
+  deleteConfirmation: { borderColor: colors.danger, gap: spacing.control },
+  deleteCustomerButton: { alignSelf: "flex-start" },
   contactAction: {
     alignItems: "center",
     borderRadius: radii.control,

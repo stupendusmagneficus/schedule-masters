@@ -1162,6 +1162,10 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      anonymize_master_customer: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: undefined
+      }
       list_master_availability_blocks: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
         Returns: {

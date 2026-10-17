@@ -1779,6 +1779,9 @@ describe("customer directory RPC", () => {
       const otherWorkspaceId = randomUUID();
       const customerId = randomUUID();
       const otherCustomerId = randomUUID();
+      const pendingAppointmentId = randomUUID();
+      const waitingListEntryId = randomUUID();
+      const accessTokenId = randomUUID();
       const email = `customer-directory-${suffix}@example.test`;
       const password = `Test-${suffix}-Password!`;
       let userId: string | undefined;
@@ -1859,6 +1862,105 @@ describe("customer directory RPC", () => {
           ).error,
         ).toBeNull();
 
+        const service = await admin
+          .from("services")
+          .insert({
+            duration_minutes: 60,
+            name: "Privacy test service",
+            price_amount: 900,
+            workspace_id: workspaceId,
+          })
+          .select("id")
+          .single();
+        expect(service.error).toBeNull();
+        if (!service.data)
+          throw new Error("Privacy test service was not created");
+
+        expect(
+          (
+            await admin.from("appointments").insert({
+              customer_id: customerId,
+              customer_note: "Sensitive booking note",
+              currency_snapshot: "CZK",
+              duration_minutes_snapshot: 60,
+              ends_at: "2030-04-03T11:00:00.000Z",
+              id: pendingAppointmentId,
+              occupied_range:
+                "[2030-04-03T10:00:00.000Z,2030-04-03T11:00:00.000Z)",
+              price_amount_snapshot: 900,
+              service_id: service.data.id,
+              service_name_snapshot: "Privacy test service",
+              source: "public_booking",
+              starts_at: "2030-04-03T10:00:00.000Z",
+              status: "pending",
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("appointment_events").insert({
+              appointment_id: pendingAppointmentId,
+              event_type: "created",
+              reason: "Sensitive event note",
+              to_status: "pending",
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("waiting_list_entries").insert({
+              customer_email: "anna@example.test",
+              customer_id: customerId,
+              customer_name: "Anna Customer",
+              customer_phone: "+420111222333",
+              desired_date: "2030-04-04",
+              id: waitingListEntryId,
+              note: "Sensitive wait-list note",
+              service_id: service.data.id,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("appointment_access_tokens").insert({
+              appointment_id: pendingAppointmentId,
+              expires_at: "2030-04-02T00:00:00.000Z",
+              id: accessTokenId,
+              purpose: "manage",
+              token_hash: `privacy-test-${suffix}`,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("notification_jobs").insert({
+              appointment_id: pendingAppointmentId,
+              channel: "email",
+              recipient: "anna@example.test",
+              scheduled_for: "2030-04-02T00:00:00.000Z",
+              type: "confirmation",
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("booking_decision_email_outbox").insert({
+              appointment_id: pendingAppointmentId,
+              decision: "accepted",
+              locale: "en",
+              recipient: "anna@example.test",
+              service_name: "Privacy test service",
+              starts_at: "2030-04-03T10:00:00.000Z",
+              timezone: "Europe/Prague",
+              workspace_id: workspaceId,
+              workspace_name: "Customer Directory Workspace",
+            })
+          ).error,
+        ).toBeNull();
+
         const directory = await user.client.rpc(
           "list_master_customer_directory",
           { p_workspace_id: workspaceId },
@@ -1913,6 +2015,146 @@ describe("customer directory RPC", () => {
           .maybeSingle();
         expect(crossWorkspaceContact.data).toBeNull();
         expect(crossWorkspaceContact.error).toBeNull();
+
+        const crossWorkspaceAnonymization = await user.client.rpc(
+          "anonymize_master_customer",
+          { p_customer_id: otherCustomerId, p_workspace_id: otherWorkspaceId },
+        );
+        expect(crossWorkspaceAnonymization.error?.code).toBe("42501");
+
+        const anonymize = await user.client.rpc("anonymize_master_customer", {
+          p_customer_id: customerId,
+          p_workspace_id: workspaceId,
+        });
+        expect(anonymize.error).toBeNull();
+        const repeatedAnonymize = await user.client.rpc(
+          "anonymize_master_customer",
+          { p_customer_id: customerId, p_workspace_id: workspaceId },
+        );
+        expect(repeatedAnonymize.error).toBeNull();
+
+        const erasedCustomer = await admin
+          .from("customers")
+          .select(
+            "name, email, phone, normalized_email, normalized_phone, notes, anonymized_at, auth_user_id",
+          )
+          .eq("id", customerId)
+          .single();
+        expect(erasedCustomer.error).toBeNull();
+        expect(erasedCustomer.data).toMatchObject({
+          anonymized_at: expect.any(String),
+          auth_user_id: null,
+          email: null,
+          name: "Anonymized customer",
+          notes: null,
+          normalized_email: null,
+          normalized_phone: null,
+          phone: null,
+        });
+        const otherWorkspaceCustomer = await admin
+          .from("customers")
+          .select("email, name")
+          .eq("id", otherCustomerId)
+          .single();
+        expect(otherWorkspaceCustomer.data).toEqual({
+          email: "other@example.test",
+          name: "Other Workspace Customer",
+        });
+
+        const anonymizedDirectory = await user.client.rpc(
+          "list_master_customer_directory",
+          { p_workspace_id: workspaceId },
+        );
+        expect(anonymizedDirectory.error).toBeNull();
+        expect(anonymizedDirectory.data).toEqual([]);
+        const anonymizedCustomerHistory = await user.client.rpc(
+          "list_master_customer_history",
+          { p_customer_id: customerId, p_workspace_id: workspaceId },
+        );
+        expect(anonymizedCustomerHistory.data).toBeNull();
+        expect(anonymizedCustomerHistory.error?.code).toBe("P0002");
+
+        const anonymizedWaitingList = await user.client.rpc(
+          "list_master_waiting_list",
+          { p_workspace_id: workspaceId },
+        );
+        expect(anonymizedWaitingList.error).toBeNull();
+        expect(anonymizedWaitingList.data).toEqual([]);
+
+        const pendingRequests = await user.client.rpc(
+          "list_master_pending_booking_requests",
+          { p_workspace_id: workspaceId },
+        );
+        expect(pendingRequests.error).toBeNull();
+        expect(pendingRequests.data).toContainEqual(
+          expect.objectContaining({
+            customer_email: null,
+            customer_name: "Anonymized customer",
+            customer_phone: null,
+            id: pendingAppointmentId,
+          }),
+        );
+
+        const appointments = await user.client
+          .from("appointments")
+          .select("id, customer_note, price_amount_snapshot")
+          .eq("workspace_id", workspaceId)
+          .eq("customer_id", customerId);
+        expect(appointments.error).toBeNull();
+        expect(appointments.data).toHaveLength(2);
+        expect(appointments.data).toContainEqual(
+          expect.objectContaining({
+            customer_note: null,
+            id: pendingAppointmentId,
+            price_amount_snapshot: 900,
+          }),
+        );
+
+        const retainedScheduleHistory = await user.client.rpc(
+          "list_master_appointments",
+          {
+            p_from_date: "2030-04-03",
+            p_to_date: "2030-04-03",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(retainedScheduleHistory.error).toBeNull();
+        expect(retainedScheduleHistory.data).toContainEqual(
+          expect.objectContaining({
+            customer_name: "Anonymized customer",
+            id: pendingAppointmentId,
+            price_amount: 900,
+          }),
+        );
+
+        const event = await admin
+          .from("appointment_events")
+          .select("reason")
+          .eq("appointment_id", pendingAppointmentId)
+          .single();
+        expect(event.data).toEqual({ reason: null });
+        const waitingEntry = await admin
+          .from("waiting_list_entries")
+          .select("id")
+          .eq("id", waitingListEntryId)
+          .maybeSingle();
+        expect(waitingEntry.data).toBeNull();
+        const revokedToken = await admin
+          .from("appointment_access_tokens")
+          .select("revoked_at")
+          .eq("id", accessTokenId)
+          .single();
+        expect(revokedToken.data?.revoked_at).not.toBeNull();
+        const notifications = await admin
+          .from("notification_jobs")
+          .select("id")
+          .eq("appointment_id", pendingAppointmentId);
+        expect(notifications.data).toEqual([]);
+        const emails = await admin
+          .from("booking_decision_email_outbox")
+          .select("id")
+          .eq("appointment_id", pendingAppointmentId);
+        expect(emails.data).toEqual([]);
       } finally {
         const deletedWorkspaces = await admin
           .from("workspaces")
