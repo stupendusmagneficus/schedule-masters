@@ -2086,14 +2086,23 @@ describe("customer directory RPC", () => {
           p_workspace_id: workspaceId,
         });
         expect(history.error).toBeNull();
-        expect(history.data).toHaveLength(1);
-        expect(history.data?.[0]).toMatchObject({
-          customer_id: customerId,
-          duration_minutes: 60,
-          price_amount: 700,
-          service_name: "Directory service",
-          status: "completed",
-        });
+        expect(history.data).toHaveLength(2);
+        expect(history.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              customer_id: customerId,
+              duration_minutes: 60,
+              price_amount: 700,
+              service_name: "Directory service",
+              status: "completed",
+            }),
+            expect.objectContaining({
+              customer_id: customerId,
+              service_name: "Privacy test service",
+              status: "pending",
+            }),
+          ]),
+        );
 
         const crossWorkspaceHistory = await user.client.rpc(
           "list_master_customer_history",
