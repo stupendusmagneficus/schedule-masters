@@ -131,6 +131,264 @@ describe("Supabase public booking contract", () => {
   );
 
   rlsIntegrationTest(
+    "keeps one-off workday overrides isolated from weekly rules and shares them with public booking",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = Date.now();
+      const workspaceId = randomUUID();
+      const otherWorkspaceId = randomUUID();
+      const password = `Availability-${suffix}-Password!`;
+      const ownerEmail = `availability-owner-${suffix}@example.test`;
+      const outsiderEmail = `availability-outsider-${suffix}@example.test`;
+      const workDate = "2030-01-07"; // Monday in the workspace timezone.
+      const nextWorkDate = "2030-01-14";
+
+      const createdWorkspaces = await admin.from("workspaces").insert([
+        {
+          id: workspaceId,
+          name: "Availability override test",
+          slug: `availability-override-${suffix}`,
+          timezone: "Europe/Prague",
+        },
+        {
+          id: otherWorkspaceId,
+          name: "Availability outsider test",
+          slug: `availability-outsider-${suffix}`,
+          timezone: "Europe/Prague",
+        },
+      ]);
+      expect(createdWorkspaces.error).toBeNull();
+
+      const owner = await createAuthenticatedTestUser({
+        admin,
+        email: ownerEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+      const outsider = await createAuthenticatedTestUser({
+        admin,
+        email: outsiderEmail,
+        password,
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl,
+      });
+
+      try {
+        const membership = await admin.from("workspace_members").insert([
+          {
+            role: "owner",
+            user_id: owner.user.id,
+            workspace_id: workspaceId,
+          },
+          {
+            role: "owner",
+            user_id: outsider.user.id,
+            workspace_id: otherWorkspaceId,
+          },
+        ]);
+        expect(membership.error).toBeNull();
+
+        const service = await admin
+          .from("services")
+          .insert({
+            duration_minutes: 60,
+            name: "Availability test service",
+            price_amount: 500,
+            workspace_id: workspaceId,
+          })
+          .select("id")
+          .single();
+        expect(service.error).toBeNull();
+        const serviceId = service.data?.id;
+        if (!serviceId) throw new Error("Test service was not created");
+
+        const bookingLink = await admin.from("booking_links").insert({
+          slug: `availability-${suffix}`,
+          workspace_id: workspaceId,
+        });
+        expect(bookingLink.error).toBeNull();
+
+        const weeklyRule = await admin.from("availability_rules").insert({
+          day_of_week: 1,
+          end_local_time: "17:00",
+          start_local_time: "09:00",
+          valid_from: workDate,
+          workspace_id: workspaceId,
+        });
+        expect(weeklyRule.error).toBeNull();
+
+        const customHours = await owner.client.rpc(
+          "set_master_availability_date_override",
+          {
+            p_date: workDate,
+            p_end_local_time: "15:00",
+            p_kind: "modified",
+            p_start_local_time: "12:00",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(customHours.error).toBeNull();
+
+        const visibleToOutsider = await outsider.client
+          .from("availability_date_overrides")
+          .select("id")
+          .eq("workspace_id", workspaceId);
+        expect(visibleToOutsider.error).toBeNull();
+        expect(visibleToOutsider.data).toEqual([]);
+
+        const masterSlots = await owner.client.rpc(
+          "get_master_available_slots",
+          {
+            p_date: workDate,
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        const publicSlots = await owner.client.rpc(
+          "get_public_available_slots",
+          {
+            p_date: workDate,
+            p_service_id: serviceId,
+            p_slug: `availability-${suffix}`,
+          },
+        );
+        expect(masterSlots.error).toBeNull();
+        expect(publicSlots.error).toBeNull();
+        expect(masterSlots.data).toHaveLength(5);
+        expect(publicSlots.data).toEqual(masterSlots.data);
+        expect(
+          new Date(masterSlots.data?.[0]?.starts_at ?? "").toISOString(),
+        ).toBe("2030-01-07T11:00:00.000Z");
+
+        const booked = await owner.client.rpc("create_public_booking", {
+          p_email: `client-${suffix}@example.test`,
+          p_idempotency_key: `availability-${suffix}`,
+          p_name: "Availability test client",
+          p_phone: "+420111222333",
+          p_service_id: serviceId,
+          p_slug: `availability-${suffix}`,
+          p_starts_at: masterSlots.data?.[0]?.starts_at as string,
+        });
+        expect(booked.error).toBeNull();
+
+        const closeBookedDay = await owner.client.rpc(
+          "set_master_availability_date_override",
+          {
+            p_date: workDate,
+            p_kind: "closed",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(closeBookedDay.error?.message).toContain(
+          "Availability override overlaps an existing appointment",
+        );
+
+        const preservedSlots = await owner.client.rpc(
+          "get_master_available_slots",
+          {
+            p_date: workDate,
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(preservedSlots.error).toBeNull();
+        expect(preservedSlots.data).toHaveLength(3);
+
+        const unauthorizedOverride = await outsider.client.rpc(
+          "set_master_availability_date_override",
+          {
+            p_date: workDate,
+            p_end_local_time: "15:00",
+            p_kind: "modified",
+            p_start_local_time: "12:00",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(unauthorizedOverride.error?.message).toContain(
+          "Workspace access denied",
+        );
+
+        await admin
+          .from("appointments")
+          .update({ status: "cancelled_by_master" })
+          .eq("workspace_id", workspaceId);
+
+        const closedDay = await owner.client.rpc(
+          "set_master_availability_date_override",
+          {
+            p_date: nextWorkDate,
+            p_kind: "closed",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(closedDay.error).toBeNull();
+
+        const unauthorizedReset = await outsider.client.rpc(
+          "clear_master_availability_date_override",
+          { p_date: nextWorkDate, p_workspace_id: workspaceId },
+        );
+        expect(unauthorizedReset.error?.message).toContain(
+          "Workspace access denied",
+        );
+
+        const closedSlots = await owner.client.rpc(
+          "get_master_available_slots",
+          {
+            p_date: nextWorkDate,
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(closedSlots.error).toBeNull();
+        expect(closedSlots.data).toEqual([]);
+
+        const closedPublicSlots = await owner.client.rpc(
+          "get_public_available_slots",
+          {
+            p_date: nextWorkDate,
+            p_service_id: serviceId,
+            p_slug: `availability-${suffix}`,
+          },
+        );
+        expect(closedPublicSlots.error).toBeNull();
+        expect(closedPublicSlots.data).toEqual([]);
+
+        const resetDay = await owner.client.rpc(
+          "clear_master_availability_date_override",
+          { p_date: nextWorkDate, p_workspace_id: workspaceId },
+        );
+        expect(resetDay.error).toBeNull();
+
+        const resetSlots = await owner.client.rpc(
+          "get_master_available_slots",
+          {
+            p_date: nextWorkDate,
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(resetSlots.error).toBeNull();
+        expect(resetSlots.data).toHaveLength(15);
+      } finally {
+        await admin
+          .from("workspaces")
+          .delete()
+          .in("id", [workspaceId, otherWorkspaceId]);
+        await admin.auth.admin.deleteUser(owner.user.id);
+        await admin.auth.admin.deleteUser(outsider.user.id);
+      }
+    },
+  );
+
+  rlsIntegrationTest(
     "rejects cross-workspace reads and appointment references",
     async () => {
       if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {

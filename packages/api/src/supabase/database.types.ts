@@ -291,6 +291,47 @@ export type Database = {
           },
         ]
       }
+      availability_date_overrides: {
+        Row: {
+          created_at: string
+          end_local_time: string | null
+          id: string
+          override_kind: string
+          start_local_time: string | null
+          updated_at: string
+          work_date: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_local_time?: string | null
+          id?: string
+          override_kind: string
+          start_local_time?: string | null
+          updated_at?: string
+          work_date: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          end_local_time?: string | null
+          id?: string
+          override_kind?: string
+          start_local_time?: string | null
+          updated_at?: string
+          work_date?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_date_overrides_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_exceptions: {
         Row: {
           created_at: string
@@ -971,6 +1012,10 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      clear_master_availability_date_override: {
+        Args: { p_date: string; p_workspace_id: string }
+        Returns: Json
+      }
       create_customer_appointment_link: {
         Args: {
           p_appointment_id: string
@@ -1251,6 +1296,16 @@ export type Database = {
       }
       set_master_appointment_paid_amount: {
         Args: { p_appointment_id: string; p_paid_amount: number }
+        Returns: Json
+      }
+      set_master_availability_date_override: {
+        Args: {
+          p_date: string
+          p_end_local_time?: string
+          p_kind: string
+          p_start_local_time?: string
+          p_workspace_id: string
+        }
         Returns: Json
       }
       set_master_waiting_list_entry_status: {
