@@ -40,6 +40,21 @@ describe("customer directory data access", () => {
     });
   });
 
+  it.each(["Anna", "+420 123 456 789", "anna@example.com"])(
+    "passes name, phone, and email searches to the server filter (%s)",
+    async (search) => {
+      const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
+      const client = { rpc } as unknown as SupabaseClient<Database>;
+
+      await listCustomerDirectory(client, "workspace-a", search);
+
+      expect(rpc).toHaveBeenCalledWith("list_master_customer_directory", {
+        p_search: search,
+        p_workspace_id: "workspace-a",
+      });
+    },
+  );
+
   it("requests real history for the selected customer in the workspace", async () => {
     const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
     const client = { rpc } as unknown as SupabaseClient<Database>;

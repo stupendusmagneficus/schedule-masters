@@ -7,9 +7,11 @@ import {
   getIntlLocale,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -24,11 +26,8 @@ import {
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import { buildCustomerPhoneUrl } from "../../features/customers/customerContact";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
-import {
-  type CustomerSegment,
-  getCustomerSegment,
-} from "../../features/customers/customerSegments";
 import { useCustomerDirectory } from "../../features/customers/useCustomerDirectory";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -44,12 +43,6 @@ type CustomersTabProps = DashboardTabProps & {
   readonly visible: boolean;
 };
 
-const segmentOrder: readonly CustomerSegment[] = [
-  "new",
-  "returning",
-  "long_absent",
-];
-
 export function CustomersTab({
   client,
   locale,
@@ -60,37 +53,10 @@ export function CustomersTab({
   visible,
 }: CustomersTabProps) {
   const [search, setSearch] = useState("");
-  const [activeSegment, setActiveSegment] = useState<CustomerSegment | "all">(
-    "all",
-  );
   const directory = useCustomerDirectory({
     client,
     search,
     workspaceId: workspace.id,
-  });
-  const segments = useMemo(
-    () =>
-      directory.customers.map((customer) => ({
-        customer,
-        segment: getCustomerSegment(
-          customer.completed_visits,
-          customer.last_completed_visit_at,
-        ),
-      })),
-    [directory.customers],
-  );
-  const intlLocale = getIntlLocale(locale);
-  const normalizedSearch = search.trim().toLocaleLowerCase(intlLocale);
-  const visibleCustomers = segments.filter(({ customer, segment }) => {
-    const matchesSegment = activeSegment === "all" || segment === activeSegment;
-    const matchesSearch =
-      !normalizedSearch ||
-      [customer.name, customer.email, customer.phone]
-        .filter((value): value is string => Boolean(value))
-        .some((value) =>
-          value.toLocaleLowerCase(intlLocale).includes(normalizedSearch),
-        );
-    return matchesSegment && matchesSearch;
   });
   const selected = directory.selectedCustomer;
 
@@ -218,32 +184,6 @@ export function CustomersTab({
         style={styles.search}
         value={search}
       />
-      <View accessibilityRole="tablist" style={styles.segmentList}>
-        <SegmentButton
-          active={activeSegment === "all"}
-          label={t("mobile.customers")}
-          onPress={() => setActiveSegment("all")}
-        />
-        {segmentOrder.map((segment) => (
-          <SegmentButton
-            active={activeSegment === segment}
-            key={segment}
-            label={t(segmentLabel(segment))}
-            onPress={() => setActiveSegment(segment)}
-          />
-        ))}
-      </View>
-      {activeSegment !== "all" ? (
-        <Text style={styles.helper}>
-          {t(
-            activeSegment === "new"
-              ? "mobile.customerNewRule"
-              : activeSegment === "returning"
-                ? "mobile.customerReturningRule"
-                : "mobile.customerLongAbsentRule",
-          )}
-        </Text>
-      ) : null}
       {directory.isLoading ? (
         <View accessibilityLiveRegion="polite" style={styles.state}>
           <ActivityIndicator color={colors.accent} />
@@ -259,7 +199,7 @@ export function CustomersTab({
       ) : null}
       {!directory.isLoading &&
       !directory.error &&
-      visibleCustomers.length === 0 ? (
+      directory.customers.length === 0 ? (
         <InfoCard>
           <Text style={styles.helper}>
             {directory.customers.length === 0 && !search.trim()
@@ -268,48 +208,72 @@ export function CustomersTab({
           </Text>
         </InfoCard>
       ) : null}
-      {visibleCustomers.map(({ customer, segment }) => (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={customer.name}
-          key={customer.id}
-          onPress={() => directory.selectCustomer(customer)}
-        >
-          <InfoCard style={styles.customerRow}>
-            <View style={styles.customerCopy}>
-              <Text style={styles.customerName}>{customer.name}</Text>
-              <Text numberOfLines={1} style={styles.helper}>
-                {customer.phone || customer.email || "—"}
-              </Text>
-            </View>
-            <Text style={styles.segmentLabel}>{t(segmentLabel(segment))}</Text>
-          </InfoCard>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
+      {directory.customers.map((customer) => {
+        const phoneUrl = customer.phone
+          ? buildCustomerPhoneUrl(customer.phone, "call")
+          : null;
 
-function SegmentButton({
-  active,
-  label,
-  onPress,
-}: {
-  active: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
-      onPress={onPress}
-      style={[styles.segment, active && styles.activeSegment]}
-    >
-      <Text style={[styles.segmentText, active && styles.activeSegmentText]}>
-        {label}
-      </Text>
-    </Pressable>
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={customer.name}
+            key={customer.id}
+            onPress={() => directory.selectCustomer(customer)}
+          >
+            <InfoCard style={styles.customerRow}>
+              <View style={styles.customerCopy}>
+                <Text style={styles.customerName}>{customer.name}</Text>
+                {customer.phone ? (
+                  phoneUrl ? (
+                    <Pressable
+                      accessibilityHint={customer.phone}
+                      accessibilityLabel={`${t("mobile.customerCall")}: ${customer.phone}`}
+                      accessibilityRole="link"
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        void Linking.openURL(phoneUrl).catch(() =>
+                          Alert.alert(t("mobile.customerContactActionFailed")),
+                        );
+                      }}
+                      style={styles.phoneLink}
+                    >
+                      <MaterialCommunityIcons
+                        color={colors.secondaryText}
+                        name="phone-outline"
+                        size={16}
+                      />
+                      <Text numberOfLines={1} style={styles.phoneText}>
+                        {customer.phone}
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <View style={styles.phoneLink}>
+                      <MaterialCommunityIcons
+                        color={colors.secondaryText}
+                        name="phone-outline"
+                        size={16}
+                      />
+                      <Text numberOfLines={1} style={styles.phoneText}>
+                        {customer.phone}
+                      </Text>
+                    </View>
+                  )
+                ) : (
+                  <View style={styles.phoneLink}>
+                    <MaterialCommunityIcons
+                      color={colors.secondaryText}
+                      name="phone-outline"
+                      size={16}
+                    />
+                    <Text style={styles.phoneText}>—</Text>
+                  </View>
+                )}
+              </View>
+            </InfoCard>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -338,12 +302,6 @@ function ErrorState({
   );
 }
 
-function segmentLabel(segment: CustomerSegment) {
-  if (segment === "new") return "mobile.customerNew" as const;
-  if (segment === "returning") return "mobile.customerReturning" as const;
-  return "mobile.customerLongAbsent" as const;
-}
-
 function formatCurrency(
   amount: number,
   currency: string,
@@ -357,11 +315,6 @@ function formatCurrency(
 }
 
 const styles = StyleSheet.create({
-  activeSegment: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.accent,
-  },
-  activeSegmentText: { color: colors.accent },
   backButton: {
     alignItems: "center",
     alignSelf: "flex-start",
@@ -384,7 +337,7 @@ const styles = StyleSheet.create({
   },
   customerCopy: { flex: 1, gap: 3, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
-  customerRow: { alignItems: "center", flexDirection: "row", gap: 10 },
+  customerRow: { alignItems: "flex-start" },
   error: { ...typography.body, color: colors.danger, marginBottom: 8 },
   eyebrow: {
     color: colors.accent,
@@ -416,6 +369,19 @@ const styles = StyleSheet.create({
     color: colors.actionText,
     fontWeight: "700",
   },
+  phoneLink: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 6,
+    minHeight: 44,
+    maxWidth: "100%",
+  },
+  phoneText: {
+    ...typography.body,
+    color: colors.secondaryText,
+    flexShrink: 1,
+  },
   errorState: { alignItems: "flex-start", gap: 4 },
   retryButton: { alignSelf: "flex-start", marginLeft: -10 },
   search: {
@@ -435,27 +401,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sectionTitle: { ...typography.section, color: colors.primaryText },
-  segment: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 12,
-  },
-  segmentLabel: {
-    ...typography.caption,
-    color: colors.secondaryText,
-    flexShrink: 0,
-  },
-  segmentList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  segmentText: {
-    ...typography.caption,
-    color: colors.primaryText,
-    fontWeight: "600",
-  },
   state: {
     alignItems: "center",
     flexDirection: "row",
