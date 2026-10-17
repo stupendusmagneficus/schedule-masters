@@ -125,7 +125,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Start local Supabase
-        run: yarn supabase:start > /dev/null 2>&1
+        run: yarn supabase:start > /dev/null
       - name: Apply migrations and seed
         run: yarn supabase:reset
       - name: Lint local database
