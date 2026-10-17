@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -41,6 +41,15 @@ const labelColors: Record<ActionButtonVariant, string> = {
   quiet: colors.secondaryText,
 };
 
+const focusBorderColors: Record<ActionButtonVariant, string> = {
+  primary: colors.primaryText,
+  secondary: colors.primaryText,
+  destructive: colors.danger,
+  destructiveConfirm: colors.inverse,
+  neutral: colors.primaryText,
+  quiet: colors.primaryText,
+};
+
 export function ActionButton({
   accessibilityLabel,
   disabled = false,
@@ -53,6 +62,7 @@ export function ActionButton({
   style,
   variant = "primary",
 }: ActionButtonProps) {
+  const [isFocused, setFocused] = useState(false);
   const isDisabled = disabled || loading;
   const visibleLabel = loading && loadingLabel ? loadingLabel : label;
   const content: ReactNode =
@@ -84,12 +94,18 @@ export function ActionButton({
       accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled: isDisabled }}
       disabled={isDisabled}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         size === "compact" && styles.compact,
         styles[variant],
         pressed && !isDisabled && styles[`${variant}Pressed`],
+        isFocused && {
+          borderColor: focusBorderColors[variant],
+          borderWidth: 3,
+        },
         isDisabled && styles.disabled,
         style,
       ]}

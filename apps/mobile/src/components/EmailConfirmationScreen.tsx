@@ -1,9 +1,10 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey } from "@schedule-app/i18n";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { colors, radii, shadows } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 
 type EmailConfirmationScreenProps = {
   readonly descriptionKey:
@@ -35,15 +36,12 @@ export function EmailConfirmationScreen({
         <Text style={styles.label}>{t("auth.confirmationEmailLabel")}</Text>
         <Text style={styles.email}>{email}</Text>
       </View>
-      <Pressable
-        accessibilityRole="button"
+      <ActionButton
+        label={t("auth.confirmationBackToSignIn")}
         onPress={onBackToSignIn}
-        style={styles.primaryButton}
-      >
-        <Text style={styles.primaryButtonText}>
-          {t("auth.confirmationBackToSignIn")}
-        </Text>
-      </Pressable>
+        style={styles.returnButton}
+        variant="quiet"
+      />
     </View>
   );
 }
@@ -69,19 +67,6 @@ const styles = StyleSheet.create({
     width: 52,
   },
   label: { ...typography.caption, color: colors.secondaryText },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-    width: "100%",
-  },
-  primaryButtonText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
+  returnButton: { width: "100%" },
   title: { ...typography.heading, color: colors.primaryText },
 });

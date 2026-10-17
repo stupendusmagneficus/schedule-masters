@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
+import { StyleSheet, Text, View } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import type {
   OnboardingDraft,
   SetupTranslator,
@@ -39,16 +39,16 @@ export function SetupCompleteStep({
           {draft.startTime}–{draft.endTime}
         </Text>
       </View>
-      <Pressable onPress={onOpenDashboard} style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>
-          {t("workspace.setupOpenDashboard")}
-        </Text>
-      </Pressable>
-      <Pressable onPress={onOpenBooking} style={styles.secondaryButton}>
-        <Text style={styles.secondaryButtonText}>
-          {t("workspace.setupOpenBooking")}
-        </Text>
-      </Pressable>
+      <ActionButton
+        label={t("workspace.setupOpenDashboard")}
+        onPress={onOpenDashboard}
+        variant="primary"
+      />
+      <ActionButton
+        label={t("workspace.setupOpenBooking")}
+        onPress={onOpenBooking}
+        variant="secondary"
+      />
       <Text selectable style={styles.bookingUrl}>
         {buildBookingUrl(bookingWebUrl, draft.slug)}
       </Text>
@@ -66,33 +66,6 @@ const styles = StyleSheet.create({
   },
   description: { ...typography.body, color: colors.secondaryText },
   eyebrow: { color: colors.accent, fontSize: 48, fontWeight: "700" },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  primaryButtonText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.control,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  secondaryButtonText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
   summary: {
     backgroundColor: colors.subtleSurface,
     borderRadius: radii.control,

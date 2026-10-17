@@ -20,6 +20,7 @@ export function LocalePicker({ locale, onLocaleChange }: LocalePickerProps) {
         const isSelected = item === locale;
         return (
           <Pressable
+            accessibilityLabel={localeLabels[item]}
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
             key={item}
@@ -47,12 +48,17 @@ const styles = StyleSheet.create({
     minWidth: 44,
     paddingHorizontal: 8,
   },
-  container: { flexDirection: "row", gap: 8 },
+  container: {
+    alignSelf: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
   selectedButton: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
   },
-  selectedText: { color: colors.inverse },
+  selectedText: { color: colors.accent },
   text: {
     color: colors.secondaryText,
     ...typography.label,
