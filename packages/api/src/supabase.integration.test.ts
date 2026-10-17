@@ -287,11 +287,18 @@ describe("Supabase public booking contract", () => {
             p_workspace_id: workspaceId,
           },
         );
-        expect(closeBookedDay.error?.message).toContain(
-          "Availability override overlaps an existing appointment",
-        );
+        expect(closeBookedDay.error).toBeNull();
 
-        const preservedSlots = await owner.client.rpc(
+        const retainedBooking = await admin
+          .from("appointments")
+          .select("id, status")
+          .eq("workspace_id", workspaceId)
+          .eq("starts_at", masterSlots.data?.[0]?.starts_at as string)
+          .single();
+        expect(retainedBooking.error).toBeNull();
+        expect(retainedBooking.data?.status).toBe("pending");
+
+        const closedBookedDaySlots = await owner.client.rpc(
           "get_master_available_slots",
           {
             p_date: workDate,
@@ -299,8 +306,8 @@ describe("Supabase public booking contract", () => {
             p_workspace_id: workspaceId,
           },
         );
-        expect(preservedSlots.error).toBeNull();
-        expect(preservedSlots.data).toHaveLength(3);
+        expect(closedBookedDaySlots.error).toBeNull();
+        expect(closedBookedDaySlots.data).toEqual([]);
 
         const unauthorizedOverride = await outsider.client.rpc(
           "set_master_availability_date_override",

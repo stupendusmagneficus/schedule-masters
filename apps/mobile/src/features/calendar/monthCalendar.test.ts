@@ -161,4 +161,32 @@ describe("month calendar", () => {
     expect(days.find((day) => day.date === "2030-02-11")?.isClosed).toBe(true);
     expect(days.find((day) => day.date === "2030-02-12")?.isClosed).toBe(false);
   });
+
+  it("shows one-off day availability in the month view without hiding bookings", () => {
+    const days = buildMonthCalendar({
+      appointments: [appointment],
+      availabilityRules: [
+        { dayOfWeek: 2, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: null,
+          override_kind: "closed",
+          start_local_time: null,
+          work_date: "2030-02-12",
+        },
+      ],
+      monthDate: "2030-02-12",
+      selectedDate: "2030-02-12",
+      timezone: "UTC",
+      todayDate: "2030-02-12",
+    });
+
+    expect(days.find((day) => day.date === "2030-02-12")).toMatchObject({
+      bookingCount: 1,
+      isClosed: true,
+      workloadPercent: null,
+    });
+  });
 });

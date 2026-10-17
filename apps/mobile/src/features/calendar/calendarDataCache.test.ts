@@ -14,8 +14,17 @@ function createClient() {
       return { data: [], error: null };
     },
   );
+  const tableQuery = Object.assign(Promise.resolve({ data: [], error: null }), {
+    eq: () => tableQuery,
+    gte: () => tableQuery,
+    lte: () => tableQuery,
+    select: () => tableQuery,
+  });
   return {
-    client: { rpc } as unknown as SupabaseClient<Database>,
+    client: {
+      from: () => tableQuery,
+      rpc,
+    } as unknown as SupabaseClient<Database>,
     rpc,
   };
 }
@@ -38,7 +47,7 @@ describe("calendar data cache", () => {
         "Europe/Prague",
         range,
       ),
-    ).toEqual({ appointments: [], blocks: [] });
+    ).toEqual({ appointments: [], blocks: [], dateOverrides: [] });
     expect(first.rpc).toHaveBeenCalledTimes(2);
 
     const second = createClient();

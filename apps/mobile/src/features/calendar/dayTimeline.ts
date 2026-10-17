@@ -1,6 +1,10 @@
 import type { DemoAppointment } from "../../demo/types";
 import type { WorkspaceAvailabilityRule } from "../../types";
 import type { MasterAppointment } from "../appointments/manualBooking";
+import {
+  type AvailabilityDateOverride,
+  getEffectiveAvailability,
+} from "../availability/dateOverrides";
 import type { PersonalBlock } from "../availability/personalBlocks";
 
 export const timelineSlotMinutes = 30;
@@ -34,6 +38,7 @@ type BuildDayTimelineParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly blocks: readonly PersonalBlock[];
+  readonly dateOverrides?: readonly AvailabilityDateOverride[];
   readonly selectedDate: string;
   readonly timezone: string;
 };
@@ -47,17 +52,23 @@ export function buildDayTimeline({
   appointments,
   availabilityRules,
   blocks,
+  dateOverrides = [],
   selectedDate,
   timezone,
 }: BuildDayTimelineParams): DayTimeline {
-  const dayOfWeek = getIsoDayOfWeek(selectedDate);
-  const rule = availabilityRules.find(
-    (candidate) => candidate.dayOfWeek === dayOfWeek,
+  const effectiveAvailability = getEffectiveAvailability(
+    selectedDate,
+    availabilityRules,
+    dateOverrides,
   );
-  const startMinute = rule ? timeToMinutes(rule.startLocalTime) : 0;
-  const endMinute = rule ? timeToMinutes(rule.endLocalTime) : 0;
+  const startMinute = effectiveAvailability.startLocalTime
+    ? timeToMinutes(effectiveAvailability.startLocalTime)
+    : 0;
+  const endMinute = effectiveAvailability.endLocalTime
+    ? timeToMinutes(effectiveAvailability.endLocalTime)
+    : 0;
 
-  if (!rule || endMinute <= startMinute) {
+  if (effectiveAvailability.isClosed || endMinute <= startMinute) {
     return {
       endMinute,
       events: [],
@@ -212,11 +223,6 @@ export function getDayTimelineSlotStart(
 export function timeToMinutes(value: string): number {
   const [hours, minutes] = value.slice(0, 5).split(":").map(Number);
   return hours * 60 + minutes;
-}
-
-function getIsoDayOfWeek(value: string): number {
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return date.getUTCDay() || 7;
 }
 
 function getLocalTime(value: string, timezone: string): LocalTime {

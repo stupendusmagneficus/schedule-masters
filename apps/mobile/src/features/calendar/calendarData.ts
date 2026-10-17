@@ -6,6 +6,10 @@ import {
   type MasterAppointment,
 } from "../appointments/manualBooking";
 import {
+  type AvailabilityDateOverride,
+  listAvailabilityDateOverrides,
+} from "../availability/dateOverrides";
+import {
   listPersonalBlocksInRange,
   type PersonalBlock,
 } from "../availability/personalBlocks";
@@ -14,6 +18,7 @@ import type { CalendarDateRange } from "./calendar";
 export type CalendarData = {
   readonly appointments: MasterAppointment[];
   readonly blocks: PersonalBlock[];
+  readonly dateOverrides: AvailabilityDateOverride[];
 };
 
 export async function listCalendarData(
@@ -21,7 +26,7 @@ export async function listCalendarData(
   workspaceId: string,
   range: CalendarDateRange,
 ): Promise<CalendarData> {
-  const [appointments, blocks] = await Promise.all([
+  const [appointments, blocks, dateOverrides] = await Promise.all([
     listMasterAppointments(client, workspaceId, range.fromDate, range.toDate),
     listPersonalBlocksInRange(
       client,
@@ -29,7 +34,13 @@ export async function listCalendarData(
       range.fromDate,
       range.toDate,
     ),
+    listAvailabilityDateOverrides(
+      client,
+      workspaceId,
+      range.fromDate,
+      range.toDate,
+    ),
   ]);
 
-  return { appointments, blocks };
+  return { appointments, blocks, dateOverrides };
 }

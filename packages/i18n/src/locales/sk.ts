@@ -261,6 +261,26 @@ export const slovakMessages: Messages = {
   "mobile.calendarClosed": "Zatvorený deň",
   "mobile.calendarClosedDescription":
     "Pre tento deň nie sú nastavené pracovné hodiny.",
+  "mobile.calendarDaySettings": "Nastaviť deň",
+  "mobile.calendarDaySettingsDescription":
+    "Zmena platí iba pre vybraný dátum a nemení týždenný rozvrh.",
+  "mobile.calendarDayOpen": "Pracovný čas",
+  "mobile.calendarDayClose": "Voľno",
+  "mobile.calendarDayStart": "Začiatok práce",
+  "mobile.calendarDayEnd": "Koniec práce",
+  "mobile.calendarDayConflictCount": "Rezervácie v konflikte: {count}",
+  "mobile.calendarDayConflictDescription":
+    "Tieto rezervácie zostanú bez zmeny. Dostupnosť nových rezervácií bude zodpovedať zvolenému rozvrhu.",
+  "mobile.calendarDaySaveFailed": "Pracovný čas sa nepodarilo uložiť.",
+  "mobile.calendarDayInvalidHours":
+    "Koniec pracovného času musí byť neskôr ako jeho začiatok.",
+  "mobile.calendarDaySave": "Uložiť",
+  "mobile.calendarDayReset": "Obnoviť týždenný rozvrh",
+  "mobile.calendarDayClosedStatus": "Voľno",
+  "mobile.calendarDayWorkingHours": "Pracovný čas",
+  "mobile.calendarDayResetDone": "Týždenný rozvrh obnovený",
+  "mobile.calendarDayClosedSaved": "Deň je zatvorený pre rezervácie",
+  "mobile.calendarDayHoursSaved": "Pracovný čas bol aktualizovaný",
   "mobile.calendarPrevious": "Predchádzajúci dátum",
   "mobile.calendarNext": "Nasledujúci dátum",
   "mobile.calendarPreviousWeek": "Predchádzajúci týždeň",

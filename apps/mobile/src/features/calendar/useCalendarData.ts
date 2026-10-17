@@ -8,7 +8,11 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState } from "react-native";
-
+import {
+  type AvailabilityOverrideDraft,
+  clearAvailabilityDateOverride,
+  saveAvailabilityDateOverride,
+} from "../availability/dateOverrides";
 import {
   createPersonalBlock,
   deletePersonalBlock,
@@ -56,6 +60,10 @@ export type CalendarDataController = CalendarData & {
   readonly reload: () => Promise<void>;
   readonly removeBlock: (blockId: string) => Promise<void>;
   readonly saveBlock: (draft: PersonalBlockDraft) => Promise<void>;
+  readonly saveDateOverride: (
+    draft: AvailabilityOverrideDraft,
+  ) => Promise<void>;
+  readonly clearDateOverride: (date: string) => Promise<void>;
   readonly updateBlock: (
     blockId: string,
     draft: PersonalBlockDraft,
@@ -80,6 +88,7 @@ export function useCalendarData({
   const [data, setData] = useState<CalendarData>({
     appointments: [],
     blocks: [],
+    dateOverrides: [],
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(client));
@@ -109,7 +118,7 @@ export function useCalendarData({
 
       if (!client) {
         if (requestGuard.isCurrent(requestId)) {
-          setData({ appointments: [], blocks: [] });
+          setData({ appointments: [], blocks: [], dateOverrides: [] });
           setIsLoading(false);
         }
         return;
@@ -130,7 +139,7 @@ export function useCalendarData({
         return;
       }
 
-      setData({ appointments: [], blocks: [] });
+      setData({ appointments: [], blocks: [], dateOverrides: [] });
       setIsLoading(true);
       setError(null);
       try {
@@ -191,7 +200,7 @@ export function useCalendarData({
       (event) => {
         if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
         invalidateCalendarDataCache(client, workspaceId, undefined, false);
-        setData({ appointments: [], blocks: [] });
+        setData({ appointments: [], blocks: [], dateOverrides: [] });
         if (event === "SIGNED_IN") {
           reloadTimeout = setTimeout(() => invokeLatestReload(reloadRef), 0);
         } else {
@@ -276,6 +285,50 @@ export function useCalendarData({
           );
         }
         throw updateError;
+      } finally {
+        if (operationGuard.isCurrent(requestId)) setIsSaving(false);
+      }
+    },
+    [client, operationGuard, reload, workspaceId],
+  );
+
+  const saveDateOverride = useCallback(
+    async (draft: AvailabilityOverrideDraft) => {
+      if (!client) return;
+      const requestId = operationGuard.begin();
+      setIsSaving(true);
+      setError(null);
+      try {
+        await saveAvailabilityDateOverride(client, workspaceId, draft);
+        await reload();
+      } catch (saveError) {
+        if (operationGuard.isCurrent(requestId)) {
+          setError(saveError instanceof Error ? saveError.message : "unknown");
+        }
+        throw saveError;
+      } finally {
+        if (operationGuard.isCurrent(requestId)) setIsSaving(false);
+      }
+    },
+    [client, operationGuard, reload, workspaceId],
+  );
+
+  const clearDateOverride = useCallback(
+    async (date: string) => {
+      if (!client) return;
+      const requestId = operationGuard.begin();
+      setIsSaving(true);
+      setError(null);
+      try {
+        await clearAvailabilityDateOverride(client, workspaceId, date);
+        await reload();
+      } catch (clearError) {
+        if (operationGuard.isCurrent(requestId)) {
+          setError(
+            clearError instanceof Error ? clearError.message : "unknown",
+          );
+        }
+        throw clearError;
       } finally {
         if (operationGuard.isCurrent(requestId)) setIsSaving(false);
       }
@@ -385,6 +438,7 @@ export function useCalendarData({
   return {
     ...data,
     error,
+    clearDateOverride,
     goToNext,
     goToPrevious,
     goToToday,
@@ -395,6 +449,7 @@ export function useCalendarData({
     reload,
     removeBlock,
     saveBlock,
+    saveDateOverride,
     selectedDate,
     setSelectedDate,
     setView,
