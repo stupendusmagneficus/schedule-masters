@@ -933,6 +933,7 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          booking_interval_minutes: number
           created_at: string
           id: string
           locale: string
@@ -943,6 +944,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          booking_interval_minutes?: number
           created_at?: string
           id?: string
           locale?: string
@@ -953,6 +955,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          booking_interval_minutes?: number
           created_at?: string
           id?: string
           locale?: string
@@ -971,6 +974,7 @@ export type Database = {
     Functions: {
       bootstrap_master_workspace: {
         Args: {
+          p_booking_interval_minutes?: number
           p_duration_minutes: number
           p_end_local_time: string
           p_locale: string
@@ -1360,6 +1364,7 @@ export type Database = {
       }
       update_master_workspace_settings: {
         Args: {
+          p_booking_interval_minutes?: number
           p_end_local_time: string
           p_name: string
           p_slug: string

@@ -59,6 +59,12 @@ export const ukrainianMessages: Messages = {
   "workspace.servicePlaceholder": "Перша послуга",
   "workspace.pricePlaceholder": "Ціна в CZK",
   "workspace.durationPlaceholder": "Тривалість у хвилинах",
+  "workspace.bookingIntervalLabel": "Крок початку запису",
+  "workspace.bookingIntervalHelp":
+    "Визначає, як часто показувати доступний час. Тривалість задається окремо для кожної послуги.",
+  "workspace.bookingInterval15": "Кожні 15 хв",
+  "workspace.bookingInterval30": "Кожні 30 хв",
+  "workspace.bookingInterval60": "Кожні 60 хв",
   "workspace.startTimeLabel": "Початок робочого дня",
   "workspace.endTimeLabel": "Кінець робочого дня",
   "workspace.workingDaysLabel": "Робочі дні",
@@ -79,6 +85,7 @@ export const ukrainianMessages: Messages = {
   "workspace.priceInvalid": "Введіть коректну ціну від 0 CZK.",
   "workspace.durationInvalid":
     "Введіть цілу тривалість послуги від 1 до 1440 хвилин.",
+  "workspace.bookingIntervalInvalid": "Виберіть крок 15, 30 або 60 хвилин.",
   "workspace.workingDaysInvalid": "Виберіть хоча б один робочий день.",
   "workspace.scheduleInvalid":
     "Введіть час у форматі HH:MM. Кінець має бути пізніше за початок.",
@@ -86,7 +93,7 @@ export const ukrainianMessages: Messages = {
   "workspace.setupSave": "Зберегти та продовжити",
   "workspace.settingsTitle": "Налаштування робочого простору",
   "workspace.settingsDescription":
-    "Змініть назву робочого простору, посилання для запису та звичайний графік роботи.",
+    "Змініть назву, посилання, робочий час і крок початку запису.",
   "workspace.settingsEdit": "Змінити налаштування",
   "workspace.settingsName": "Назва робочого простору",
   "workspace.settingsSlug": "Посилання для запису",

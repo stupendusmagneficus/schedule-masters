@@ -57,6 +57,7 @@ function createClient({
 describe("loadMasterWorkspace", () => {
   const userId = "user-1";
   const workspace = {
+    booking_interval_minutes: 15,
     id: "workspace-1",
     name: "Anna Nails",
     slug: "anna-nails",
@@ -160,6 +161,7 @@ describe("loadMasterWorkspace", () => {
       services: [service],
       workspace: {
         ...workspace,
+        bookingIntervalMinutes: 15,
         availabilityRules: [
           {
             dayOfWeek: 1,

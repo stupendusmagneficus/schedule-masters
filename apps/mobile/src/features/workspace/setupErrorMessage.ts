@@ -11,6 +11,7 @@ export function getSetupValidationMessageKey(
     slug: "workspace.setupInvalidSlug",
     price: "workspace.priceInvalid",
     duration: "workspace.durationInvalid",
+    bookingInterval: "workspace.bookingIntervalInvalid",
     workingDays: "workspace.workingDaysInvalid",
     schedule: "workspace.scheduleInvalid",
   };

@@ -31,6 +31,101 @@ describe("Supabase public booking contract", () => {
     await supabase?.removeAllChannels();
   });
 
+  rlsIntegrationTest(
+    "uses the workspace booking interval when generating complete service slots",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const slug = `booking-interval-${suffix}`;
+      const workDate = "2030-01-07";
+
+      try {
+        const workspace = await admin.from("workspaces").insert({
+          booking_interval_minutes: 15,
+          id: workspaceId,
+          name: "Booking interval test",
+          slug,
+          timezone: "Europe/Prague",
+        });
+        expect(workspace.error).toBeNull();
+
+        const bookingLink = await admin.from("booking_links").insert({
+          slug,
+          workspace_id: workspaceId,
+        });
+        expect(bookingLink.error).toBeNull();
+
+        const service = await admin
+          .from("services")
+          .insert({
+            duration_minutes: 60,
+            name: "One-hour service",
+            price_amount: 500,
+            workspace_id: workspaceId,
+          })
+          .select("id")
+          .single();
+        expect(service.error).toBeNull();
+        const serviceId = service.data?.id;
+        if (!serviceId) throw new Error("Test service was not created");
+
+        const availability = await admin.from("availability_rules").insert({
+          day_of_week: 1,
+          end_local_time: "11:00",
+          start_local_time: "09:00",
+          valid_from: workDate,
+          workspace_id: workspaceId,
+        });
+        expect(availability.error).toBeNull();
+
+        const quarterHourSlots = await supabase?.rpc(
+          "get_public_available_slots",
+          { p_date: workDate, p_service_id: serviceId, p_slug: slug },
+        );
+        expect(quarterHourSlots?.error).toBeNull();
+        expect(
+          quarterHourSlots?.data?.map((slot) =>
+            new Date(slot.starts_at).toISOString(),
+          ),
+        ).toEqual([
+          "2030-01-07T08:00:00.000Z",
+          "2030-01-07T08:15:00.000Z",
+          "2030-01-07T08:30:00.000Z",
+          "2030-01-07T08:45:00.000Z",
+          "2030-01-07T09:00:00.000Z",
+        ]);
+
+        const updateInterval = await admin
+          .from("workspaces")
+          .update({ booking_interval_minutes: 60 })
+          .eq("id", workspaceId);
+        expect(updateInterval.error).toBeNull();
+
+        const hourlySlots = await supabase?.rpc("get_public_available_slots", {
+          p_date: workDate,
+          p_service_id: serviceId,
+          p_slug: slug,
+        });
+        expect(hourlySlots?.error).toBeNull();
+        expect(
+          hourlySlots?.data?.map((slot) =>
+            new Date(slot.starts_at).toISOString(),
+          ),
+        ).toEqual(["2030-01-07T08:00:00.000Z", "2030-01-07T09:00:00.000Z"]);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+      }
+    },
+  );
+
   integrationTest(
     "rejects public booking requests without a valid email address",
     async () => {

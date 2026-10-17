@@ -64,6 +64,11 @@ export type MessageKey =
   | "workspace.servicePlaceholder"
   | "workspace.pricePlaceholder"
   | "workspace.durationPlaceholder"
+  | "workspace.bookingIntervalLabel"
+  | "workspace.bookingIntervalHelp"
+  | "workspace.bookingInterval15"
+  | "workspace.bookingInterval30"
+  | "workspace.bookingInterval60"
   | "workspace.startTimeLabel"
   | "workspace.endTimeLabel"
   | "workspace.workingDaysLabel"
@@ -80,6 +85,7 @@ export type MessageKey =
   | "workspace.setupInvalidService"
   | "workspace.priceInvalid"
   | "workspace.durationInvalid"
+  | "workspace.bookingIntervalInvalid"
   | "workspace.workingDaysInvalid"
   | "workspace.scheduleInvalid"
   | "workspace.setupSaving"
@@ -544,6 +550,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "Первая услуга",
     "workspace.pricePlaceholder": "Цена в Kč",
     "workspace.durationPlaceholder": "Длительность, минут",
+    "workspace.bookingIntervalLabel": "Шаг начала записи",
+    "workspace.bookingIntervalHelp":
+      "Выберите, как часто показывать варианты времени. Длительность задаётся отдельно у каждой услуги.",
+    "workspace.bookingInterval15": "Каждые 15 мин",
+    "workspace.bookingInterval30": "Каждые 30 мин",
+    "workspace.bookingInterval60": "Каждые 60 мин",
     "workspace.startTimeLabel": "Начало рабочего дня",
     "workspace.endTimeLabel": "Конец рабочего дня",
     "workspace.workingDaysLabel": "Рабочие дни",
@@ -564,6 +576,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
     "workspace.durationInvalid":
       "Введите целую длительность услуги от 1 до 1440 минут.",
+    "workspace.bookingIntervalInvalid": "Выберите шаг 15, 30 или 60 минут.",
     "workspace.workingDaysInvalid": "Выберите хотя бы один рабочий день.",
     "workspace.scheduleInvalid":
       "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
@@ -571,7 +584,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Сохранить и продолжить",
     "workspace.settingsTitle": "Рабочее пространство",
     "workspace.settingsDescription":
-      "Измените название, ссылку для записи и обычные рабочие часы.",
+      "Измените название, ссылку, рабочие часы и шаг начала записи.",
     "workspace.settingsEdit": "Изменить настройки",
     "workspace.settingsName": "Название рабочего пространства",
     "workspace.settingsSlug": "Ссылка для записи",
@@ -1103,6 +1116,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "První služba",
     "workspace.pricePlaceholder": "Cena v Kč",
     "workspace.durationPlaceholder": "Délka, minuty",
+    "workspace.bookingIntervalLabel": "Krok začátku rezervace",
+    "workspace.bookingIntervalHelp":
+      "Určuje, jak často se zobrazí možné časy. Délka se nastavuje zvlášť u každé služby.",
+    "workspace.bookingInterval15": "Každých 15 min",
+    "workspace.bookingInterval30": "Každých 30 min",
+    "workspace.bookingInterval60": "Každých 60 min",
     "workspace.startTimeLabel": "Začátek pracovní doby",
     "workspace.endTimeLabel": "Konec pracovní doby",
     "workspace.workingDaysLabel": "Pracovní dny",
@@ -1122,6 +1141,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
     "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
     "workspace.durationInvalid": "Zadejte celé číslo od 1 do 1440 minut.",
+    "workspace.bookingIntervalInvalid": "Vyberte krok 15, 30 nebo 60 minut.",
     "workspace.workingDaysInvalid": "Vyberte alespoň jeden pracovní den.",
     "workspace.scheduleInvalid":
       "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
@@ -1129,7 +1149,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Uložit a pokračovat",
     "workspace.settingsTitle": "Pracovní prostor",
     "workspace.settingsDescription":
-      "Upravte název, odkaz pro rezervace a běžnou pracovní dobu.",
+      "Upravte název, odkaz, pracovní dobu a krok začátku rezervace.",
     "workspace.settingsEdit": "Upravit nastavení",
     "workspace.settingsName": "Název pracovního prostoru",
     "workspace.settingsSlug": "Odkaz pro rezervace",
@@ -1653,6 +1673,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "First service",
     "workspace.pricePlaceholder": "Price in CZK",
     "workspace.durationPlaceholder": "Duration in minutes",
+    "workspace.bookingIntervalLabel": "Booking start interval",
+    "workspace.bookingIntervalHelp":
+      "Choose how often start times are offered. Service duration is set separately for each service.",
+    "workspace.bookingInterval15": "Every 15 min",
+    "workspace.bookingInterval30": "Every 30 min",
+    "workspace.bookingInterval60": "Every 60 min",
     "workspace.startTimeLabel": "Workday starts",
     "workspace.endTimeLabel": "Workday ends",
     "workspace.workingDaysLabel": "Working days",
@@ -1673,6 +1699,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
     "workspace.durationInvalid":
       "Enter a whole number between 1 and 1440 minutes.",
+    "workspace.bookingIntervalInvalid": "Choose 15, 30 or 60 minutes.",
     "workspace.workingDaysInvalid": "Choose at least one working day.",
     "workspace.scheduleInvalid":
       "Enter time in HH:MM format. The end must be after the start.",
@@ -1680,7 +1707,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Save and continue",
     "workspace.settingsTitle": "Workspace settings",
     "workspace.settingsDescription":
-      "Update the workspace name, booking link, and regular working hours.",
+      "Update the workspace name, booking link, working hours, and booking start interval.",
     "workspace.settingsEdit": "Edit settings",
     "workspace.settingsName": "Workspace name",
     "workspace.settingsSlug": "Booking link",

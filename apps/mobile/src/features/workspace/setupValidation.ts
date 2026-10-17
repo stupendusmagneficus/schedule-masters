@@ -1,3 +1,4 @@
+import { isBookingIntervalMinutes } from "./bookingInterval";
 import type { OnboardingDraft, SetupStep } from "./setupTypes";
 
 export type SetupValidationError =
@@ -5,6 +6,7 @@ export type SetupValidationError =
   | "slug"
   | "price"
   | "duration"
+  | "bookingInterval"
   | "workingDays"
   | "schedule";
 
@@ -48,6 +50,9 @@ export function validateSetupStep(
       duration > 1440
     ) {
       return "duration";
+    }
+    if (!isBookingIntervalMinutes(values.bookingIntervalMinutes)) {
+      return "bookingInterval";
     }
     return null;
   }

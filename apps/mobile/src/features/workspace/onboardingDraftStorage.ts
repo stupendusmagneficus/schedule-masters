@@ -1,4 +1,8 @@
 import { platformStorage } from "../../lib/platformStorage";
+import {
+  defaultBookingIntervalMinutes,
+  isBookingIntervalMinutes,
+} from "./bookingInterval";
 import type { OnboardingDraft, SetupStep } from "./setupTypes";
 import { onboardingDraftStorageKey } from "./setupTypes";
 
@@ -18,7 +22,14 @@ export async function loadOnboardingDraft(
 
     const parsed: unknown = JSON.parse(raw);
     if (!isStoredDraft(parsed)) return null;
-    return parsed;
+    return {
+      ...parsed,
+      draft: {
+        ...parsed.draft,
+        bookingIntervalMinutes:
+          parsed.draft.bookingIntervalMinutes ?? defaultBookingIntervalMinutes,
+      },
+    };
   } catch {
     return null;
   }
@@ -64,6 +75,8 @@ function isOnboardingDraft(value: unknown): value is OnboardingDraft {
     typeof candidate.serviceName === "string" &&
     typeof candidate.price === "string" &&
     typeof candidate.duration === "string" &&
+    (candidate.bookingIntervalMinutes === undefined ||
+      isBookingIntervalMinutes(candidate.bookingIntervalMinutes)) &&
     Array.isArray(candidate.workingDays) &&
     candidate.workingDays.every((day) => Number.isInteger(day)) &&
     typeof candidate.startTime === "string" &&

@@ -1,6 +1,6 @@
 import type { MessageKey } from "@schedule-app/i18n";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-
+import { BookingIntervalField } from "../../components/BookingIntervalField";
 import type {
   OnboardingDraft,
   SetupTranslator,
@@ -57,6 +57,19 @@ export function ServiceStep({
         value={draft.duration}
       />
       {errorKey === "workspace.durationInvalid" && (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {t(errorKey)}
+        </Text>
+      )}
+      <BookingIntervalField
+        label={t("workspace.bookingIntervalLabel")}
+        onChange={(bookingIntervalMinutes) =>
+          onChange({ bookingIntervalMinutes })
+        }
+        t={t}
+        value={draft.bookingIntervalMinutes}
+      />
+      {errorKey === "workspace.bookingIntervalInvalid" && (
         <Text accessibilityRole="alert" style={styles.error}>
           {t(errorKey)}
         </Text>

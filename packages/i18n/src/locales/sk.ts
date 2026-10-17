@@ -59,6 +59,12 @@ export const slovakMessages: Messages = {
   "workspace.servicePlaceholder": "Prvá služba",
   "workspace.pricePlaceholder": "Cena v CZK",
   "workspace.durationPlaceholder": "Trvanie v minútach",
+  "workspace.bookingIntervalLabel": "Krok začiatku rezervácie",
+  "workspace.bookingIntervalHelp":
+    "Určuje, ako často sa zobrazia možné časy. Trvanie sa nastavuje zvlášť pri každej službe.",
+  "workspace.bookingInterval15": "Každých 15 min",
+  "workspace.bookingInterval30": "Každých 30 min",
+  "workspace.bookingInterval60": "Každých 60 min",
   "workspace.startTimeLabel": "Začiatok pracovného dňa",
   "workspace.endTimeLabel": "Koniec pracovného dňa",
   "workspace.workingDaysLabel": "Pracovné dni",
@@ -79,6 +85,7 @@ export const slovakMessages: Messages = {
   "workspace.priceInvalid": "Zadajte platnú cenu od 0 CZK.",
   "workspace.durationInvalid":
     "Zadajte celé trvanie služby od 1 do 1440 minút.",
+  "workspace.bookingIntervalInvalid": "Vyberte krok 15, 30 alebo 60 minút.",
   "workspace.workingDaysInvalid": "Vyberte aspoň jeden pracovný deň.",
   "workspace.scheduleInvalid":
     "Zadajte čas vo formáte HH:MM. Koniec musí byť neskôr ako začiatok.",
@@ -86,7 +93,7 @@ export const slovakMessages: Messages = {
   "workspace.setupSave": "Uložiť a pokračovať",
   "workspace.settingsTitle": "Nastavenia pracovného priestoru",
   "workspace.settingsDescription":
-    "Upravte názov pracovného priestoru, odkaz na rezerváciu a bežný pracovný čas.",
+    "Upravte názov, odkaz, pracovný čas a krok začiatku rezervácie.",
   "workspace.settingsEdit": "Upraviť nastavenia",
   "workspace.settingsName": "Názov pracovného priestoru",
   "workspace.settingsSlug": "Odkaz na rezerváciu",

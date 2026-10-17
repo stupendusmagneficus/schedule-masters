@@ -7,6 +7,7 @@ export const demoWorkspace: Workspace = {
     endLocalTime: "21:00",
     startLocalTime: "08:00",
   })),
+  bookingIntervalMinutes: 30,
   id: "demo-workspace",
   name: "Elena Beauty",
   slug: "elena-beauty",
