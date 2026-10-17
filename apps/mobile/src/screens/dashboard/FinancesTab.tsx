@@ -14,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { DemoData } from "../../demo/types";
@@ -118,13 +119,13 @@ export function FinancesTab({
       {financeData.error ? (
         <InfoCard>
           <Text style={styles.helper}>{t("mobile.financeLoadFailed")}</Text>
-          <Pressable
-            accessibilityRole="button"
+          <ActionButton
+            label={t("mobile.financeRetry")}
             onPress={() => void financeData.reload()}
+            size="compact"
             style={styles.retryButton}
-          >
-            <Text style={styles.retryText}>{t("mobile.financeRetry")}</Text>
-          </Pressable>
+            variant="quiet"
+          />
         </InfoCard>
       ) : null}
 
@@ -332,8 +333,7 @@ const styles = StyleSheet.create({
   },
   noticeText: { ...typography.caption, color: colors.secondaryText, flex: 1 },
   pressed: { opacity: 0.75 },
-  retryButton: { alignSelf: "flex-start", marginTop: 12 },
-  retryText: { ...typography.label, color: colors.accentPressed },
+  retryButton: { alignSelf: "flex-start", marginLeft: -10, marginTop: 4 },
   state: { alignItems: "center", gap: 8, paddingVertical: 28 },
   summaryCard: {
     backgroundColor: colors.accentSoft,

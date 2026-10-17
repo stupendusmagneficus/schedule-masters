@@ -11,6 +11,7 @@ import {
 import type { MasterWaitingListMatch } from "../features/waitingList/waitingList";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 import { FullscreenModal } from "./FullscreenModal";
 import { InfoCard } from "./InfoCard";
 
@@ -57,12 +58,18 @@ export function WaitingListMatchesModal({
             <Text style={styles.helper}>{t("common.loading")}</Text>
           </View>
         ) : error ? (
-          <Pressable accessibilityRole="button" onPress={onRetry}>
+          <View style={styles.errorState}>
             <Text style={styles.error}>
               {t("mobile.waitingListLoadFailed")}
             </Text>
-            <Text style={styles.action}>{t("common.retry")}</Text>
-          </Pressable>
+            <ActionButton
+              label={t("common.retry")}
+              onPress={onRetry}
+              size="compact"
+              style={styles.retryButton}
+              variant="quiet"
+            />
+          </View>
         ) : matches.length === 0 ? (
           <InfoCard>
             <Text style={styles.helper}>
@@ -116,7 +123,8 @@ const styles = StyleSheet.create({
   content: { gap: 12, padding: 16, paddingBottom: 40 },
   helper: { ...typography.body, color: colors.secondaryText },
   error: { ...typography.body, color: colors.danger },
-  action: { ...typography.label, color: colors.accent },
+  errorState: { alignItems: "flex-start", gap: 4 },
+  retryButton: { alignSelf: "flex-start", marginLeft: -10 },
   state: { alignItems: "center", flexDirection: "row", gap: 10 },
   card: { gap: 6, padding: 12 },
   name: { ...typography.body, color: colors.primaryText, fontWeight: "700" },

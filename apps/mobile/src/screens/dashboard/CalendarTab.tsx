@@ -14,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import { CalendarSlotActionModal } from "../../components/CalendarSlotActionModal";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
@@ -336,24 +337,17 @@ export function CalendarTab({
                   {t("mobile.personalBlockDescription")}
                 </Text>
               </View>
-              <Pressable
-                accessibilityRole="button"
+              <ActionButton
                 disabled={!client}
+                label={t("mobile.personalBlockAdd")}
                 onPress={() =>
                   openBlockEditor(
                     createDefaultPersonalBlockDraft(calendar.selectedDate),
                   )
                 }
-                style={({ pressed }) => [
-                  styles.addButton,
-                  !client && styles.disabled,
-                  pressed && styles.addButtonPressed,
-                ]}
-              >
-                <Text style={styles.addButtonText}>
-                  {t("mobile.personalBlockAdd")}
-                </Text>
-              </Pressable>
+                size="compact"
+                variant="secondary"
+              />
             </View>
             {calendar.isLoading ? (
               <Text style={styles.helper}>{t("common.loading")}</Text>
@@ -554,18 +548,6 @@ function PersonalBlockRow({
 const styles = StyleSheet.create({
   content: { gap: spacing.section },
   fullscreenMonthContent: { flex: 1, gap: 8, minHeight: 0 },
-  addButton: {
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  addButtonPressed: { backgroundColor: colors.actionPressed },
-  addButtonText: {
-    ...typography.caption,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
   blockCopy: { flex: 1, gap: 2 },
   blockRow: {
     alignItems: "center",
@@ -606,7 +588,6 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontWeight: "700",
   },
-  disabled: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
   helper: { ...typography.body, color: colors.secondaryText },
   sectionTitle: {
@@ -623,16 +604,21 @@ const styles = StyleSheet.create({
   sectionHeaderCopy: { flex: 1 },
   viewButton: {
     alignItems: "center",
+    borderColor: "transparent",
     borderRadius: radii.control,
+    borderWidth: 1,
     flex: 1,
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: 4,
   },
-  viewButtonActive: { backgroundColor: colors.surface },
+  viewButtonActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
   viewButtonPressed: { opacity: 0.78 },
   viewButtonText: { ...typography.label, color: colors.secondaryText },
-  viewButtonTextActive: { color: colors.primaryText, fontWeight: "700" },
+  viewButtonTextActive: { color: colors.accent, fontWeight: "700" },
   viewSwitcher: {
     alignSelf: "stretch",
     backgroundColor: colors.subtleSurface,

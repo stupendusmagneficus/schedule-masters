@@ -22,6 +22,7 @@ export type ActionButtonVariant =
 type ActionButtonProps = {
   readonly accessibilityLabel?: string;
   readonly disabled?: boolean;
+  readonly icon?: ReactNode;
   readonly label: string;
   readonly loadingLabel?: string;
   readonly loading?: boolean;
@@ -43,6 +44,7 @@ const labelColors: Record<ActionButtonVariant, string> = {
 export function ActionButton({
   accessibilityLabel,
   disabled = false,
+  icon,
   label,
   loadingLabel,
   loading = false,
@@ -63,6 +65,13 @@ export function ActionButton({
       </View>
     ) : loading ? (
       <ActivityIndicator color={labelColors[variant]} />
+    ) : icon ? (
+      <View style={styles.iconLabel}>
+        {icon}
+        <Text style={[styles.label, { color: labelColors[variant] }]}>
+          {label}
+        </Text>
+      </View>
     ) : (
       <Text style={[styles.label, { color: labelColors[variant] }]}>
         {label}
@@ -132,5 +141,6 @@ const styles = StyleSheet.create({
   },
   quietPressed: { backgroundColor: colors.subtleSurface },
   disabled: { opacity: 0.55 },
+  iconLabel: { alignItems: "center", flexDirection: "row", gap: 8 },
   label: { ...typography.label, fontWeight: "700", textAlign: "center" },
 });

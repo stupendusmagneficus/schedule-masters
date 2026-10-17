@@ -488,6 +488,9 @@ test.describe("mobile web smoke", () => {
       name: "Volné termíny",
     });
     await expect(freeSlotsButton).toBeVisible();
+    const freeSlotsButtonSize = await freeSlotsButton.boundingBox();
+    expect(freeSlotsButtonSize?.height).toBeGreaterThanOrEqual(44);
+    await expect(freeSlotsButton).toHaveCSS("border-color", "rgb(47, 125, 92)");
     const freeSlotsButtonBox = await freeSlotsButton.boundingBox();
     const summaryBox = await page
       .getByText("Rezervace", { exact: true })
@@ -520,6 +523,29 @@ test.describe("mobile web smoke", () => {
         "Formulář pro vytvoření rezervace bude přidán v dalším kroku MVP.",
       ),
     ).toBeVisible();
+  });
+
+  test("keeps calendar view selection distinct from primary actions", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+
+    const dayTab = page.getByRole("tab", { name: "Den", exact: true });
+    await expect(dayTab).toHaveCSS("border-color", "rgb(47, 125, 92)");
+    await expect(dayTab).toHaveCSS("background-color", "rgb(244, 247, 245)");
+
+    const previousDate = page.getByRole("button", {
+      name: "Předchozí datum",
+    });
+    const arrowSize = await previousDate.boundingBox();
+    expect(arrowSize?.width).toBeGreaterThanOrEqual(44);
+    expect(arrowSize?.height).toBeGreaterThanOrEqual(44);
+    await expect(previousDate).not.toHaveCSS(
+      "background-color",
+      "rgb(47, 125, 92)",
+    );
   });
   test("renders the public booking URL as an actionable profile link", async ({
     page,

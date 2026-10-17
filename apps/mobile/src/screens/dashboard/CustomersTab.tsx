@@ -16,6 +16,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
@@ -322,13 +323,17 @@ function ErrorState({
   retryLabel: string;
 }) {
   return (
-    <InfoCard>
+    <InfoCard style={styles.errorState}>
       <Text accessibilityRole="alert" style={styles.error}>
         {message}
       </Text>
-      <Pressable accessibilityRole="button" onPress={onRetry}>
-        <Text style={styles.retry}>{retryLabel}</Text>
-      </Pressable>
+      <ActionButton
+        label={retryLabel}
+        onPress={onRetry}
+        size="compact"
+        style={styles.retryButton}
+        variant="quiet"
+      />
     </InfoCard>
   );
 }
@@ -352,8 +357,11 @@ function formatCurrency(
 }
 
 const styles = StyleSheet.create({
-  activeSegment: { backgroundColor: colors.accent },
-  activeSegmentText: { color: colors.actionText },
+  activeSegment: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  activeSegmentText: { color: colors.accent },
   backButton: {
     alignItems: "center",
     alignSelf: "flex-start",
@@ -408,7 +416,8 @@ const styles = StyleSheet.create({
     color: colors.actionText,
     fontWeight: "700",
   },
-  retry: { ...typography.label, color: colors.accent, fontWeight: "700" },
+  errorState: { alignItems: "flex-start", gap: 4 },
+  retryButton: { alignSelf: "flex-start", marginLeft: -10 },
   search: {
     ...typography.body,
     backgroundColor: colors.surface,

@@ -144,9 +144,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: radii.control,
     justifyContent: "center",
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: 16,
   },
   todayButtonPressed: { backgroundColor: colors.subtleSurface },
-  todayText: { ...typography.label, color: colors.accent, fontWeight: "700" },
+  todayText: {
+    ...typography.label,
+    color: colors.secondaryText,
+    fontWeight: "700",
+  },
 });
