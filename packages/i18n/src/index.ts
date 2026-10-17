@@ -239,6 +239,12 @@ export type MessageKey =
   | "mobile.customerHistory"
   | "mobile.customerHistoryEmpty"
   | "mobile.customerNote"
+  | "mobile.customerDelete"
+  | "mobile.customerDeleteConfirm"
+  | "mobile.customerDeleteConfirmAction"
+  | "mobile.customerDeleteCancel"
+  | "mobile.customerDeleteSaving"
+  | "mobile.customerDeleteFailed"
   | "mobile.customerBooking"
   | "mobile.customerVisitCount"
   | "mobile.calendarClosed"
@@ -756,6 +762,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerHistory": "История записей",
     "mobile.customerHistoryEmpty": "Записей пока нет.",
     "mobile.customerNote": "Заметка мастера",
+    "mobile.customerDelete": "Удалить клиента",
+    "mobile.customerDeleteConfirm":
+      "Контактные данные и заметки клиента будут удалены. История записей и финансовые суммы останутся в обезличенном виде.",
+    "mobile.customerDeleteConfirmAction": "Удалить данные",
+    "mobile.customerDeleteCancel": "Оставить клиента",
+    "mobile.customerDeleteSaving": "Удаляем данные…",
+    "mobile.customerDeleteFailed":
+      "Не удалось удалить данные клиента. Попробуйте ещё раз.",
     "mobile.customerBooking": "Создать запись",
     "mobile.customerVisitCount": "Завершённых визитов",
     "mobile.calendarClosed": "Нерабочий день",
@@ -1304,6 +1318,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerHistory": "Historie rezervací",
     "mobile.customerHistoryEmpty": "Zatím nemá žádné rezervace.",
     "mobile.customerNote": "Poznámka mistra",
+    "mobile.customerDelete": "Odstranit klienta",
+    "mobile.customerDeleteConfirm":
+      "Kontaktní údaje a poznámky klienta budou odstraněny. Historie rezervací a finanční součty zůstanou anonymizované.",
+    "mobile.customerDeleteConfirmAction": "Odstranit údaje",
+    "mobile.customerDeleteCancel": "Ponechat klienta",
+    "mobile.customerDeleteSaving": "Odstraňuji údaje…",
+    "mobile.customerDeleteFailed":
+      "Údaje klienta se nepodařilo odstranit. Zkuste to znovu.",
     "mobile.customerBooking": "Vytvořit rezervaci",
     "mobile.customerVisitCount": "Dokončené návštěvy",
     "mobile.calendarClosed": "Nepracovní den",
@@ -1850,6 +1872,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerHistory": "Booking history",
     "mobile.customerHistoryEmpty": "There are no bookings yet.",
     "mobile.customerNote": "Master's note",
+    "mobile.customerDelete": "Delete customer",
+    "mobile.customerDeleteConfirm":
+      "The customer's contact details and notes will be removed. Appointment history and financial totals will remain anonymized.",
+    "mobile.customerDeleteConfirmAction": "Delete data",
+    "mobile.customerDeleteCancel": "Keep customer",
+    "mobile.customerDeleteSaving": "Removing data…",
+    "mobile.customerDeleteFailed":
+      "Could not remove the customer's data. Please try again.",
     "mobile.customerBooking": "Create booking",
     "mobile.customerVisitCount": "Completed visits",
     "mobile.calendarClosed": "Closed day",

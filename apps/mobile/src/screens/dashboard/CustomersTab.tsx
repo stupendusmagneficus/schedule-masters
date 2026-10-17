@@ -28,6 +28,7 @@ import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import { buildCustomerPhoneUrl } from "../../features/customers/customerContact";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
+import { anonymizeCustomer } from "../../features/customers/customerDirectory";
 import { useCustomerDirectory } from "../../features/customers/useCustomerDirectory";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -65,6 +66,25 @@ export function CustomersTab({
   const customerCallUrl = selected?.phone
     ? buildCustomerPhoneUrl(selected.phone, "call")
     : null;
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeletingCustomer, setDeletingCustomer] = useState(false);
+  const [deleteCustomerError, setDeleteCustomerError] = useState(false);
+
+  async function deleteSelectedCustomer() {
+    if (!client || !selected) return;
+    setDeletingCustomer(true);
+    setDeleteCustomerError(false);
+    try {
+      await anonymizeCustomer(client, workspace.id, selected.id);
+      setShowDeleteConfirmation(false);
+      directory.selectCustomer(null);
+      await directory.reload();
+    } catch {
+      setDeleteCustomerError(true);
+    } finally {
+      setDeletingCustomer(false);
+    }
+  }
 
   if (selected) {
     return (
@@ -72,7 +92,11 @@ export function CustomersTab({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${t("common.back")}: ${t("mobile.customers")}`}
-          onPress={() => directory.selectCustomer(null)}
+          onPress={() => {
+            setShowDeleteConfirmation(false);
+            setDeleteCustomerError(false);
+            directory.selectCustomer(null);
+          }}
           style={styles.backButton}
         >
           <MaterialCommunityIcons
@@ -92,6 +116,46 @@ export function CustomersTab({
               {t("mobile.customerVisitCount")}: {selected.completed_visits}
             </Text>
           </View>
+          {selected.phone ? (
+            <View style={styles.contactActions}>
+              {customerCallUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerCall")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerCallUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="phone-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+              {customerSmsUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerSms")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerSmsUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="message-text-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
         </View>
         <Pressable
           accessibilityRole="button"
@@ -105,50 +169,12 @@ export function CustomersTab({
         <InfoCard>
           <Text style={styles.sectionTitle}>{t("mobile.customerContact")}</Text>
           {selected.phone ? (
-            <View style={styles.contactActionRow}>
-              <Text style={styles.body}>{selected.phone}</Text>
-              <View style={styles.contactActions}>
-                {customerCallUrl ? (
-                  <Pressable
-                    accessibilityLabel={t("mobile.customerCall")}
-                    accessibilityRole="button"
-                    onPress={() =>
-                      void Linking.openURL(customerCallUrl).catch(() =>
-                        Alert.alert(t("mobile.customerContactActionFailed")),
-                      )
-                    }
-                    style={styles.contactAction}
-                  >
-                    <MaterialCommunityIcons
-                      color={colors.accent}
-                      name="phone-outline"
-                      size={22}
-                    />
-                  </Pressable>
-                ) : null}
-                {customerSmsUrl ? (
-                  <Pressable
-                    accessibilityLabel={t("mobile.customerSms")}
-                    accessibilityRole="button"
-                    onPress={() =>
-                      void Linking.openURL(customerSmsUrl).catch(() =>
-                        Alert.alert(t("mobile.customerContactActionFailed")),
-                      )
-                    }
-                    style={styles.contactAction}
-                  >
-                    <MaterialCommunityIcons
-                      color={colors.accent}
-                      name="message-text-outline"
-                      size={22}
-                    />
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
+            <Text style={styles.body}>{selected.phone}</Text>
           ) : null}
           {selected.email ? (
-            <Text style={styles.body}>{selected.email}</Text>
+            <Text numberOfLines={1} style={styles.body}>
+              {selected.email}
+            </Text>
           ) : null}
           {!selected.phone && !selected.email ? (
             <Text style={styles.helper}>—</Text>
@@ -214,6 +240,41 @@ export function CustomersTab({
             </InfoCard>
           </Pressable>
         ))}
+        {showDeleteConfirmation ? (
+          <InfoCard style={styles.deleteConfirmation}>
+            <Text style={styles.body}>{t("mobile.customerDeleteConfirm")}</Text>
+            {deleteCustomerError ? (
+              <Text accessibilityRole="alert" style={styles.error}>
+                {t("mobile.customerDeleteFailed")}
+              </Text>
+            ) : null}
+            <View style={styles.deleteActions}>
+              <ActionButton
+                disabled={isDeletingCustomer}
+                label={t("mobile.customerDeleteCancel")}
+                onPress={() => setShowDeleteConfirmation(false)}
+                size="compact"
+                variant="quiet"
+              />
+              <ActionButton
+                label={t("mobile.customerDeleteConfirmAction")}
+                loading={isDeletingCustomer}
+                loadingLabel={t("mobile.customerDeleteSaving")}
+                onPress={() => void deleteSelectedCustomer()}
+                size="compact"
+                variant="destructiveConfirm"
+              />
+            </View>
+          </InfoCard>
+        ) : (
+          <ActionButton
+            label={t("mobile.customerDelete")}
+            onPress={() => setShowDeleteConfirmation(true)}
+            size="compact"
+            style={styles.deleteCustomerButton}
+            variant="destructive"
+          />
+        )}
       </View>
     );
   }
@@ -389,13 +450,15 @@ const styles = StyleSheet.create({
   },
   customerCopy: { flex: 1, gap: 0, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
-  contactActionRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "space-between",
-  },
   contactActions: { flexDirection: "row", gap: 4 },
+  deleteActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.control,
+    justifyContent: "flex-end",
+  },
+  deleteConfirmation: { borderColor: colors.danger, gap: spacing.control },
+  deleteCustomerButton: { alignSelf: "flex-start" },
   contactAction: {
     alignItems: "center",
     borderRadius: radii.control,

@@ -277,6 +277,14 @@ export const slovakMessages: Messages = {
   "mobile.customerHistory": "História rezervácií",
   "mobile.customerHistoryEmpty": "Zatiaľ nemá žiadne rezervácie.",
   "mobile.customerNote": "Poznámka majstra",
+  "mobile.customerDelete": "Odstrániť klienta",
+  "mobile.customerDeleteConfirm":
+    "Kontaktné údaje a poznámky klienta sa odstránia. História rezervácií a finančné súčty zostanú anonymizované.",
+  "mobile.customerDeleteConfirmAction": "Odstrániť údaje",
+  "mobile.customerDeleteCancel": "Ponechať klienta",
+  "mobile.customerDeleteSaving": "Odstraňujú sa údaje…",
+  "mobile.customerDeleteFailed":
+    "Údaje klienta sa nepodarilo odstrániť. Skúste to znova.",
   "mobile.customerBooking": "Vytvoriť rezerváciu",
   "mobile.customerVisitCount": "Dokončené návštevy",
   "mobile.calendarClosed": "Zatvorený deň",

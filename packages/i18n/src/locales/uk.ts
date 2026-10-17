@@ -275,6 +275,14 @@ export const ukrainianMessages: Messages = {
   "mobile.customerHistory": "Історія записів",
   "mobile.customerHistoryEmpty": "Записів поки немає.",
   "mobile.customerNote": "Примітка майстра",
+  "mobile.customerDelete": "Видалити клієнта",
+  "mobile.customerDeleteConfirm":
+    "Контактні дані та примітки клієнта буде видалено. Історія записів і фінансові підсумки залишаться знеособленими.",
+  "mobile.customerDeleteConfirmAction": "Видалити дані",
+  "mobile.customerDeleteCancel": "Залишити клієнта",
+  "mobile.customerDeleteSaving": "Видаляємо дані…",
+  "mobile.customerDeleteFailed":
+    "Не вдалося видалити дані клієнта. Спробуйте ще раз.",
   "mobile.customerBooking": "Створити запис",
   "mobile.customerVisitCount": "Завершені візити",
   "mobile.calendarClosed": "Вихідний день",

@@ -2,6 +2,7 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
+  anonymizeCustomer,
   listCustomerDirectory,
   listCustomerHistory,
 } from "./customerDirectory";
@@ -77,5 +78,30 @@ describe("customer directory data access", () => {
     await expect(
       listCustomerDirectory(client, "workspace-a", ""),
     ).rejects.toThrow("Workspace access denied");
+  });
+
+  it("requests customer anonymization inside the active workspace", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await expect(
+      anonymizeCustomer(client, "workspace-a", "customer-a"),
+    ).resolves.toBeUndefined();
+    expect(rpc).toHaveBeenCalledWith("anonymize_master_customer", {
+      p_customer_id: "customer-a",
+      p_workspace_id: "workspace-a",
+    });
+  });
+
+  it("does not hide failed anonymization requests", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: "Permission denied" },
+    });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await expect(
+      anonymizeCustomer(client, "workspace-a", "customer-a"),
+    ).rejects.toThrow("Permission denied");
   });
 });

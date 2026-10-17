@@ -8,6 +8,18 @@ export type CustomerVisit =
 
 type CustomerDirectoryClient = SupabaseClient<Database>;
 
+export async function anonymizeCustomer(
+  client: CustomerDirectoryClient,
+  workspaceId: string,
+  customerId: string,
+): Promise<void> {
+  const { error } = await client.rpc("anonymize_master_customer", {
+    p_customer_id: customerId,
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function listCustomerDirectory(
   client: CustomerDirectoryClient,
   workspaceId: string,
