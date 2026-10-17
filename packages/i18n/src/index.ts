@@ -313,6 +313,16 @@ export type MessageKey =
   | "mobile.manualBookingCustomerEmail"
   | "mobile.manualBookingCustomerPhone"
   | "mobile.manualBookingService"
+  | "mobile.manualBookingServices"
+  | "mobile.manualBookingAddService"
+  | "mobile.manualBookingMoveServiceUp"
+  | "mobile.manualBookingMoveServiceDown"
+  | "mobile.manualBookingRemoveService"
+  | "mobile.manualBookingNoServicesSelected"
+  | "mobile.manualBookingServicesRequired"
+  | "mobile.manualBookingServiceLimitReached"
+  | "mobile.manualBookingCurrencyMismatch"
+  | "mobile.manualBookingTotal"
   | "mobile.manualBookingDate"
   | "mobile.manualBookingTime"
   | "mobile.manualBookingNoSlots"
@@ -863,7 +873,20 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Имя клиента *",
     "mobile.manualBookingCustomerEmail": "Email клиента",
     "mobile.manualBookingCustomerPhone": "Телефон клиента",
-    "mobile.manualBookingService": "Услуга",
+    "mobile.manualBookingService": "Услуги",
+    "mobile.manualBookingServices": "Услуги *",
+    "mobile.manualBookingAddService": "Добавить услугу",
+    "mobile.manualBookingMoveServiceUp": "Переместить услугу выше",
+    "mobile.manualBookingMoveServiceDown": "Переместить услугу ниже",
+    "mobile.manualBookingRemoveService": "Убрать услугу",
+    "mobile.manualBookingNoServicesSelected":
+      "Выберите одну или несколько услуг.",
+    "mobile.manualBookingServicesRequired": "Выберите хотя бы одну услугу.",
+    "mobile.manualBookingServiceLimitReached":
+      "В одной записи можно выбрать не более 20 услуг.",
+    "mobile.manualBookingCurrencyMismatch":
+      "В одной записи можно объединить услуги только в одной валюте.",
+    "mobile.manualBookingTotal": "итого",
     "mobile.manualBookingDate": "Дата *",
     "mobile.manualBookingTime": "Свободное время *",
     "mobile.manualBookingNoSlots": "На эту дату нет свободных окон.",
@@ -977,7 +1000,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Архив",
     "mobile.serviceName": "Название услуги *",
     "mobile.serviceChoose": "Выберите услугу",
-    "mobile.serviceSearch": "Поиск по названию или описанию",
+    "mobile.serviceSearch": "Поиск по названию, описанию или категории",
     "mobile.serviceSearchClear": "Очистить поиск",
     "mobile.serviceSearchEmpty": "Услуги не найдены.",
     "mobile.serviceFiltersClear": "Сбросить фильтры",
@@ -1437,7 +1460,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Jméno klienta *",
     "mobile.manualBookingCustomerEmail": "E-mail klienta",
     "mobile.manualBookingCustomerPhone": "Telefon klienta",
-    "mobile.manualBookingService": "Služba",
+    "mobile.manualBookingService": "Služby",
+    "mobile.manualBookingServices": "Služby *",
+    "mobile.manualBookingAddService": "Přidat službu",
+    "mobile.manualBookingMoveServiceUp": "Posunout službu výše",
+    "mobile.manualBookingMoveServiceDown": "Posunout službu níže",
+    "mobile.manualBookingRemoveService": "Odebrat službu",
+    "mobile.manualBookingNoServicesSelected": "Vyberte jednu nebo více služeb.",
+    "mobile.manualBookingServicesRequired": "Vyberte alespoň jednu službu.",
+    "mobile.manualBookingServiceLimitReached":
+      "V jedné rezervaci lze vybrat nejvýše 20 služeb.",
+    "mobile.manualBookingCurrencyMismatch":
+      "V jedné rezervaci lze kombinovat pouze služby ve stejné měně.",
+    "mobile.manualBookingTotal": "celkem",
     "mobile.manualBookingDate": "Datum *",
     "mobile.manualBookingTime": "Volný termín *",
     "mobile.manualBookingNoSlots": "Pro toto datum nejsou volné termíny.",
@@ -1548,7 +1583,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Archiv",
     "mobile.serviceName": "Název služby *",
     "mobile.serviceChoose": "Vyberte službu",
-    "mobile.serviceSearch": "Hledat podle názvu nebo popisu",
+    "mobile.serviceSearch": "Hledat podle názvu, popisu nebo kategorie",
     "mobile.serviceSearchClear": "Vymazat hledání",
     "mobile.serviceSearchEmpty": "Žádné služby nebyly nalezeny.",
     "mobile.serviceFiltersClear": "Zrušit filtry",
@@ -2009,7 +2044,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Customer name *",
     "mobile.manualBookingCustomerEmail": "Customer email",
     "mobile.manualBookingCustomerPhone": "Customer phone",
-    "mobile.manualBookingService": "Service",
+    "mobile.manualBookingService": "Services",
+    "mobile.manualBookingServices": "Services *",
+    "mobile.manualBookingAddService": "Add service",
+    "mobile.manualBookingMoveServiceUp": "Move service up",
+    "mobile.manualBookingMoveServiceDown": "Move service down",
+    "mobile.manualBookingRemoveService": "Remove service",
+    "mobile.manualBookingNoServicesSelected": "Choose one or more services.",
+    "mobile.manualBookingServicesRequired": "Choose at least one service.",
+    "mobile.manualBookingServiceLimitReached":
+      "You can choose up to 20 services per booking.",
+    "mobile.manualBookingCurrencyMismatch":
+      "Services in one booking must use the same currency.",
+    "mobile.manualBookingTotal": "total",
     "mobile.manualBookingDate": "Date *",
     "mobile.manualBookingTime": "Available time *",
     "mobile.manualBookingNoSlots": "There are no available times on this date.",
@@ -2123,7 +2170,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Archived",
     "mobile.serviceName": "Service name *",
     "mobile.serviceChoose": "Choose a service",
-    "mobile.serviceSearch": "Search by name or description",
+    "mobile.serviceSearch": "Search by name, description, or category",
     "mobile.serviceSearchClear": "Clear search",
     "mobile.serviceSearchEmpty": "No services found.",
     "mobile.serviceFiltersClear": "Clear filters",
