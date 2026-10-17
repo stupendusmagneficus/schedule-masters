@@ -2,9 +2,15 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Workspace } from "../../types";
+import {
+  type BookingIntervalMinutes,
+  defaultBookingIntervalMinutes,
+  isBookingIntervalMinutes,
+} from "./bookingInterval";
 
 export type WorkspaceSettingsDraft = {
   readonly endTime: string;
+  readonly bookingIntervalMinutes: BookingIntervalMinutes;
   readonly name: string;
   readonly slug: string;
   readonly startTime: string;
@@ -12,6 +18,7 @@ export type WorkspaceSettingsDraft = {
 };
 
 export type WorkspaceSettingsError =
+  | "bookingInterval"
   | "name"
   | "schedule"
   | "slug"
@@ -30,6 +37,8 @@ export function createWorkspaceSettingsDraft(
   ];
   return {
     endTime: firstRule?.endLocalTime.slice(0, 5) ?? "17:00",
+    bookingIntervalMinutes:
+      workspace.bookingIntervalMinutes ?? defaultBookingIntervalMinutes,
     name: workspace.name,
     slug: workspace.slug,
     startTime: firstRule?.startLocalTime.slice(0, 5) ?? "09:00",
@@ -42,6 +51,9 @@ export function validateWorkspaceSettings(
 ): WorkspaceSettingsError | null {
   const name = draft.name.trim();
   if (!name || name.length > 120) return "name";
+  if (!isBookingIntervalMinutes(draft.bookingIntervalMinutes)) {
+    return "bookingInterval";
+  }
 
   const slug = draft.slug.trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return "slug";
@@ -73,6 +85,7 @@ export async function saveWorkspaceSettings(
 ): Promise<void> {
   const { error } = await client.rpc("update_master_workspace_settings", {
     p_end_local_time: draft.endTime,
+    p_booking_interval_minutes: draft.bookingIntervalMinutes,
     p_name: draft.name.trim(),
     p_slug: draft.slug.trim(),
     p_start_local_time: draft.startTime,

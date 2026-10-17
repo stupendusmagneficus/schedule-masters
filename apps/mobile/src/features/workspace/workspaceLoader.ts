@@ -2,6 +2,7 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Service, Workspace } from "../../types";
+import { defaultBookingIntervalMinutes } from "./bookingInterval";
 
 export type WorkspaceLoadResult =
   | { readonly kind: "error" }
@@ -30,7 +31,7 @@ export async function loadMasterWorkspace(
 
   const workspaceResult = await client
     .from("workspaces")
-    .select("id, name, slug, timezone")
+    .select("id, name, slug, timezone, booking_interval_minutes")
     .eq("id", member.workspace_id)
     .single();
 
@@ -66,6 +67,12 @@ export async function loadMasterWorkspace(
     services: serviceResult.data ?? [],
     workspace: {
       ...workspaceResult.data,
+      bookingIntervalMinutes:
+        (workspaceResult.data.booking_interval_minutes as
+          | 15
+          | 30
+          | 60
+          | null) ?? defaultBookingIntervalMinutes,
       availabilityRules: (availabilityResult.data ?? []).map((rule) => ({
         dayOfWeek: rule.day_of_week,
         endLocalTime: rule.end_local_time,

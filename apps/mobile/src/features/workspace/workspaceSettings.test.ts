@@ -4,6 +4,7 @@ import type { WorkspaceSettingsDraft } from "./workspaceSettings";
 import { validateWorkspaceSettings } from "./workspaceSettings";
 
 const validDraft: WorkspaceSettingsDraft = {
+  bookingIntervalMinutes: 30,
   endTime: "18:00",
   name: "Anna Nails",
   slug: "anna-nails",
@@ -14,6 +15,18 @@ const validDraft: WorkspaceSettingsDraft = {
 describe("workspace settings validation", () => {
   it("accepts valid workspace details and a weekly schedule", () => {
     expect(validateWorkspaceSettings(validDraft)).toBeNull();
+  });
+
+  it("accepts only supported booking start intervals", () => {
+    expect(
+      validateWorkspaceSettings({ ...validDraft, bookingIntervalMinutes: 15 }),
+    ).toBeNull();
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        bookingIntervalMinutes: 45 as 30,
+      }),
+    ).toBe("bookingInterval");
   });
 
   it("rejects an empty or overlong workspace name", () => {

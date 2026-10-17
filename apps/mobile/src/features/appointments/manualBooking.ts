@@ -27,23 +27,23 @@ export type AppointmentStatus =
 export type ManualBookingDraft = {
   readonly customerId: string | null;
   readonly date: string;
-  readonly durationMinutes: string;
   readonly email: string;
   readonly masterNote: string;
   readonly name: string;
   readonly phone: string;
-  readonly priceAmount: string;
-  readonly serviceId: string;
+  readonly serviceIds: readonly string[];
   readonly startsAt: string;
 };
 
 export type ManualBookingValidationError =
   | "date"
-  | "duration"
   | "email"
   | "name"
-  | "price"
+  | "services"
+  | "serviceLimit"
   | "slot";
+
+export const MANUAL_BOOKING_MAX_SERVICES = 20;
 
 type ManualBookingClient = SupabaseClient<Database>;
 
@@ -57,15 +57,11 @@ export function validateManualBookingDraft(
     return "email";
   }
   if (!isValidDate(draft.date)) return "date";
-  if (!draft.startsAt) return "slot";
-
-  const duration = Number(draft.durationMinutes);
-  if (!Number.isInteger(duration) || duration < 1 || duration > 1440) {
-    return "duration";
+  if (draft.serviceIds.length === 0) return "services";
+  if (draft.serviceIds.length > MANUAL_BOOKING_MAX_SERVICES) {
+    return "serviceLimit";
   }
-
-  const price = Number(draft.priceAmount);
-  if (!Number.isFinite(price) || price < 0) return "price";
+  if (!draft.startsAt) return "slot";
   return null;
 }
 
@@ -96,14 +92,17 @@ export function deduplicateManualBookingCustomers(
 export async function listMasterAvailableSlots(
   client: ManualBookingClient,
   workspaceId: string,
-  serviceId: string,
+  serviceIds: readonly string[],
   date: string,
 ): Promise<AvailableSlot[]> {
-  const { data, error } = await client.rpc("get_master_available_slots", {
-    p_date: date,
-    p_service_id: serviceId,
-    p_workspace_id: workspaceId,
-  });
+  const { data, error } = await client.rpc(
+    "get_master_available_slots_for_services",
+    {
+      p_date: date,
+      p_service_ids: [...serviceIds],
+      p_workspace_id: workspaceId,
+    },
+  );
   if (error) throw new Error(error.message);
   return data ?? [];
 }
@@ -132,19 +131,20 @@ export async function createMasterBooking(
   draft: ManualBookingDraft,
   idempotencyKey = createIdempotencyKey(),
 ): Promise<Record<string, unknown>> {
-  const { data, error } = await client.rpc("create_master_booking", {
-    p_customer_id: draft.customerId ?? undefined,
-    p_duration_minutes: Number(draft.durationMinutes),
-    p_email: draft.email.trim() || undefined,
-    p_idempotency_key: idempotencyKey,
-    p_master_note: draft.masterNote.trim() || undefined,
-    p_name: draft.name.trim() || undefined,
-    p_phone: draft.phone.trim() || undefined,
-    p_price_amount: Number(draft.priceAmount),
-    p_service_id: draft.serviceId,
-    p_starts_at: draft.startsAt,
-    p_workspace_id: workspaceId,
-  });
+  const { data, error } = await client.rpc(
+    "create_master_booking_with_services",
+    {
+      p_customer_id: draft.customerId ?? undefined,
+      p_email: draft.email.trim() || undefined,
+      p_idempotency_key: idempotencyKey,
+      p_master_note: draft.masterNote.trim() || undefined,
+      p_name: draft.name.trim() || undefined,
+      p_phone: draft.phone.trim() || undefined,
+      p_service_ids: [...draft.serviceIds],
+      p_starts_at: draft.startsAt,
+      p_workspace_id: workspaceId,
+    },
+  );
   if (error) throw new Error(error.message);
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error("Booking response is invalid");

@@ -19,6 +19,7 @@ import {
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerAppointmentPage } from "../src/components/CustomerAppointmentPage";
+import { PublicServicePicker } from "../src/components/PublicServicePicker";
 import { analytics } from "../src/lib/analytics";
 import {
   getFollowingBookableDate,
@@ -45,6 +46,7 @@ const demoContext: PublicBookingContext = {
       id: demoServiceId,
       name: "Demo manicure",
       description: "Careful manicure with a clean, polished finish.",
+      category: "Manicure",
       durationMinutes: 60,
       priceAmount: 700,
       currency: "CZK",
@@ -84,7 +86,7 @@ export default function HomePage() {
   const [locale, setLocale] = useState<SupportedLocale>(detectLocale);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const [context, setContext] = useState<PublicBookingContext | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [isLoadingContext, setIsLoadingContext] = useState(true);
   const [contextLoadError, setContextLoadError] = useState(false);
   const [managementToken, setManagementToken] = useState<string | null>(null);
@@ -112,9 +114,9 @@ export default function HomePage() {
         .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     });
   }, [demoMode]);
-  const selectedService = context?.services.find(
-    (service) => service.id === selectedServiceId,
-  );
+  const selectedServices = selectedServiceIds
+    .map((id) => context?.services.find((service) => service.id === id))
+    .filter((service) => service !== undefined);
   const selectedDateLabel = formatDate(parseDateInput(date), locale, {
     day: "numeric",
     month: "long",
@@ -154,7 +156,7 @@ export default function HomePage() {
 
       if (isDemoBookingPage()) {
         setContext(demoContext);
-        setSelectedServiceId(demoServiceId);
+        setSelectedServiceIds([demoServiceId]);
         setIsLoadingContext(false);
         return;
       }
@@ -190,12 +192,11 @@ export default function HomePage() {
           throw new Error("Booking context unavailable");
 
         const parsed = parsePublicBookingContext(data);
-        if (parsed.services.length === 0) {
-          throw new Error("No active services");
-        }
         if (cancelled) return;
         setContext(parsed);
-        setSelectedServiceId(parsed.services[0]?.id ?? "");
+        setSelectedServiceIds(
+          parsed.services[0] ? [parsed.services[0].id] : [],
+        );
       } catch {
         if (!cancelled) {
           setContext(null);
@@ -215,6 +216,7 @@ export default function HomePage() {
     let cancelled = false;
     async function loadSlots() {
       setSelectedSlot(null);
+      setSlots([]);
       setError(null);
       setIsLoadingSlots(true);
       if (isDemoBookingPage()) {
@@ -222,7 +224,7 @@ export default function HomePage() {
         setIsLoadingSlots(false);
         return;
       }
-      if (!selectedServiceId) {
+      if (selectedServiceIds.length === 0) {
         setSlots([]);
         setIsLoadingSlots(false);
         return;
@@ -240,10 +242,10 @@ export default function HomePage() {
         return;
       }
       const { data, error: slotsError } = await supabase.rpc(
-        "get_public_available_slots",
+        "get_public_available_slots_for_services",
         {
           p_date: date,
-          p_service_id: selectedServiceId,
+          p_service_ids: selectedServiceIds,
           p_slug: slug,
         },
       );
@@ -266,10 +268,10 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [date, selectedServiceId, supabase, t]);
+  }, [date, selectedServiceIds, supabase, t]);
 
   async function submitBooking() {
-    if (!selectedService) {
+    if (selectedServices.length === 0) {
       setError(t("booking.selectService"));
       return;
     }
@@ -296,8 +298,31 @@ export default function HomePage() {
         setConfirmation({
           id: `demo-${Date.now()}`,
           startsAt: selectedSlot.startsAt,
-          endsAt: selectedSlot.endsAt,
-          serviceName: selectedService.name,
+          endsAt: new Date(
+            new Date(selectedSlot.startsAt).getTime() +
+              selectedServices.reduce(
+                (total, service) => total + service.durationMinutes,
+                0,
+              ) *
+                60_000,
+          ).toISOString(),
+          serviceName: selectedServices
+            .map((service) => service.name)
+            .join(" + "),
+          durationMinutes: selectedServices.reduce(
+            (total, service) => total + service.durationMinutes,
+            0,
+          ),
+          priceAmount: selectedServices.reduce(
+            (total, service) => total + service.priceAmount,
+            0,
+          ),
+          serviceItems: selectedServices.map((service) => ({
+            serviceName: service.name,
+            durationMinutes: service.durationMinutes,
+            priceAmount: service.priceAmount,
+            currency: service.currency,
+          })),
           status: "pending",
         });
         analytics.track(analyticsEvents.publicBookingSucceeded, {
@@ -315,7 +340,7 @@ export default function HomePage() {
       bookingRequestKey.current = idempotencyKey;
       analytics.track(analyticsEvents.publicBookingSubmitted, { locale });
       const { data, error: bookingError } = await supabase.rpc(
-        "create_public_booking",
+        "create_public_booking_with_services",
         {
           p_customer_note: note || undefined,
           p_email: email,
@@ -323,14 +348,26 @@ export default function HomePage() {
           p_locale: locale,
           p_name: name,
           p_phone: phone,
-          p_service_id: selectedService.id,
+          p_service_ids: selectedServiceIds,
           p_slug: slug,
           p_starts_at: selectedSlot.startsAt,
         },
       );
-      if (bookingError) throw new Error(bookingError.message);
+      if (bookingError) {
+        if (
+          bookingError.message.includes("Selected time is no longer available")
+        ) {
+          setSelectedSlot(null);
+          setSlots((current) =>
+            current.filter((slot) => slot.startsAt !== selectedSlot.startsAt),
+          );
+          setError(t("booking.slotNoLongerAvailable"));
+          return;
+        }
+        throw new Error(bookingError.message);
+      }
       analytics.track(analyticsEvents.publicBookingSucceeded, { locale });
-      setConfirmation(data as PublicBookingResult);
+      setConfirmation(data as unknown as PublicBookingResult);
     } catch {
       analytics.track(analyticsEvents.publicBookingFailed, {
         locale,
@@ -403,10 +440,29 @@ export default function HomePage() {
             <p className="muted-copy">{t("booking.pendingConfirmation")}</p>
           )}
           <p className="confirmation-copy">
-            {confirmation.serviceName} ·{" "}
-            {formatDate(new Date(confirmation.startsAt), locale)} ·{" "}
+            {confirmation.serviceItems
+              ?.map((item) => item.serviceName)
+              .join(" + ") ?? confirmation.serviceName}{" "}
+            · {formatDate(new Date(confirmation.startsAt), locale)} ·{" "}
             {formatTime(new Date(confirmation.startsAt), locale)}
           </p>
+          {confirmation.durationMinutes !== undefined && (
+            <p className="confirmation-total">
+              {t("booking.totalDuration")}: {confirmation.durationMinutes} min
+            </p>
+          )}
+          {confirmation.priceAmount !== undefined && (
+            <p className="confirmation-total">
+              {t("booking.totalPrice")}:{" "}
+              {formatCurrency(
+                confirmation.priceAmount,
+                locale,
+                confirmation.serviceItems?.[0]?.currency ??
+                  context.services[0]?.currency ??
+                  "CZK",
+              )}
+            </p>
+          )}
           <button
             className="secondary-button neutral-button confirmation-close-button"
             type="button"
@@ -462,33 +518,21 @@ export default function HomePage() {
               *
             </span>
           </h2>
-          <div className="service-list">
-            {context.services.map((service) => (
-              <button
-                aria-pressed={service.id === selectedServiceId}
-                className={
-                  service.id === selectedServiceId
-                    ? "service-option selected"
-                    : "service-option"
-                }
-                key={service.id}
-                onClick={() => setSelectedServiceId(service.id)}
-                type="button"
-              >
-                <span>
-                  <strong>{service.name}</strong>
-                  <small>{service.durationMinutes} min</small>
-                </span>
-                <span className="service-price">
-                  {formatCurrency(
-                    service.priceAmount,
-                    locale,
-                    service.currency,
-                  )}
-                </span>
-              </button>
-            ))}
-          </div>
+          <PublicServicePicker
+            locale={locale}
+            onToggleService={(serviceId) => {
+              setSelectedServiceIds((current) =>
+                current.includes(serviceId)
+                  ? current.filter((id) => id !== serviceId)
+                  : [...current, serviceId],
+              );
+              setSelectedSlot(null);
+              bookingRequestKey.current = null;
+            }}
+            selectedServiceIds={selectedServiceIds}
+            services={context.services}
+            t={t}
+          />
         </div>
 
         <div className="booking-section">
@@ -504,7 +548,11 @@ export default function HomePage() {
             id="booking-date"
             className="date-input"
             min={new Date().toISOString().slice(0, 10)}
-            onChange={(event) => setDate(event.target.value)}
+            onChange={(event) => {
+              setDate(event.target.value);
+              setSelectedSlot(null);
+              bookingRequestKey.current = null;
+            }}
             type="date"
             value={date}
           />
@@ -549,6 +597,7 @@ export default function HomePage() {
                 key={slot.startsAt}
                 onClick={() => {
                   setSelectedSlot(slot);
+                  bookingRequestKey.current = null;
                   analytics.track(analyticsEvents.bookingSlotSelected, {
                     locale,
                   });
@@ -634,7 +683,7 @@ export default function HomePage() {
         )}
         <button
           className="primary-button confirm-button"
-          disabled={isLoading}
+          disabled={isLoading || selectedServices.length === 0}
           onClick={() => void submitBooking()}
           type="button"
         >

@@ -1,8 +1,8 @@
 import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatTime } from "@schedule-app/i18n";
+import { formatCurrency, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -39,7 +39,7 @@ import type { Service, Workspace } from "../types";
 import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
-import { ServicePickerField } from "./ServicePickerField";
+import { ManualBookingServicesField } from "./ManualBookingServicesField";
 
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
@@ -95,18 +95,25 @@ export function ManualBookingModal({
     useState<ManualBookingValidationError | null>(null);
   const initializedKey = useRef<string | null>(null);
 
-  const selectedService =
-    services.find((service) => service.id === draft.serviceId) ??
-    services[0] ??
-    null;
-  const selectedServiceId = selectedService?.id;
+  const selectedServices = draft.serviceIds
+    .map((id) => services.find((service) => service.id === id))
+    .filter((service): service is Service => Boolean(service));
+  const serviceIdsForAvailability = useMemo(
+    () => [...draft.serviceIds],
+    [draft.serviceIds],
+  );
+  const initialSlotResolved = useRef(false);
 
   useEffect(() => {
     if (!visible) {
       initializedKey.current = null;
       return;
     }
-    const nextKey = `${initialDate}:${initialStartsAt ?? ""}:${initialServiceId ?? ""}:${initialCustomer?.id ?? ""}`;
+    const defaultServiceId =
+      services.find((service) => service.id === initialServiceId)?.id ??
+      services[0]?.id ??
+      "";
+    const nextKey = `${initialDate}:${initialStartsAt ?? ""}:${initialServiceId ?? defaultServiceId}:${initialCustomer?.id ?? ""}`;
     if (initializedKey.current === nextKey) return;
     initializedKey.current = nextKey;
     setDraft({
@@ -132,6 +139,7 @@ export function ManualBookingModal({
     setExistingCustomer(true);
     setCustomers([]);
     setSlots([]);
+    initialSlotResolved.current = false;
     setError(null);
     setValidationError(null);
     setIdempotencyKey(createIdempotencyKey());
@@ -173,7 +181,7 @@ export function ManualBookingModal({
   ]);
 
   useEffect(() => {
-    if (!visible || !selectedServiceId || !draft.date) return;
+    if (!visible || !serviceIdsForAvailability.length || !draft.date) return;
     let active = true;
     setLoadingSlots(true);
     setSlots([]);
@@ -181,20 +189,21 @@ export function ManualBookingModal({
     void listMasterAvailableSlots(
       client,
       workspace.id,
-      selectedServiceId,
+      serviceIdsForAvailability,
       draft.date,
     )
       .then((nextSlots) => {
         if (!active) return;
         setSlots(nextSlots);
-        if (initialStartsAt) {
+        if (initialStartsAt && !initialSlotResolved.current) {
           const matchingSlot = nextSlots.find((slot) =>
             sameInstant(slot.starts_at, initialStartsAt),
           );
           setDraft((current) => ({
             ...current,
-            startsAt: matchingSlot?.starts_at ?? current.startsAt,
+            startsAt: matchingSlot?.starts_at ?? "",
           }));
+          initialSlotResolved.current = true;
         }
       })
       .catch(() => {
@@ -210,7 +219,7 @@ export function ManualBookingModal({
     client,
     draft.date,
     initialStartsAt,
-    selectedServiceId,
+    serviceIdsForAvailability,
     t,
     visible,
     workspace.id,
@@ -218,17 +227,14 @@ export function ManualBookingModal({
 
   function updateDraft(patch: Partial<ManualBookingDraft>) {
     setDraft((current) => ({ ...current, ...patch }));
+    setIdempotencyKey(createIdempotencyKey());
     setValidationError(null);
     setError(null);
   }
 
-  function selectService(service: Service) {
-    updateDraft({
-      durationMinutes: String(service.duration_minutes),
-      priceAmount: String(service.price_amount),
-      serviceId: service.id,
-      startsAt: "",
-    });
+  function selectServices(serviceIds: string[]) {
+    updateDraft({ serviceIds, startsAt: "" });
+    setStep("time");
   }
 
   function selectCustomer(customer: ManualBookingCustomer) {
@@ -256,8 +262,8 @@ export function ManualBookingModal({
       if (
         nextValidationError === "date" ||
         nextValidationError === "slot" ||
-        nextValidationError === "duration" ||
-        nextValidationError === "price"
+        nextValidationError === "services" ||
+        nextValidationError === "serviceLimit"
       ) {
         setValidationError(nextValidationError);
         return;
@@ -279,7 +285,9 @@ export function ManualBookingModal({
     setValidationError(nextValidationError);
     if (nextValidationError) {
       setStep(
-        ["date", "slot", "duration", "price"].includes(nextValidationError)
+        ["date", "slot", "services", "serviceLimit"].includes(
+          nextValidationError,
+        )
           ? "time"
           : "customer",
       );
@@ -333,7 +341,9 @@ export function ManualBookingModal({
           ) : null}
           {step === "time" ? (
             <ActionButton
-              disabled={isLoadingSlots || !selectedService || !draft.startsAt}
+              disabled={
+                isLoadingSlots || !selectedServices.length || !draft.startsAt
+              }
               label={t("common.next")}
               onPress={handleNext}
               variant="primary"
@@ -404,9 +414,8 @@ export function ManualBookingModal({
               isLoadingSlots={isLoadingSlots}
               locale={locale}
               onChangeDate={(date) => updateDraft({ date })}
-              onSelectService={selectService}
+              onChangeServices={selectServices}
               onSelectSlot={(startsAt) => updateDraft({ startsAt })}
-              selectedService={selectedService}
               services={services}
               slots={slots}
               t={t}
@@ -435,7 +444,14 @@ export function ManualBookingModal({
               validationError={validationError}
             />
           ) : (
-            <ReviewStep draft={draft} selectedService={selectedService} t={t} />
+            <ReviewStep
+              draft={draft}
+              locale={locale}
+              selectedServices={selectedServices}
+              slots={slots}
+              t={t}
+              workspace={workspace}
+            />
           )}
 
           {step === "review" ? (
@@ -458,9 +474,8 @@ function TimeStep({
   isLoadingSlots,
   locale,
   onChangeDate,
-  onSelectService,
+  onChangeServices,
   onSelectSlot,
-  selectedService,
   services,
   slots,
   t,
@@ -470,9 +485,8 @@ function TimeStep({
   readonly isLoadingSlots: boolean;
   readonly locale: SupportedLocale;
   readonly onChangeDate: (date: string) => void;
-  readonly onSelectService: (service: Service) => void;
+  readonly onChangeServices: (serviceIds: string[]) => void;
   readonly onSelectSlot: (startsAt: string) => void;
-  readonly selectedService: Service | null;
   readonly services: readonly Service[];
   readonly slots: readonly AvailableSlot[];
   readonly t: (key: MessageKey) => string;
@@ -480,16 +494,12 @@ function TimeStep({
 }) {
   return (
     <View>
-      <Text style={styles.sectionTitle}>
-        {t("mobile.manualBookingService")}
-      </Text>
       {services.length ? (
-        <ServicePickerField
-          label={t("mobile.manualBookingService")}
+        <ManualBookingServicesField
           locale={locale}
-          onSelect={onSelectService}
-          selectedService={selectedService}
+          onChange={onChangeServices}
           services={services}
+          serviceIds={draft.serviceIds}
           t={t}
         />
       ) : (
@@ -664,26 +674,57 @@ function CustomerStep({
 
 function ReviewStep({
   draft,
-  selectedService,
+  locale,
+  selectedServices,
+  slots,
   t,
+  workspace,
 }: {
   readonly draft: ManualBookingDraft;
-  readonly selectedService: Service | null;
+  readonly locale: SupportedLocale;
+  readonly selectedServices: readonly Service[];
+  readonly slots: readonly AvailableSlot[];
   readonly t: (key: MessageKey) => string;
+  readonly workspace: Workspace;
 }) {
+  const selectedSlot = slots.find((slot) =>
+    sameInstant(slot.starts_at, draft.startsAt),
+  );
+  const duration = selectedServices.reduce(
+    (total, service) => total + service.duration_minutes,
+    0,
+  );
+  const price = selectedServices.reduce(
+    (total, service) => total + service.price_amount,
+    0,
+  );
+  const currency = selectedServices[0]?.currency ?? "CZK";
+  const fallbackEndsAt = new Date(
+    new Date(draft.startsAt).getTime() + duration * 60_000,
+  ).toISOString();
+  const endsAt = selectedSlot?.ends_at ?? fallbackEndsAt;
   const rows = [
     [
       t("mobile.manualBookingService"),
-      selectedService?.name ?? t("mobile.noServices"),
+      selectedServices.map((service) => service.name).join(" + ") ||
+        t("mobile.noServices"),
     ],
     [t("mobile.manualBookingCustomerName"), draft.name],
     [t("mobile.manualBookingDate"), draft.date],
-    [t("mobile.manualBookingTime"), draft.startsAt.slice(11, 16)],
-    [t("mobile.manualBookingDuration"), `${draft.durationMinutes} min`],
     [
-      t("mobile.manualBookingPrice"),
-      `${draft.priceAmount} ${selectedService?.currency ?? ""}`,
+      t("mobile.manualBookingTime"),
+      `${formatTime(new Date(draft.startsAt), locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: workspace.timezone,
+      })}–${formatTime(new Date(endsAt), locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: workspace.timezone,
+      })}`,
     ],
+    [t("mobile.manualBookingDuration"), `${duration} min`],
+    [t("mobile.manualBookingPrice"), formatCurrency(price, locale, currency)],
   ];
 
   return (
@@ -778,13 +819,11 @@ function createInitialDraft(
   return {
     customerId: null,
     date,
-    durationMinutes: service ? String(service.duration_minutes) : "",
     email: "",
     masterNote: "",
     name: "",
     phone: "",
-    priceAmount: service ? String(service.price_amount) : "",
-    serviceId: service?.id ?? "",
+    serviceIds: service ? [service.id] : [],
     startsAt: startsAt ?? "",
   };
 }
@@ -801,10 +840,10 @@ function validationMessage(
 ): string {
   const keys: Record<ManualBookingValidationError, MessageKey> = {
     date: "mobile.manualBookingDateInvalid",
-    duration: "mobile.manualBookingDurationInvalid",
     email: "mobile.manualBookingEmailInvalid",
     name: "mobile.manualBookingNameRequired",
-    price: "mobile.manualBookingPriceInvalid",
+    services: "mobile.manualBookingServicesRequired",
+    serviceLimit: "mobile.manualBookingServiceLimitReached",
     slot: "mobile.manualBookingTimeRequired",
   };
   return t(keys[error]);

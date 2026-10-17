@@ -1,4 +1,8 @@
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
+import {
+  type BookingIntervalMinutes,
+  defaultBookingIntervalMinutes,
+} from "./bookingInterval";
 
 export type SetupStep = 1 | 2 | 3 | 4;
 
@@ -8,6 +12,7 @@ export type OnboardingDraft = {
   readonly serviceName: string;
   readonly price: string;
   readonly duration: string;
+  readonly bookingIntervalMinutes: BookingIntervalMinutes;
   readonly workingDays: ReadonlyArray<number>;
   readonly startTime: string;
   readonly endTime: string;
@@ -32,6 +37,7 @@ export function createDefaultOnboardingDraft(
           : "Gel manicure",
     price: "700",
     duration: "60",
+    bookingIntervalMinutes: defaultBookingIntervalMinutes,
     workingDays: [1, 2, 3, 4, 5, 6, 7],
     startTime: "08:00",
     endTime: "21:00",

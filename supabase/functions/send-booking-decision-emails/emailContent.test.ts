@@ -7,6 +7,9 @@ Deno.test("accepted email contains the confirmed slot in the request locale", ()
     locale: "cz",
     recipient: "client@example.test",
     serviceName: "Manikúra",
+    durationMinutes: 120,
+    priceAmount: 1300,
+    currency: "CZK",
     startsAt: "2030-01-03T09:00:00.000Z",
     timezone: "Europe/Prague",
     workspaceName: "Studio <Yahor>",
@@ -14,6 +17,8 @@ Deno.test("accepted email contains the confirmed slot in the request locale", ()
 
   assert.equal(email.subject, "Vaše rezervace je potvrzena");
   assert.match(email.text, /Služba: Manikúra/);
+  assert.match(email.text, /Délka: 120 min/);
+  assert.match(email.text, /Cena: 1\u00a0300,00 Kč/);
   assert.match(email.text, /Datum:/);
   assert.match(email.html, /Studio &lt;Yahor&gt;/);
 });
