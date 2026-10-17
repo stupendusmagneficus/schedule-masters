@@ -375,7 +375,7 @@ export default function HomePage() {
             {t("booking.unavailable")}
           </p>
           <button
-            className="secondary-button"
+            className="secondary-button neutral-button"
             onClick={() => window.location.reload()}
             type="button"
           >
@@ -408,7 +408,7 @@ export default function HomePage() {
             {formatTime(new Date(confirmation.startsAt), locale)}
           </p>
           <button
-            className="secondary-button confirmation-close-button"
+            className="secondary-button neutral-button confirmation-close-button"
             type="button"
             onClick={() => {
               bookingRequestKey.current = null;
@@ -465,6 +465,7 @@ export default function HomePage() {
           <div className="service-list">
             {context.services.map((service) => (
               <button
+                aria-pressed={service.id === selectedServiceId}
                 className={
                   service.id === selectedServiceId
                     ? "service-option selected"
@@ -528,7 +529,7 @@ export default function HomePage() {
             <div className="empty-state">
               <p>{noSlotsForSelectedDate}</p>
               <button
-                className="secondary-button"
+                className="secondary-button neutral-button"
                 onClick={() => setDate(getFollowingBookableDate(date))}
                 type="button"
               >
@@ -539,6 +540,7 @@ export default function HomePage() {
           <div className="slot-list">
             {slots.map((slot) => (
               <button
+                aria-pressed={selectedSlot?.startsAt === slot.startsAt}
                 className={
                   selectedSlot?.startsAt === slot.startsAt
                     ? "slot-option selected"

@@ -34,6 +34,8 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isConfirmingCancellation, setIsConfirmingCancellation] =
+    useState(false);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -73,6 +75,7 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
     if (!result || typeof result.status !== "string") {
       setHasError(true);
     } else {
+      setIsConfirmingCancellation(false);
       setAppointment((current) =>
         current
           ? {
@@ -149,23 +152,53 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
             {appointment.canConfirm ? (
               <button
                 className="primary-button"
+                aria-busy={isSaving}
                 disabled={isSaving}
                 onClick={() => void updateAppointment("confirm")}
                 type="button"
               >
-                {t("booking.manageConfirm")}
+                {isSaving ? t("common.loading") : t("booking.manageConfirm")}
               </button>
             ) : null}
-            {appointment.canCancel ? (
+            {appointment.canCancel && !isConfirmingCancellation ? (
               <button
                 className="secondary-button danger-button"
-                disabled={isSaving}
-                onClick={() => void updateAppointment("cancel")}
+                onClick={() => setIsConfirmingCancellation(true)}
                 type="button"
               >
                 {t("booking.manageCancel")}
               </button>
             ) : null}
+          </div>
+        ) : null}
+        {appointment.canCancel && isConfirmingCancellation ? (
+          <div
+            aria-label={t("booking.manageCancelPrompt")}
+            className="cancel-confirmation"
+            role="group"
+          >
+            <p>{t("booking.manageCancelPrompt")}</p>
+            <div className="management-actions">
+              <button
+                aria-busy={isSaving}
+                className="danger-confirm-button"
+                disabled={isSaving}
+                onClick={() => void updateAppointment("cancel")}
+                type="button"
+              >
+                {isSaving
+                  ? t("common.loading")
+                  : t("booking.manageCancelConfirm")}
+              </button>
+              <button
+                className="secondary-button neutral-button"
+                disabled={isSaving}
+                onClick={() => setIsConfirmingCancellation(false)}
+                type="button"
+              >
+                {t("booking.manageKeepBooking")}
+              </button>
+            </div>
           </div>
         ) : null}
         {hasError ? (

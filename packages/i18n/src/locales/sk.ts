@@ -496,6 +496,10 @@ export const slovakMessages: Messages = {
   "booking.manageDescription": "Podrobnosti vašej rezervácie",
   "booking.manageConfirm": "Potvrdiť rezerváciu",
   "booking.manageCancel": "Zrušiť rezerváciu",
+  "booking.manageCancelPrompt":
+    "Naozaj chcete zrušiť túto rezerváciu? Túto akciu nemožno vrátiť.",
+  "booking.manageCancelConfirm": "Potvrdiť zrušenie",
+  "booking.manageKeepBooking": "Ponechať rezerváciu",
   "booking.managePending": "Čaká na potvrdenie",
   "booking.manageConfirmed": "Potvrdené",
   "booking.manageCancelled": "Zrušené",

@@ -435,6 +435,9 @@ export type MessageKey =
   | "booking.manageDescription"
   | "booking.manageConfirm"
   | "booking.manageCancel"
+  | "booking.manageCancelPrompt"
+  | "booking.manageCancelConfirm"
+  | "booking.manageKeepBooking"
   | "booking.managePending"
   | "booking.manageConfirmed"
   | "booking.manageCancelled"
@@ -942,6 +945,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageDescription": "Детали вашей записи",
     "booking.manageConfirm": "Подтвердить запись",
     "booking.manageCancel": "Отменить запись",
+    "booking.manageCancelPrompt":
+      "Вы уверены, что хотите отменить запись? Это действие нельзя будет отменить.",
+    "booking.manageCancelConfirm": "Подтвердить отмену",
+    "booking.manageKeepBooking": "Оставить запись",
     "booking.managePending": "Ожидает подтверждения",
     "booking.manageConfirmed": "Подтверждена",
     "booking.manageCancelled": "Отменена",
@@ -1440,6 +1447,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageDescription": "Podrobnosti rezervace",
     "booking.manageConfirm": "Potvrdit rezervaci",
     "booking.manageCancel": "Zrušit rezervaci",
+    "booking.manageCancelPrompt":
+      "Opravdu chcete rezervaci zrušit? Tuto akci nelze vrátit.",
+    "booking.manageCancelConfirm": "Potvrdit zrušení",
+    "booking.manageKeepBooking": "Ponechat rezervaci",
     "booking.managePending": "Čeká na potvrzení",
     "booking.manageConfirmed": "Potvrzeno",
     "booking.manageCancelled": "Zrušeno",
@@ -1947,6 +1958,10 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageDescription": "Your appointment details",
     "booking.manageConfirm": "Confirm booking",
     "booking.manageCancel": "Cancel booking",
+    "booking.manageCancelPrompt":
+      "Are you sure you want to cancel this booking? This cannot be undone.",
+    "booking.manageCancelConfirm": "Confirm cancellation",
+    "booking.manageKeepBooking": "Keep booking",
     "booking.managePending": "Awaiting confirmation",
     "booking.manageConfirmed": "Confirmed",
     "booking.manageCancelled": "Cancelled",

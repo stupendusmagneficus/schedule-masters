@@ -494,6 +494,10 @@ export const ukrainianMessages: Messages = {
   "booking.manageDescription": "Деталі вашого запису",
   "booking.manageConfirm": "Підтвердити запис",
   "booking.manageCancel": "Скасувати запис",
+  "booking.manageCancelPrompt":
+    "Ви впевнені, що хочете скасувати цей запис? Цю дію не можна буде скасувати.",
+  "booking.manageCancelConfirm": "Підтвердити скасування",
+  "booking.manageKeepBooking": "Залишити запис",
   "booking.managePending": "Очікує підтвердження",
   "booking.manageConfirmed": "Підтверджено",
   "booking.manageCancelled": "Скасовано",
