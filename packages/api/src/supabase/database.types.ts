@@ -1149,11 +1149,11 @@ export type Database = {
           customer_name: string
           duration_minutes: number
           ends_at: string
-          occupied_ends_at: string
-          occupied_starts_at: string
           id: string
           is_new_customer: boolean
           is_returning_customer: boolean
+          occupied_ends_at: string
+          occupied_starts_at: string
           paid_amount: number
           price_amount: number
           service_name: string
