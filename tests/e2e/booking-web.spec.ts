@@ -600,6 +600,11 @@ test.describe("public booking web", () => {
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
+    await expect(
+      page.getByRole("searchbox", { name: "Search by service or category" }),
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
     await expect(page.locator(".service-option").first()).toHaveCSS(
       "outline-style",
       "solid",
