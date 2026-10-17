@@ -161,6 +161,7 @@ describe("Supabase public booking contract", () => {
           id: otherWorkspaceId,
           name: "Availability outsider test",
           slug: `availability-outsider-${suffix}`,
+          timezone: "Europe/Prague",
         },
       ]);
       expect(createdWorkspaces.error).toBeNull();

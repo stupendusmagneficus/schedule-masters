@@ -192,6 +192,7 @@ declare
   v_timezone text;
   v_work_date date;
   v_override public.availability_date_overrides%rowtype;
+  v_has_override boolean := false;
   v_start timestamptz;
   v_end timestamptz;
 begin
@@ -234,6 +235,8 @@ begin
      and o.work_date = v_work_date;
 
   if found then
+    v_has_override := true;
+
     if v_override.override_kind = 'closed' then
       raise exception 'Selected time is outside the master schedule for this date';
     end if;
@@ -246,7 +249,8 @@ begin
     end if;
   end if;
 
-  if new.source = 'public_booking'
+  if v_has_override
+    and new.source = 'public_booking'
     and new.service_id is not null
     and not exists (
       select 1
