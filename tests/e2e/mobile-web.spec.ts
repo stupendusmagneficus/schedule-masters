@@ -93,13 +93,21 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByText("Zatím nemáte žádné klienty.", { exact: false }),
     ).toBeVisible();
+    await expect(page.getByText("Noví", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Vracejí se", { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByText("Dlouho nepřišli", { exact: true }),
+    ).toHaveCount(0);
 
-    const hasHorizontalOverflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth + 1,
-    );
-    expect(hasHorizontalOverflow).toBe(false);
+    for (const width of [320, 430]) {
+      await page.setViewportSize({ width, height: 812 });
+      const hasHorizontalOverflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth + 1,
+      );
+      expect(hasHorizontalOverflow).toBe(false);
+    }
   });
 
   test("opens Profile from the five bottom tabs at a narrow viewport", async ({

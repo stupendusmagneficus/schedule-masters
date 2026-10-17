@@ -258,6 +258,7 @@ export const slovakMessages: Messages = {
   "mobile.calendarBulkAppliedDates": "Spracované dátumy: {dates}",
   "mobile.customers": "Klienti",
   "mobile.customerSearch": "Meno, telefón alebo e-mail",
+  "mobile.openCustomerDetails": "Otvoriť profil klienta",
   "mobile.customerEmpty":
     "Zatiaľ nemáte žiadnych klientov. Zobrazia sa tu po vytvorení rezervácie.",
   "mobile.customerSearchEmpty":
