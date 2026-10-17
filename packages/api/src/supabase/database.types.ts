@@ -972,6 +972,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anonymize_master_customer: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: undefined
+      }
       bootstrap_master_workspace: {
         Args: {
           p_booking_interval_minutes?: number
@@ -1165,10 +1169,6 @@ export type Database = {
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
-      }
-      anonymize_master_customer: {
-        Args: { p_customer_id: string; p_workspace_id: string }
-        Returns: undefined
       }
       list_master_availability_blocks: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
