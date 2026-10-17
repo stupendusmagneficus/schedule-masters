@@ -262,6 +262,63 @@ export type Database = {
           },
         ]
       }
+      appointment_services: {
+        Row: {
+          appointment_id: string
+          buffer_after_minutes_snapshot: number
+          buffer_before_minutes_snapshot: number
+          created_at: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id?: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot?: string
+          duration_minutes_snapshot?: number
+          position?: number
+          price_amount_snapshot?: number
+          service_id?: string | null
+          service_name_snapshot?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_services_appointment_id_workspace_id_fkey"
+            columns: ["appointment_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "appointment_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_breaks: {
         Row: {
           availability_rule_id: string
@@ -1057,6 +1114,20 @@ export type Database = {
         }
         Returns: Json
       }
+      create_master_booking_with_services: {
+        Args: {
+          p_customer_id?: string
+          p_email?: string
+          p_idempotency_key: string
+          p_master_note?: string
+          p_name?: string
+          p_phone?: string
+          p_service_ids: string[]
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       create_master_waiting_list_customer: {
         Args: {
           p_customer_email: string
@@ -1100,6 +1171,20 @@ export type Database = {
         }
         Returns: Json
       }
+      create_public_booking_with_services: {
+        Args: {
+          p_customer_note?: string
+          p_email: string
+          p_idempotency_key?: string
+          p_locale?: string
+          p_name: string
+          p_phone: string
+          p_service_ids: string[]
+          p_slug: string
+          p_starts_at: string
+        }
+        Returns: Json
+      }
       delete_master_availability_block: {
         Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
@@ -1125,6 +1210,13 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_available_slots_for_services: {
+        Args: { p_date: string; p_service_ids: string[]; p_workspace_id: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_master_month_available_slots: {
         Args: {
           p_month_start: string
@@ -1139,6 +1231,13 @@ export type Database = {
       }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string; p_slug: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
+      get_public_available_slots_for_services: {
+        Args: { p_date: string; p_service_ids: string[]; p_slug: string }
         Returns: {
           ends_at: string
           starts_at: string
@@ -1168,6 +1267,17 @@ export type Database = {
           source: Database["public"]["Enums"]["appointment_source"]
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
+      list_master_appointment_services: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          duration_minutes: number
+          position: number
+          price_amount: number
+          service_id: string | null
+          service_name: string
         }[]
       }
       list_master_availability_blocks: {
