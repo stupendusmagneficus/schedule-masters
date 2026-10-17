@@ -62,6 +62,9 @@ export function CustomersTab({
   const customerSmsUrl = selected?.phone
     ? buildCustomerPhoneUrl(selected.phone, "sms")
     : null;
+  const customerCallUrl = selected?.phone
+    ? buildCustomerPhoneUrl(selected.phone, "call")
+    : null;
 
   if (selected) {
     return (
@@ -104,24 +107,44 @@ export function CustomersTab({
           {selected.phone ? (
             <View style={styles.contactActionRow}>
               <Text style={styles.body}>{selected.phone}</Text>
-              {customerSmsUrl ? (
-                <Pressable
-                  accessibilityLabel={t("mobile.customerSms")}
-                  accessibilityRole="button"
-                  onPress={() =>
-                    void Linking.openURL(customerSmsUrl).catch(() =>
-                      Alert.alert(t("mobile.customerContactActionFailed")),
-                    )
-                  }
-                  style={styles.contactAction}
-                >
-                  <MaterialCommunityIcons
-                    color={colors.accent}
-                    name="message-text-outline"
-                    size={22}
-                  />
-                </Pressable>
-              ) : null}
+              <View style={styles.contactActions}>
+                {customerCallUrl ? (
+                  <Pressable
+                    accessibilityLabel={t("mobile.customerCall")}
+                    accessibilityRole="button"
+                    onPress={() =>
+                      void Linking.openURL(customerCallUrl).catch(() =>
+                        Alert.alert(t("mobile.customerContactActionFailed")),
+                      )
+                    }
+                    style={styles.contactAction}
+                  >
+                    <MaterialCommunityIcons
+                      color={colors.accent}
+                      name="phone-outline"
+                      size={22}
+                    />
+                  </Pressable>
+                ) : null}
+                {customerSmsUrl ? (
+                  <Pressable
+                    accessibilityLabel={t("mobile.customerSms")}
+                    accessibilityRole="button"
+                    onPress={() =>
+                      void Linking.openURL(customerSmsUrl).catch(() =>
+                        Alert.alert(t("mobile.customerContactActionFailed")),
+                      )
+                    }
+                    style={styles.contactAction}
+                  >
+                    <MaterialCommunityIcons
+                      color={colors.accent}
+                      name="message-text-outline"
+                      size={22}
+                    />
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
           ) : null}
           {selected.email ? (
@@ -372,6 +395,7 @@ const styles = StyleSheet.create({
     gap: 8,
     justifyContent: "space-between",
   },
+  contactActions: { flexDirection: "row", gap: 4 },
   contactAction: {
     alignItems: "center",
     borderRadius: radii.control,
