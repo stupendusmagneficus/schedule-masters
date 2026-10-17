@@ -318,11 +318,11 @@ export function CalendarTab({
             loadPrevious={monthWindow.loadPrevious}
             locale={locale}
             months={monthItems}
-            onOpenSelectedDay={() => calendar.setView("day")}
-            onSelectDate={calendar.setSelectedDate}
-            selectedDate={calendar.selectedDate}
+            onSelectDate={(date) => {
+              calendar.setSelectedDate(date);
+              calendar.setView("day");
+            }}
             t={t}
-            timezone={workspace.timezone}
           />
         </CalendarMonthPickerSheet>
         {calendar.view !== "month" ? (

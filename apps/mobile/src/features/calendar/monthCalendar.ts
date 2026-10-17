@@ -5,27 +5,18 @@ import {
   type PersonalBlock,
 } from "../availability/personalBlocks";
 import { addCalendarDays, getCalendarDateRange } from "./calendar";
+import { calculateCalendarWorkload } from "./calendarWorkload";
 
 export type MonthCalendarDay = {
   readonly bookingCount: number;
   readonly blockCount: number;
   readonly date: string;
-  readonly expectedRevenueByCurrency: Readonly<Record<string, number>>;
   readonly isClosed: boolean;
   readonly isCurrentMonth: boolean;
   readonly isSelected: boolean;
   readonly isToday: boolean;
+  readonly workloadPercent: number | null;
 };
-
-export type CalendarWorkloadLevel = "low" | "medium" | "high";
-
-export function getCalendarWorkloadLevel(
-  bookingCount: number,
-): CalendarWorkloadLevel {
-  if (bookingCount >= 5) return "high";
-  if (bookingCount >= 3) return "medium";
-  return "low";
-}
 
 type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
@@ -57,10 +48,11 @@ export function buildMonthCalendar({
     {
       bookingCount: number;
       blockCount: number;
-      revenue: Record<string, number>;
     }
   >();
-  const rulesByDay = new Set(availabilityRules.map((rule) => rule.dayOfWeek));
+  const rulesByDay = new Map(
+    availabilityRules.map((rule) => [rule.dayOfWeek, rule]),
+  );
 
   for (const appointment of appointments) {
     const date = formatDateInTimeZone(
@@ -69,19 +61,10 @@ export function buildMonthCalendar({
     );
     const entry = getOrCreateDay(dataByDate, date);
     if (
-      appointment.status !== "cancelled_by_customer" &&
-      appointment.status !== "cancelled_by_master"
-    ) {
-      entry.bookingCount += 1;
-    }
-    if (
-      appointment.status === "pending" ||
       appointment.status === "confirmed" ||
       appointment.status === "completed"
     ) {
-      const currency = appointment.currency.trim().toUpperCase();
-      entry.revenue[currency] =
-        (entry.revenue[currency] ?? 0) + Number(appointment.price_amount);
+      entry.bookingCount += 1;
     }
   }
 
@@ -93,15 +76,23 @@ export function buildMonthCalendar({
   const days: MonthCalendarDay[] = [];
   for (let date = gridStart; date <= gridEnd; date = addCalendarDays(date, 1)) {
     const data = dataByDate.get(date);
+    const availabilityRule = rulesByDay.get(getIsoDayOfWeek(date));
+    const workload = calculateCalendarWorkload({
+      appointments,
+      availabilityRule,
+      blocks,
+      date,
+      timezone,
+    });
     days.push({
       bookingCount: data?.bookingCount ?? 0,
       blockCount: data?.blockCount ?? 0,
       date,
-      expectedRevenueByCurrency: data?.revenue ?? {},
-      isClosed: !rulesByDay.has(getIsoDayOfWeek(date)),
+      isClosed: !availabilityRule,
       isCurrentMonth: date >= monthRange.fromDate && date <= monthRange.toDate,
       isSelected: date === selectedDate,
       isToday: date === todayDate,
+      workloadPercent: workload.percent,
     });
   }
 
@@ -114,14 +105,13 @@ function getOrCreateDay(
     {
       bookingCount: number;
       blockCount: number;
-      revenue: Record<string, number>;
     }
   >,
   date: string,
 ) {
   let day = days.get(date);
   if (!day) {
-    day = { bookingCount: 0, blockCount: 0, revenue: {} };
+    day = { bookingCount: 0, blockCount: 0 };
     days.set(date, day);
   }
   return day;

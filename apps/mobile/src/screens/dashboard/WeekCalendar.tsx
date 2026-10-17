@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { getAppointmentStatusLabel } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import type { PersonalBlock } from "../../features/availability/personalBlocks";
+import { getCalendarWorkloadLevel } from "../../features/calendar/calendarWorkload";
 import { formatTimelineTime } from "../../features/calendar/dayTimeline";
 import {
   buildWeekCalendarMonth,
@@ -14,6 +15,7 @@ import {
 import { colors, radii } from "../../theme/tokens";
 import { CalendarEventLegend } from "./CalendarEventLegend";
 import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
+import { CalendarWorkloadLegend } from "./CalendarWorkloadLegend";
 
 const compactSlotHeight = 24;
 const calendarTimeGutterWidth = 36;
@@ -62,11 +64,7 @@ export function WeekCalendar({
     ...(openDays.length ? openDays : days).map((day) => day.endMinute),
   );
   const timeSlots = createCompactSlots(startMinute, endMinute);
-  const totalEvents = days.reduce(
-    (total, day) =>
-      total + day.events.filter((event) => event.kind === "appointment").length,
-    0,
-  );
+  const totalEvents = days.reduce((total, day) => total + day.bookingCount, 0);
 
   return (
     <View
@@ -90,6 +88,7 @@ export function WeekCalendar({
         title={weekLabel}
         todayLabel={t("mobile.today")}
       />
+      <CalendarWorkloadLegend t={t} />
       <View style={styles.monthWeekdays}>
         {monthDays.slice(0, 7).map((day) => (
           <Text key={day.date} style={styles.monthWeekday}>
@@ -132,7 +131,12 @@ export function WeekCalendar({
         <View style={styles.dayHeaderColumns}>
           {days.map((day) => (
             <Pressable
-              accessibilityLabel={formatDateLabel(day.date, locale, timezone)}
+              accessibilityLabel={getWeekDayAccessibilityLabel(
+                day,
+                locale,
+                timezone,
+                t,
+              )}
               accessibilityRole="button"
               key={day.date}
               onPress={() => onPressDay?.(day.date)}
@@ -160,10 +164,27 @@ export function WeekCalendar({
               >
                 {day.date.slice(-2).replace(/^0/, "")}
               </Text>
+              <Text
+                style={[
+                  styles.weekDayCount,
+                  {
+                    color:
+                      day.workloadPercent === null
+                        ? colors.secondaryText
+                        : getWorkloadColor(day.workloadPercent),
+                  },
+                  day.date === selectedDate && styles.weekDayTextSelected,
+                ]}
+              >
+                {day.bookingCount}
+              </Text>
               <View
                 style={[
                   styles.weekDayDot,
-                  day.events.length > 0 && styles.weekDayDotActive,
+                  day.bookingCount > 0 &&
+                    day.workloadPercent !== null && {
+                      backgroundColor: getWorkloadColor(day.workloadPercent),
+                    },
                   day.isClosed && styles.weekDayDotClosed,
                 ]}
               />
@@ -571,6 +592,40 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 15,
   },
+  weekDayCount: {
+    fontSize: 8,
+    fontWeight: "700",
+    lineHeight: 10,
+    textAlign: "center",
+  },
   weekDayTextSelected: { color: colors.accentPressed },
   weekHeaderRow: { flexDirection: "row", marginBottom: 2 },
 });
+
+function getWorkloadColor(workloadPercent: number | null): string {
+  switch (getCalendarWorkloadLevel(workloadPercent)) {
+    case "high":
+      return colors.danger;
+    case "medium":
+      return colors.pendingText;
+    default:
+      return colors.accent;
+  }
+}
+
+function getWeekDayAccessibilityLabel(
+  day: WeekCalendarDay,
+  locale: SupportedLocale,
+  timezone: string,
+  t: WeekCalendarProps["t"],
+): string {
+  const parts = [
+    formatDateLabel(day.date, locale, timezone),
+    day.isClosed ? t("mobile.calendarClosed") : "",
+    `${day.bookingCount} ${t("mobile.weekBookings")}`,
+    day.workloadPercent === null
+      ? ""
+      : `${day.workloadPercent}% ${t("mobile.calendarWorkload")}`,
+  ];
+  return parts.filter(Boolean).join(", ");
+}

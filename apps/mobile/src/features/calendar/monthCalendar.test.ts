@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { MasterAppointment } from "../appointments/manualBooking";
 import type { PersonalBlock } from "../availability/personalBlocks";
-import { buildMonthCalendar, getCalendarWorkloadLevel } from "./monthCalendar";
+import { getCalendarWorkloadLevel } from "./calendarWorkload";
+import { buildMonthCalendar } from "./monthCalendar";
 
 const appointment = {
   currency: "CZK",
@@ -56,12 +57,12 @@ describe("month calendar", () => {
     });
   });
 
-  it("maps booking counts to low, medium, and high workload levels", () => {
-    expect(getCalendarWorkloadLevel(1)).toBe("low");
-    expect(getCalendarWorkloadLevel(2)).toBe("low");
-    expect(getCalendarWorkloadLevel(3)).toBe("medium");
-    expect(getCalendarWorkloadLevel(4)).toBe("medium");
-    expect(getCalendarWorkloadLevel(5)).toBe("high");
+  it("maps occupied working time to low, medium, and high workload levels", () => {
+    expect(getCalendarWorkloadLevel(null)).toBe("low");
+    expect(getCalendarWorkloadLevel(29)).toBe("low");
+    expect(getCalendarWorkloadLevel(30)).toBe("medium");
+    expect(getCalendarWorkloadLevel(69)).toBe("medium");
+    expect(getCalendarWorkloadLevel(70)).toBe("high");
   });
 
   it("adds leading and trailing days for incomplete weeks across year boundaries", () => {
@@ -78,7 +79,7 @@ describe("month calendar", () => {
     });
   });
 
-  it("summarizes bookings, blocks, and expected revenue without counting canceled revenue", () => {
+  it("summarizes confirmed bookings and personal blocks", () => {
     const canceled = {
       ...appointment,
       id: "appointment-canceled",
@@ -99,8 +100,31 @@ describe("month calendar", () => {
     expect(days.find((day) => day.date === "2030-02-12")).toMatchObject({
       bookingCount: 1,
       blockCount: 1,
-      expectedRevenueByCurrency: { CZK: 700 },
+      workloadPercent: 13,
     });
+  });
+
+  it("excludes pending bookings from the visible count and workload", () => {
+    const pending = {
+      ...appointment,
+      id: "appointment-pending",
+      starts_at: "2030-02-12T11:00:00.000Z",
+      ends_at: "2030-02-12T12:00:00.000Z",
+      status: "pending",
+    } as MasterAppointment;
+    const day = buildMonthCalendar({
+      appointments: [appointment, pending],
+      availabilityRules: [
+        { dayOfWeek: 2, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      monthDate: "2030-02-12",
+      selectedDate: "2030-02-12",
+      timezone: "UTC",
+      todayDate: "2030-02-12",
+    }).find((candidate) => candidate.date === "2030-02-12");
+
+    expect(day).toMatchObject({ bookingCount: 1, workloadPercent: 11 });
   });
 
   it("builds each list row for its own month while retaining the selected date", () => {

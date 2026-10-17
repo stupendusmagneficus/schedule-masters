@@ -362,20 +362,17 @@ test.describe("mobile web smoke", () => {
     expect(new Set(tops).size).toBe(1);
   });
 
-  test("selects a month date and opens it separately in the day calendar", async ({
+  test("selecting a month date opens that day immediately", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("tab", { name: "Měsíc" }).click();
     await page.getByRole("button", { name: /14\. října 2026/ }).click();
+    await expect(page.getByTestId("calendar-month-sheet")).toBeHidden();
     await expect(
-      page.getByRole("button", { name: "Otevřít den", exact: true }),
+      page.getByText("14. října 2026", { exact: true }),
     ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Otevřít den", exact: true })
-      .click();
-
     await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
   });
 
@@ -408,20 +405,16 @@ test.describe("mobile web smoke", () => {
 
     const nextMonthDate = page
       .getByRole("button", {
-        name: /1\. listopadu 2026/,
+        name: /^1\. listopadu 2026/,
       })
       .last();
     await nextMonthDate.scrollIntoViewIfNeeded();
-    const scrollTopBeforeSelection = await monthList.evaluate(
-      (element) => element.scrollTop,
-    );
     await nextMonthDate.click();
+    await expect(page.getByTestId("calendar-month-sheet")).toBeHidden();
     await expect(
-      page.getByRole("button", { name: "Otevřít den", exact: true }),
+      page.getByText("1. listopadu 2026", { exact: true }),
     ).toBeVisible();
-    expect(
-      await monthList.evaluate((element) => element.scrollTop),
-    ).toBeGreaterThanOrEqual(scrollTopBeforeSelection - 4);
+    await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
   });
 
   test("keeps week selection in week view", async ({ page }) => {
