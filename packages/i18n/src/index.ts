@@ -241,7 +241,6 @@ export type MessageKey =
   | "mobile.monthBookings"
   | "mobile.monthBlocks"
   | "mobile.monthNoBookings"
-  | "mobile.monthOpenDay"
   | "mobile.weekBookings"
   | "mobile.weekNoBookings"
   | "mobile.calendarWorkload"
@@ -719,7 +718,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthBookings": "записей",
     "mobile.monthBlocks": "блоков",
     "mobile.monthNoBookings": "Нет записей",
-    "mobile.monthOpenDay": "Открыть день",
     "mobile.weekBookings": "записей",
     "mobile.weekNoBookings": "Нет записей",
     "mobile.calendarWorkload": "загрузка",
@@ -1223,7 +1221,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthBookings": "rezervací",
     "mobile.monthBlocks": "bloků",
     "mobile.monthNoBookings": "Žádné rezervace",
-    "mobile.monthOpenDay": "Otevřít den",
     "mobile.weekBookings": "rezervací",
     "mobile.weekNoBookings": "Žádné rezervace",
     "mobile.calendarWorkload": "vytížení",
@@ -1725,7 +1722,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.monthBookings": "bookings",
     "mobile.monthBlocks": "blocks",
     "mobile.monthNoBookings": "No bookings",
-    "mobile.monthOpenDay": "Open day",
     "mobile.weekBookings": "bookings",
     "mobile.weekNoBookings": "No bookings",
     "mobile.calendarWorkload": "workload",

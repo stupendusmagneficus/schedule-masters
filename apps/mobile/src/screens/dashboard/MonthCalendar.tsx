@@ -1,10 +1,5 @@
 import type { SupportedLocale } from "@schedule-app/i18n";
-import {
-  formatAccessibleDate,
-  formatCompactDate,
-  formatCurrency,
-  formatDate,
-} from "@schedule-app/i18n";
+import { formatDate } from "@schedule-app/i18n";
 import { useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
@@ -37,11 +32,8 @@ type MonthCalendarProps = {
   readonly loadPrevious: () => void;
   readonly loadNext: () => void;
   readonly locale: SupportedLocale;
-  readonly onOpenSelectedDay: () => void;
   readonly onSelectDate: (date: string) => void;
-  readonly selectedDate: string;
   readonly t: DashboardTabProps["t"];
-  readonly timezone: string;
 };
 
 export function MonthCalendar({
@@ -51,15 +43,9 @@ export function MonthCalendar({
   loadPrevious,
   loadNext,
   locale,
-  onOpenSelectedDay,
   onSelectDate,
-  selectedDate,
   t,
-  timezone,
 }: MonthCalendarProps) {
-  const selectedDay = months
-    .flatMap((month) => month.days)
-    .find((day) => day.date === selectedDate);
   const listRef = useRef<FlatList<MonthItem>>(null);
   const scrollOffset = useRef(0);
   const firstMonth = useRef(months[0]?.month);
@@ -131,53 +117,6 @@ export function MonthCalendar({
       />
       {isLoadingPrevious ? <MonthLoading style={styles.loadingTop} /> : null}
       {isLoadingNext ? <MonthLoading style={styles.loadingBottom} /> : null}
-      {selectedDay ? (
-        <View style={styles.summary}>
-          <View style={styles.summaryCopy}>
-            <Text
-              accessibilityLabel={formatAccessibleDate(
-                new Date(`${selectedDay.date}T12:00:00.000Z`),
-                locale,
-                timezone,
-              )}
-              style={styles.summaryDate}
-            >
-              {formatCompactDate(
-                new Date(`${selectedDay.date}T12:00:00.000Z`),
-                locale,
-                { timeZone: timezone },
-              )}
-            </Text>
-            <Text style={styles.summaryDetails}>
-              {selectedDay.isClosed
-                ? t("mobile.calendarClosed")
-                : selectedDay.bookingCount
-                  ? `${selectedDay.bookingCount} ${t("mobile.monthBookings")}`
-                  : t("mobile.monthNoBookings")}
-              {selectedDay.blockCount > 0
-                ? ` · ${selectedDay.blockCount} ${t("mobile.monthBlocks")}`
-                : ""}
-              {selectedDay.workloadPercent !== null
-                ? ` · ${selectedDay.workloadPercent}% ${t("mobile.calendarWorkload")}`
-                : ""}
-            </Text>
-            <Text style={styles.summaryRevenue}>
-              {t("mobile.expectedRevenue")}:{" "}
-              {formatRevenue(selectedDay, locale)}
-            </Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onOpenSelectedDay}
-            style={({ pressed }) => [
-              styles.openDayButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={styles.openDayText}>{t("mobile.monthOpenDay")}</Text>
-          </Pressable>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -320,14 +259,6 @@ function MonthLoading({ style }: { readonly style: object }) {
   );
 }
 
-function formatRevenue(day: MonthCalendarDay, locale: SupportedLocale): string {
-  const currencies = Object.entries(day.expectedRevenueByCurrency);
-  if (currencies.length === 0) return formatCurrency(0, locale, "CZK");
-  return currencies
-    .map(([currency, amount]) => formatCurrency(amount, locale, currency))
-    .join(" · ");
-}
-
 function getWorkloadColor(workloadPercent: number | null): string {
   switch (getCalendarWorkloadLevel(workloadPercent)) {
     case "high":
@@ -451,19 +382,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textTransform: "capitalize",
   },
-  openDayButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14,
-  },
-  openDayText: {
-    color: colors.actionText,
-    ...typography.caption,
-    fontWeight: "700",
-  },
   outsideDay: { opacity: 0.42 },
   outsideDayText: { color: colors.secondaryText },
   pressed: { opacity: 0.7 },
@@ -474,24 +392,6 @@ const styles = StyleSheet.create({
     color: colors.actionText,
     borderColor: colors.actionText,
   },
-  summary: {
-    alignItems: "center",
-    borderTopColor: colors.borderSubtle,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 10,
-    justifyContent: "space-between",
-    marginTop: 8,
-    paddingTop: 10,
-  },
-  summaryCopy: { flex: 1, gap: 2, minWidth: 0 },
-  summaryDate: {
-    color: colors.primaryText,
-    ...typography.label,
-    fontWeight: "700",
-  },
-  summaryDetails: { color: colors.secondaryText, ...typography.caption },
-  summaryRevenue: { color: colors.primaryText, ...typography.caption },
   todayDay: { borderColor: colors.accent, borderWidth: 1 },
   weekday: {
     color: colors.secondaryText,

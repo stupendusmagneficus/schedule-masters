@@ -11,7 +11,6 @@ export type MonthCalendarDay = {
   readonly bookingCount: number;
   readonly blockCount: number;
   readonly date: string;
-  readonly expectedRevenueByCurrency: Readonly<Record<string, number>>;
   readonly isClosed: boolean;
   readonly isCurrentMonth: boolean;
   readonly isSelected: boolean;
@@ -49,7 +48,6 @@ export function buildMonthCalendar({
     {
       bookingCount: number;
       blockCount: number;
-      revenue: Record<string, number>;
     }
   >();
   const rulesByDay = new Map(
@@ -67,15 +65,6 @@ export function buildMonthCalendar({
       appointment.status === "completed"
     ) {
       entry.bookingCount += 1;
-    }
-    if (
-      appointment.status === "pending" ||
-      appointment.status === "confirmed" ||
-      appointment.status === "completed"
-    ) {
-      const currency = appointment.currency.trim().toUpperCase();
-      entry.revenue[currency] =
-        (entry.revenue[currency] ?? 0) + Number(appointment.price_amount);
     }
   }
 
@@ -99,7 +88,6 @@ export function buildMonthCalendar({
       bookingCount: data?.bookingCount ?? 0,
       blockCount: data?.blockCount ?? 0,
       date,
-      expectedRevenueByCurrency: data?.revenue ?? {},
       isClosed: !availabilityRule,
       isCurrentMonth: date >= monthRange.fromDate && date <= monthRange.toDate,
       isSelected: date === selectedDate,
@@ -117,14 +105,13 @@ function getOrCreateDay(
     {
       bookingCount: number;
       blockCount: number;
-      revenue: Record<string, number>;
     }
   >,
   date: string,
 ) {
   let day = days.get(date);
   if (!day) {
-    day = { bookingCount: 0, blockCount: 0, revenue: {} };
+    day = { bookingCount: 0, blockCount: 0 };
     days.set(date, day);
   }
   return day;

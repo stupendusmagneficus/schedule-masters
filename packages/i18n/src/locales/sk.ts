@@ -275,7 +275,6 @@ export const slovakMessages: Messages = {
   "mobile.monthBookings": "rezervácie",
   "mobile.monthBlocks": "bloky",
   "mobile.monthNoBookings": "Žiadne rezervácie",
-  "mobile.monthOpenDay": "Otvoriť deň",
   "mobile.weekBookings": "rezervácie",
   "mobile.weekNoBookings": "Žiadne rezervácie",
   "mobile.calendarWorkload": "vyťaženosť",

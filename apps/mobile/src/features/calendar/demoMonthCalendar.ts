@@ -36,17 +36,9 @@ export function buildDemoMonthCalendar(
     const acceptedBookings = bookings.filter(
       (booking) => booking.status === "confirmed",
     );
-    const expectedRevenueByCurrency: Record<string, number> = {};
-    if (bookings.length) {
-      expectedRevenueByCurrency.CZK = bookings.reduce(
-        (sum, booking) => sum + booking.priceAmount,
-        0,
-      );
-    }
     return {
       ...day,
       bookingCount: acceptedBookings.length,
-      expectedRevenueByCurrency,
       isSelected: day.date === selectedDate,
       workloadPercent: Math.min(
         100,

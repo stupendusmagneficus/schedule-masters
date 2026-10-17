@@ -273,7 +273,6 @@ export const ukrainianMessages: Messages = {
   "mobile.monthBookings": "записи",
   "mobile.monthBlocks": "блокування",
   "mobile.monthNoBookings": "Записів немає",
-  "mobile.monthOpenDay": "Відкрити день",
   "mobile.weekBookings": "записи",
   "mobile.weekNoBookings": "Записів немає",
   "mobile.calendarWorkload": "завантаження",

@@ -79,7 +79,7 @@ describe("month calendar", () => {
     });
   });
 
-  it("summarizes bookings, blocks, and expected revenue without counting canceled revenue", () => {
+  it("summarizes confirmed bookings and personal blocks", () => {
     const canceled = {
       ...appointment,
       id: "appointment-canceled",
@@ -100,7 +100,6 @@ describe("month calendar", () => {
     expect(days.find((day) => day.date === "2030-02-12")).toMatchObject({
       bookingCount: 1,
       blockCount: 1,
-      expectedRevenueByCurrency: { CZK: 700 },
       workloadPercent: 13,
     });
   });
