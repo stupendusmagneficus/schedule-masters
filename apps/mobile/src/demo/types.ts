@@ -1,3 +1,4 @@
+import type { PersonalBlock } from "../features/availability/personalBlocks";
 import type { Service } from "../types";
 
 export type DemoAppointment = {
@@ -14,5 +15,6 @@ export type DemoAppointment = {
 export type DemoData = {
   readonly appointments: readonly DemoAppointment[];
   readonly freeSlots: readonly string[];
+  readonly personalBlocks: readonly PersonalBlock[];
   readonly primaryService: Service;
 };

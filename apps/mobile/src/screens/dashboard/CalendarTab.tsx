@@ -8,7 +8,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -91,6 +90,7 @@ export function CalendarTab({
   const [blockDraft, setBlockDraft] = useState(() =>
     createDefaultPersonalBlockDraft(calendar.selectedDate),
   );
+  const [demoBlocks, setDemoBlocks] = useState(demoData?.personalBlocks ?? []);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [slotAction, setSlotAction] = useState<{
     readonly date: string;
@@ -123,6 +123,7 @@ export function CalendarTab({
         selectedDate: calendar.selectedDate,
         timezone: workspace.timezone,
       });
+  const personalBlocks = demoData ? demoBlocks : calendar.blocks;
   const week = demoData
     ? buildDemoWeekCalendar(
         demoData.appointments,
@@ -351,15 +352,21 @@ export function CalendarTab({
             </View>
             {calendar.isLoading ? (
               <Text style={styles.helper}>{t("common.loading")}</Text>
-            ) : calendar.blocks.length ? (
+            ) : personalBlocks.length ? (
               <View style={styles.blocksList}>
-                {calendar.blocks.map((block) => (
+                {personalBlocks.map((block) => (
                   <PersonalBlockRow
                     block={block}
                     key={block.id}
                     locale={locale}
                     onDelete={async (blockId) => {
-                      await calendar.removeBlock(blockId);
+                      if (demoData) {
+                        setDemoBlocks((current) =>
+                          current.filter((item) => item.id !== blockId),
+                        );
+                      } else {
+                        await calendar.removeBlock(blockId);
+                      }
                       onFeedback(t("mobile.personalBlockDeleted"));
                     }}
                     t={t}
@@ -487,6 +494,8 @@ function PersonalBlockRow({
   readonly t: DashboardTabProps["t"];
   readonly timezone: string;
 }) {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const date = formatCompactDate(new Date(block.starts_at), locale, {
     timeZone: timezone,
   });
@@ -501,8 +510,22 @@ function PersonalBlockRow({
     timeZone: timezone,
   });
 
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      await onDelete(block.id);
+      setIsConfirmingDelete(false);
+    } catch {
+      // The parent exposes the server error in the personal blocks card.
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
-    <View style={styles.blockRow}>
+    <View
+      style={[styles.blockRow, isConfirmingDelete && styles.blockRowConfirming]}
+    >
       <View style={styles.blockCopy}>
         <Text style={styles.blockTitle}>
           {block.reason || t("mobile.personalBlocks")}
@@ -518,29 +541,43 @@ function PersonalBlockRow({
           {date} · {start} – {end}
         </Text>
       </View>
-      <Pressable
-        accessibilityLabel={`${t("mobile.personalBlockDelete")} ${block.reason || ""}`}
-        accessibilityRole="button"
-        onPress={() =>
-          Alert.alert(
-            t("mobile.personalBlockDelete"),
-            block.reason || t("mobile.personalBlocks"),
-            [
-              { text: t("common.cancel"), style: "cancel" },
-              {
-                onPress: () => void onDelete(block.id).catch(() => undefined),
-                text: t("mobile.personalBlockDelete"),
-                style: "destructive",
-              },
-            ],
-          )
-        }
-        style={styles.deleteButton}
-      >
-        <Text style={styles.deleteButtonText}>
-          {t("mobile.personalBlockDelete")}
-        </Text>
-      </Pressable>
+      {isConfirmingDelete ? (
+        <View style={styles.blockDeleteConfirmation}>
+          <Text accessibilityRole="alert" style={styles.blockDeletePrompt}>
+            {t("mobile.personalBlockDeleteConfirm")}
+          </Text>
+          <View style={styles.blockDeleteActions}>
+            <ActionButton
+              disabled={isDeleting}
+              label={t("common.cancel")}
+              onPress={() => setIsConfirmingDelete(false)}
+              size="compact"
+              variant="secondary"
+            />
+            <ActionButton
+              disabled={isDeleting}
+              label={t("mobile.personalBlockDelete")}
+              loading={isDeleting}
+              loadingLabel={t("common.loading")}
+              onPress={() => void handleDelete()}
+              size="compact"
+              variant="destructiveConfirm"
+            />
+          </View>
+        </View>
+      ) : (
+        <Pressable
+          accessibilityLabel={`${t("mobile.personalBlockDelete")} ${block.reason || ""}`}
+          accessibilityRole="button"
+          disabled={isDeleting}
+          onPress={() => setIsConfirmingDelete(true)}
+          style={styles.deleteButton}
+        >
+          <Text style={styles.deleteButtonText}>
+            {t("mobile.personalBlockDelete")}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -558,6 +595,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     padding: 12,
+  },
+  blockRowConfirming: { alignItems: "stretch", flexDirection: "column" },
+  blockDeleteActions: { flexDirection: "row", gap: 8 },
+  blockDeleteConfirmation: { gap: 8 },
+  blockDeletePrompt: {
+    ...typography.body,
+    color: colors.danger,
+    fontWeight: "600",
   },
   blockTitle: { ...typography.label, color: colors.primaryText },
   blocksList: { gap: 8, marginTop: 14 },
@@ -582,7 +627,12 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-  deleteButton: { paddingHorizontal: 4, paddingVertical: 8 },
+  deleteButton: {
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
+  },
   deleteButtonText: {
     ...typography.caption,
     color: colors.danger,

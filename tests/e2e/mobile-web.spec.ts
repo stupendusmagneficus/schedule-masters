@@ -347,6 +347,50 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
+  test("confirms personal block deletion inline and allows cancelling it", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář", exact: true }).click();
+
+    const deleteButton = page.getByRole("button", { name: "Smazat Oběd" });
+    await expect(deleteButton).toBeVisible();
+    expect((await deleteButton.boundingBox())?.height).toBeGreaterThanOrEqual(
+      44,
+    );
+    await deleteButton.click();
+    await expect(
+      page.getByText(
+        "Přestávka bude odstraněna a tento čas bude znovu dostupný pro rezervace.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Zrušit", exact: true }).click();
+    await expect(deleteButton).toBeVisible();
+
+    await deleteButton.click();
+    const confirmDeleteButton = page.getByRole("button", {
+      name: "Smazat",
+      exact: true,
+    });
+    await expect(confirmDeleteButton).toBeVisible();
+    expect(
+      (await confirmDeleteButton.boundingBox())?.height,
+    ).toBeGreaterThanOrEqual(44);
+    await confirmDeleteButton.click();
+    await expect(deleteButton).toHaveCount(0);
+    await expect(page.getByText("Osobní blok byl smazán")).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth + 1,
+      ),
+    ).toBe(true);
+  });
+
   test("keeps all calendar modes on one row at a narrow viewport", async ({
     page,
   }) => {

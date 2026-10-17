@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import type { Database } from "@schedule-app/api";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { describe, expect, it, vi } from "vitest";
 
 import {
+  deletePersonalBlock,
   formatDateInTimeZone,
   getPersonalBlockDraft,
   getPersonalBlockDraftForSlot,
@@ -33,6 +36,31 @@ describe("validatePersonalBlockDraft", () => {
     expect(
       validatePersonalBlockDraft({ ...validDraft, endTime: "12:00" }),
     ).toBe("endBeforeStart");
+  });
+});
+
+describe("deletePersonalBlock", () => {
+  it("deletes the selected block in the active workspace", async () => {
+    const rpc = vi.fn().mockResolvedValue({ error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await deletePersonalBlock(client, "workspace-1", "block-1");
+
+    expect(rpc).toHaveBeenCalledWith("delete_master_availability_block", {
+      p_block_id: "block-1",
+      p_workspace_id: "workspace-1",
+    });
+  });
+
+  it("preserves server errors so the screen can show a recovery message", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      error: { message: "Personal block could not be deleted" },
+    });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await expect(
+      deletePersonalBlock(client, "workspace-1", "block-1"),
+    ).rejects.toThrow("Personal block could not be deleted");
   });
 });
 
