@@ -384,6 +384,65 @@ describe("Supabase public booking contract", () => {
         );
         expect(resetSlots.error).toBeNull();
         expect(resetSlots.data).toHaveLength(15);
+
+        const bulkOverrides = await owner.client.rpc(
+          "set_master_availability_date_overrides",
+          {
+            p_overrides: [
+              {
+                date: nextWorkDate,
+                endLocalTime: "12:00",
+                kind: "modified",
+                startLocalTime: "10:00",
+              },
+              {
+                date: "2030-01-21",
+                endLocalTime: null,
+                kind: "closed",
+                startLocalTime: null,
+              },
+            ],
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(bulkOverrides.error).toBeNull();
+        expect(
+          (
+            bulkOverrides.data as {
+              processed?: unknown[];
+            } | null
+          )?.processed,
+        ).toHaveLength(2);
+
+        const savedBulkOverrides = await admin
+          .from("availability_date_overrides")
+          .select("work_date, override_kind")
+          .eq("workspace_id", workspaceId)
+          .in("work_date", [nextWorkDate, "2030-01-21"])
+          .order("work_date");
+        expect(savedBulkOverrides.error).toBeNull();
+        expect(savedBulkOverrides.data).toEqual([
+          { work_date: nextWorkDate, override_kind: "modified" },
+          { work_date: "2030-01-21", override_kind: "closed" },
+        ]);
+
+        const unauthorizedBulkOverrides = await outsider.client.rpc(
+          "set_master_availability_date_overrides",
+          {
+            p_overrides: [
+              {
+                date: "2030-01-21",
+                endLocalTime: null,
+                kind: "closed",
+                startLocalTime: null,
+              },
+            ],
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(unauthorizedBulkOverrides.error?.message).toContain(
+          "Workspace access denied",
+        );
       } finally {
         await admin
           .from("workspaces")

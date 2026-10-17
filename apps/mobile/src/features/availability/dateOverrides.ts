@@ -2,7 +2,6 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WorkspaceAvailabilityRule } from "../../types";
 import type { MasterAppointment } from "../appointments/manualBooking";
-import { formatDateInTimeZone } from "./personalBlocks";
 
 export type AvailabilityDateOverride = {
   readonly work_date: string;
@@ -23,6 +22,64 @@ export type AvailabilityOverrideDraft = {
   readonly startLocalTime: string | null;
   readonly endLocalTime: string | null;
 };
+
+export type AvailabilityDateSelectionSummary = {
+  readonly closedDates: string[];
+  readonly openDates: string[];
+};
+
+export type AvailabilityDateSelectionSnapshot = {
+  readonly date: string;
+  readonly isClosed: boolean;
+  readonly appointments: readonly MasterAppointment[];
+};
+
+export function summarizeAvailabilityDateSnapshots(
+  snapshots: readonly AvailabilityDateSelectionSnapshot[],
+): AvailabilityDateSelectionSummary {
+  const summary: AvailabilityDateSelectionSummary = {
+    closedDates: [],
+    openDates: [],
+  };
+  for (const snapshot of [...snapshots].sort((left, right) =>
+    left.date.localeCompare(right.date),
+  )) {
+    summary[snapshot.isClosed ? "closedDates" : "openDates"].push(
+      snapshot.date,
+    );
+  }
+  return summary;
+}
+
+export function classifyAvailabilityDates(
+  dates: readonly string[],
+  rules: readonly WorkspaceAvailabilityRule[],
+  overrides: readonly AvailabilityDateOverride[],
+): AvailabilityDateSelectionSummary {
+  const summary: AvailabilityDateSelectionSummary = {
+    closedDates: [],
+    openDates: [],
+  };
+  for (const date of [...new Set(dates)].sort()) {
+    const availability = getEffectiveAvailability(date, rules, overrides);
+    summary[availability.isClosed ? "closedDates" : "openDates"].push(date);
+  }
+  return summary;
+}
+
+export function buildAvailabilityOverrideDrafts(
+  dates: readonly string[],
+  kind: AvailabilityOverrideDraft["kind"],
+  startLocalTime: string | null,
+  endLocalTime: string | null,
+): AvailabilityOverrideDraft[] {
+  return [...new Set(dates)].sort().map((date) => ({
+    date,
+    endLocalTime: kind === "modified" ? endLocalTime : null,
+    kind,
+    startLocalTime: kind === "modified" ? startLocalTime : null,
+  }));
+}
 
 export function isValidAvailabilityOverrideDraft(
   draft: AvailabilityOverrideDraft,
@@ -74,24 +131,33 @@ export function findAvailabilityConflicts(
     ) {
       return false;
     }
-    const startDate = formatDateInTimeZone(
-      new Date(appointment.starts_at),
+    const occupiedStart =
+      appointment.occupied_starts_at ?? appointment.starts_at;
+    const occupiedEnd = appointment.occupied_ends_at ?? appointment.ends_at;
+    const dayStart = localDateTimeOrdinal(draft.date, "00:00");
+    const dayEnd = dayStart + 1440;
+    const occupiedStartOrdinal = instantLocalDateTimeOrdinal(
+      occupiedStart,
       draft.timezone,
     );
-    const endDate = formatDateInTimeZone(
-      new Date(appointment.ends_at),
+    const occupiedEndOrdinal = instantLocalDateTimeOrdinal(
+      occupiedEnd,
       draft.timezone,
     );
-    if (startDate !== draft.date && endDate !== draft.date) return false;
+    if (occupiedStartOrdinal >= dayEnd || occupiedEndOrdinal <= dayStart) {
+      return false;
+    }
     if (draft.kind === "closed") return true;
-    const proposedStart = parseLocalTime(draft.startLocalTime ?? "00:00");
-    const proposedEnd = parseLocalTime(draft.endLocalTime ?? "24:00");
+    const proposedStart = localDateTimeOrdinal(
+      draft.date,
+      draft.startLocalTime ?? "00:00",
+    );
+    const proposedEnd = localDateTimeOrdinal(
+      draft.date,
+      draft.endLocalTime ?? "24:00",
+    );
     return (
-      (startDate === draft.date &&
-        parseAppointmentTime(appointment.starts_at, draft.timezone) <
-          proposedStart) ||
-      (endDate === draft.date &&
-        parseAppointmentTime(appointment.ends_at, draft.timezone) > proposedEnd)
+      occupiedStartOrdinal < proposedStart || occupiedEndOrdinal > proposedEnd
     );
   });
 }
@@ -135,6 +201,29 @@ export async function saveAvailabilityDateOverride(
   if (error) throw new Error(error.message);
 }
 
+export async function saveAvailabilityDateOverrides(
+  client: AvailabilityClient,
+  workspaceId: string,
+  drafts: readonly AvailabilityOverrideDraft[],
+): Promise<void> {
+  if (
+    !drafts.length ||
+    drafts.some((draft) => !isValidAvailabilityOverrideDraft(draft))
+  ) {
+    throw new Error("Availability date overrides are invalid");
+  }
+  const { error } = await client.rpc("set_master_availability_date_overrides", {
+    p_overrides: drafts.map((draft) => ({
+      date: draft.date,
+      endLocalTime: draft.kind === "modified" ? draft.endLocalTime : null,
+      kind: draft.kind,
+      startLocalTime: draft.kind === "modified" ? draft.startLocalTime : null,
+    })),
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function clearAvailabilityDateOverride(
   client: AvailabilityClient,
   workspaceId: string,
@@ -160,16 +249,23 @@ function parseLocalTime(value: string): number {
   return hours * 60 + minutes;
 }
 
-function parseAppointmentTime(value: string, timezone: string): number {
-  const parts = new Intl.DateTimeFormat("en-GB", {
+function localDateTimeOrdinal(date: string, time: string): number {
+  const day = Math.floor(new Date(`${date}T00:00:00.000Z`).getTime() / 60_000);
+  return day + parseLocalTime(time);
+}
+
+function instantLocalDateTimeOrdinal(value: string, timezone: string): number {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
     hour: "2-digit",
     hourCycle: "h23",
     minute: "2-digit",
+    month: "2-digit",
     timeZone: timezone,
+    year: "numeric",
   }).formatToParts(new Date(value));
-  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
-  const minute = Number(
-    parts.find((part) => part.type === "minute")?.value ?? 0,
-  );
-  return hour * 60 + minute;
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? "00";
+  const date = `${part("year")}-${part("month")}-${part("day")}`;
+  return localDateTimeOrdinal(date, `${part("hour")}:${part("minute")}`);
 }

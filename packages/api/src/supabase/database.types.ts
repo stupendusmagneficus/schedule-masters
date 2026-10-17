@@ -1152,6 +1152,8 @@ export type Database = {
           id: string
           is_new_customer: boolean
           is_returning_customer: boolean
+          occupied_ends_at: string
+          occupied_starts_at: string
           paid_amount: number
           price_amount: number
           service_name: string
@@ -1306,6 +1308,10 @@ export type Database = {
           p_start_local_time?: string
           p_workspace_id: string
         }
+        Returns: Json
+      }
+      set_master_availability_date_overrides: {
+        Args: { p_overrides: Json; p_workspace_id: string }
         Returns: Json
       }
       set_master_waiting_list_entry_status: {

@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import { getCalendarWorkloadLevel } from "../../features/calendar/calendarWorkload";
 import type { MonthCalendarDay } from "../../features/calendar/monthCalendar";
 import type { CalendarMonthEntry } from "../../features/calendar/useCalendarMonthWindow";
@@ -32,7 +33,19 @@ type MonthCalendarProps = {
   readonly loadPrevious: () => void;
   readonly loadNext: () => void;
   readonly locale: SupportedLocale;
+  readonly selectionMode: boolean;
+  readonly selectedDates: readonly string[];
+  readonly closedDateCount: number;
+  readonly openDateCount: number;
+  readonly isBulkSaving: boolean;
+  readonly selectionEnabled: boolean;
+  readonly processedDates: readonly string[];
   readonly onSelectDate: (date: string) => void;
+  readonly onToggleDate: (date: string) => void;
+  readonly onStartSelection: () => void;
+  readonly onCancelSelection: () => void;
+  readonly onOpenClosedDates: () => void;
+  readonly onCloseOpenDates: () => void;
   readonly t: DashboardTabProps["t"];
 };
 
@@ -43,7 +56,19 @@ export function MonthCalendar({
   loadPrevious,
   loadNext,
   locale,
+  selectionMode,
+  selectedDates,
+  closedDateCount,
+  openDateCount,
+  isBulkSaving,
+  selectionEnabled,
+  processedDates,
   onSelectDate,
+  onToggleDate,
+  onStartSelection,
+  onCancelSelection,
+  onOpenClosedDates,
+  onCloseOpenDates,
   t,
 }: MonthCalendarProps) {
   const listRef = useRef<FlatList<MonthItem>>(null);
@@ -84,7 +109,22 @@ export function MonthCalendar({
 
   return (
     <View style={styles.root}>
-      <CalendarWorkloadLegend t={t} />
+      <View style={styles.monthToolbar}>
+        <CalendarWorkloadLegend t={t} />
+        {selectionMode ? (
+          <Text style={styles.selectionHint}>
+            {t("mobile.calendarSelectionHint")}
+          </Text>
+        ) : (
+          <ActionButton
+            disabled={!selectionEnabled}
+            label={t("mobile.calendarSelectDays")}
+            onPress={onStartSelection}
+            size="compact"
+            variant="secondary"
+          />
+        )}
+      </View>
       <FlatList
         ref={listRef}
         data={months}
@@ -108,13 +148,64 @@ export function MonthCalendar({
         renderItem={({ item }) => (
           <MonthGrid
             days={item.days}
+            hasData={Boolean(item.data)}
             hasError={item.hasError}
             locale={locale}
             onSelectDate={onSelectDate}
+            onToggleDate={onToggleDate}
+            selectionMode={selectionMode}
+            selectedDates={selectedDates}
             t={t}
           />
         )}
       />
+      {selectionMode ? (
+        <View style={styles.selectionPanel}>
+          <Text accessibilityLiveRegion="polite" style={styles.selectionCount}>
+            {t("mobile.calendarSelectedDatesCount").replace(
+              "{count}",
+              String(selectedDates.length),
+            )}
+          </Text>
+          {processedDates.length ? (
+            <Text style={styles.processedDates}>
+              {t("mobile.calendarBulkAppliedDates").replace(
+                "{dates}",
+                formatDates(processedDates, locale),
+              )}
+            </Text>
+          ) : null}
+          {closedDateCount > 0 ? (
+            <ActionButton
+              disabled={isBulkSaving}
+              label={t("mobile.calendarOpenClosedDays").replace(
+                "{count}",
+                String(closedDateCount),
+              )}
+              loading={isBulkSaving}
+              onPress={onOpenClosedDates}
+              variant="primary"
+            />
+          ) : null}
+          {openDateCount > 0 ? (
+            <ActionButton
+              disabled={isBulkSaving}
+              label={t("mobile.calendarCloseOpenDays").replace(
+                "{count}",
+                String(openDateCount),
+              )}
+              onPress={onCloseOpenDates}
+              variant="destructive"
+            />
+          ) : null}
+          <ActionButton
+            disabled={isBulkSaving}
+            label={t("mobile.calendarCancelSelection")}
+            onPress={onCancelSelection}
+            variant="neutral"
+          />
+        </View>
+      ) : null}
       {isLoadingPrevious ? <MonthLoading style={styles.loadingTop} /> : null}
       {isLoadingNext ? <MonthLoading style={styles.loadingBottom} /> : null}
     </View>
@@ -123,15 +214,23 @@ export function MonthCalendar({
 
 function MonthGrid({
   days,
+  hasData,
   hasError,
   locale,
   onSelectDate,
+  onToggleDate,
+  selectionMode,
+  selectedDates,
   t,
 }: {
   readonly days: readonly MonthCalendarDay[];
+  readonly hasData: boolean;
   readonly hasError: boolean;
   readonly locale: SupportedLocale;
   readonly onSelectDate: (date: string) => void;
+  readonly onToggleDate: (date: string) => void;
+  readonly selectionMode: boolean;
+  readonly selectedDates: readonly string[];
   readonly t: MonthCalendarProps["t"];
 }) {
   const month = days.find((day) => day.isCurrentMonth)?.date ?? days[0]?.date;
@@ -162,90 +261,110 @@ function MonthGrid({
         ))}
       </View>
       <View style={styles.monthGrid}>
-        {days.map((day) => (
-          <Pressable
-            accessibilityLabel={getDayAccessibilityLabel(day, locale, t)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: day.isSelected }}
-            key={day.date}
-            onPress={() => onSelectDate(day.date)}
-            style={({ pressed }) => [
-              styles.dayCell,
-              !day.isCurrentMonth && styles.outsideDay,
-              pressed && styles.pressed,
-            ]}
-          >
-            <View
-              style={[
-                styles.dayCircle,
-                day.isClosed && styles.closedDay,
-                day.isToday && styles.todayDay,
-                day.isSelected && styles.selectedDay,
+        {days.map((day) => {
+          const isMultiSelected = selectedDates.includes(day.date);
+          const isDisabled = selectionMode && !hasData;
+          const isStrongSelection =
+            (day.isSelected && !selectionMode) ||
+            (selectionMode && day.isToday && isMultiSelected);
+          return (
+            <Pressable
+              accessibilityLabel={getDayAccessibilityLabel(day, locale, t)}
+              accessibilityRole="button"
+              accessibilityState={{
+                disabled: isDisabled,
+                selected: selectionMode ? isMultiSelected : day.isSelected,
+              }}
+              disabled={isDisabled}
+              hitSlop={2}
+              key={day.date}
+              onPress={() =>
+                selectionMode ? onToggleDate(day.date) : onSelectDate(day.date)
+              }
+              style={({ pressed }) => [
+                styles.dayCell,
+                !day.isCurrentMonth && styles.outsideDay,
+                isDisabled && styles.disabledDay,
+                pressed && styles.pressed,
               ]}
             >
-              {day.bookingCount > 0 && day.workloadPercent !== null ? (
-                <View
-                  accessibilityElementsHidden
-                  style={[
-                    getWorkloadRingStyle(
-                      day.workloadPercent,
-                      day.isSelected
-                        ? colors.actionText
-                        : getWorkloadColor(day.workloadPercent),
-                    ),
-                  ]}
-                />
-              ) : null}
-              <Text
+              <View
                 style={[
-                  styles.dayNumber,
-                  !day.isCurrentMonth && styles.outsideDayText,
-                  day.isSelected && styles.selectedDayText,
+                  styles.dayCircle,
+                  day.isClosed && styles.closedDay,
+                  day.isToday && styles.todayDay,
+                  selectionMode &&
+                    isMultiSelected &&
+                    (day.isToday
+                      ? styles.selectedDay
+                      : styles.multiSelectedDay),
+                  isStrongSelection && styles.selectedDay,
                 ]}
               >
-                {Number(day.date.slice(-2))}
-              </Text>
-              <View style={styles.indicators}>
-                {day.bookingCount > 0 ? (
-                  <Text
+                {day.bookingCount > 0 && day.workloadPercent !== null ? (
+                  <View
+                    accessibilityElementsHidden
                     style={[
-                      styles.bookingCount,
-                      {
-                        color: day.isSelected
+                      getWorkloadRingStyle(
+                        day.workloadPercent,
+                        isStrongSelection
                           ? colors.actionText
-                          : day.workloadPercent === null
-                            ? colors.secondaryText
-                            : getWorkloadColor(day.workloadPercent),
-                      },
+                          : getWorkloadColor(day.workloadPercent),
+                      ),
                     ]}
-                  >
-                    {day.bookingCount}
-                  </Text>
+                  />
                 ) : null}
-                {day.blockCount > 0 ? (
-                  <Text
-                    style={[
-                      styles.blockCount,
-                      day.isSelected && styles.selectedIndicator,
-                    ]}
-                  >
-                    {day.blockCount}
-                  </Text>
-                ) : null}
-                {day.isClosed ? (
-                  <Text
-                    style={[
-                      styles.closedIndicator,
-                      day.isSelected && styles.selectedIndicator,
-                    ]}
-                  >
-                    ×
-                  </Text>
-                ) : null}
+                <Text
+                  style={[
+                    styles.dayNumber,
+                    !day.isCurrentMonth && styles.outsideDayText,
+                    isStrongSelection && styles.selectedDayText,
+                  ]}
+                >
+                  {Number(day.date.slice(-2))}
+                </Text>
+                <View style={styles.indicators}>
+                  {day.bookingCount > 0 ? (
+                    <Text
+                      style={[
+                        styles.bookingCount,
+                        {
+                          color: isStrongSelection
+                            ? colors.actionText
+                            : day.workloadPercent === null
+                              ? colors.secondaryText
+                              : getWorkloadColor(day.workloadPercent),
+                        },
+                      ]}
+                    >
+                      {day.bookingCount}
+                    </Text>
+                  ) : null}
+                  {day.blockCount > 0 ? (
+                    <Text
+                      style={[
+                        styles.blockCount,
+                        isStrongSelection && styles.selectedIndicator,
+                      ]}
+                    >
+                      {day.blockCount}
+                    </Text>
+                  ) : null}
+                  {day.isClosed ? (
+                    <Text
+                      style={[
+                        styles.closedIndicator,
+                        isStrongSelection && styles.selectedIndicator,
+                      ]}
+                    >
+                      ×
+                    </Text>
+                  ) : null}
+                </View>
               </View>
-            </View>
-          </Pressable>
-        ))}
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );
@@ -306,6 +425,19 @@ function getDayAccessibilityLabel(
       : "",
   ];
   return parts.filter(Boolean).join(", ");
+}
+
+function formatDates(dates: readonly string[], locale: SupportedLocale) {
+  return dates
+    .map((date) =>
+      formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
+        day: "numeric",
+        month: "short",
+        timeZone: "UTC",
+        year: "numeric",
+      }),
+    )
+    .join(", ");
 }
 
 const styles = StyleSheet.create({
@@ -374,6 +506,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   monthList: { flex: 1 },
+  monthToolbar: { gap: 12, paddingBottom: 12 },
   monthRow: { height: MONTH_ROW_HEIGHT, paddingBottom: 18 },
   monthTitle: {
     color: colors.primaryText,
@@ -384,15 +517,32 @@ const styles = StyleSheet.create({
   },
   outsideDay: { opacity: 0.42 },
   outsideDayText: { color: colors.secondaryText },
+  disabledDay: { opacity: 0.45 },
   pressed: { opacity: 0.7 },
   root: { flex: 1, minHeight: 0 },
+  selectionHint: { ...typography.caption, color: colors.secondaryText },
+  selectionPanel: {
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+    paddingBottom: 8,
+    paddingTop: 12,
+  },
+  selectionCount: { ...typography.label, color: colors.primaryText },
+  processedDates: { ...typography.caption, color: colors.accent },
+  multiSelectedDay: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+    borderWidth: 2,
+  },
   selectedDay: { backgroundColor: colors.accent, borderColor: colors.accent },
   selectedDayText: { color: colors.actionText, fontWeight: "700" },
   selectedIndicator: {
     color: colors.actionText,
     borderColor: colors.actionText,
   },
-  todayDay: { borderColor: colors.accent, borderWidth: 1 },
+  todayDay: { borderColor: colors.accent, borderWidth: 2 },
   weekday: {
     color: colors.secondaryText,
     fontSize: 10,

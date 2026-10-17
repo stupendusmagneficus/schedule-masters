@@ -5,7 +5,7 @@ import {
   formatTime,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
 import { AvailabilityDateOverrideModal } from "../../components/AvailabilityDateOverrideModal";
+import { BulkAvailabilityOverrideModal } from "../../components/BulkAvailabilityOverrideModal";
 import { CalendarSlotActionModal } from "../../components/CalendarSlotActionModal";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
@@ -22,8 +23,11 @@ import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import {
+  type AvailabilityDateSelectionSnapshot,
   type AvailabilityOverrideDraft,
+  findAvailabilityConflicts,
   getEffectiveAvailability,
+  summarizeAvailabilityDateSnapshots,
 } from "../../features/availability/dateOverrides";
 import type {
   PersonalBlock,
@@ -99,6 +103,13 @@ export function CalendarTab({
   const [demoBlocks, setDemoBlocks] = useState(demoData?.personalBlocks ?? []);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [isDaySettingsVisible, setDaySettingsVisible] = useState(false);
+  const [isDateSelectionMode, setDateSelectionMode] = useState(false);
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [selectedDateSnapshots, setSelectedDateSnapshots] = useState<
+    Record<string, AvailabilityDateSelectionSnapshot>
+  >({});
+  const [bulkMode, setBulkMode] = useState<"close" | "open" | null>(null);
+  const [processedDates, setProcessedDates] = useState<string[]>([]);
   const [slotAction, setSlotAction] = useState<{
     readonly date: string;
     readonly startsAt: string;
@@ -116,7 +127,14 @@ export function CalendarTab({
     if (calendar.view !== "month") previousNonMonthView.current = calendar.view;
     calendar.setView("month");
   };
-  const closeMonthPicker = () => calendar.setView(previousNonMonthView.current);
+  const closeMonthPicker = () => {
+    setDateSelectionMode(false);
+    setSelectedDates([]);
+    setSelectedDateSnapshots({});
+    setProcessedDates([]);
+    setBulkMode(null);
+    calendar.setView(previousNonMonthView.current);
+  };
   const dateLabel =
     calendar.view === "week"
       ? getCalendarWeekLabel(calendar.selectedDate, locale, workspace.timezone)
@@ -173,14 +191,40 @@ export function CalendarTab({
       });
   const todayDate = getTodayCalendarDate(workspace.timezone);
   const navigationDisabled = !client && !demoData;
-  const monthAppointments = monthWindow.entries.flatMap(
-    (entry) => entry.data?.appointments ?? [],
+  const monthAppointments = useMemo(
+    () =>
+      monthWindow.entries.flatMap((entry) => entry.data?.appointments ?? []),
+    [monthWindow.entries],
   );
-  const monthBlocks = monthWindow.entries.flatMap(
-    (entry) => entry.data?.blocks ?? [],
+  const monthBlocks = useMemo(
+    () => monthWindow.entries.flatMap((entry) => entry.data?.blocks ?? []),
+    [monthWindow.entries],
   );
-  const monthOverrides = monthWindow.entries.flatMap(
-    (entry) => entry.data?.dateOverrides ?? [],
+  const monthOverrides = useMemo(
+    () =>
+      monthWindow.entries.flatMap((entry) => entry.data?.dateOverrides ?? []),
+    [monthWindow.entries],
+  );
+  const selectionSummary = useMemo(
+    () =>
+      summarizeAvailabilityDateSnapshots(Object.values(selectedDateSnapshots)),
+    [selectedDateSnapshots],
+  );
+  const bulkActionDates =
+    bulkMode === "open"
+      ? selectionSummary.closedDates
+      : bulkMode === "close"
+        ? selectionSummary.openDates
+        : [];
+  const appointmentsByDate = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(selectedDateSnapshots).map(([date, snapshot]) => [
+          date,
+          snapshot.appointments,
+        ]),
+      ),
+    [selectedDateSnapshots],
   );
   const monthItems = monthWindow.entries.map((entry) => {
     const days: MonthCalendarDay[] = demoData
@@ -207,6 +251,58 @@ export function CalendarTab({
     calendar.view === "week" &&
     todayDate >= weekRange.fromDate &&
     todayDate <= weekRange.toDate;
+  const startDateSelection = () => {
+    setSelectedDates([]);
+    setSelectedDateSnapshots({});
+    setProcessedDates([]);
+    setDateSelectionMode(true);
+  };
+  const cancelDateSelection = () => {
+    setSelectedDates([]);
+    setSelectedDateSnapshots({});
+    setProcessedDates([]);
+    setDateSelectionMode(false);
+  };
+  const toggleSelectedDate = (date: string) => {
+    setProcessedDates([]);
+    const isSelected = selectedDates.includes(date);
+    setSelectedDates((current) =>
+      isSelected
+        ? current.filter((selectedDate) => selectedDate !== date)
+        : [...current, date].sort(),
+    );
+    setSelectedDateSnapshots((current) => {
+      if (isSelected) {
+        const remaining = { ...current };
+        delete remaining[date];
+        return remaining;
+      }
+      const month = monthItems.find((item) => item.month === date.slice(0, 7));
+      const day = month?.days.find((candidate) => candidate.date === date);
+      if (!day) return current;
+      return {
+        ...current,
+        [date]: {
+          appointments: findAvailabilityConflicts(monthAppointments, {
+            date,
+            endLocalTime: null,
+            kind: "closed",
+            startLocalTime: null,
+            timezone: workspace.timezone,
+          }),
+          date,
+          isClosed: day.isClosed,
+        },
+      };
+    });
+  };
+  const applyBulkOverrides = async (drafts: AvailabilityOverrideDraft[]) => {
+    await calendar.saveDateOverrides(drafts);
+    setProcessedDates(drafts.map((draft) => draft.date));
+    setSelectedDates([]);
+    setSelectedDateSnapshots({});
+    setBulkMode(null);
+  };
 
   return (
     <>
@@ -362,23 +458,52 @@ export function CalendarTab({
         <CalendarMonthPickerSheet
           closeLabel={t("common.close")}
           onClose={closeMonthPicker}
-          title={t("mobile.calendarSelectDate")}
+          title={
+            isDateSelectionMode
+              ? t("mobile.calendarSelectDays")
+              : t("mobile.calendarSelectDate")
+          }
           visible={calendar.view === "month"}
         >
           <MonthCalendar
+            closedDateCount={selectionSummary.closedDates.length}
             isLoadingNext={monthWindow.isLoadingNext}
             isLoadingPrevious={monthWindow.isLoadingPrevious}
+            isBulkSaving={calendar.isSaving}
             loadNext={monthWindow.loadNext}
             loadPrevious={monthWindow.loadPrevious}
             locale={locale}
             months={monthItems}
+            onCancelSelection={cancelDateSelection}
+            onCloseOpenDates={() => setBulkMode("close")}
+            onOpenClosedDates={() => setBulkMode("open")}
             onSelectDate={(date) => {
               calendar.setSelectedDate(date);
               calendar.setView("day");
             }}
+            onStartSelection={startDateSelection}
+            onToggleDate={toggleSelectedDate}
+            openDateCount={selectionSummary.openDates.length}
+            processedDates={processedDates}
+            selectedDates={selectedDates}
+            selectionEnabled={Boolean(client)}
+            selectionMode={isDateSelectionMode}
             t={t}
           />
         </CalendarMonthPickerSheet>
+        <BulkAvailabilityOverrideModal
+          appointmentsByDate={appointmentsByDate}
+          dates={bulkActionDates}
+          error={calendar.error}
+          isSaving={calendar.isSaving}
+          locale={locale}
+          mode={bulkMode ?? "close"}
+          onApply={applyBulkOverrides}
+          onClose={() => setBulkMode(null)}
+          t={t}
+          timezone={workspace.timezone}
+          visible={bulkMode !== null}
+        />
         {calendar.view !== "month" ? (
           <InfoCard>
             <View style={styles.sectionHeader}>

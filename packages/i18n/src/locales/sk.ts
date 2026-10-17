@@ -236,6 +236,26 @@ export const slovakMessages: Messages = {
   "mobile.todayRetry": "Skúsiť znova",
   "mobile.calendar": "Kalendár",
   "mobile.calendarSelectDate": "Vyberte dátum",
+  "mobile.calendarSelectDays": "Vybrať dátumy",
+  "mobile.calendarSelectionHint":
+    "Klepnutím na dátumy ich pridáte do výberu alebo z neho odoberiete.",
+  "mobile.calendarCancelSelection": "Zrušiť výber",
+  "mobile.calendarSelectedDatesCount": "Vybrané dátumy: {count}",
+  "mobile.calendarOpenClosedDays": "Otvoriť voľné dni: {count}",
+  "mobile.calendarCloseOpenDays": "Zatvoriť pracovné dni: {count}",
+  "mobile.calendarBulkOpenTitle": "Otvoriť vybrané dni",
+  "mobile.calendarBulkCloseTitle": "Zatvoriť vybrané dni",
+  "mobile.calendarBulkOpenDescription":
+    "Nastavte rovnaký pracovný čas pre všetky vybrané voľné dni.",
+  "mobile.calendarBulkCloseDescription":
+    "Zatvoria sa iba vybrané dátumy. Týždenný rozvrh zostane bez zmeny.",
+  "mobile.calendarBulkConflictSummary":
+    "Dátumy: {dates}. Rezervácie, ktoré zostanú bez zmeny: {count}.",
+  "mobile.calendarBulkSaveFailed": "Vybrané dni sa nepodarilo upraviť.",
+  "mobile.calendarBulkInvalidHours":
+    "Koniec pracovného času musí byť neskôr ako jeho začiatok.",
+  "mobile.calendarBulkApply": "Použiť zmeny",
+  "mobile.calendarBulkAppliedDates": "Spracované dátumy: {dates}",
   "mobile.customers": "Klienti",
   "mobile.customerSearch": "Meno, telefón alebo e-mail",
   "mobile.customerEmpty":
