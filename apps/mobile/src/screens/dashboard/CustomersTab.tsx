@@ -258,17 +258,23 @@ export function CustomersTab({
                       </Text>
                     </View>
                   )
-                ) : (
-                  <View style={styles.phoneLink}>
-                    <MaterialCommunityIcons
-                      color={colors.secondaryText}
-                      name="phone-outline"
-                      size={16}
-                    />
-                    <Text style={styles.phoneText}>—</Text>
-                  </View>
-                )}
+                ) : null}
               </View>
+              <Pressable
+                accessibilityLabel={t("mobile.openCustomerDetails")}
+                accessibilityRole="button"
+                onPress={(event) => {
+                  event.stopPropagation();
+                  directory.selectCustomer(customer);
+                }}
+                style={styles.detailsButton}
+              >
+                <MaterialCommunityIcons
+                  color={colors.secondaryText}
+                  name="dots-horizontal"
+                  size={24}
+                />
+              </Pressable>
             </InfoCard>
           </Pressable>
         );
@@ -335,9 +341,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.control,
   },
-  customerCopy: { flex: 1, gap: 3, minWidth: 0 },
+  customerCopy: { flex: 1, gap: 0, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
-  customerRow: { alignItems: "flex-start" },
+  customerRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    padding: 8,
+  },
+  detailsButton: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    justifyContent: "center",
+    minHeight: 44,
+    minWidth: 44,
+  },
   error: { ...typography.body, color: colors.danger, marginBottom: 8 },
   eyebrow: {
     color: colors.accent,

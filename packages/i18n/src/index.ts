@@ -224,6 +224,7 @@ export type MessageKey =
   | "mobile.calendarBulkAppliedDates"
   | "mobile.customers"
   | "mobile.customerSearch"
+  | "mobile.openCustomerDetails"
   | "mobile.customerEmpty"
   | "mobile.customerSearchEmpty"
   | "mobile.customerLoadFailed"
@@ -738,6 +739,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarBulkAppliedDates": "Обработаны даты: {dates}",
     "mobile.customers": "Клиенты",
     "mobile.customerSearch": "Имя, телефон или email",
+    "mobile.openCustomerDetails": "Открыть профиль клиента",
     "mobile.customerEmpty": "Клиентов пока нет. Они появятся после записей.",
     "mobile.customerSearchEmpty": "По этому запросу клиентов не найдено.",
     "mobile.customerLoadFailed": "Не удалось загрузить клиентов или историю.",
@@ -1284,6 +1286,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarBulkAppliedDates": "Zpracovaná data: {dates}",
     "mobile.customers": "Klienti",
     "mobile.customerSearch": "Jméno, telefon nebo e-mail",
+    "mobile.openCustomerDetails": "Otevřít profil klienta",
     "mobile.customerEmpty":
       "Zatím nemáte žádné klienty. Zobrazí se po vytvoření rezervace.",
     "mobile.customerSearchEmpty": "Tomuto hledání neodpovídají žádní klienti.",
@@ -1829,6 +1832,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarBulkAppliedDates": "Dates processed: {dates}",
     "mobile.customers": "Customers",
     "mobile.customerSearch": "Name, phone, or email",
+    "mobile.openCustomerDetails": "Open customer profile",
     "mobile.customerEmpty":
       "No customers yet. They appear after a booking is made.",
     "mobile.customerSearchEmpty": "No customers match this search.",

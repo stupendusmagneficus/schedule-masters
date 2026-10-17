@@ -257,6 +257,7 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarBulkAppliedDates": "Оброблено дати: {dates}",
   "mobile.customers": "Клієнти",
   "mobile.customerSearch": "Ім’я, телефон або електронна пошта",
+  "mobile.openCustomerDetails": "Відкрити профіль клієнта",
   "mobile.customerEmpty":
     "Клієнтів поки немає. Вони з’являться тут після створення запису.",
   "mobile.customerSearchEmpty": "За цим запитом клієнтів не знайдено.",
