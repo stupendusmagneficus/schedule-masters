@@ -515,6 +515,17 @@ export const ukrainianMessages: Messages = {
   "booking.submitFailed":
     "Не вдалося надіслати заявку. Перевірте з’єднання та спробуйте ще раз.",
   "booking.chooseService": "Виберіть послугу",
+  "booking.searchServices": "Пошук за назвою або категорією",
+  "booking.selectedServices": "Вибрані послуги",
+  "booking.removeService": "Прибрати: {name}",
+  "booking.remove": "Прибрати",
+  "booking.totalDuration": "Загальний час",
+  "booking.totalPrice": "Разом",
+  "booking.categoryOther": "Без категорії",
+  "booking.noMatchingServices": "Нічого не знайдено. Змініть запит.",
+  "booking.noServices": "Наразі немає доступних послуг для запису.",
+  "booking.slotNoLongerAvailable":
+    "Цей час уже зайняли. Виберіть інший вільний час.",
   "booking.chooseDate": "Виберіть дату",
   "booking.chooseTime": "Виберіть час",
   "booking.yourDetails": "Ваші дані",

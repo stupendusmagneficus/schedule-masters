@@ -10,6 +10,7 @@ export type PublicBookingService = {
   readonly id: string;
   readonly name: string;
   readonly description: string | null;
+  readonly category: string | null;
   readonly durationMinutes: number;
   readonly priceAmount: number;
   readonly currency: string;
@@ -30,6 +31,14 @@ export type PublicBookingResult = {
   readonly startsAt: string;
   readonly endsAt: string;
   readonly serviceName: string;
+  readonly serviceItems?: readonly {
+    readonly serviceName: string;
+    readonly durationMinutes: number;
+    readonly priceAmount: number;
+    readonly currency: string;
+  }[];
+  readonly durationMinutes?: number;
+  readonly priceAmount?: number;
   readonly status: string;
 };
 
@@ -78,6 +87,10 @@ export function parsePublicBookingContext(
         name: item.name,
         description:
           typeof item.description === "string" ? item.description : null,
+        category:
+          typeof item.category === "string" && item.category.trim()
+            ? item.category.trim()
+            : null,
         durationMinutes: item.durationMinutes,
         priceAmount: item.priceAmount,
         currency: item.currency,

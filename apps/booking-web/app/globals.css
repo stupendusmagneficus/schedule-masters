@@ -140,6 +140,119 @@ h2 {
   gap: 8px;
 }
 
+.service-search-label {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.service-selection-quick-summary {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--surface);
+  box-shadow: var(--shadow-surface);
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.service-selection-quick-summary strong {
+  white-space: nowrap;
+}
+
+.service-categories {
+  display: grid;
+  gap: 20px;
+}
+
+.service-category h3,
+.selected-services-summary h3 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.selected-services-summary {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--surface-subtle);
+}
+
+.selected-services-summary ol {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.selected-services-summary li,
+.selected-services-summary dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selected-services-summary li {
+  min-height: 44px;
+}
+
+.selected-services-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.selected-services-summary dt {
+  color: var(--muted);
+}
+
+.selected-services-summary dd {
+  font-weight: 700;
+  margin: 0;
+}
+
+.remove-service-button {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.remove-service-button:hover {
+  background: var(--danger-soft);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .service-option,
 .slot-option {
   min-height: 52px;
@@ -431,6 +544,11 @@ textarea {
 .confirmation-copy {
   color: var(--muted);
   margin: 12px 0 24px;
+}
+
+.confirmation-total {
+  color: var(--muted);
+  margin-top: 8px;
 }
 
 .cancel-confirmation {

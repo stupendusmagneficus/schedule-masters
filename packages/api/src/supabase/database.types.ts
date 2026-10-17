@@ -1067,9 +1067,12 @@ export type Database = {
         Args: { p_batch_size?: number; p_recipient_allowlist?: string[] }
         Returns: {
           attempts: number
+          currency: string
           decision: string
+          duration_minutes: number
           id: string
           locale: string
+          price_amount: number
           recipient: string
           service_name: string
           starts_at: string

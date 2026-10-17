@@ -517,6 +517,17 @@ export const slovakMessages: Messages = {
   "booking.submitFailed":
     "Žiadosť sa nepodarilo odoslať. Skontrolujte pripojenie a skúste to znova.",
   "booking.chooseService": "Vyberte službu",
+  "booking.searchServices": "Hľadať podľa názvu alebo kategórie",
+  "booking.selectedServices": "Vybrané služby",
+  "booking.removeService": "Odstrániť: {name}",
+  "booking.remove": "Odstrániť",
+  "booking.totalDuration": "Celkový čas",
+  "booking.totalPrice": "Spolu",
+  "booking.categoryOther": "Bez kategórie",
+  "booking.noMatchingServices": "Nič sa nenašlo. Upravte vyhľadávanie.",
+  "booking.noServices": "Momentálne nie sú dostupné žiadne služby.",
+  "booking.slotNoLongerAvailable":
+    "Tento čas už nie je voľný. Vyberte si iný termín.",
   "booking.chooseDate": "Vyberte dátum",
   "booking.chooseTime": "Vyberte čas",
   "booking.yourDetails": "Vaše údaje",

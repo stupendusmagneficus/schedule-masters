@@ -449,6 +449,16 @@ export type MessageKey =
   | "booking.availabilityFailed"
   | "booking.submitFailed"
   | "booking.chooseService"
+  | "booking.searchServices"
+  | "booking.selectedServices"
+  | "booking.removeService"
+  | "booking.remove"
+  | "booking.totalDuration"
+  | "booking.totalPrice"
+  | "booking.categoryOther"
+  | "booking.noMatchingServices"
+  | "booking.noServices"
+  | "booking.slotNoLongerAvailable"
   | "booking.chooseDate"
   | "booking.chooseTime"
   | "booking.yourDetails"
@@ -1011,6 +1021,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.",
     "booking.chooseService": "Выберите услугу",
+    "booking.searchServices": "Поиск по названию или категории",
+    "booking.selectedServices": "Выбранные услуги",
+    "booking.removeService": "Убрать {name}",
+    "booking.remove": "Убрать",
+    "booking.totalDuration": "Общее время",
+    "booking.totalPrice": "Итого",
+    "booking.categoryOther": "Без категории",
+    "booking.noMatchingServices": "Ничего не найдено. Измените запрос.",
+    "booking.noServices": "Пока нет доступных услуг для записи.",
+    "booking.slotNoLongerAvailable":
+      "Это время уже заняли. Выберите другой свободный интервал.",
     "booking.chooseDate": "Выберите дату",
     "booking.chooseTime": "Выберите время",
     "booking.yourDetails": "Ваши данные",
@@ -1569,6 +1590,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "Rezervaci se nepodařilo odeslat. Zkontrolujte připojení a zkuste to znovu.",
     "booking.chooseService": "Vyberte službu",
+    "booking.searchServices": "Hľadať podľa názvu alebo kategórie",
+    "booking.selectedServices": "Vybrané služby",
+    "booking.removeService": "Odstrániť: {name}",
+    "booking.remove": "Odstranit",
+    "booking.totalDuration": "Celkový čas",
+    "booking.totalPrice": "Spolu",
+    "booking.categoryOther": "Bez kategórie",
+    "booking.noMatchingServices": "Nič sa nenašlo. Upravte vyhľadávanie.",
+    "booking.noServices": "Momentálne nie sú dostupné žiadne služby.",
+    "booking.slotNoLongerAvailable":
+      "Tento čas už nie je voľný. Vyberte si iný termín.",
     "booking.chooseDate": "Vyberte datum",
     "booking.chooseTime": "Vyberte čas",
     "booking.yourDetails": "Vaše údaje",
@@ -2136,6 +2168,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "We couldn't send your request. Check your connection and try again.",
     "booking.chooseService": "Choose a service",
+    "booking.searchServices": "Search by service or category",
+    "booking.selectedServices": "Selected services",
+    "booking.removeService": "Remove {name}",
+    "booking.remove": "Remove",
+    "booking.totalDuration": "Total duration",
+    "booking.totalPrice": "Total",
+    "booking.categoryOther": "Uncategorized",
+    "booking.noMatchingServices": "No services found. Try another search.",
+    "booking.noServices": "There are no services available for booking yet.",
+    "booking.slotNoLongerAvailable":
+      "This time was just taken. Choose another available time.",
     "booking.chooseDate": "Choose a date",
     "booking.chooseTime": "Choose a time",
     "booking.yourDetails": "Your details",

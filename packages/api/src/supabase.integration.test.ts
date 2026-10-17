@@ -1990,6 +1990,9 @@ describe("Supabase public booking contract", () => {
         expect.objectContaining({
           decision: "accepted",
           recipient: `lifecycle-client-${suffix}@example.test`,
+          duration_minutes: 60,
+          price_amount: 700,
+          currency: "CZK",
         }),
       ]);
 
