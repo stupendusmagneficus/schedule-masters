@@ -361,6 +361,9 @@ test.describe("mobile web smoke", () => {
     );
     await deleteButton.click();
     await expect(
+      page.getByTestId("personal-block-row-demo-personal-block-1"),
+    ).toHaveCSS("border-top-left-radius", "16px");
+    await expect(
       page.getByText(
         "Přestávka bude odstraněna a tento čas bude znovu dostupný pro rezervace.",
         { exact: true },

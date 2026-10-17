@@ -524,6 +524,7 @@ function PersonalBlockRow({
 
   return (
     <View
+      testID={`personal-block-row-${block.id}`}
       style={[styles.blockRow, isConfirmingDelete && styles.blockRowConfirming]}
     >
       <View style={styles.blockCopy}>
@@ -591,7 +592,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.subtleSurface,
     borderLeftColor: colors.border,
     borderLeftWidth: 3,
-    borderRadius: radii.control,
+    borderRadius: radii.surface,
     flexDirection: "row",
     gap: 12,
     padding: 12,
