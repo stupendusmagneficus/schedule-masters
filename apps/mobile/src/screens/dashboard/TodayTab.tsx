@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 
+import { ActionButton } from "../../components/ActionButton";
 import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
@@ -128,24 +129,19 @@ export function TodayTab({
       ) : null}
 
       {hasActiveServices || demoData ? (
-        <Pressable
-          accessibilityLabel={t("mobile.freeSlots")}
-          accessibilityRole="button"
+        <ActionButton
+          icon={
+            <MaterialCommunityIcons
+              color={colors.accent}
+              name="calendar-search"
+              size={20}
+            />
+          }
+          label={t("mobile.freeSlots")}
           onPress={onOpenFreeSlots}
-          style={({ pressed }) => [
-            styles.freeSlotsAction,
-            pressed && styles.pressed,
-          ]}
-        >
-          <MaterialCommunityIcons
-            color={colors.accent}
-            name="calendar-search"
-            size={20}
-          />
-          <Text style={styles.freeSlotsActionText}>
-            {t("mobile.freeSlots")}
-          </Text>
-        </Pressable>
+          style={styles.freeSlotsAction}
+          variant="secondary"
+        />
       ) : null}
 
       {(!appointmentsLoading && !appointmentsError) || demoData ? (
@@ -243,10 +239,16 @@ export function TodayTab({
               <Text style={styles.helper}>{t("common.loading")}</Text>
             </View>
           ) : appointmentsError ? (
-            <Pressable accessibilityRole="button" onPress={onRetryAppointments}>
+            <View style={styles.retryState}>
               <Text style={styles.error}>{t("mobile.todayLoadFailed")}</Text>
-              <Text style={styles.retry}>{t("mobile.todayRetry")}</Text>
-            </Pressable>
+              <ActionButton
+                label={t("mobile.todayRetry")}
+                onPress={() => onRetryAppointments?.()}
+                size="compact"
+                style={styles.retryButton}
+                variant="quiet"
+              />
+            </View>
           ) : masterAppointments.length ? (
             <View style={styles.appointmentsList}>
               {masterAppointments.map((appointment) => (
@@ -322,7 +324,8 @@ const styles = StyleSheet.create({
   },
   helper: { ...typography.body, color: colors.secondaryText },
   error: { ...typography.body, color: colors.danger },
-  retry: { ...typography.label, color: colors.accent, marginTop: 6 },
+  retryButton: { alignSelf: "flex-start", marginLeft: -10, marginTop: -8 },
+  retryState: { alignItems: "flex-start", gap: 4 },
   state: { alignItems: "center", flexDirection: "row", gap: 10 },
   nextLabel: { ...typography.caption, color: colors.accent, fontWeight: "700" },
   pressed: { opacity: 0.78 },
@@ -366,23 +369,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   scheduleCard: { marginTop: 8 },
-  freeSlotsAction: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.border,
-    borderRadius: radii.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 8,
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  freeSlotsActionText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
+  freeSlotsAction: { alignSelf: "flex-start", borderRadius: radii.pill },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {

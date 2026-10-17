@@ -90,7 +90,8 @@ export function BookingRequestsModal({
             <ActionButton
               label={t("common.retry")}
               onPress={onRetry}
-              variant="secondary"
+              size="compact"
+              variant="quiet"
             />
           </View>
         ) : requests.length === 0 ? (
