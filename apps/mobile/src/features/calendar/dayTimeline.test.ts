@@ -90,6 +90,55 @@ describe("day timeline", () => {
     expect(timeline).toMatchObject({ isClosed: true, slots: [], events: [] });
   });
 
+  it("applies a one-off closure over the weekly rule", () => {
+    const timeline = buildDayTimeline({
+      appointments: [],
+      availabilityRules: [
+        { dayOfWeek: 1, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: null,
+          override_kind: "closed",
+          start_local_time: null,
+          work_date: "2026-09-28",
+        },
+      ],
+      selectedDate: "2026-09-28",
+      timezone: "Europe/Prague",
+    });
+
+    expect(timeline).toMatchObject({ isClosed: true, slots: [], events: [] });
+  });
+
+  it("uses one-off hours without changing the weekly availability rule", () => {
+    const timeline = buildDayTimeline({
+      appointments: [],
+      availabilityRules: [
+        { dayOfWeek: 1, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: "14:00:00",
+          override_kind: "modified",
+          start_local_time: "12:00:00",
+          work_date: "2026-09-28",
+        },
+      ],
+      selectedDate: "2026-09-28",
+      timezone: "Europe/Prague",
+    });
+
+    expect(timeline).toMatchObject({
+      endMinute: 14 * 60,
+      isClosed: false,
+      startMinute: 12 * 60,
+    });
+    expect(timeline.slots).toHaveLength(4);
+  });
+
   it("converts a local timeline slot to an ISO instant", () => {
     expect(
       getDayTimelineSlotStart("2026-09-28", 10 * 60 + 30, "Europe/Prague"),

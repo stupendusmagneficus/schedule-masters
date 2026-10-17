@@ -14,18 +14,24 @@ import {
   View,
 } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
+import { AvailabilityDateOverrideModal } from "../../components/AvailabilityDateOverrideModal";
 import { CalendarSlotActionModal } from "../../components/CalendarSlotActionModal";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
+import {
+  type AvailabilityOverrideDraft,
+  getEffectiveAvailability,
+} from "../../features/availability/dateOverrides";
 import type {
   PersonalBlock,
   PersonalBlockDraft,
 } from "../../features/availability/personalBlocks";
 import {
   createDefaultPersonalBlockDraft,
+  formatDateInTimeZone,
   getPersonalBlockDraft,
   getPersonalBlockDraftForSlot,
 } from "../../features/availability/personalBlocks";
@@ -92,6 +98,7 @@ export function CalendarTab({
   );
   const [demoBlocks, setDemoBlocks] = useState(demoData?.personalBlocks ?? []);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [isDaySettingsVisible, setDaySettingsVisible] = useState(false);
   const [slotAction, setSlotAction] = useState<{
     readonly date: string;
     readonly startsAt: string;
@@ -120,10 +127,36 @@ export function CalendarTab({
         appointments: calendar.appointments,
         availabilityRules: workspace.availabilityRules,
         blocks: calendar.blocks,
+        dateOverrides: calendar.dateOverrides,
         selectedDate: calendar.selectedDate,
         timezone: workspace.timezone,
       });
   const personalBlocks = demoData ? demoBlocks : calendar.blocks;
+  const effectiveAvailability = getEffectiveAvailability(
+    calendar.selectedDate,
+    workspace.availabilityRules,
+    calendar.dateOverrides,
+  );
+  const selectedDayOfWeek =
+    new Date(`${calendar.selectedDate}T00:00:00.000Z`).getUTCDay() || 7;
+  const selectedDayRule = workspace.availabilityRules.find(
+    (rule) => rule.dayOfWeek === selectedDayOfWeek,
+  );
+  const dayStartTime =
+    effectiveAvailability.startLocalTime ??
+    selectedDayRule?.startLocalTime ??
+    "09:00";
+  const dayEndTime =
+    effectiveAvailability.endLocalTime ??
+    selectedDayRule?.endLocalTime ??
+    "17:00";
+  const selectedDayAppointments = calendar.appointments.filter(
+    (appointment) =>
+      formatDateInTimeZone(
+        new Date(appointment.starts_at),
+        workspace.timezone,
+      ) === calendar.selectedDate,
+  );
   const week = demoData
     ? buildDemoWeekCalendar(
         demoData.appointments,
@@ -134,6 +167,7 @@ export function CalendarTab({
         appointments: calendar.appointments,
         availabilityRules: workspace.availabilityRules,
         blocks: calendar.blocks,
+        dateOverrides: calendar.dateOverrides,
         selectedDate: calendar.selectedDate,
         timezone: workspace.timezone,
       });
@@ -144,6 +178,9 @@ export function CalendarTab({
   );
   const monthBlocks = monthWindow.entries.flatMap(
     (entry) => entry.data?.blocks ?? [],
+  );
+  const monthOverrides = monthWindow.entries.flatMap(
+    (entry) => entry.data?.dateOverrides ?? [],
   );
   const monthItems = monthWindow.entries.map((entry) => {
     const days: MonthCalendarDay[] = demoData
@@ -157,6 +194,7 @@ export function CalendarTab({
           appointments: monthAppointments,
           availabilityRules: workspace.availabilityRules,
           blocks: monthBlocks,
+          dateOverrides: monthOverrides,
           monthDate: `${entry.month}-15`,
           selectedDate: calendar.selectedDate,
           timezone: workspace.timezone,
@@ -231,6 +269,20 @@ export function CalendarTab({
                 todayLabel={t("mobile.today")}
               />
             ) : null}
+            <View style={styles.dayAvailabilityControl}>
+              <Text style={styles.dayAvailabilityStatus}>
+                {effectiveAvailability.isClosed
+                  ? t("mobile.calendarDayClosedStatus")
+                  : `${t("mobile.calendarDayWorkingHours")}: ${dayStartTime.slice(0, 5)}–${dayEndTime.slice(0, 5)}`}
+              </Text>
+              <ActionButton
+                disabled={!client}
+                label={t("mobile.calendarDaySettings")}
+                onPress={() => setDaySettingsVisible(true)}
+                size="compact"
+                variant="secondary"
+              />
+            </View>
             {calendar.view === "week" ? (
               <WeekCalendar
                 days={week}
@@ -385,6 +437,39 @@ export function CalendarTab({
           </InfoCard>
         ) : null}
       </View>
+      <AvailabilityDateOverrideModal
+        appointments={selectedDayAppointments}
+        date={calendar.selectedDate}
+        endLocalTime={dayEndTime}
+        error={calendar.error}
+        hasOverride={calendar.dateOverrides.some(
+          (override) => override.work_date === calendar.selectedDate,
+        )}
+        initialIsClosed={effectiveAvailability.isClosed}
+        isSaving={calendar.isSaving}
+        locale={locale}
+        onClear={async () => {
+          await calendar.clearDateOverride(calendar.selectedDate);
+          setDaySettingsVisible(false);
+          onFeedback(t("mobile.calendarDayResetDone"));
+        }}
+        onClose={() => setDaySettingsVisible(false)}
+        onSave={async (draft: AvailabilityOverrideDraft) => {
+          await calendar.saveDateOverride(draft);
+          setDaySettingsVisible(false);
+          onFeedback(
+            t(
+              draft.kind === "closed"
+                ? "mobile.calendarDayClosedSaved"
+                : "mobile.calendarDayHoursSaved",
+            ),
+          );
+        }}
+        startLocalTime={dayStartTime}
+        t={t}
+        timezone={workspace.timezone}
+        visible={isDaySettingsVisible}
+      />
       <PersonalBlockModal
         error={calendar.error}
         initialDraft={blockDraft}
@@ -608,6 +693,18 @@ const styles = StyleSheet.create({
   blockTitle: { ...typography.label, color: colors.primaryText },
   blocksList: { gap: 8, marginTop: 14 },
   calendarCard: { position: "relative" },
+  dayAvailabilityControl: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  dayAvailabilityStatus: {
+    ...typography.label,
+    color: colors.secondaryText,
+    flex: 1,
+  },
   calendarLoadingOverlay: {
     ...StyleSheet.absoluteFill,
     alignItems: "center",

@@ -5,6 +5,10 @@ import type {
   MasterAppointment,
 } from "../appointments/manualBooking";
 import {
+  type AvailabilityDateOverride,
+  getEffectiveAvailability,
+} from "../availability/dateOverrides";
+import {
   formatDateInTimeZone,
   type PersonalBlock,
 } from "../availability/personalBlocks";
@@ -47,6 +51,7 @@ type BuildWeekCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly blocks: readonly PersonalBlock[];
+  readonly dateOverrides?: readonly AvailabilityDateOverride[];
   readonly selectedDate: string;
   readonly timezone: string;
 };
@@ -55,6 +60,7 @@ export function buildWeekCalendar({
   appointments,
   availabilityRules,
   blocks,
+  dateOverrides = [],
   selectedDate,
   timezone,
 }: BuildWeekCalendarParams): WeekCalendarDay[] {
@@ -63,9 +69,18 @@ export function buildWeekCalendar({
     addCalendarDays(fromDate, index),
   );
   const days = dates.map((date) => {
-    const rule = availabilityRules.find(
-      (candidate) => candidate.dayOfWeek === getIsoDayOfWeek(date),
+    const availability = getEffectiveAvailability(
+      date,
+      availabilityRules,
+      dateOverrides,
     );
+    const rule = availability.isClosed
+      ? undefined
+      : {
+          dayOfWeek: getIsoDayOfWeek(date),
+          startLocalTime: availability.startLocalTime ?? "00:00",
+          endLocalTime: availability.endLocalTime ?? "00:00",
+        };
 
     const workload = calculateCalendarWorkload({
       appointments,
@@ -91,7 +106,7 @@ export function buildWeekCalendar({
       date,
       endMinute: rule ? timeToMinutes(rule.endLocalTime) : 20 * 60,
       events: [] as WeekCalendarEvent[],
-      isClosed: !rule,
+      isClosed: availability.isClosed,
       startMinute: rule ? timeToMinutes(rule.startLocalTime) : 8 * 60,
       workloadPercent: workload.percent,
     };

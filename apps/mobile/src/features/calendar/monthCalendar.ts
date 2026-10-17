@@ -1,6 +1,10 @@
 import type { WorkspaceAvailabilityRule } from "../../types";
 import type { MasterAppointment } from "../appointments/manualBooking";
 import {
+  type AvailabilityDateOverride,
+  getEffectiveAvailability,
+} from "../availability/dateOverrides";
+import {
   formatDateInTimeZone,
   type PersonalBlock,
 } from "../availability/personalBlocks";
@@ -22,6 +26,7 @@ type BuildMonthCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly blocks: readonly PersonalBlock[];
+  readonly dateOverrides?: readonly AvailabilityDateOverride[];
   readonly monthDate: string;
   readonly selectedDate: string;
   readonly timezone: string;
@@ -32,6 +37,7 @@ export function buildMonthCalendar({
   appointments,
   availabilityRules,
   blocks,
+  dateOverrides = [],
   monthDate,
   selectedDate,
   timezone,
@@ -50,10 +56,6 @@ export function buildMonthCalendar({
       blockCount: number;
     }
   >();
-  const rulesByDay = new Map(
-    availabilityRules.map((rule) => [rule.dayOfWeek, rule]),
-  );
-
   for (const appointment of appointments) {
     const date = formatDateInTimeZone(
       new Date(appointment.starts_at),
@@ -76,7 +78,18 @@ export function buildMonthCalendar({
   const days: MonthCalendarDay[] = [];
   for (let date = gridStart; date <= gridEnd; date = addCalendarDays(date, 1)) {
     const data = dataByDate.get(date);
-    const availabilityRule = rulesByDay.get(getIsoDayOfWeek(date));
+    const availability = getEffectiveAvailability(
+      date,
+      availabilityRules,
+      dateOverrides,
+    );
+    const availabilityRule = availability.isClosed
+      ? undefined
+      : {
+          dayOfWeek: getIsoDayOfWeek(date),
+          startLocalTime: availability.startLocalTime ?? "00:00",
+          endLocalTime: availability.endLocalTime ?? "00:00",
+        };
     const workload = calculateCalendarWorkload({
       appointments,
       availabilityRule,
@@ -88,7 +101,7 @@ export function buildMonthCalendar({
       bookingCount: data?.bookingCount ?? 0,
       blockCount: data?.blockCount ?? 0,
       date,
-      isClosed: !availabilityRule,
+      isClosed: availability.isClosed,
       isCurrentMonth: date >= monthRange.fromDate && date <= monthRange.toDate,
       isSelected: date === selectedDate,
       isToday: date === todayDate,

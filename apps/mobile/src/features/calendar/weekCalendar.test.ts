@@ -108,6 +108,39 @@ describe("week calendar", () => {
     expect(week[1]?.events[0]?.title).toBe("Maria P.");
   });
 
+  it("applies one-off opening hours and closures to their dates in the week", () => {
+    const week = buildWeekCalendar({
+      appointments: [appointment],
+      availabilityRules: [
+        { dayOfWeek: 3, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: "15:00:00",
+          override_kind: "modified",
+          start_local_time: "12:00:00",
+          work_date: "2030-01-09",
+        },
+        {
+          end_local_time: null,
+          override_kind: "closed",
+          start_local_time: null,
+          work_date: "2030-01-10",
+        },
+      ],
+      selectedDate: "2030-01-09",
+      timezone: "UTC",
+    });
+
+    expect(week[2]).toMatchObject({
+      endMinute: 15 * 60,
+      isClosed: false,
+      startMinute: 12 * 60,
+    });
+    expect(week[3]?.isClosed).toBe(true);
+  });
+
   it("builds a compact month grid with the selected week highlighted", () => {
     const week = buildDemoWeekCalendar([], "2030-01-09", "Europe/Prague");
     const month = buildWeekCalendarMonth("2030-01-09", week);

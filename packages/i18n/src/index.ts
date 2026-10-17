@@ -227,6 +227,23 @@ export type MessageKey =
   | "mobile.customerVisitCount"
   | "mobile.calendarClosed"
   | "mobile.calendarClosedDescription"
+  | "mobile.calendarDaySettings"
+  | "mobile.calendarDaySettingsDescription"
+  | "mobile.calendarDayOpen"
+  | "mobile.calendarDayClose"
+  | "mobile.calendarDayStart"
+  | "mobile.calendarDayEnd"
+  | "mobile.calendarDayConflictCount"
+  | "mobile.calendarDayConflictDescription"
+  | "mobile.calendarDaySaveFailed"
+  | "mobile.calendarDayInvalidHours"
+  | "mobile.calendarDaySave"
+  | "mobile.calendarDayReset"
+  | "mobile.calendarDayClosedStatus"
+  | "mobile.calendarDayWorkingHours"
+  | "mobile.calendarDayResetDone"
+  | "mobile.calendarDayClosedSaved"
+  | "mobile.calendarDayHoursSaved"
   | "mobile.calendarPrevious"
   | "mobile.calendarNext"
   | "mobile.calendarPreviousWeek"
@@ -707,6 +724,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosed": "Нерабочий день",
     "mobile.calendarClosedDescription":
       "На этот день рабочие часы не настроены.",
+    "mobile.calendarDaySettings": "Настроить день",
+    "mobile.calendarDaySettingsDescription":
+      "Изменение действует только на выбранную дату и не меняет недельный график.",
+    "mobile.calendarDayOpen": "Рабочие часы",
+    "mobile.calendarDayClose": "Выходной",
+    "mobile.calendarDayStart": "Начало работы",
+    "mobile.calendarDayEnd": "Конец работы",
+    "mobile.calendarDayConflictCount": "Конфликтующих записей: {count}",
+    "mobile.calendarDayConflictDescription":
+      "Эти записи сохранятся без изменений. Доступность новых записей будет соответствовать выбранному графику.",
+    "mobile.calendarDaySaveFailed": "Не удалось сохранить график дня.",
+    "mobile.calendarDayInvalidHours":
+      "Укажите конец рабочего времени позже начала.",
+    "mobile.calendarDaySave": "Сохранить",
+    "mobile.calendarDayReset": "Вернуть недельный график",
+    "mobile.calendarDayClosedStatus": "Выходной",
+    "mobile.calendarDayWorkingHours": "Рабочее время",
+    "mobile.calendarDayResetDone": "Недельный график восстановлен",
+    "mobile.calendarDayClosedSaved": "День закрыт для бронирования",
+    "mobile.calendarDayHoursSaved": "Рабочее время обновлено",
     "mobile.calendarPrevious": "Предыдущая дата",
     "mobile.calendarNext": "Следующая дата",
     "mobile.calendarPreviousWeek": "Предыдущая неделя",
@@ -1214,6 +1251,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosed": "Nepracovní den",
     "mobile.calendarClosedDescription":
       "Pro tento den nejsou nastavené pracovní hodiny.",
+    "mobile.calendarDaySettings": "Nastavit den",
+    "mobile.calendarDaySettingsDescription":
+      "Změna platí pouze pro vybrané datum a nemění týdenní rozvrh.",
+    "mobile.calendarDayOpen": "Pracovní doba",
+    "mobile.calendarDayClose": "Volno",
+    "mobile.calendarDayStart": "Začátek práce",
+    "mobile.calendarDayEnd": "Konec práce",
+    "mobile.calendarDayConflictCount": "Rezervace v konfliktu: {count}",
+    "mobile.calendarDayConflictDescription":
+      "Tyto rezervace zůstanou beze změny. Dostupnost nových rezervací bude odpovídat zvolenému rozvrhu.",
+    "mobile.calendarDaySaveFailed": "Pracovní dobu se nepodařilo uložit.",
+    "mobile.calendarDayInvalidHours":
+      "Zadejte konec pracovní doby po jejím začátku.",
+    "mobile.calendarDaySave": "Uložit",
+    "mobile.calendarDayReset": "Obnovit týdenní rozvrh",
+    "mobile.calendarDayClosedStatus": "Volno",
+    "mobile.calendarDayWorkingHours": "Pracovní doba",
+    "mobile.calendarDayResetDone": "Týdenní rozvrh byl obnoven",
+    "mobile.calendarDayClosedSaved": "Den byl uzavřen pro rezervace",
+    "mobile.calendarDayHoursSaved": "Pracovní doba byla aktualizována",
     "mobile.calendarPrevious": "Předchozí datum",
     "mobile.calendarNext": "Následující datum",
     "mobile.calendarPreviousWeek": "Předchozí týden",
@@ -1719,6 +1776,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosed": "Closed day",
     "mobile.calendarClosedDescription":
       "Working hours are not configured for this day.",
+    "mobile.calendarDaySettings": "Configure day",
+    "mobile.calendarDaySettingsDescription":
+      "This change applies only to the selected date and does not change the weekly schedule.",
+    "mobile.calendarDayOpen": "Working hours",
+    "mobile.calendarDayClose": "Day off",
+    "mobile.calendarDayStart": "Work starts",
+    "mobile.calendarDayEnd": "Work ends",
+    "mobile.calendarDayConflictCount": "Conflicting bookings: {count}",
+    "mobile.calendarDayConflictDescription":
+      "These bookings will stay unchanged. New booking availability will follow the selected schedule.",
+    "mobile.calendarDaySaveFailed": "Could not save the day schedule.",
+    "mobile.calendarDayInvalidHours":
+      "Set the end of the work period after its start.",
+    "mobile.calendarDaySave": "Save",
+    "mobile.calendarDayReset": "Restore weekly schedule",
+    "mobile.calendarDayClosedStatus": "Day off",
+    "mobile.calendarDayWorkingHours": "Working hours",
+    "mobile.calendarDayResetDone": "Weekly schedule restored",
+    "mobile.calendarDayClosedSaved": "Day closed for bookings",
+    "mobile.calendarDayHoursSaved": "Working hours updated",
     "mobile.calendarPrevious": "Previous date",
     "mobile.calendarNext": "Next date",
     "mobile.calendarPreviousWeek": "Previous week",

@@ -116,6 +116,10 @@ function mergeCalendarData(
     CalendarData["blocks"][number]["id"],
     CalendarData["blocks"][number]
   >();
+  const dateOverrides = new Map<
+    CalendarData["dateOverrides"][number]["work_date"],
+    CalendarData["dateOverrides"][number]
+  >();
 
   for (const entry of entries) {
     for (const appointment of entry.value.appointments) {
@@ -136,6 +140,14 @@ function mergeCalendarData(
         blocks.set(block.id, block);
       }
     }
+    for (const override of entry.value.dateOverrides) {
+      if (
+        override.work_date >= range.fromDate &&
+        override.work_date <= range.toDate
+      ) {
+        dateOverrides.set(override.work_date, override);
+      }
+    }
   }
 
   return {
@@ -144,6 +156,9 @@ function mergeCalendarData(
     ),
     blocks: [...blocks.values()].sort((left, right) =>
       left.starts_at.localeCompare(right.starts_at),
+    ),
+    dateOverrides: [...dateOverrides.values()].sort((left, right) =>
+      left.work_date.localeCompare(right.work_date),
     ),
   };
 }

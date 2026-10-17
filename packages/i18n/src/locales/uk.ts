@@ -259,6 +259,26 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarClosed": "Вихідний день",
   "mobile.calendarClosedDescription":
     "Для цього дня не налаштовано робочі години.",
+  "mobile.calendarDaySettings": "Налаштувати день",
+  "mobile.calendarDaySettingsDescription":
+    "Зміна діє лише для вибраної дати й не змінює тижневий графік.",
+  "mobile.calendarDayOpen": "Робочі години",
+  "mobile.calendarDayClose": "Вихідний",
+  "mobile.calendarDayStart": "Початок роботи",
+  "mobile.calendarDayEnd": "Кінець роботи",
+  "mobile.calendarDayConflictCount": "Записів із конфліктом: {count}",
+  "mobile.calendarDayConflictDescription":
+    "Ці записи залишаться без змін. Доступність нових записів відповідатиме вибраному графіку.",
+  "mobile.calendarDaySaveFailed": "Не вдалося зберегти графік дня.",
+  "mobile.calendarDayInvalidHours":
+    "Кінець робочого часу має бути пізніше за його початок.",
+  "mobile.calendarDaySave": "Зберегти",
+  "mobile.calendarDayReset": "Відновити тижневий графік",
+  "mobile.calendarDayClosedStatus": "Вихідний",
+  "mobile.calendarDayWorkingHours": "Робочий час",
+  "mobile.calendarDayResetDone": "Тижневий графік відновлено",
+  "mobile.calendarDayClosedSaved": "День закрито для записів",
+  "mobile.calendarDayHoursSaved": "Робочий час оновлено",
   "mobile.calendarPrevious": "Попередня дата",
   "mobile.calendarNext": "Наступна дата",
   "mobile.calendarPreviousWeek": "Попередній тиждень",
