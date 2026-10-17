@@ -3,6 +3,9 @@ export type BookingDecisionEmail = {
   readonly locale: "ru" | "cz" | "en";
   readonly recipient: string;
   readonly serviceName: string;
+  readonly durationMinutes?: number;
+  readonly priceAmount?: number;
+  readonly currency?: string;
   readonly startsAt: string;
   readonly timezone: string;
   readonly workspaceName: string;
@@ -16,6 +19,8 @@ const copy = {
     acceptedBody: "Мастер подтвердил вашу запись.",
     declinedBody: "Эту запись не удалось подтвердить.",
     service: "Услуга",
+    duration: "Длительность",
+    price: "Стоимость",
     date: "Дата",
     time: "Время",
     footer:
@@ -28,6 +33,8 @@ const copy = {
     acceptedBody: "Vaše rezervace byla potvrzena.",
     declinedBody: "Tuto rezervaci se nepodařilo potvrdit.",
     service: "Služba",
+    duration: "Délka",
+    price: "Cena",
     date: "Datum",
     time: "Čas",
     footer:
@@ -40,6 +47,8 @@ const copy = {
     acceptedBody: "Your appointment has been confirmed.",
     declinedBody: "This appointment could not be confirmed.",
     service: "Service",
+    duration: "Duration",
+    price: "Price",
     date: "Date",
     time: "Time",
     footer:
@@ -88,6 +97,17 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
     input.decision === "accepted"
       ? [
           `${messages.service}: ${input.serviceName}`,
+          ...(input.durationMinutes === undefined
+            ? []
+            : [`${messages.duration}: ${input.durationMinutes} min`]),
+          ...(input.priceAmount === undefined || !input.currency
+            ? []
+            : [
+                `${messages.price}: ${new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency: input.currency,
+                }).format(input.priceAmount)}`,
+              ]),
           `${messages.date}: ${date}`,
           `${messages.time}: ${time}`,
         ]

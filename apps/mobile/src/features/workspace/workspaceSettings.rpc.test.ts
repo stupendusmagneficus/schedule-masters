@@ -8,6 +8,7 @@ import {
 } from "./workspaceSettings";
 
 const draft: WorkspaceSettingsDraft = {
+  bookingIntervalMinutes: 15,
   endTime: "18:00",
   name: "Anna Nails",
   slug: "anna-nails",
@@ -24,6 +25,7 @@ describe("saveWorkspaceSettings", () => {
 
     expect(rpc).toHaveBeenCalledWith("update_master_workspace_settings", {
       p_end_local_time: "18:00",
+      p_booking_interval_minutes: 15,
       p_name: "Anna Nails",
       p_slug: "anna-nails",
       p_start_local_time: "09:00",

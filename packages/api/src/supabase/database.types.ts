@@ -139,6 +139,63 @@ export type Database = {
           },
         ]
       }
+      appointment_services: {
+        Row: {
+          appointment_id: string
+          buffer_after_minutes_snapshot: number
+          buffer_before_minutes_snapshot: number
+          created_at: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id?: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot?: string
+          duration_minutes_snapshot?: number
+          position?: number
+          price_amount_snapshot?: number
+          service_id?: string | null
+          service_name_snapshot?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_services_appointment_id_workspace_id_fkey"
+            columns: ["appointment_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "appointment_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           buffer_after_minutes_snapshot: number
@@ -933,6 +990,7 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          booking_interval_minutes: number
           created_at: string
           id: string
           locale: string
@@ -943,6 +1001,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          booking_interval_minutes?: number
           created_at?: string
           id?: string
           locale?: string
@@ -953,6 +1012,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          booking_interval_minutes?: number
           created_at?: string
           id?: string
           locale?: string
@@ -969,8 +1029,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anonymize_master_customer: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: undefined
+      }
       bootstrap_master_workspace: {
         Args: {
+          p_booking_interval_minutes?: number
           p_duration_minutes: number
           p_end_local_time: string
           p_locale: string
@@ -1002,9 +1067,12 @@ export type Database = {
         Args: { p_batch_size?: number; p_recipient_allowlist?: string[] }
         Returns: {
           attempts: number
+          currency: string
           decision: string
+          duration_minutes: number
           id: string
           locale: string
+          price_amount: number
           recipient: string
           service_name: string
           starts_at: string
@@ -1044,6 +1112,20 @@ export type Database = {
           p_phone?: string
           p_price_amount?: number
           p_service_id: string
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
+      create_master_booking_with_services: {
+        Args: {
+          p_customer_id?: string
+          p_email?: string
+          p_idempotency_key: string
+          p_master_note?: string
+          p_name?: string
+          p_phone?: string
+          p_service_ids: string[]
           p_starts_at: string
           p_workspace_id: string
         }
@@ -1092,6 +1174,20 @@ export type Database = {
         }
         Returns: Json
       }
+      create_public_booking_with_services: {
+        Args: {
+          p_customer_note?: string
+          p_email: string
+          p_idempotency_key?: string
+          p_locale?: string
+          p_name: string
+          p_phone: string
+          p_service_ids: string[]
+          p_slug: string
+          p_starts_at: string
+        }
+        Returns: Json
+      }
       delete_master_availability_block: {
         Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
@@ -1117,6 +1213,17 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_available_slots_for_services: {
+        Args: {
+          p_date: string
+          p_service_ids: string[]
+          p_workspace_id: string
+        }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_master_month_available_slots: {
         Args: {
           p_month_start: string
@@ -1136,10 +1243,28 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_public_available_slots_for_services: {
+        Args: { p_date: string; p_service_ids: string[]; p_slug: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_public_booking_context: { Args: { p_slug: string }; Returns: Json }
       is_workspace_member: {
         Args: { target_workspace_id: string }
         Returns: boolean
+      }
+      list_master_appointment_services: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          duration_minutes: number
+          position: number
+          price_amount: number
+          service_id: string | null
+          service_name: string
+        }[]
       }
       list_master_appointments: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
@@ -1161,10 +1286,6 @@ export type Database = {
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
-      }
-      anonymize_master_customer: {
-        Args: { p_customer_id: string; p_workspace_id: string }
-        Returns: undefined
       }
       list_master_availability_blocks: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
@@ -1360,6 +1481,7 @@ export type Database = {
       }
       update_master_workspace_settings: {
         Args: {
+          p_booking_interval_minutes?: number
           p_end_local_time: string
           p_name: string
           p_slug: string

@@ -275,7 +275,7 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();
 
     const search = page.getByRole("textbox", {
-      name: "Hledat podle názvu nebo popisu",
+      name: "Hledat podle názvu, popisu nebo kategorie",
     });
     await search.fill("clean finish");
     await expect(page.getByText("Gel manicure", { exact: true })).toBeVisible();

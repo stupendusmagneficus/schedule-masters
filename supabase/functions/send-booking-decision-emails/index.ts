@@ -7,6 +7,9 @@ type ClaimedEmail = {
   readonly locale: "ru" | "cz" | "en";
   readonly recipient: string;
   readonly service_name: string;
+  readonly duration_minutes?: number;
+  readonly price_amount?: number;
+  readonly currency?: string;
   readonly starts_at: string;
   readonly timezone: string;
   readonly workspace_name: string;
@@ -112,6 +115,9 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
         locale: job.locale,
         recipient: job.recipient,
         serviceName: job.service_name,
+        durationMinutes: job.duration_minutes,
+        priceAmount: job.price_amount,
+        currency: job.currency,
         startsAt: job.starts_at,
         timezone: job.timezone,
         workspaceName: job.workspace_name,

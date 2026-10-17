@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { createDefaultOnboardingDraft } from "./setupTypes";
 import { validateSetupStep, validateSetupValues } from "./setupValidation";
 
 const validValues = {
@@ -8,6 +9,7 @@ const validValues = {
   serviceName: "Gel manicure",
   slug: "anna-nails",
   duration: "60",
+  bookingIntervalMinutes: 30 as const,
   workingDays: [1, 2, 3, 4, 5],
   startTime: "08:00",
   endTime: "21:00",
@@ -74,5 +76,20 @@ describe("validateSetupStep", () => {
         3,
       ),
     ).toBe("schedule");
+  });
+});
+
+describe("onboarding booking interval", () => {
+  const draft = createDefaultOnboardingDraft("en");
+
+  it("defaults the booking start interval to 30 minutes", () => {
+    expect(draft.bookingIntervalMinutes).toBe(30);
+    expect(validateSetupStep(draft, 2)).toBeNull();
+  });
+
+  it("rejects unsupported booking start intervals", () => {
+    expect(
+      validateSetupStep({ ...draft, bookingIntervalMinutes: 45 as 30 }, 2),
+    ).toBe("bookingInterval");
   });
 });

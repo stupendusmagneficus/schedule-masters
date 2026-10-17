@@ -23,6 +23,21 @@ const supabase =
       })
     : null;
 
+async function callUntypedRpc<T>(
+  name: string,
+  args: Record<string, unknown>,
+): Promise<{ data: T | null; error: { message: string } | null }> {
+  if (!supabase) throw new Error("Supabase integration client is unavailable");
+
+  const client = supabase as unknown as {
+    rpc: (
+      functionName: string,
+      parameters: Record<string, unknown>,
+    ) => Promise<{ data: T | null; error: { message: string } | null }>;
+  };
+  return client.rpc(name, args);
+}
+
 const serviceId = "00000000-0000-0000-0000-000000000002";
 const bookingDate = "2030-01-03";
 
@@ -30,6 +45,452 @@ describe("Supabase public booking contract", () => {
   afterAll(async () => {
     await supabase?.removeAllChannels();
   });
+
+  rlsIntegrationTest(
+    "uses the workspace booking interval when generating complete service slots",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const slug = `booking-interval-${suffix}`;
+      const workDate = "2030-01-07";
+
+      try {
+        const workspace = await admin.from("workspaces").insert({
+          booking_interval_minutes: 15,
+          id: workspaceId,
+          name: "Booking interval test",
+          slug,
+          timezone: "Europe/Prague",
+        });
+        expect(workspace.error).toBeNull();
+
+        const bookingLink = await admin.from("booking_links").insert({
+          slug,
+          workspace_id: workspaceId,
+        });
+        expect(bookingLink.error).toBeNull();
+
+        const service = await admin
+          .from("services")
+          .insert({
+            duration_minutes: 60,
+            name: "One-hour service",
+            price_amount: 500,
+            workspace_id: workspaceId,
+          })
+          .select("id")
+          .single();
+        expect(service.error).toBeNull();
+        const serviceId = service.data?.id;
+        if (!serviceId) throw new Error("Test service was not created");
+
+        const availability = await admin.from("availability_rules").insert({
+          day_of_week: 1,
+          end_local_time: "11:00",
+          start_local_time: "09:00",
+          valid_from: workDate,
+          workspace_id: workspaceId,
+        });
+        expect(availability.error).toBeNull();
+
+        const quarterHourSlots = await supabase?.rpc(
+          "get_public_available_slots",
+          { p_date: workDate, p_service_id: serviceId, p_slug: slug },
+        );
+        expect(quarterHourSlots?.error).toBeNull();
+        expect(
+          quarterHourSlots?.data?.map((slot) =>
+            new Date(slot.starts_at).toISOString(),
+          ),
+        ).toEqual([
+          "2030-01-07T08:00:00.000Z",
+          "2030-01-07T08:15:00.000Z",
+          "2030-01-07T08:30:00.000Z",
+          "2030-01-07T08:45:00.000Z",
+          "2030-01-07T09:00:00.000Z",
+        ]);
+
+        const updateInterval = await admin
+          .from("workspaces")
+          .update({ booking_interval_minutes: 60 })
+          .eq("id", workspaceId);
+        expect(updateInterval.error).toBeNull();
+
+        const hourlySlots = await supabase?.rpc("get_public_available_slots", {
+          p_date: workDate,
+          p_service_id: serviceId,
+          p_slug: slug,
+        });
+        expect(hourlySlots?.error).toBeNull();
+        expect(
+          hourlySlots?.data?.map((slot) =>
+            new Date(slot.starts_at).toISOString(),
+          ),
+        ).toEqual(["2030-01-07T08:00:00.000Z", "2030-01-07T09:00:00.000Z"]);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+      }
+    },
+  );
+
+  rlsIntegrationTest(
+    "books multiple services as one ordered appointment and reserves their combined duration",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const slug = `multi-service-${suffix}`;
+      const workDate = "2030-01-07";
+      const serviceIds = [randomUUID(), randomUUID()];
+
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert({
+              booking_interval_minutes: 30,
+              id: workspaceId,
+              name: "Multi-service test",
+              slug,
+              timezone: "Europe/Prague",
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("booking_links").insert({
+              slug,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("services").insert([
+              {
+                duration_minutes: 90,
+                id: serviceIds[0],
+                name: "Manicure",
+                price_amount: 1200,
+                sort_order: 0,
+                workspace_id: workspaceId,
+              },
+              {
+                duration_minutes: 60,
+                id: serviceIds[1],
+                name: "Pedicure",
+                price_amount: 900,
+                sort_order: 1,
+                workspace_id: workspaceId,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("availability_rules").insert({
+              day_of_week: 1,
+              end_local_time: "14:00",
+              start_local_time: "09:00",
+              valid_from: workDate,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const slots = await callUntypedRpc<
+          Array<{ starts_at: string; ends_at: string }>
+        >("get_public_available_slots_for_services", {
+          p_date: workDate,
+          p_service_ids: serviceIds,
+          p_slug: slug,
+        });
+        expect(slots.error).toBeNull();
+        expect(slots.data?.[0]).toMatchObject({
+          starts_at: "2030-01-07T08:00:00+00:00",
+          ends_at: "2030-01-07T10:30:00+00:00",
+        });
+
+        const booking = await callUntypedRpc<{
+          id: string;
+          endsAt: string;
+          serviceName: string;
+          priceAmount: number;
+        }>("create_public_booking_with_services", {
+          p_customer_note: null,
+          p_email: "multi-service@example.test",
+          p_idempotency_key: `multi-service-${suffix}`,
+          p_locale: "en",
+          p_name: "Multi Service Customer",
+          p_phone: null,
+          p_service_ids: serviceIds,
+          p_slug: slug,
+          p_starts_at: "2030-01-07T08:00:00.000Z",
+        });
+        expect(booking.error).toBeNull();
+        expect(booking.data).toMatchObject({
+          endsAt: "2030-01-07T10:30:00+00:00",
+          priceAmount: 2100,
+          serviceName: "Manicure + Pedicure",
+        });
+        const replay = await callUntypedRpc<{ id: string }>(
+          "create_public_booking_with_services",
+          {
+            p_customer_note: null,
+            p_email: "multi-service@example.test",
+            p_idempotency_key: `multi-service-${suffix}`,
+            p_locale: "en",
+            p_name: "Multi Service Customer",
+            p_phone: "",
+            p_service_ids: serviceIds,
+            p_slug: slug,
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+          },
+        );
+        expect(replay.error).toBeNull();
+        expect(replay.data?.id).toBe(booking.data?.id);
+
+        const conflictingReplay = await callUntypedRpc<unknown>(
+          "create_public_booking_with_services",
+          {
+            p_email: "multi-service@example.test",
+            p_idempotency_key: `multi-service-${suffix}`,
+            p_name: "Multi Service Customer",
+            p_phone: "",
+            p_service_ids: [...serviceIds].reverse(),
+            p_slug: slug,
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+          },
+        );
+        expect(conflictingReplay.error?.message).toContain(
+          "Idempotency key was already used for another service selection",
+        );
+        const appointmentId = booking.data?.id;
+        if (!appointmentId)
+          throw new Error("Multi-service appointment missing");
+
+        const appointment = await admin
+          .from("appointments")
+          .select(
+            "duration_minutes_snapshot, ends_at, price_amount_snapshot, service_name_snapshot",
+          )
+          .eq("id", appointmentId)
+          .single();
+        expect(appointment.error).toBeNull();
+        expect(appointment.data).toMatchObject({
+          duration_minutes_snapshot: 150,
+          ends_at: "2030-01-07T10:30:00+00:00",
+          price_amount_snapshot: 2100,
+          service_name_snapshot: "Manicure + Pedicure",
+        });
+
+        const lineItems = await admin
+          .from("appointment_services")
+          .select(
+            "position, service_name_snapshot, duration_minutes_snapshot, price_amount_snapshot",
+          )
+          .eq("appointment_id", appointmentId)
+          .order("position");
+        expect(lineItems.error).toBeNull();
+        expect(lineItems.data).toMatchObject([
+          {
+            position: 1,
+            service_name_snapshot: "Manicure",
+            duration_minutes_snapshot: 90,
+            price_amount_snapshot: 1200,
+          },
+          {
+            position: 2,
+            service_name_snapshot: "Pedicure",
+            duration_minutes_snapshot: 60,
+            price_amount_snapshot: 900,
+          },
+        ]);
+
+        const afterBooking = await callUntypedRpc<
+          Array<{ starts_at: string; ends_at: string }>
+        >("get_public_available_slots_for_services", {
+          p_date: workDate,
+          p_service_ids: serviceIds,
+          p_slug: slug,
+        });
+        expect(afterBooking.error).toBeNull();
+        expect(
+          afterBooking.data?.some(
+            (slot) => slot.starts_at === "2030-01-07T10:00:00+00:00",
+          ),
+        ).toBe(false);
+        expect(
+          afterBooking.data?.some(
+            (slot) => slot.starts_at === "2030-01-07T10:30:00+00:00",
+          ),
+        ).toBe(true);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+      }
+    },
+  );
+
+  rlsIntegrationTest(
+    "creates a manual multi-service booking for one workspace member",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const serviceIds = [randomUUID(), randomUUID()];
+      const workDate = "2030-01-07";
+      const email = `multi-service-master-${suffix}@example.test`;
+      const password = `Test-${randomUUID()}-Aa1!`;
+      let userId: string | undefined;
+
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert({
+              booking_interval_minutes: 30,
+              id: workspaceId,
+              name: "Manual multi-service test",
+              slug: `manual-multi-service-${suffix}`,
+              timezone: "Europe/Prague",
+            })
+          ).error,
+        ).toBeNull();
+        const owner = await createAuthenticatedTestUser({
+          admin,
+          email,
+          password,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        userId = owner.user.id;
+
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              role: "owner",
+              user_id: userId,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("services").insert([
+              {
+                duration_minutes: 90,
+                id: serviceIds[0],
+                name: "Manicure",
+                price_amount: 1200,
+                sort_order: 0,
+                workspace_id: workspaceId,
+              },
+              {
+                duration_minutes: 60,
+                id: serviceIds[1],
+                name: "Pedicure",
+                price_amount: 900,
+                sort_order: 1,
+                workspace_id: workspaceId,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("availability_rules").insert({
+              day_of_week: 1,
+              end_local_time: "14:00",
+              start_local_time: "09:00",
+              valid_from: workDate,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const booking = await owner.client.rpc(
+          "create_master_booking_with_services",
+          {
+            p_idempotency_key: `manual-multi-service-${suffix}`,
+            p_name: "Manual Multi Service Customer",
+            p_service_ids: serviceIds,
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(booking.error).toBeNull();
+        expect(booking.data).toMatchObject({
+          durationMinutes: 150,
+          endsAt: "2030-01-07T10:30:00+00:00",
+          priceAmount: 2100,
+          serviceName: "Manicure + Pedicure",
+        });
+
+        const lineItems = await admin
+          .from("appointment_services")
+          .select("position, service_name_snapshot")
+          .eq("appointment_id", (booking.data as { id: string }).id)
+          .order("position");
+        expect(lineItems.error).toBeNull();
+        expect(lineItems.data).toEqual([
+          { position: 1, service_name_snapshot: "Manicure" },
+          { position: 2, service_name_snapshot: "Pedicure" },
+        ]);
+
+        const replay = await owner.client.rpc(
+          "create_master_booking_with_services",
+          {
+            p_idempotency_key: `manual-multi-service-${suffix}`,
+            p_name: "Manual Multi Service Customer",
+            p_service_ids: serviceIds,
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(replay.error).toBeNull();
+        expect((replay.data as { id: string }).id).toBe(
+          (booking.data as { id: string }).id,
+        );
+
+        const conflictingReplay = await owner.client.rpc(
+          "create_master_booking_with_services",
+          {
+            p_idempotency_key: `manual-multi-service-${suffix}`,
+            p_name: "Manual Multi Service Customer",
+            p_service_ids: [...serviceIds].reverse(),
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(conflictingReplay.error?.message).toContain(
+          "Idempotency key was already used for another service selection",
+        );
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+        if (userId) await admin.auth.admin.deleteUser(userId);
+      }
+    },
+  );
 
   integrationTest(
     "rejects public booking requests without a valid email address",
@@ -1529,6 +1990,9 @@ describe("Supabase public booking contract", () => {
         expect.objectContaining({
           decision: "accepted",
           recipient: `lifecycle-client-${suffix}@example.test`,
+          duration_minutes: 60,
+          price_amount: 700,
+          currency: "CZK",
         }),
       ]);
 
@@ -1991,14 +2455,23 @@ describe("customer directory RPC", () => {
           p_workspace_id: workspaceId,
         });
         expect(history.error).toBeNull();
-        expect(history.data).toHaveLength(1);
-        expect(history.data?.[0]).toMatchObject({
-          customer_id: customerId,
-          duration_minutes: 60,
-          price_amount: 700,
-          service_name: "Directory service",
-          status: "completed",
-        });
+        expect(history.data).toHaveLength(2);
+        expect(history.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              customer_id: customerId,
+              duration_minutes: 60,
+              price_amount: 700,
+              service_name: "Directory service",
+              status: "completed",
+            }),
+            expect.objectContaining({
+              customer_id: customerId,
+              service_name: "Privacy test service",
+              status: "pending",
+            }),
+          ]),
+        );
 
         const crossWorkspaceHistory = await user.client.rpc(
           "list_master_customer_history",

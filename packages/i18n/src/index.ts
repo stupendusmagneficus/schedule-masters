@@ -64,6 +64,11 @@ export type MessageKey =
   | "workspace.servicePlaceholder"
   | "workspace.pricePlaceholder"
   | "workspace.durationPlaceholder"
+  | "workspace.bookingIntervalLabel"
+  | "workspace.bookingIntervalHelp"
+  | "workspace.bookingInterval15"
+  | "workspace.bookingInterval30"
+  | "workspace.bookingInterval60"
   | "workspace.startTimeLabel"
   | "workspace.endTimeLabel"
   | "workspace.workingDaysLabel"
@@ -80,6 +85,7 @@ export type MessageKey =
   | "workspace.setupInvalidService"
   | "workspace.priceInvalid"
   | "workspace.durationInvalid"
+  | "workspace.bookingIntervalInvalid"
   | "workspace.workingDaysInvalid"
   | "workspace.scheduleInvalid"
   | "workspace.setupSaving"
@@ -307,6 +313,16 @@ export type MessageKey =
   | "mobile.manualBookingCustomerEmail"
   | "mobile.manualBookingCustomerPhone"
   | "mobile.manualBookingService"
+  | "mobile.manualBookingServices"
+  | "mobile.manualBookingAddService"
+  | "mobile.manualBookingMoveServiceUp"
+  | "mobile.manualBookingMoveServiceDown"
+  | "mobile.manualBookingRemoveService"
+  | "mobile.manualBookingNoServicesSelected"
+  | "mobile.manualBookingServicesRequired"
+  | "mobile.manualBookingServiceLimitReached"
+  | "mobile.manualBookingCurrencyMismatch"
+  | "mobile.manualBookingTotal"
   | "mobile.manualBookingDate"
   | "mobile.manualBookingTime"
   | "mobile.manualBookingNoSlots"
@@ -443,6 +459,16 @@ export type MessageKey =
   | "booking.availabilityFailed"
   | "booking.submitFailed"
   | "booking.chooseService"
+  | "booking.searchServices"
+  | "booking.selectedServices"
+  | "booking.removeService"
+  | "booking.remove"
+  | "booking.totalDuration"
+  | "booking.totalPrice"
+  | "booking.categoryOther"
+  | "booking.noMatchingServices"
+  | "booking.noServices"
+  | "booking.slotNoLongerAvailable"
   | "booking.chooseDate"
   | "booking.chooseTime"
   | "booking.yourDetails"
@@ -544,6 +570,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "Первая услуга",
     "workspace.pricePlaceholder": "Цена в Kč",
     "workspace.durationPlaceholder": "Длительность, минут",
+    "workspace.bookingIntervalLabel": "Шаг начала записи",
+    "workspace.bookingIntervalHelp":
+      "Выберите, как часто показывать варианты времени. Длительность задаётся отдельно у каждой услуги.",
+    "workspace.bookingInterval15": "Каждые 15 мин",
+    "workspace.bookingInterval30": "Каждые 30 мин",
+    "workspace.bookingInterval60": "Каждые 60 мин",
     "workspace.startTimeLabel": "Начало рабочего дня",
     "workspace.endTimeLabel": "Конец рабочего дня",
     "workspace.workingDaysLabel": "Рабочие дни",
@@ -564,6 +596,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
     "workspace.durationInvalid":
       "Введите целую длительность услуги от 1 до 1440 минут.",
+    "workspace.bookingIntervalInvalid": "Выберите шаг 15, 30 или 60 минут.",
     "workspace.workingDaysInvalid": "Выберите хотя бы один рабочий день.",
     "workspace.scheduleInvalid":
       "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
@@ -571,7 +604,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Сохранить и продолжить",
     "workspace.settingsTitle": "Рабочее пространство",
     "workspace.settingsDescription":
-      "Измените название, ссылку для записи и обычные рабочие часы.",
+      "Измените название, ссылку, рабочие часы и шаг начала записи.",
     "workspace.settingsEdit": "Изменить настройки",
     "workspace.settingsName": "Название рабочего пространства",
     "workspace.settingsSlug": "Ссылка для записи",
@@ -840,7 +873,20 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Имя клиента *",
     "mobile.manualBookingCustomerEmail": "Email клиента",
     "mobile.manualBookingCustomerPhone": "Телефон клиента",
-    "mobile.manualBookingService": "Услуга",
+    "mobile.manualBookingService": "Услуги",
+    "mobile.manualBookingServices": "Услуги *",
+    "mobile.manualBookingAddService": "Добавить услугу",
+    "mobile.manualBookingMoveServiceUp": "Переместить услугу выше",
+    "mobile.manualBookingMoveServiceDown": "Переместить услугу ниже",
+    "mobile.manualBookingRemoveService": "Убрать услугу",
+    "mobile.manualBookingNoServicesSelected":
+      "Выберите одну или несколько услуг.",
+    "mobile.manualBookingServicesRequired": "Выберите хотя бы одну услугу.",
+    "mobile.manualBookingServiceLimitReached":
+      "В одной записи можно выбрать не более 20 услуг.",
+    "mobile.manualBookingCurrencyMismatch":
+      "В одной записи можно объединить услуги только в одной валюте.",
+    "mobile.manualBookingTotal": "итого",
     "mobile.manualBookingDate": "Дата *",
     "mobile.manualBookingTime": "Свободное время *",
     "mobile.manualBookingNoSlots": "На эту дату нет свободных окон.",
@@ -954,7 +1000,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Архив",
     "mobile.serviceName": "Название услуги *",
     "mobile.serviceChoose": "Выберите услугу",
-    "mobile.serviceSearch": "Поиск по названию или описанию",
+    "mobile.serviceSearch": "Поиск по названию, описанию или категории",
     "mobile.serviceSearchClear": "Очистить поиск",
     "mobile.serviceSearchEmpty": "Услуги не найдены.",
     "mobile.serviceFiltersClear": "Сбросить фильтры",
@@ -998,6 +1044,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.",
     "booking.chooseService": "Выберите услугу",
+    "booking.searchServices": "Поиск по названию или категории",
+    "booking.selectedServices": "Выбранные услуги",
+    "booking.removeService": "Убрать {name}",
+    "booking.remove": "Убрать",
+    "booking.totalDuration": "Общее время",
+    "booking.totalPrice": "Итого",
+    "booking.categoryOther": "Без категории",
+    "booking.noMatchingServices": "Ничего не найдено. Измените запрос.",
+    "booking.noServices": "Пока нет доступных услуг для записи.",
+    "booking.slotNoLongerAvailable":
+      "Это время уже заняли. Выберите другой свободный интервал.",
     "booking.chooseDate": "Выберите дату",
     "booking.chooseTime": "Выберите время",
     "booking.yourDetails": "Ваши данные",
@@ -1103,6 +1160,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "První služba",
     "workspace.pricePlaceholder": "Cena v Kč",
     "workspace.durationPlaceholder": "Délka, minuty",
+    "workspace.bookingIntervalLabel": "Krok začátku rezervace",
+    "workspace.bookingIntervalHelp":
+      "Určuje, jak často se zobrazí možné časy. Délka se nastavuje zvlášť u každé služby.",
+    "workspace.bookingInterval15": "Každých 15 min",
+    "workspace.bookingInterval30": "Každých 30 min",
+    "workspace.bookingInterval60": "Každých 60 min",
     "workspace.startTimeLabel": "Začátek pracovní doby",
     "workspace.endTimeLabel": "Konec pracovní doby",
     "workspace.workingDaysLabel": "Pracovní dny",
@@ -1122,6 +1185,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
     "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
     "workspace.durationInvalid": "Zadejte celé číslo od 1 do 1440 minut.",
+    "workspace.bookingIntervalInvalid": "Vyberte krok 15, 30 nebo 60 minut.",
     "workspace.workingDaysInvalid": "Vyberte alespoň jeden pracovní den.",
     "workspace.scheduleInvalid":
       "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
@@ -1129,7 +1193,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Uložit a pokračovat",
     "workspace.settingsTitle": "Pracovní prostor",
     "workspace.settingsDescription":
-      "Upravte název, odkaz pro rezervace a běžnou pracovní dobu.",
+      "Upravte název, odkaz, pracovní dobu a krok začátku rezervace.",
     "workspace.settingsEdit": "Upravit nastavení",
     "workspace.settingsName": "Název pracovního prostoru",
     "workspace.settingsSlug": "Odkaz pro rezervace",
@@ -1396,7 +1460,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Jméno klienta *",
     "mobile.manualBookingCustomerEmail": "E-mail klienta",
     "mobile.manualBookingCustomerPhone": "Telefon klienta",
-    "mobile.manualBookingService": "Služba",
+    "mobile.manualBookingService": "Služby",
+    "mobile.manualBookingServices": "Služby *",
+    "mobile.manualBookingAddService": "Přidat službu",
+    "mobile.manualBookingMoveServiceUp": "Posunout službu výše",
+    "mobile.manualBookingMoveServiceDown": "Posunout službu níže",
+    "mobile.manualBookingRemoveService": "Odebrat službu",
+    "mobile.manualBookingNoServicesSelected": "Vyberte jednu nebo více služeb.",
+    "mobile.manualBookingServicesRequired": "Vyberte alespoň jednu službu.",
+    "mobile.manualBookingServiceLimitReached":
+      "V jedné rezervaci lze vybrat nejvýše 20 služeb.",
+    "mobile.manualBookingCurrencyMismatch":
+      "V jedné rezervaci lze kombinovat pouze služby ve stejné měně.",
+    "mobile.manualBookingTotal": "celkem",
     "mobile.manualBookingDate": "Datum *",
     "mobile.manualBookingTime": "Volný termín *",
     "mobile.manualBookingNoSlots": "Pro toto datum nejsou volné termíny.",
@@ -1507,7 +1583,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Archiv",
     "mobile.serviceName": "Název služby *",
     "mobile.serviceChoose": "Vyberte službu",
-    "mobile.serviceSearch": "Hledat podle názvu nebo popisu",
+    "mobile.serviceSearch": "Hledat podle názvu, popisu nebo kategorie",
     "mobile.serviceSearchClear": "Vymazat hledání",
     "mobile.serviceSearchEmpty": "Žádné služby nebyly nalezeny.",
     "mobile.serviceFiltersClear": "Zrušit filtry",
@@ -1549,6 +1625,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "Rezervaci se nepodařilo odeslat. Zkontrolujte připojení a zkuste to znovu.",
     "booking.chooseService": "Vyberte službu",
+    "booking.searchServices": "Hľadať podľa názvu alebo kategórie",
+    "booking.selectedServices": "Vybrané služby",
+    "booking.removeService": "Odstrániť: {name}",
+    "booking.remove": "Odstranit",
+    "booking.totalDuration": "Celkový čas",
+    "booking.totalPrice": "Spolu",
+    "booking.categoryOther": "Bez kategórie",
+    "booking.noMatchingServices": "Nič sa nenašlo. Upravte vyhľadávanie.",
+    "booking.noServices": "Momentálne nie sú dostupné žiadne služby.",
+    "booking.slotNoLongerAvailable":
+      "Tento čas už nie je voľný. Vyberte si iný termín.",
     "booking.chooseDate": "Vyberte datum",
     "booking.chooseTime": "Vyberte čas",
     "booking.yourDetails": "Vaše údaje",
@@ -1653,6 +1740,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "First service",
     "workspace.pricePlaceholder": "Price in CZK",
     "workspace.durationPlaceholder": "Duration in minutes",
+    "workspace.bookingIntervalLabel": "Booking start interval",
+    "workspace.bookingIntervalHelp":
+      "Choose how often start times are offered. Service duration is set separately for each service.",
+    "workspace.bookingInterval15": "Every 15 min",
+    "workspace.bookingInterval30": "Every 30 min",
+    "workspace.bookingInterval60": "Every 60 min",
     "workspace.startTimeLabel": "Workday starts",
     "workspace.endTimeLabel": "Workday ends",
     "workspace.workingDaysLabel": "Working days",
@@ -1673,6 +1766,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
     "workspace.durationInvalid":
       "Enter a whole number between 1 and 1440 minutes.",
+    "workspace.bookingIntervalInvalid": "Choose 15, 30 or 60 minutes.",
     "workspace.workingDaysInvalid": "Choose at least one working day.",
     "workspace.scheduleInvalid":
       "Enter time in HH:MM format. The end must be after the start.",
@@ -1680,7 +1774,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Save and continue",
     "workspace.settingsTitle": "Workspace settings",
     "workspace.settingsDescription":
-      "Update the workspace name, booking link, and regular working hours.",
+      "Update the workspace name, booking link, working hours, and booking start interval.",
     "workspace.settingsEdit": "Edit settings",
     "workspace.settingsName": "Workspace name",
     "workspace.settingsSlug": "Booking link",
@@ -1950,7 +2044,19 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingCustomerName": "Customer name *",
     "mobile.manualBookingCustomerEmail": "Customer email",
     "mobile.manualBookingCustomerPhone": "Customer phone",
-    "mobile.manualBookingService": "Service",
+    "mobile.manualBookingService": "Services",
+    "mobile.manualBookingServices": "Services *",
+    "mobile.manualBookingAddService": "Add service",
+    "mobile.manualBookingMoveServiceUp": "Move service up",
+    "mobile.manualBookingMoveServiceDown": "Move service down",
+    "mobile.manualBookingRemoveService": "Remove service",
+    "mobile.manualBookingNoServicesSelected": "Choose one or more services.",
+    "mobile.manualBookingServicesRequired": "Choose at least one service.",
+    "mobile.manualBookingServiceLimitReached":
+      "You can choose up to 20 services per booking.",
+    "mobile.manualBookingCurrencyMismatch":
+      "Services in one booking must use the same currency.",
+    "mobile.manualBookingTotal": "total",
     "mobile.manualBookingDate": "Date *",
     "mobile.manualBookingTime": "Available time *",
     "mobile.manualBookingNoSlots": "There are no available times on this date.",
@@ -2064,7 +2170,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceArchived": "Archived",
     "mobile.serviceName": "Service name *",
     "mobile.serviceChoose": "Choose a service",
-    "mobile.serviceSearch": "Search by name or description",
+    "mobile.serviceSearch": "Search by name, description, or category",
     "mobile.serviceSearchClear": "Clear search",
     "mobile.serviceSearchEmpty": "No services found.",
     "mobile.serviceFiltersClear": "Clear filters",
@@ -2109,6 +2215,17 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.submitFailed":
       "We couldn't send your request. Check your connection and try again.",
     "booking.chooseService": "Choose a service",
+    "booking.searchServices": "Search by service or category",
+    "booking.selectedServices": "Selected services",
+    "booking.removeService": "Remove {name}",
+    "booking.remove": "Remove",
+    "booking.totalDuration": "Total duration",
+    "booking.totalPrice": "Total",
+    "booking.categoryOther": "Uncategorized",
+    "booking.noMatchingServices": "No services found. Try another search.",
+    "booking.noServices": "There are no services available for booking yet.",
+    "booking.slotNoLongerAvailable":
+      "This time was just taken. Choose another available time.",
     "booking.chooseDate": "Choose a date",
     "booking.chooseTime": "Choose a time",
     "booking.yourDetails": "Your details",
