@@ -3,6 +3,7 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActionButton } from "../../components/ActionButton";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
@@ -79,17 +80,14 @@ export function ProfileTab({
           {t("auth.signOutFailed")}
         </Text>
       ) : null}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isSigningOut }}
+      <ActionButton
         disabled={isSigningOut}
+        label={t("mobile.signOut")}
+        loading={isSigningOut}
+        loadingLabel={t("common.loading")}
         onPress={onSignOut}
-        style={[styles.signOutButton, isSigningOut && styles.disabledButton]}
-      >
-        <Text style={styles.signOutText}>
-          {isSigningOut ? t("common.loading") : t("mobile.signOut")}
-        </Text>
-      </Pressable>
+        variant="destructive"
+      />
       <SettingsModal
         bookingUrl={bookingUrl}
         canManageWorkspace={canManageWorkspace}
@@ -109,7 +107,6 @@ export function ProfileTab({
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
-  disabledButton: { opacity: 0.6 },
   settingsCard: { padding: 0 },
   settingsEntry: {
     alignItems: "center",
@@ -125,14 +122,5 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: "700",
   },
-  signOutButton: {
-    alignItems: "center",
-    borderColor: colors.danger,
-    borderRadius: 999,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 48,
-  },
   signOutError: { ...typography.body, color: colors.danger },
-  signOutText: { ...typography.label, color: colors.danger, fontWeight: "700" },
 });

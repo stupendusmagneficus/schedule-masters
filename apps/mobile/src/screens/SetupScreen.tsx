@@ -4,14 +4,8 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActionButton } from "../components/ActionButton";
 import { mobileEnv } from "../config/env";
 import {
   clearOnboardingDraft,
@@ -276,35 +270,32 @@ function StepActions({
 }) {
   return (
     <>
-      <Pressable
+      <ActionButton
         disabled={busy}
+        label={
+          step === 3 ? t("workspace.setupFinish") : t("workspace.setupNext")
+        }
+        loading={busy}
+        loadingLabel={t("workspace.setupSaving")}
         onPress={onNext}
-        style={[styles.primaryButton, busy && styles.disabledButton]}
-      >
-        <Text style={styles.primaryButtonText}>
-          {busy
-            ? t("workspace.setupSaving")
-            : step === 3
-              ? t("workspace.setupFinish")
-              : t("workspace.setupNext")}
-        </Text>
-      </Pressable>
+        style={styles.actionButton}
+        variant="primary"
+      />
       {canGoBack && (
-        <Pressable disabled={busy} onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>{t("workspace.setupBack")}</Text>
-        </Pressable>
+        <ActionButton
+          disabled={busy}
+          label={t("workspace.setupBack")}
+          onPress={onBack}
+          size="compact"
+          style={styles.actionButton}
+          variant="quiet"
+        />
       )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: { alignItems: "center", minHeight: 44, justifyContent: "center" },
-  backButtonText: {
-    ...typography.label,
-    color: colors.accent,
-    fontWeight: "700",
-  },
   container: {
     backgroundColor: colors.canvas,
     gap: 18,
@@ -312,25 +303,11 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     padding: 20,
   },
-  disabledButton: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
   description: { ...typography.body, color: colors.secondaryText },
   eyebrow: { color: colors.accent, ...typography.eyebrow },
   header: { gap: 12, paddingHorizontal: 4 },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-    width: "100%",
-  },
-  primaryButtonText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
+  actionButton: { width: "100%" },
   progress: {
     ...typography.caption,
     color: colors.primaryText,

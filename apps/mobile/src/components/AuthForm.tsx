@@ -2,11 +2,11 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import type { MessageKey } from "@schedule-app/i18n";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
 import type { AuthMode } from "../features/auth/authentication";
 import type { AuthNotice } from "../features/auth/authNotice";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { ActionButton } from "./ActionButton";
 
 type AuthFormProps = {
   readonly busy: boolean;
@@ -152,34 +152,28 @@ export function AuthForm({
           </Text>
         </View>
       )}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ disabled: busy }}
+      <ActionButton
         disabled={busy}
+        label={t(isSignUp ? "auth.signUp" : "auth.signIn")}
+        loading={busy}
+        loadingLabel={t("common.loading")}
         onPress={onSubmit}
-        style={[styles.primaryButton, busy && styles.disabledButton]}
-      >
-        <Text style={styles.primaryButtonText}>
-          {busy
-            ? t("common.loading")
-            : t(isSignUp ? "auth.signUp" : "auth.signIn")}
-        </Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
+        style={styles.actionButton}
+        variant="primary"
+      />
+      <ActionButton
         disabled={busy}
+        label={t(isSignUp ? "auth.signInPrompt" : "auth.signUpPrompt")}
         onPress={() => onModeChange(isSignUp ? "signIn" : "signUp")}
-      >
-        <Text style={styles.link}>
-          {t(isSignUp ? "auth.signInPrompt" : "auth.signUpPrompt")}
-        </Text>
-      </Pressable>
+        size="compact"
+        style={styles.actionButton}
+        variant="quiet"
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  disabledButton: { opacity: 0.6 },
   error: { ...typography.caption, color: colors.danger },
   field: { gap: 6 },
   form: { gap: 16, width: "100%" },
@@ -219,11 +213,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     minWidth: 44,
   },
-  link: {
-    color: colors.accent,
-    textAlign: "center",
-    ...typography.label,
-  },
+  actionButton: { width: "100%" },
   notice: {
     alignItems: "flex-start",
     borderRadius: radii.control,
@@ -236,20 +226,6 @@ const styles = StyleSheet.create({
   noticeInfo: { backgroundColor: colors.accentSoft },
   noticeInfoText: { color: colors.accentPressed },
   noticeText: { ...typography.metadata, flex: 1 },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: 16,
-    width: "100%",
-  },
-  primaryButtonText: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
   required: { color: colors.danger },
   requiredHint: { ...typography.caption, color: colors.secondaryText },
 });
