@@ -28,6 +28,11 @@ const demoService: Service = {
   sort_order: 0,
 };
 
+const demoBlockStart = new Date();
+demoBlockStart.setHours(13, 0, 0, 0);
+const demoBlockEnd = new Date(demoBlockStart);
+demoBlockEnd.setHours(14, 0, 0, 0);
+
 export const demoData: DemoData = {
   appointments: [
     {
@@ -72,5 +77,13 @@ export const demoData: DemoData = {
     },
   ],
   freeSlots: ["11:00", "14:30", "17:30"],
+  personalBlocks: [
+    {
+      ends_at: demoBlockEnd.toISOString(),
+      id: "demo-personal-block-1",
+      reason: "Oběd",
+      starts_at: demoBlockStart.toISOString(),
+    },
+  ],
   primaryService: demoService,
 };
