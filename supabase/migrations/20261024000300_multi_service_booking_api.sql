@@ -741,7 +741,7 @@ create function public.list_master_appointment_services(
   p_appointment_id uuid
 )
 returns table (
-  position integer,
+  "position" integer,
   service_id uuid,
   service_name text,
   duration_minutes integer,
