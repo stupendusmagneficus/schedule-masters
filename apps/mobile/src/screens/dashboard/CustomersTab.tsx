@@ -59,6 +59,9 @@ export function CustomersTab({
     workspaceId: workspace.id,
   });
   const selected = directory.selectedCustomer;
+  const customerSmsUrl = selected?.phone
+    ? buildCustomerPhoneUrl(selected.phone, "sms")
+    : null;
 
   if (selected) {
     return (
@@ -99,7 +102,27 @@ export function CustomersTab({
         <InfoCard>
           <Text style={styles.sectionTitle}>{t("mobile.customerContact")}</Text>
           {selected.phone ? (
-            <Text style={styles.body}>{selected.phone}</Text>
+            <View style={styles.contactActionRow}>
+              <Text style={styles.body}>{selected.phone}</Text>
+              {customerSmsUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerSms")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerSmsUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="message-text-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
           {selected.email ? (
             <Text style={styles.body}>{selected.email}</Text>
@@ -343,6 +366,19 @@ const styles = StyleSheet.create({
   },
   customerCopy: { flex: 1, gap: 0, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
+  contactActionRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+  },
+  contactAction: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    justifyContent: "center",
+    minHeight: 44,
+    minWidth: 44,
+  },
   customerRow: {
     alignItems: "center",
     flexDirection: "row",
