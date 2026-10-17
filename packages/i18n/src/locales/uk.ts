@@ -235,6 +235,26 @@ export const ukrainianMessages: Messages = {
   "mobile.todayRetry": "Спробувати ще раз",
   "mobile.calendar": "Календар",
   "mobile.calendarSelectDate": "Виберіть дату",
+  "mobile.calendarSelectDays": "Вибрати дати",
+  "mobile.calendarSelectionHint":
+    "Торкніться дат, щоб додати їх до вибору або прибрати з нього.",
+  "mobile.calendarCancelSelection": "Скасувати вибір",
+  "mobile.calendarSelectedDatesCount": "Вибрано дат: {count}",
+  "mobile.calendarOpenClosedDays": "Відкрити вихідні: {count}",
+  "mobile.calendarCloseOpenDays": "Закрити робочі дні: {count}",
+  "mobile.calendarBulkOpenTitle": "Відкрити вибрані дні",
+  "mobile.calendarBulkCloseTitle": "Закрити вибрані дні",
+  "mobile.calendarBulkOpenDescription":
+    "Задайте однаковий робочий час для всіх вибраних вихідних.",
+  "mobile.calendarBulkCloseDescription":
+    "Буде закрито лише вибрані дати. Тижневий графік не зміниться.",
+  "mobile.calendarBulkConflictSummary":
+    "Дати: {dates}. Записи, що залишаться без змін: {count}.",
+  "mobile.calendarBulkSaveFailed": "Не вдалося змінити вибрані дні.",
+  "mobile.calendarBulkInvalidHours":
+    "Кінець робочого часу має бути пізніше за його початок.",
+  "mobile.calendarBulkApply": "Застосувати зміни",
+  "mobile.calendarBulkAppliedDates": "Оброблено дати: {dates}",
   "mobile.customers": "Клієнти",
   "mobile.customerSearch": "Ім’я, телефон або електронна пошта",
   "mobile.customerEmpty":

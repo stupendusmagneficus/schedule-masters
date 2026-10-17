@@ -207,6 +207,21 @@ export type MessageKey =
   | "mobile.todayRetry"
   | "mobile.calendar"
   | "mobile.calendarSelectDate"
+  | "mobile.calendarSelectDays"
+  | "mobile.calendarSelectionHint"
+  | "mobile.calendarCancelSelection"
+  | "mobile.calendarSelectedDatesCount"
+  | "mobile.calendarOpenClosedDays"
+  | "mobile.calendarCloseOpenDays"
+  | "mobile.calendarBulkOpenTitle"
+  | "mobile.calendarBulkCloseTitle"
+  | "mobile.calendarBulkOpenDescription"
+  | "mobile.calendarBulkCloseDescription"
+  | "mobile.calendarBulkConflictSummary"
+  | "mobile.calendarBulkSaveFailed"
+  | "mobile.calendarBulkInvalidHours"
+  | "mobile.calendarBulkApply"
+  | "mobile.calendarBulkAppliedDates"
   | "mobile.customers"
   | "mobile.customerSearch"
   | "mobile.customerEmpty"
@@ -701,6 +716,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
     "mobile.calendarSelectDate": "Выберите дату",
+    "mobile.calendarSelectDays": "Выбрать даты",
+    "mobile.calendarSelectionHint":
+      "Нажимайте на даты, чтобы добавить или убрать их из выбора.",
+    "mobile.calendarCancelSelection": "Отменить выбор",
+    "mobile.calendarSelectedDatesCount": "Выбрано дат: {count}",
+    "mobile.calendarOpenClosedDays": "Открыть выходные: {count}",
+    "mobile.calendarCloseOpenDays": "Закрыть рабочие: {count}",
+    "mobile.calendarBulkOpenTitle": "Открыть выбранные дни",
+    "mobile.calendarBulkCloseTitle": "Закрыть выбранные дни",
+    "mobile.calendarBulkOpenDescription":
+      "Задайте одинаковые рабочие часы для всех выбранных выходных.",
+    "mobile.calendarBulkCloseDescription":
+      "Будут закрыты только выбранные даты. Недельный график не изменится.",
+    "mobile.calendarBulkConflictSummary":
+      "Даты: {dates}. Записей, которые сохранятся без изменений: {count}.",
+    "mobile.calendarBulkSaveFailed": "Не удалось изменить выбранные дни.",
+    "mobile.calendarBulkInvalidHours":
+      "Укажите конец рабочего времени позже начала.",
+    "mobile.calendarBulkApply": "Применить изменения",
+    "mobile.calendarBulkAppliedDates": "Обработаны даты: {dates}",
     "mobile.customers": "Клиенты",
     "mobile.customerSearch": "Имя, телефон или email",
     "mobile.customerEmpty": "Клиентов пока нет. Они появятся после записей.",
@@ -1227,6 +1262,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
     "mobile.calendarSelectDate": "Vyberte datum",
+    "mobile.calendarSelectDays": "Vybrat dny",
+    "mobile.calendarSelectionHint":
+      "Klepnutím na data je přidáte do výběru nebo z něj odeberete.",
+    "mobile.calendarCancelSelection": "Zrušit výběr",
+    "mobile.calendarSelectedDatesCount": "Vybraná data: {count}",
+    "mobile.calendarOpenClosedDays": "Otevřít volné dny: {count}",
+    "mobile.calendarCloseOpenDays": "Uzavřít pracovní dny: {count}",
+    "mobile.calendarBulkOpenTitle": "Otevřít vybrané dny",
+    "mobile.calendarBulkCloseTitle": "Uzavřít vybrané dny",
+    "mobile.calendarBulkOpenDescription":
+      "Nastavte stejnou pracovní dobu pro všechny vybrané volné dny.",
+    "mobile.calendarBulkCloseDescription":
+      "Uzavřou se pouze vybraná data. Týdenní rozvrh zůstane beze změny.",
+    "mobile.calendarBulkConflictSummary":
+      "Data: {dates}. Rezervace, které zůstanou beze změny: {count}.",
+    "mobile.calendarBulkSaveFailed": "Vybrané dny se nepodařilo upravit.",
+    "mobile.calendarBulkInvalidHours":
+      "Konec pracovní doby musí být později než její začátek.",
+    "mobile.calendarBulkApply": "Použít změny",
+    "mobile.calendarBulkAppliedDates": "Zpracovaná data: {dates}",
     "mobile.customers": "Klienti",
     "mobile.customerSearch": "Jméno, telefon nebo e-mail",
     "mobile.customerEmpty":
@@ -1752,6 +1807,26 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
     "mobile.calendarSelectDate": "Choose a date",
+    "mobile.calendarSelectDays": "Select dates",
+    "mobile.calendarSelectionHint":
+      "Tap dates to add or remove them from your selection.",
+    "mobile.calendarCancelSelection": "Cancel selection",
+    "mobile.calendarSelectedDatesCount": "Dates selected: {count}",
+    "mobile.calendarOpenClosedDays": "Open days off: {count}",
+    "mobile.calendarCloseOpenDays": "Close working days: {count}",
+    "mobile.calendarBulkOpenTitle": "Open selected days",
+    "mobile.calendarBulkCloseTitle": "Close selected days",
+    "mobile.calendarBulkOpenDescription":
+      "Set the same working hours for all selected days off.",
+    "mobile.calendarBulkCloseDescription":
+      "Only the selected dates will close. Your weekly schedule stays unchanged.",
+    "mobile.calendarBulkConflictSummary":
+      "Dates: {dates}. Bookings that will stay unchanged: {count}.",
+    "mobile.calendarBulkSaveFailed": "Could not update the selected days.",
+    "mobile.calendarBulkInvalidHours":
+      "Set the end of the work period after its start.",
+    "mobile.calendarBulkApply": "Apply changes",
+    "mobile.calendarBulkAppliedDates": "Dates processed: {dates}",
     "mobile.customers": "Customers",
     "mobile.customerSearch": "Name, phone, or email",
     "mobile.customerEmpty":

@@ -7,10 +7,15 @@ type MasterAppointmentRow =
   Database["public"]["Functions"]["list_master_appointments"]["Returns"][number];
 export type MasterAppointment = Omit<
   MasterAppointmentRow,
-  "is_new_customer" | "is_returning_customer"
+  | "is_new_customer"
+  | "is_returning_customer"
+  | "occupied_ends_at"
+  | "occupied_starts_at"
 > & {
   readonly is_new_customer?: boolean;
   readonly is_returning_customer?: boolean;
+  readonly occupied_ends_at?: string;
+  readonly occupied_starts_at?: string;
 };
 export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];

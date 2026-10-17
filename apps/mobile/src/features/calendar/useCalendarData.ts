@@ -12,6 +12,7 @@ import {
   type AvailabilityOverrideDraft,
   clearAvailabilityDateOverride,
   saveAvailabilityDateOverride,
+  saveAvailabilityDateOverrides,
 } from "../availability/dateOverrides";
 import {
   createPersonalBlock,
@@ -62,6 +63,9 @@ export type CalendarDataController = CalendarData & {
   readonly saveBlock: (draft: PersonalBlockDraft) => Promise<void>;
   readonly saveDateOverride: (
     draft: AvailabilityOverrideDraft,
+  ) => Promise<void>;
+  readonly saveDateOverrides: (
+    drafts: readonly AvailabilityOverrideDraft[],
   ) => Promise<void>;
   readonly clearDateOverride: (date: string) => Promise<void>;
   readonly updateBlock: (
@@ -313,6 +317,27 @@ export function useCalendarData({
     [client, operationGuard, reload, workspaceId],
   );
 
+  const saveDateOverrides = useCallback(
+    async (drafts: readonly AvailabilityOverrideDraft[]) => {
+      if (!client) return;
+      const requestId = operationGuard.begin();
+      setIsSaving(true);
+      setError(null);
+      try {
+        await saveAvailabilityDateOverrides(client, workspaceId, drafts);
+        await reload();
+      } catch (saveError) {
+        if (operationGuard.isCurrent(requestId)) {
+          setError(saveError instanceof Error ? saveError.message : "unknown");
+        }
+        throw saveError;
+      } finally {
+        if (operationGuard.isCurrent(requestId)) setIsSaving(false);
+      }
+    },
+    [client, operationGuard, reload, workspaceId],
+  );
+
   const clearDateOverride = useCallback(
     async (date: string) => {
       if (!client) return;
@@ -450,6 +475,7 @@ export function useCalendarData({
     removeBlock,
     saveBlock,
     saveDateOverride,
+    saveDateOverrides,
     selectedDate,
     setSelectedDate,
     setView,
