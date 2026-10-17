@@ -139,6 +139,63 @@ export type Database = {
           },
         ]
       }
+      appointment_services: {
+        Row: {
+          appointment_id: string
+          buffer_after_minutes_snapshot: number
+          buffer_before_minutes_snapshot: number
+          created_at: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot: string
+          duration_minutes_snapshot: number
+          position: number
+          price_amount_snapshot: number
+          service_id?: string | null
+          service_name_snapshot: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string
+          buffer_after_minutes_snapshot?: number
+          buffer_before_minutes_snapshot?: number
+          created_at?: string
+          currency_snapshot?: string
+          duration_minutes_snapshot?: number
+          position?: number
+          price_amount_snapshot?: number
+          service_id?: string | null
+          service_name_snapshot?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_services_appointment_id_workspace_id_fkey"
+            columns: ["appointment_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "appointment_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           buffer_after_minutes_snapshot: number
@@ -258,63 +315,6 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      appointment_services: {
-        Row: {
-          appointment_id: string
-          buffer_after_minutes_snapshot: number
-          buffer_before_minutes_snapshot: number
-          created_at: string
-          currency_snapshot: string
-          duration_minutes_snapshot: number
-          position: number
-          price_amount_snapshot: number
-          service_id: string | null
-          service_name_snapshot: string
-          workspace_id: string
-        }
-        Insert: {
-          appointment_id: string
-          buffer_after_minutes_snapshot?: number
-          buffer_before_minutes_snapshot?: number
-          created_at?: string
-          currency_snapshot: string
-          duration_minutes_snapshot: number
-          position: number
-          price_amount_snapshot: number
-          service_id?: string | null
-          service_name_snapshot: string
-          workspace_id: string
-        }
-        Update: {
-          appointment_id?: string
-          buffer_after_minutes_snapshot?: number
-          buffer_before_minutes_snapshot?: number
-          created_at?: string
-          currency_snapshot?: string
-          duration_minutes_snapshot?: number
-          position?: number
-          price_amount_snapshot?: number
-          service_id?: string | null
-          service_name_snapshot?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "appointment_services_appointment_id_workspace_id_fkey"
-            columns: ["appointment_id", "workspace_id"]
-            isOneToOne: false
-            referencedRelation: "appointments"
-            referencedColumns: ["id", "workspace_id"]
-          },
-          {
-            foreignKeyName: "appointment_services_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -1211,7 +1211,11 @@ export type Database = {
         }[]
       }
       get_master_available_slots_for_services: {
-        Args: { p_date: string; p_service_ids: string[]; p_workspace_id: string }
+        Args: {
+          p_date: string
+          p_service_ids: string[]
+          p_workspace_id: string
+        }
         Returns: {
           ends_at: string
           starts_at: string
@@ -1248,6 +1252,17 @@ export type Database = {
         Args: { target_workspace_id: string }
         Returns: boolean
       }
+      list_master_appointment_services: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          currency: string
+          duration_minutes: number
+          position: number
+          price_amount: number
+          service_id: string | null
+          service_name: string
+        }[]
+      }
       list_master_appointments: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
         Returns: {
@@ -1267,17 +1282,6 @@ export type Database = {
           source: Database["public"]["Enums"]["appointment_source"]
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
-        }[]
-      }
-      list_master_appointment_services: {
-        Args: { p_appointment_id: string; p_workspace_id: string }
-        Returns: {
-          currency: string
-          duration_minutes: number
-          position: number
-          price_amount: number
-          service_id: string | null
-          service_name: string
         }[]
       }
       list_master_availability_blocks: {
