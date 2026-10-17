@@ -26,10 +26,7 @@ import {
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
-import {
-  buildCustomerEmailUrl,
-  buildCustomerPhoneUrl,
-} from "../../features/customers/customerContact";
+import { buildCustomerPhoneUrl } from "../../features/customers/customerContact";
 import type { CustomerProfile } from "../../features/customers/customerDirectory";
 import { anonymizeCustomer } from "../../features/customers/customerDirectory";
 import { useCustomerDirectory } from "../../features/customers/useCustomerDirectory";
@@ -68,9 +65,6 @@ export function CustomersTab({
     : null;
   const customerCallUrl = selected?.phone
     ? buildCustomerPhoneUrl(selected.phone, "call")
-    : null;
-  const customerEmailUrl = selected?.email
-    ? buildCustomerEmailUrl(selected.email)
     : null;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isDeletingCustomer, setDeletingCustomer] = useState(false);
@@ -122,6 +116,46 @@ export function CustomersTab({
               {t("mobile.customerVisitCount")}: {selected.completed_visits}
             </Text>
           </View>
+          {selected.phone ? (
+            <View style={styles.contactActions}>
+              {customerCallUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerCall")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerCallUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="phone-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+              {customerSmsUrl ? (
+                <Pressable
+                  accessibilityLabel={t("mobile.customerSms")}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    void Linking.openURL(customerSmsUrl).catch(() =>
+                      Alert.alert(t("mobile.customerContactActionFailed")),
+                    )
+                  }
+                  style={styles.contactAction}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accent}
+                    name="message-text-outline"
+                    size={22}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
         </View>
         <Pressable
           accessibilityRole="button"
@@ -135,72 +169,12 @@ export function CustomersTab({
         <InfoCard>
           <Text style={styles.sectionTitle}>{t("mobile.customerContact")}</Text>
           {selected.phone ? (
-            <View style={styles.contactActionRow}>
-              <Text style={styles.body}>{selected.phone}</Text>
-              <View style={styles.contactActions}>
-                {customerCallUrl ? (
-                  <Pressable
-                    accessibilityLabel={t("mobile.customerCall")}
-                    accessibilityRole="button"
-                    onPress={() =>
-                      void Linking.openURL(customerCallUrl).catch(() =>
-                        Alert.alert(t("mobile.customerContactActionFailed")),
-                      )
-                    }
-                    style={styles.contactAction}
-                  >
-                    <MaterialCommunityIcons
-                      color={colors.accent}
-                      name="phone-outline"
-                      size={22}
-                    />
-                  </Pressable>
-                ) : null}
-                {customerSmsUrl ? (
-                  <Pressable
-                    accessibilityLabel={t("mobile.customerSms")}
-                    accessibilityRole="button"
-                    onPress={() =>
-                      void Linking.openURL(customerSmsUrl).catch(() =>
-                        Alert.alert(t("mobile.customerContactActionFailed")),
-                      )
-                    }
-                    style={styles.contactAction}
-                  >
-                    <MaterialCommunityIcons
-                      color={colors.accent}
-                      name="message-text-outline"
-                      size={22}
-                    />
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
+            <Text style={styles.body}>{selected.phone}</Text>
           ) : null}
           {selected.email ? (
-            <View style={styles.contactActionRow}>
-              <Text numberOfLines={1} style={styles.body}>
-                {selected.email}
-              </Text>
-              {customerEmailUrl ? (
-                <Pressable
-                  accessibilityLabel={t("mobile.customerEmail")}
-                  accessibilityRole="button"
-                  onPress={() =>
-                    void Linking.openURL(customerEmailUrl).catch(() =>
-                      Alert.alert(t("mobile.customerContactActionFailed")),
-                    )
-                  }
-                  style={styles.contactAction}
-                >
-                  <MaterialCommunityIcons
-                    color={colors.accent}
-                    name="email-outline"
-                    size={22}
-                  />
-                </Pressable>
-              ) : null}
-            </View>
+            <Text numberOfLines={1} style={styles.body}>
+              {selected.email}
+            </Text>
           ) : null}
           {!selected.phone && !selected.email ? (
             <Text style={styles.helper}>—</Text>
@@ -476,12 +450,6 @@ const styles = StyleSheet.create({
   },
   customerCopy: { flex: 1, gap: 0, minWidth: 0 },
   customerName: { ...typography.label, color: colors.primaryText },
-  contactActionRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "space-between",
-  },
   contactActions: { flexDirection: "row", gap: 4 },
   deleteActions: {
     flexDirection: "row",

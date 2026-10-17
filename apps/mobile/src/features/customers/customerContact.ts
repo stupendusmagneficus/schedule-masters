@@ -4,18 +4,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 type CustomerContactClient = SupabaseClient<Database>;
 export type CustomerPhoneAction = "call" | "sms";
 
-export function buildCustomerEmailUrl(email: string): string | null {
-  const normalizedEmail = email.trim();
-  if (
-    !normalizedEmail ||
-    /[\s<>?#&]/.test(normalizedEmail) ||
-    !/^[^@]+@[^@]+\.[^@]+$/.test(normalizedEmail)
-  ) {
-    return null;
-  }
-  return `mailto:${normalizedEmail}`;
-}
-
 export async function getMasterCustomerPhone(
   client: CustomerContactClient,
   workspaceId: string,

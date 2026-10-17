@@ -2,7 +2,6 @@ import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
-  buildCustomerEmailUrl,
   buildCustomerPhoneUrl,
   getMasterCustomerPhone,
 } from "./customerContact";
@@ -81,16 +80,5 @@ describe("customer contact", () => {
       "sms:+420123456789",
     );
     expect(buildCustomerPhoneUrl("—", "call")).toBeNull();
-  });
-
-  it("builds an email composer URL only for a valid address", () => {
-    expect(buildCustomerEmailUrl(" anna@example.test ")).toBe(
-      "mailto:anna@example.test",
-    );
-    expect(buildCustomerEmailUrl("invalid email")).toBeNull();
-    expect(
-      buildCustomerEmailUrl("anna@example.test?bcc=other@example.test"),
-    ).toBe(null);
-    expect(buildCustomerEmailUrl(" ")).toBeNull();
   });
 });

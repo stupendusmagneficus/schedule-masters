@@ -211,7 +211,6 @@ export const slovakMessages: Messages = {
   "mobile.customerContactLoading": "Načítava sa telefónne číslo…",
   "mobile.customerContactLoadFailed": "Kontakt klienta sa nepodarilo načítať.",
   "mobile.customerCall": "Zavolať",
-  "mobile.customerEmail": "Napísať e-mail",
   "mobile.customerSms": "Poslať SMS",
   "mobile.customerContactActionFailed":
     "Nepodarilo sa otvoriť aplikáciu na kontaktovanie.",

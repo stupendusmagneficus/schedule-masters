@@ -210,7 +210,6 @@ export const ukrainianMessages: Messages = {
   "mobile.customerContactLoading": "Завантаження номера телефону…",
   "mobile.customerContactLoadFailed": "Не вдалося завантажити контакт клієнта.",
   "mobile.customerCall": "Зателефонувати",
-  "mobile.customerEmail": "Написати електронного листа",
   "mobile.customerSms": "Надіслати SMS",
   "mobile.customerContactActionFailed":
     "Не вдалося відкрити застосунок для зв’язку.",

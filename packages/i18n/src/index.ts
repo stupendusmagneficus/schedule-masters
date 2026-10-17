@@ -187,7 +187,6 @@ export type MessageKey =
   | "mobile.customerContactLoading"
   | "mobile.customerContactLoadFailed"
   | "mobile.customerCall"
-  | "mobile.customerEmail"
   | "mobile.customerSms"
   | "mobile.customerContactActionFailed"
   | "mobile.confirmBooking"
@@ -698,7 +697,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContactLoading": "Загружаем номер телефона…",
     "mobile.customerContactLoadFailed": "Не удалось загрузить контакт клиента.",
     "mobile.customerCall": "Позвонить",
-    "mobile.customerEmail": "Написать на email",
     "mobile.customerSms": "Написать SMS",
     "mobile.customerContactActionFailed":
       "Не удалось открыть приложение для связи.",
@@ -1255,7 +1253,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContactLoading": "Načítání telefonního čísla…",
     "mobile.customerContactLoadFailed": "Kontakt klienta se nepodařilo načíst.",
     "mobile.customerCall": "Zavolat",
-    "mobile.customerEmail": "Napsat e-mail",
     "mobile.customerSms": "Napsat SMS",
     "mobile.customerContactActionFailed":
       "Aplikaci pro kontakt se nepodařilo otevřít.",
@@ -1810,7 +1807,6 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContactLoadFailed":
       "Could not load the customer's contact.",
     "mobile.customerCall": "Call",
-    "mobile.customerEmail": "Email customer",
     "mobile.customerSms": "Text by SMS",
     "mobile.customerContactActionFailed": "Could not open the contact app.",
     "mobile.confirmBooking": "Confirm booking",
