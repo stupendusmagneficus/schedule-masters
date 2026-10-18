@@ -189,9 +189,12 @@ export function TodayTab({
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
           <ScheduleSectionHeader
+            onOpenFreeSlots={onOpenFreeSlots}
+            showFreeSlots={Boolean(hasActiveServices || demoData)}
             title={
               isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
             }
+            t={t}
           />
           {demoAppointments.length ? (
             <View style={styles.appointmentsList}>
@@ -217,10 +220,13 @@ export function TodayTab({
       {!demoData ? (
         <InfoCard style={styles.scheduleCard}>
           <ScheduleSectionHeader
+            onOpenFreeSlots={onOpenFreeSlots}
+            showFreeSlots={Boolean(hasActiveServices)}
             title={
               isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
             }
             isLoading={appointmentsRefreshing}
+            t={t}
           />
           {appointmentsLoading && !appointmentsRefreshing ? (
             <View accessibilityLiveRegion="polite" style={styles.state}>
@@ -313,10 +319,6 @@ export function TodayTab({
             ) : null
           }
         />
-      ) : null}
-
-      {hasActiveServices || demoData ? (
-        <FreeSlotsAction onPress={onOpenFreeSlots} t={t} />
       ) : null}
 
       {!demoData && !isPastDate ? (
@@ -420,11 +422,26 @@ const styles = StyleSheet.create({
   scheduleHeader: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.compact,
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  freeSlotsAction: { alignSelf: "flex-start", borderRadius: radii.pill },
+  scheduleTitle: { flexShrink: 1 },
+  freeSlotsLink: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 4,
+  },
+  freeSlotsText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
+  freeSlotsPressed: { opacity: 0.72 },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
@@ -444,43 +461,42 @@ const styles = StyleSheet.create({
 
 function ScheduleSectionHeader({
   isLoading = false,
+  onOpenFreeSlots,
+  showFreeSlots,
   title,
-}: {
-  readonly isLoading?: boolean;
-  readonly title: string;
-}) {
-  return (
-    <View style={styles.scheduleHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {isLoading ? (
-        <ActivityIndicator color={colors.accent} size="small" />
-      ) : null}
-    </View>
-  );
-}
-
-function FreeSlotsAction({
-  onPress,
   t,
 }: {
-  readonly onPress: () => void;
+  readonly isLoading?: boolean;
+  readonly onOpenFreeSlots: () => void;
+  readonly showFreeSlots: boolean;
+  readonly title: string;
   readonly t: TodayTabProps["t"];
 }) {
   return (
-    <ActionButton
-      icon={
-        <MaterialCommunityIcons
-          color={colors.accent}
-          name="calendar-search"
-          size={18}
-        />
-      }
-      label={t("mobile.freeSlots")}
-      onPress={onPress}
-      size="compact"
-      style={styles.freeSlotsAction}
-      variant="secondary"
-    />
+    <View style={styles.scheduleHeader}>
+      <Text style={[styles.sectionTitle, styles.scheduleTitle]}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator color={colors.accent} size="small" />
+      ) : null}
+      {showFreeSlots ? (
+        <Pressable
+          accessibilityLabel={t("mobile.freeSlots")}
+          accessibilityRole="button"
+          onPress={onOpenFreeSlots}
+          style={({ pressed }) => [
+            styles.freeSlotsLink,
+            pressed && styles.freeSlotsPressed,
+          ]}
+        >
+          <MaterialCommunityIcons
+            color={colors.accent}
+            name="calendar-search"
+            size={18}
+          />
+          <Text style={styles.freeSlotsText}>{t("mobile.freeSlots")}</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
