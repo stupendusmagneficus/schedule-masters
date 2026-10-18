@@ -230,7 +230,7 @@ test.describe("mobile web smoke", () => {
           document.documentElement.clientWidth,
       );
     expect(localePickerFits).toBe(true);
-    await page.getByRole("radio", { name: "UK" }).click();
+    await page.getByRole("radio", { name: "UA" }).click();
 
     await expect(page.getByText("Мова", { exact: true })).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("lang", "uk");
@@ -318,17 +318,23 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
     await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
 
+    // Pick a future date so the demo still works after the current day's
+    // morning slots have passed.
+    await page.getByRole("button", { name: "Následující datum" }).click();
+
     await page
       .getByRole("button", {
         name: /08:00, Klepnutím vytvoříte rezervaci/,
       })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Co přidat v tomto čase?" }),
+      page.getByRole("heading", { name: "Vyberte čas začátku" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Přidat pauzu" }).first(),
-    ).toBeDisabled();
+    await expect(page.getByRole("tab", { name: "Rezervace" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByRole("tab", { name: "Přestávka" })).toBeDisabled();
     await page.getByRole("button", { name: "Nová rezervace" }).last().click();
     await expect(
       page.getByText(
@@ -516,6 +522,14 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 780 });
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, "share", {
+        configurable: true,
+        value: async (content: { text?: string }) => {
+          window.localStorage.setItem("sharedSchedule", content.text ?? "");
+        },
+      });
+    });
     await page.goto("/?demo=1");
 
     const selectedDate = await page.evaluate(() => {
@@ -552,6 +566,23 @@ test.describe("mobile web smoke", () => {
       .boundingBox();
     expect(freeSlotsButtonBox?.y).toBeLessThan(summaryBox?.y ?? 0);
     await freeSlotsButton.click();
+    await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(
+      page.getByRole("button", { name: "Sdílet rozvrh" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Sdílet rozvrh" }).click();
+    await expect(
+      page.getByText("Vyberte aplikaci pro odeslání rozvrhu."),
+    ).toBeVisible();
+    const sharedSchedule = await page.evaluate(() =>
+      window.localStorage.getItem("sharedSchedule"),
+    );
+    expect(sharedSchedule).toContain("Gel manicure");
+    expect(sharedSchedule).toContain("Elena Beauty");
+    await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: selectedDate }),
@@ -570,6 +601,7 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
 
     await page.getByRole("button", { name: "Volné termíny" }).click();
+    await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await page.getByRole("button", { name: "11:00", exact: true }).click();
     await page.getByRole("button", { name: "Objednat klienta" }).click();
 

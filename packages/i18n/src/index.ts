@@ -1,7 +1,7 @@
 import { slovakMessages } from "./locales/sk";
 import { ukrainianMessages } from "./locales/uk";
 
-export const supportedLocales = ["ru", "cz", "en", "sk", "uk"] as const;
+export const supportedLocales = ["en", "cz", "sk", "ru", "uk"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const fallbackLocale: SupportedLocale = "en";
@@ -132,6 +132,13 @@ export type MessageKey =
   | "mobile.freeSlotsNoSlots"
   | "mobile.freeSlotsLoadFailed"
   | "mobile.freeSlotsBook"
+  | "mobile.freeSlotsShareTab"
+  | "mobile.freeSlotsBookTab"
+  | "mobile.freeSlotsShareDescription"
+  | "mobile.freeSlotsShareAction"
+  | "mobile.freeSlotsShareNoAvailability"
+  | "mobile.freeSlotsShareFailed"
+  | "mobile.freeSlotsShareOpened"
   | "mobile.bookingRequests"
   | "mobile.waitingList"
   | "mobile.waitingListAdd"
@@ -283,7 +290,9 @@ export type MessageKey =
   | "mobile.calendarPreviousWeek"
   | "mobile.calendarNextWeek"
   | "mobile.calendarTapToBook"
-  | "mobile.calendarSlotActionTitle"
+  | "mobile.calendarChooseTime"
+  | "mobile.calendarBookingTab"
+  | "mobile.calendarBreakTab"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
@@ -664,6 +673,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Не удалось загрузить свободные окна. Попробуйте ещё раз.",
     "mobile.freeSlotsBook": "Записать клиента",
+    "mobile.freeSlotsShareTab": "Поделиться",
+    "mobile.freeSlotsBookTab": "Найти и записать",
+    "mobile.freeSlotsShareDescription":
+      "Поделитесь свободными окнами с клиентом через приложение для сообщений.",
+    "mobile.freeSlotsShareAction": "Поделиться расписанием",
+    "mobile.freeSlotsShareNoAvailability":
+      "В этом месяце нет свободных окон для выбранной услуги.",
+    "mobile.freeSlotsShareFailed": "Не удалось открыть меню отправки.",
+    "mobile.freeSlotsShareOpened":
+      "Выберите приложение, чтобы отправить расписание.",
     "mobile.bookingRequests": "Заявки",
     "mobile.waitingList": "Лист ожидания",
     "mobile.waitingListAdd": "Добавить в лист ожидания",
@@ -847,7 +866,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Предыдущая неделя",
     "mobile.calendarNextWeek": "Следующая неделя",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
-    "mobile.calendarSlotActionTitle": "Что добавить на это время?",
+    "mobile.calendarChooseTime": "Выберите время начала",
+    "mobile.calendarBookingTab": "Запись",
+    "mobile.calendarBreakTab": "Перерыв",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
@@ -1259,6 +1280,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Volné termíny se nepodařilo načíst. Zkuste to znovu.",
     "mobile.freeSlotsBook": "Objednat klienta",
+    "mobile.freeSlotsShareTab": "Sdílet",
+    "mobile.freeSlotsBookTab": "Najít a objednat",
+    "mobile.freeSlotsShareDescription":
+      "Sdílejte volné termíny s klientem přes aplikaci pro zprávy.",
+    "mobile.freeSlotsShareAction": "Sdílet rozvrh",
+    "mobile.freeSlotsShareNoAvailability":
+      "Tento měsíc nejsou pro vybranou službu volné termíny.",
+    "mobile.freeSlotsShareFailed": "Nabídku sdílení se nepodařilo otevřít.",
+    "mobile.freeSlotsShareOpened": "Vyberte aplikaci pro odeslání rozvrhu.",
     "mobile.bookingRequests": "Žádosti",
     "mobile.waitingList": "Seznam náhradníků",
     "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
@@ -1442,7 +1472,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Předchozí týden",
     "mobile.calendarNextWeek": "Následující týden",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
-    "mobile.calendarSlotActionTitle": "Co přidat v tomto čase?",
+    "mobile.calendarChooseTime": "Vyberte čas začátku",
+    "mobile.calendarBookingTab": "Rezervace",
+    "mobile.calendarBreakTab": "Přestávka",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
@@ -1851,6 +1883,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Couldn't load available times. Please try again.",
     "mobile.freeSlotsBook": "Book client",
+    "mobile.freeSlotsShareTab": "Share",
+    "mobile.freeSlotsBookTab": "Find & book",
+    "mobile.freeSlotsShareDescription":
+      "Share available times with a client through your messaging app.",
+    "mobile.freeSlotsShareAction": "Share schedule",
+    "mobile.freeSlotsShareNoAvailability":
+      "No times are available for this service this month.",
+    "mobile.freeSlotsShareFailed": "Couldn't open the share menu.",
+    "mobile.freeSlotsShareOpened": "Choose an app to send the schedule.",
     "mobile.bookingRequests": "Requests",
     "mobile.waitingList": "Waiting list",
     "mobile.waitingListAdd": "Add to waiting list",
@@ -2034,7 +2075,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Previous week",
     "mobile.calendarNextWeek": "Next week",
     "mobile.calendarTapToBook": "Tap to create a booking",
-    "mobile.calendarSlotActionTitle": "What would you like to add?",
+    "mobile.calendarChooseTime": "Choose a start time",
+    "mobile.calendarBookingTab": "Booking",
+    "mobile.calendarBreakTab": "Break",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",
@@ -2464,9 +2507,9 @@ export function formatCurrency(
 }
 
 export const localeLabels: Record<SupportedLocale, string> = {
-  ru: "RU",
-  cz: "CZ",
   en: "EN",
+  cz: "CZ",
   sk: "SK",
-  uk: "UK",
+  ru: "RU",
+  uk: "UA",
 };

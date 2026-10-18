@@ -441,20 +441,35 @@ describe("Supabase public booking contract", () => {
           ).error,
         ).toBeNull();
 
+        const quarterHourSlots = await owner.client.rpc(
+          "get_master_available_slots_for_services",
+          {
+            p_date: workDate,
+            p_service_ids: serviceIds,
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(quarterHourSlots.error).toBeNull();
+        expect(
+          quarterHourSlots.data?.some(
+            (slot) => slot.starts_at === "2030-01-07T08:15:00+00:00",
+          ),
+        ).toBe(true);
+
         const booking = await owner.client.rpc(
           "create_master_booking_with_services",
           {
             p_idempotency_key: `manual-multi-service-${suffix}`,
             p_name: "Manual Multi Service Customer",
             p_service_ids: serviceIds,
-            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_starts_at: "2030-01-07T08:15:00.000Z",
             p_workspace_id: workspaceId,
           },
         );
         expect(booking.error).toBeNull();
         expect(booking.data).toMatchObject({
           durationMinutes: 150,
-          endsAt: "2030-01-07T10:30:00+00:00",
+          endsAt: "2030-01-07T10:45:00+00:00",
           priceAmount: 2100,
           serviceName: "Manicure + Pedicure",
         });
@@ -476,7 +491,7 @@ describe("Supabase public booking contract", () => {
             p_idempotency_key: `manual-multi-service-${suffix}`,
             p_name: "Manual Multi Service Customer",
             p_service_ids: serviceIds,
-            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_starts_at: "2030-01-07T08:15:00.000Z",
             p_workspace_id: workspaceId,
           },
         );
@@ -491,7 +506,7 @@ describe("Supabase public booking contract", () => {
             p_idempotency_key: `manual-multi-service-${suffix}`,
             p_name: "Manual Multi Service Customer",
             p_service_ids: [...serviceIds].reverse(),
-            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_starts_at: "2030-01-07T08:15:00.000Z",
             p_workspace_id: workspaceId,
           },
         );
@@ -736,8 +751,20 @@ describe("Supabase public booking contract", () => {
         );
         expect(masterSlots.error).toBeNull();
         expect(publicSlots.error).toBeNull();
-        expect(masterSlots.data).toHaveLength(5);
-        expect(publicSlots.data).toEqual(masterSlots.data);
+        expect(masterSlots.data).toHaveLength(9);
+        expect(publicSlots.data).toHaveLength(5);
+        expect(
+          masterSlots.data?.some(
+            (slot) => slot.starts_at === "2030-01-07T11:15:00+00:00",
+          ),
+        ).toBe(true);
+        expect(
+          publicSlots.data?.every((publicSlot) =>
+            masterSlots.data?.some(
+              (masterSlot) => masterSlot.starts_at === publicSlot.starts_at,
+            ),
+          ),
+        ).toBe(true);
         expect(
           new Date(masterSlots.data?.[0]?.starts_at ?? "").toISOString(),
         ).toBe("2030-01-07T11:00:00.000Z");
@@ -857,7 +884,7 @@ describe("Supabase public booking contract", () => {
           },
         );
         expect(resetSlots.error).toBeNull();
-        expect(resetSlots.data).toHaveLength(15);
+        expect(resetSlots.data?.length).toBeGreaterThan(15);
 
         const bulkOverrides = await owner.client.rpc(
           "set_master_availability_date_overrides",
@@ -1298,7 +1325,7 @@ describe("Supabase public booking contract", () => {
   );
 
   rlsIntegrationTest(
-    "uses one tenant-scoped availability contract for master and public booking",
+    "uses tenant-scoped availability while allowing finer manual booking slots",
     async () => {
       if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
         return;
@@ -1462,7 +1489,18 @@ describe("Supabase public booking contract", () => {
         p_slug: `availability-${suffix}`,
       });
       expect(publicSlots.error).toBeNull();
-      expect(publicSlots.data).toEqual(masterSlots.data);
+      expect(
+        masterSlots.data?.some(
+          (slot) => slot.starts_at === "2030-03-28T08:15:00+00:00",
+        ),
+      ).toBe(true);
+      expect(
+        publicSlots.data?.every((publicSlot) =>
+          masterSlots.data?.some(
+            (masterSlot) => masterSlot.starts_at === publicSlot.starts_at,
+          ),
+        ),
+      ).toBe(true);
       expect(Object.keys(publicSlots.data?.[0] ?? {}).sort()).toEqual([
         "ends_at",
         "starts_at",

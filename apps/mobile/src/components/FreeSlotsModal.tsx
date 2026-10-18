@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import type { DemoData } from "../demo/types";
+import { buildFreeSlotsShareMessage } from "../features/appointments/freeSlotsShareMessage";
 import {
   listMasterMonthAvailableSlots,
   type MonthAvailableSlot,
@@ -56,6 +58,7 @@ export function FreeSlotsModal({
   visible,
   workspace,
 }: FreeSlotsModalProps) {
+  const [activeMode, setActiveMode] = useState<"share" | "book">("share");
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [monthDate, setMonthDate] = useState(initialDate);
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -63,6 +66,9 @@ export function FreeSlotsModal({
   const [slots, setSlots] = useState<MonthAvailableSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "opened" | "failed">(
+    "idle",
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -70,6 +76,8 @@ export function FreeSlotsModal({
     setSelectedDate(initialDate);
     setSelectedStart(null);
     setServiceId(services[0]?.id ?? "");
+    setActiveMode("share");
+    setShareStatus("idle");
   }, [initialDate, services, visible]);
 
   useEffect(() => {
@@ -147,6 +155,32 @@ export function FreeSlotsModal({
     { month: "long", timeZone: "UTC", year: "numeric" },
   );
   const selectedService = services.find((service) => service.id === serviceId);
+  const shareMessage = buildFreeSlotsShareMessage({
+    heading: t("mobile.freeSlots"),
+    locale,
+    serviceName: selectedService?.name ?? "",
+    slots: displaySlots,
+    timezone: workspace.timezone,
+    workspaceName: workspace.name,
+  });
+  const shareDisabled =
+    !selectedService || !availableDates.size || isLoading || hasError;
+
+  async function shareSchedule() {
+    if (shareDisabled) return;
+    setShareStatus("idle");
+    try {
+      const result = await Share.share({
+        message: shareMessage,
+        title: t("mobile.freeSlots"),
+      });
+      if (!result || result.action === Share.sharedAction) {
+        setShareStatus("opened");
+      }
+    } catch {
+      setShareStatus("failed");
+    }
+  }
 
   return (
     <FullscreenModal
@@ -155,28 +189,68 @@ export function FreeSlotsModal({
       title={t("mobile.freeSlots")}
       visible={visible}
       footer={
-        <Pressable
-          accessibilityRole="button"
-          disabled={!selectedService || !selectedStart || isLoading}
-          onPress={() => {
-            if (selectedService && selectedStart) {
-              onBook(selectedService.id, selectedDate, selectedStart);
-            }
-          }}
-          style={({ pressed }) => [
-            styles.bookButton,
-            (!selectedService || !selectedStart || isLoading) &&
-              styles.disabled,
-            pressed && styles.pressed,
-          ]}
-        >
-          <Text style={styles.bookButtonText}>{t("mobile.freeSlotsBook")}</Text>
-        </Pressable>
+        activeMode === "share" ? (
+          <View style={styles.footerContent}>
+            {shareStatus !== "idle" ? (
+              <Text
+                accessibilityRole={
+                  shareStatus === "failed" ? "alert" : undefined
+                }
+                style={
+                  shareStatus === "failed" ? styles.errorMessage : styles.helper
+                }
+              >
+                {t(
+                  shareStatus === "failed"
+                    ? "mobile.freeSlotsShareFailed"
+                    : "mobile.freeSlotsShareOpened",
+                )}
+              </Text>
+            ) : null}
+            <PrimaryButton
+              disabled={shareDisabled}
+              label={t("mobile.freeSlotsShareAction")}
+              onPress={() => void shareSchedule()}
+            />
+          </View>
+        ) : (
+          <PrimaryButton
+            disabled={!selectedService || !selectedStart || isLoading}
+            label={t("mobile.freeSlotsBook")}
+            onPress={() => {
+              if (selectedService && selectedStart) {
+                onBook(selectedService.id, selectedDate, selectedStart);
+              }
+            }}
+          />
+        )
       }
     >
       <ScrollView contentContainerStyle={styles.content}>
+        <View accessibilityRole="tablist" style={styles.modeTabs}>
+          <ModeTab
+            active={activeMode === "share"}
+            label={t("mobile.freeSlotsShareTab")}
+            onPress={() => {
+              setActiveMode("share");
+              setShareStatus("idle");
+            }}
+          />
+          <ModeTab
+            active={activeMode === "book"}
+            label={t("mobile.freeSlotsBookTab")}
+            onPress={() => {
+              setActiveMode("book");
+              setShareStatus("idle");
+            }}
+          />
+        </View>
         <Text style={styles.description}>
-          {t("mobile.freeSlotsDescription")}
+          {t(
+            activeMode === "share"
+              ? "mobile.freeSlotsShareDescription"
+              : "mobile.freeSlotsDescription",
+          )}
         </Text>
         <Text style={styles.sectionTitle}>
           {t("mobile.freeSlotsChooseService")}
@@ -187,6 +261,7 @@ export function FreeSlotsModal({
           onSelect={(service) => {
             setServiceId(service.id);
             setSelectedStart(null);
+            setShareStatus("idle");
           }}
           selectedService={selectedService ?? null}
           services={services}
@@ -202,6 +277,7 @@ export function FreeSlotsModal({
               setMonthDate(previous);
               setSelectedDate(previous);
               setSelectedStart(null);
+              setShareStatus("idle");
             }}
             style={styles.monthArrow}
           >
@@ -218,81 +294,86 @@ export function FreeSlotsModal({
               setMonthDate(next);
               setSelectedDate(next);
               setSelectedStart(null);
+              setShareStatus("idle");
             }}
             style={styles.monthArrow}
           >
             <Text style={styles.arrowText}>›</Text>
           </Pressable>
         </View>
-        <Text style={styles.sectionTitle}>
-          {t("mobile.freeSlotsChooseDate")}
-        </Text>
-        <View style={styles.calendar}>
-          {weekdayLabels.map((label, index) => (
-            <Text key={String(index)} style={styles.weekday}>
-              {label}
+        {activeMode === "book" ? (
+          <>
+            <Text style={styles.sectionTitle}>
+              {t("mobile.freeSlotsChooseDate")}
             </Text>
-          ))}
-          {calendar.dates.map((date) => {
-            const available = availableDates.has(date);
-            const inMonth = date.slice(0, 7) === monthDate.slice(0, 7);
-            const selected = date === selectedDate;
-            return (
-              <Pressable
-                accessibilityLabel={formatDate(
-                  new Date(`${date}T12:00:00.000Z`),
-                  locale,
-                  {
-                    day: "numeric",
-                    month: "long",
-                    timeZone: "UTC",
-                    year: "numeric",
-                  },
-                )}
-                accessibilityRole="button"
-                accessibilityState={{
-                  disabled: !available || !inMonth,
-                  selected,
-                }}
-                aria-pressed={selected}
-                disabled={!available || !inMonth || isLoading}
-                key={date}
-                onPress={() => {
-                  setSelectedDate(date);
-                  setSelectedStart(null);
-                }}
-                style={[
-                  styles.day,
-                  !inMonth && styles.outsideDay,
-                  available && styles.availableDay,
-                  selected && styles.selectedDay,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.dayText,
-                    !available && styles.disabledDayText,
-                    selected && styles.selectedDayText,
-                  ]}
-                >
-                  {Number(date.slice(-2))}
+            <View style={styles.calendar}>
+              {weekdayLabels.map((label, index) => (
+                <Text key={String(index)} style={styles.weekday}>
+                  {label}
                 </Text>
-                {available ? (
-                  <View
+              ))}
+              {calendar.dates.map((date) => {
+                const available = availableDates.has(date);
+                const inMonth = date.slice(0, 7) === monthDate.slice(0, 7);
+                const selected = date === selectedDate;
+                return (
+                  <Pressable
+                    accessibilityLabel={formatDate(
+                      new Date(`${date}T12:00:00.000Z`),
+                      locale,
+                      {
+                        day: "numeric",
+                        month: "long",
+                        timeZone: "UTC",
+                        year: "numeric",
+                      },
+                    )}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      disabled: !available || !inMonth,
+                      selected,
+                    }}
+                    aria-pressed={selected}
+                    disabled={!available || !inMonth || isLoading}
+                    key={date}
+                    onPress={() => {
+                      setSelectedDate(date);
+                      setSelectedStart(null);
+                    }}
                     style={[
-                      styles.availabilityDot,
-                      selected && styles.selectedDot,
+                      styles.day,
+                      !inMonth && styles.outsideDay,
+                      available && styles.availableDay,
+                      selected && styles.selectedDay,
                     ]}
-                  />
-                ) : null}
-              </Pressable>
-            );
-          })}
-        </View>
+                  >
+                    <Text
+                      style={[
+                        styles.dayText,
+                        !available && styles.disabledDayText,
+                        selected && styles.selectedDayText,
+                      ]}
+                    >
+                      {Number(date.slice(-2))}
+                    </Text>
+                    {available ? (
+                      <View
+                        style={[
+                          styles.availabilityDot,
+                          selected && styles.selectedDot,
+                        ]}
+                      />
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
 
-        <Text style={styles.sectionTitle}>
-          {t("mobile.freeSlotsChooseTime")}
-        </Text>
+            <Text style={styles.sectionTitle}>
+              {t("mobile.freeSlotsChooseTime")}
+            </Text>
+          </>
+        ) : null}
         {isLoading ? (
           <View accessibilityLiveRegion="polite" style={styles.status}>
             <ActivityIndicator color={colors.accent} />
@@ -304,8 +385,41 @@ export function FreeSlotsModal({
           </Text>
         ) : !availableDates.size ? (
           <Text style={styles.message}>
-            {t("mobile.freeSlotsNoAvailability")}
+            {t(
+              activeMode === "share"
+                ? "mobile.freeSlotsShareNoAvailability"
+                : "mobile.freeSlotsNoAvailability",
+            )}
           </Text>
+        ) : activeMode === "share" ? (
+          <View style={styles.shareSchedule}>
+            {[...availableDates].sort().map((date) => {
+              const daySlots = calendar.slotsByDate.get(date) ?? [];
+              return (
+                <View key={date} style={styles.shareDay}>
+                  <Text style={styles.shareDate}>
+                    {formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
+                      day: "numeric",
+                      month: "long",
+                      timeZone: "UTC",
+                      year: "numeric",
+                    })}
+                  </Text>
+                  <Text style={styles.shareTimes}>
+                    {daySlots
+                      .map((slot) =>
+                        formatTime(new Date(slot.starts_at), locale, {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: workspace.timezone,
+                        }),
+                      )
+                      .join(" · ")}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
         ) : !selectedDaySlots.length ? (
           <Text style={styles.message}>{t("mobile.freeSlotsNoSlots")}</Text>
         ) : (
@@ -352,6 +466,59 @@ export function FreeSlotsModal({
         )}
       </ScrollView>
     </FullscreenModal>
+  );
+}
+
+function ModeTab({
+  active,
+  label,
+  onPress,
+}: {
+  readonly active: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      aria-selected={active}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.modeTab,
+        active && styles.modeTabActive,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[styles.modeTabText, active && styles.modeTabTextActive]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function PrimaryButton({
+  disabled,
+  label,
+  onPress,
+}: {
+  readonly disabled: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.bookButton,
+        disabled && styles.disabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={styles.bookButtonText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -417,6 +584,50 @@ const styles = StyleSheet.create({
     color: colors.secondaryText,
     paddingVertical: 8,
   },
+  modeTabs: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+    padding: 4,
+  },
+  modeTab: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 8,
+  },
+  modeTabActive: { backgroundColor: colors.surface },
+  modeTabText: {
+    ...typography.label,
+    color: colors.secondaryText,
+    textAlign: "center",
+  },
+  modeTabTextActive: { color: colors.primaryText, fontWeight: "700" },
+  footerContent: { gap: 8 },
+  errorMessage: { ...typography.caption, color: colors.danger },
+  shareSchedule: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radii.surface,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  shareDay: {
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  shareDate: {
+    ...typography.label,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
+  shareTimes: { ...typography.body, color: colors.secondaryText },
   outsideDay: { opacity: 0 },
   pressed: { opacity: 0.78 },
   sectionTitle: {

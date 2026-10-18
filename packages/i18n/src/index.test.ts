@@ -9,12 +9,25 @@ import {
   formatDate,
   formatTime,
   getIntlLocale,
+  localeLabels,
   resolveLocale,
+  supportedLocales,
   translate,
   translationKeys,
 } from "./index";
 
 describe("locale resolution", () => {
+  it("shows languages in the requested order using standard language labels", () => {
+    expect(supportedLocales).toEqual(["en", "cz", "sk", "ru", "uk"]);
+    expect(localeLabels).toEqual({
+      en: "EN",
+      cz: "CZ",
+      sk: "SK",
+      ru: "RU",
+      uk: "UA",
+    });
+  });
+
   it("normalizes supported language and region tags", () => {
     expect(resolveLocale("ru-RU")).toBe("ru");
     expect(resolveLocale("cs-CZ")).toBe("cz");
