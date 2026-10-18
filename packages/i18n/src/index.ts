@@ -499,6 +499,14 @@ export type MessageKey =
   | "mobile.serviceBufferBefore"
   | "mobile.serviceBufferAfter"
   | "mobile.serviceSortOrder"
+  | "mobile.serviceSourceLanguage"
+  | "mobile.serviceTranslationReviewHint"
+  | "mobile.serviceTranslateWithAi"
+  | "mobile.serviceTranslationLoading"
+  | "mobile.serviceTranslationFailed"
+  | "mobile.serviceTranslationNameRequired"
+  | "mobile.serviceTranslationsShow"
+  | "mobile.serviceTranslationsHide"
   | "mobile.serviceSave"
   | "mobile.serviceCreate"
   | "mobile.serviceArchiveConfirm"
@@ -1150,6 +1158,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Перерыв до, минут",
     "mobile.serviceBufferAfter": "Перерыв после, минут",
     "mobile.serviceSortOrder": "Порядок",
+    "mobile.serviceSourceLanguage": "Язык исходного названия",
+    "mobile.serviceTranslationReviewHint":
+      "Название, описание и категория будут отправлены в OpenAI. Запросы могут тарифицироваться. Проверьте и измените черновики перед сохранением.",
+    "mobile.serviceTranslateWithAi": "Предложить перевод с помощью ИИ",
+    "mobile.serviceTranslationLoading": "Готовим переводы…",
+    "mobile.serviceTranslationFailed":
+      "Не удалось подготовить перевод. Попробуйте ещё раз.",
+    "mobile.serviceTranslationNameRequired": "Сначала введите название услуги.",
+    "mobile.serviceTranslationsShow": "Показать переводы",
+    "mobile.serviceTranslationsHide": "Скрыть переводы",
     "mobile.serviceSave": "Сохранить услугу",
     "mobile.serviceCreate": "Создать услугу",
     "mobile.serviceArchiveConfirm":
@@ -1805,6 +1823,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Pauza před, minuty",
     "mobile.serviceBufferAfter": "Pauza po, minuty",
     "mobile.serviceSortOrder": "Pořadí",
+    "mobile.serviceSourceLanguage": "Jazyk původního názvu",
+    "mobile.serviceTranslationReviewHint":
+      "Název, popis a kategorie se odešlou službě OpenAI. Požadavky mohou být zpoplatněny. Před uložením návrhy zkontrolujte a upravte.",
+    "mobile.serviceTranslateWithAi": "Navrhnout překlad pomocí AI",
+    "mobile.serviceTranslationLoading": "Připravují se překlady…",
+    "mobile.serviceTranslationFailed":
+      "Překlad se nepodařilo připravit. Zkuste to znovu.",
+    "mobile.serviceTranslationNameRequired": "Nejprve zadejte název služby.",
+    "mobile.serviceTranslationsShow": "Zobrazit překlady",
+    "mobile.serviceTranslationsHide": "Skrýt překlady",
     "mobile.serviceSave": "Uložit službu",
     "mobile.serviceCreate": "Vytvořit službu",
     "mobile.serviceArchiveConfirm":
@@ -2465,6 +2493,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Buffer before, minutes",
     "mobile.serviceBufferAfter": "Buffer after, minutes",
     "mobile.serviceSortOrder": "Sort order",
+    "mobile.serviceSourceLanguage": "Source name language",
+    "mobile.serviceTranslationReviewHint":
+      "The name, description, and category are sent to OpenAI. Requests may incur charges. Review and edit the drafts before saving.",
+    "mobile.serviceTranslateWithAi": "Suggest translations with AI",
+    "mobile.serviceTranslationLoading": "Preparing translations…",
+    "mobile.serviceTranslationFailed":
+      "Could not prepare translations. Try again.",
+    "mobile.serviceTranslationNameRequired": "Enter the service name first.",
+    "mobile.serviceTranslationsShow": "Show translations",
+    "mobile.serviceTranslationsHide": "Hide translations",
     "mobile.serviceSave": "Save service",
     "mobile.serviceCreate": "Create service",
     "mobile.serviceArchiveConfirm":

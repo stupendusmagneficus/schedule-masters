@@ -572,6 +572,16 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceBufferBefore": "Перерва до, хвилин",
   "mobile.serviceBufferAfter": "Перерва після, хвилин",
   "mobile.serviceSortOrder": "Порядок сортування",
+  "mobile.serviceSourceLanguage": "Мова вихідної назви",
+  "mobile.serviceTranslationReviewHint":
+    "Назва, опис і категорія надсилаються до OpenAI. Запити можуть оплачуватися окремо. Перевірте й відредагуйте чернетки перед збереженням.",
+  "mobile.serviceTranslateWithAi": "Запропонувати переклади за допомогою ШІ",
+  "mobile.serviceTranslationLoading": "Готуємо переклади…",
+  "mobile.serviceTranslationFailed":
+    "Не вдалося підготувати переклади. Спробуйте ще раз.",
+  "mobile.serviceTranslationNameRequired": "Спочатку введіть назву послуги.",
+  "mobile.serviceTranslationsShow": "Показати переклади",
+  "mobile.serviceTranslationsHide": "Сховати переклади",
   "mobile.serviceSave": "Зберегти послугу",
   "mobile.serviceCreate": "Створити послугу",
   "mobile.serviceArchiveConfirm":

@@ -1,4 +1,9 @@
-import type { Database } from "@schedule-app/api";
+import {
+  parseServiceTranslations,
+  type Database,
+  type ServiceLocale,
+  type ServiceTranslations,
+} from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Service } from "../../types";
@@ -13,6 +18,8 @@ export type ServiceDraft = {
   readonly name: string;
   readonly priceAmount: string;
   readonly sortOrder: string;
+  readonly sourceLocale?: ServiceLocale;
+  readonly translations?: ServiceTranslations;
 };
 
 export type ServiceValidationError =
@@ -36,7 +43,7 @@ export type ServiceCatalogFilters = {
 type ServiceClient = SupabaseClient<Database>;
 
 const serviceFields =
-  "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at";
+  "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at, source_locale, translations";
 
 export function getServiceCategories(services: readonly Service[]): string[] {
   return [
@@ -76,7 +83,10 @@ function normalizeSearchText(value: string): string {
     .toLocaleLowerCase();
 }
 
-export function createServiceDraft(service?: Service | null): ServiceDraft {
+export function createServiceDraft(
+  service?: Service | null,
+  defaultLocale: ServiceLocale = "cz",
+): ServiceDraft {
   return {
     bufferAfterMinutes: String(service?.buffer_after_minutes ?? 0),
     bufferBeforeMinutes: String(service?.buffer_before_minutes ?? 0),
@@ -87,6 +97,8 @@ export function createServiceDraft(service?: Service | null): ServiceDraft {
     name: service?.name ?? "",
     priceAmount: String(service?.price_amount ?? 0),
     sortOrder: String(service?.sort_order ?? 0),
+    sourceLocale: service?.source_locale ?? defaultLocale,
+    translations: service?.translations ?? {},
   };
 }
 
@@ -130,7 +142,10 @@ export async function listServices(
     .order("sort_order")
     .order("name");
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map((service) => ({
+    ...service,
+    translations: parseServiceTranslations(service.translations),
+  }));
 }
 
 export async function createService(
@@ -148,7 +163,7 @@ export async function createService(
     .select(serviceFields)
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return { ...data, translations: parseServiceTranslations(data.translations) };
 }
 
 export async function updateService(
@@ -165,7 +180,7 @@ export async function updateService(
     .select(serviceFields)
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return { ...data, translations: parseServiceTranslations(data.translations) };
 }
 
 export async function archiveService(
@@ -194,6 +209,37 @@ export async function restoreService(
   if (error) throw new Error(error.message);
 }
 
+export async function suggestServiceTranslations(
+  client: ServiceClient,
+  workspaceId: string,
+  input: Pick<
+    ServiceDraft,
+    "category" | "description" | "name" | "sourceLocale"
+  >,
+): Promise<ServiceTranslations> {
+  const { data, error } = await client.functions.invoke(
+    "translate-service-content",
+    {
+      body: {
+        category: input.category.trim() || null,
+        description: input.description.trim() || null,
+        name: input.name.trim(),
+        sourceLocale: input.sourceLocale,
+        workspaceId,
+      },
+    },
+  );
+  if (error) throw new Error(error.message);
+  if (!data || typeof data.translations !== "object") {
+    throw new Error("Translation response is invalid");
+  }
+  const translations = parseServiceTranslations(data.translations);
+  if (Object.keys(translations).length !== 4) {
+    throw new Error("Translation response is incomplete");
+  }
+  return translations;
+}
+
 function toServiceInput(draft: ServiceDraft) {
   return {
     buffer_after_minutes: Number(draft.bufferAfterMinutes),
@@ -205,6 +251,8 @@ function toServiceInput(draft: ServiceDraft) {
     name: draft.name.trim(),
     price_amount: Number(draft.priceAmount),
     sort_order: Number(draft.sortOrder),
+    source_locale: draft.sourceLocale ?? "cz",
+    translations: draft.translations ?? {},
   };
 }
 

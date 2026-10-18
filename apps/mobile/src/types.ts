@@ -26,4 +26,6 @@ export type Service = {
   readonly price_amount: number;
   readonly currency: string;
   readonly sort_order: number;
+  readonly source_locale?: "en" | "cz" | "sk" | "ru" | "uk";
+  readonly translations?: import("@schedule-app/api").ServiceTranslations;
 };

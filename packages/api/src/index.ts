@@ -6,9 +6,22 @@ export type { SupabaseDatabaseClient } from "./supabase/client";
 export { createSupabaseClient } from "./supabase/client";
 export type { Database } from "./supabase/database.types";
 
+export type ServiceLocale = "en" | "cz" | "sk" | "ru" | "uk";
+
+export type ServiceTranslation = {
+  readonly category: string | null;
+  readonly description: string | null;
+  readonly name: string;
+};
+
+export type ServiceTranslations = Partial<
+  Record<ServiceLocale, ServiceTranslation>
+>;
+
 export type PublicBookingService = {
   readonly id: string;
   readonly name: string;
+  readonly translations?: ServiceTranslations;
   readonly description: string | null;
   readonly category: string | null;
   readonly durationMinutes: number;
@@ -85,6 +98,7 @@ export function parsePublicBookingContext(
       return {
         id: item.id,
         name: item.name,
+        translations: parseServiceTranslations(item.translations),
         description:
           typeof item.description === "string" ? item.description : null,
         category:
@@ -97,4 +111,22 @@ export function parsePublicBookingContext(
       };
     }),
   };
+}
+
+export function parseServiceTranslations(value: unknown): ServiceTranslations {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const translations: ServiceTranslations = {};
+  for (const locale of ["en", "cz", "sk", "ru", "uk"] as const) {
+    const raw = (value as Record<string, unknown>)[locale];
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+    const item = raw as Record<string, unknown>;
+    if (typeof item.name !== "string" || !item.name.trim()) continue;
+    translations[locale] = {
+      name: item.name,
+      description:
+        typeof item.description === "string" ? item.description : null,
+      category: typeof item.category === "string" ? item.category : null,
+    };
+  }
+  return translations;
 }

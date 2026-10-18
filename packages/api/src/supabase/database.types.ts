@@ -822,6 +822,8 @@ export type Database = {
           name: string
           price_amount: number
           sort_order: number
+          source_locale: "en" | "cz" | "sk" | "ru" | "uk"
+          translations: Json
           updated_at: string
           workspace_id: string
         }
@@ -839,6 +841,8 @@ export type Database = {
           name: string
           price_amount: number
           sort_order?: number
+          source_locale?: "en" | "cz" | "sk" | "ru" | "uk"
+          translations?: Json
           updated_at?: string
           workspace_id: string
         }
@@ -856,6 +860,8 @@ export type Database = {
           name?: string
           price_amount?: number
           sort_order?: number
+          source_locale?: "en" | "cz" | "sk" | "ru" | "uk"
+          translations?: Json
           updated_at?: string
           workspace_id?: string
         }

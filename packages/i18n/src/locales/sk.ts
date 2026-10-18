@@ -576,6 +576,16 @@ export const slovakMessages: Messages = {
   "mobile.serviceBufferBefore": "Prestávka pred, minúty",
   "mobile.serviceBufferAfter": "Prestávka po, minúty",
   "mobile.serviceSortOrder": "Poradie",
+  "mobile.serviceSourceLanguage": "Jazyk pôvodného názvu",
+  "mobile.serviceTranslationReviewHint":
+    "Názov, popis a kategória sa odošlú službe OpenAI. Požiadavky môžu byť spoplatnené. Pred uložením návrhy skontrolujte a upravte.",
+  "mobile.serviceTranslateWithAi": "Navrhnúť preklady pomocou AI",
+  "mobile.serviceTranslationLoading": "Pripravujú sa preklady…",
+  "mobile.serviceTranslationFailed":
+    "Preklady sa nepodarilo pripraviť. Skúste to znova.",
+  "mobile.serviceTranslationNameRequired": "Najprv zadajte názov služby.",
+  "mobile.serviceTranslationsShow": "Zobraziť preklady",
+  "mobile.serviceTranslationsHide": "Skryť preklady",
   "mobile.serviceSave": "Uložiť službu",
   "mobile.serviceCreate": "Vytvoriť službu",
   "mobile.serviceArchiveConfirm":

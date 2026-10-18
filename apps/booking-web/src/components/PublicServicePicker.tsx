@@ -2,7 +2,10 @@ import type { PublicBookingService } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatCurrency } from "@schedule-app/i18n";
 import { useMemo, useState } from "react";
-import { getServiceSelectionSummary } from "../utils/serviceSelection";
+import {
+  getLocalizedServiceContent,
+  getServiceSelectionSummary,
+} from "../utils/serviceSelection";
 
 type PublicServicePickerProps = {
   readonly locale: SupportedLocale;
@@ -28,15 +31,18 @@ export function PublicServicePicker({
     [selectedServiceIds, services],
   );
   const normalizedQuery = query.trim().toLowerCase();
-  const filteredServices = services.filter((service) =>
-    `${service.name} ${service.category ?? ""}`
+  const filteredServices = services.filter((service) => {
+    const content = getLocalizedServiceContent(service, locale);
+    return `${content.name} ${content.category ?? ""}`
       .toLowerCase()
-      .includes(normalizedQuery),
-  );
+      .includes(normalizedQuery);
+  });
   const categories = new Map<string, PublicBookingService[]>();
 
   for (const service of filteredServices) {
-    const category = service.category || t("booking.categoryOther");
+    const category =
+      getLocalizedServiceContent(service, locale).category ||
+      t("booking.categoryOther");
     categories.set(category, [...(categories.get(category) ?? []), service]);
   }
 
@@ -89,6 +95,7 @@ export function PublicServicePicker({
               <div className="service-list">
                 {categoryServices.map((service) => {
                   const selected = selectedServiceIds.includes(service.id);
+                  const content = getLocalizedServiceContent(service, locale);
                   return (
                     <button
                       aria-pressed={selected}
@@ -100,7 +107,10 @@ export function PublicServicePicker({
                       type="button"
                     >
                       <span>
-                        <strong>{service.name}</strong>
+                        <strong>{content.name}</strong>
+                        {content.description ? (
+                          <small>{content.description}</small>
+                        ) : null}
                         <small>{service.durationMinutes} min</small>
                       </span>
                       <span className="service-price">
@@ -128,11 +138,11 @@ export function PublicServicePicker({
           <ol>
             {selectedServices.map((service) => (
               <li key={service.id}>
-                <span>{service.name}</span>
+                <span>{getLocalizedServiceContent(service, locale).name}</span>
                 <button
                   aria-label={t("booking.removeService").replace(
                     "{name}",
-                    service.name,
+                    getLocalizedServiceContent(service, locale).name,
                   )}
                   className="remove-service-button"
                   onClick={() => onToggleService(service.id)}
