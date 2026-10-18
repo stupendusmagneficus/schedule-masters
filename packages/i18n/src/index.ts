@@ -1,7 +1,7 @@
 import { slovakMessages } from "./locales/sk";
 import { ukrainianMessages } from "./locales/uk";
 
-export const supportedLocales = ["ru", "cz", "en", "sk", "uk"] as const;
+export const supportedLocales = ["en", "cz", "sk", "ru", "uk"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const fallbackLocale: SupportedLocale = "en";
@@ -2507,9 +2507,9 @@ export function formatCurrency(
 }
 
 export const localeLabels: Record<SupportedLocale, string> = {
-  ru: "RU",
-  cz: "CZ",
   en: "EN",
+  cz: "CZ",
   sk: "SK",
-  uk: "UK",
+  ru: "RU",
+  uk: "UA",
 };

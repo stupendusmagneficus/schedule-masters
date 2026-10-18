@@ -597,7 +597,17 @@ test.describe("public booking web", () => {
       ).toBe(true);
     }
 
+    await expect(page.getByRole("radio")).toHaveText([
+      "EN",
+      "CZ",
+      "SK",
+      "RU",
+      "UA",
+    ]);
     await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("radio", { name: "RU" })).toBeFocused();
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await expect(
