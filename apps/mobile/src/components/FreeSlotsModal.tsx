@@ -2,11 +2,9 @@ import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import * as Sharing from "expo-sharing";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -14,13 +12,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { captureRef } from "react-native-view-shot";
 import type { DemoData } from "../demo/types";
-import {
-  getDatesInDateRange,
-  getFreeSlotsShareRangeError,
-  isValidFreeSlotsShareRange,
-} from "../features/appointments/freeSlotsDateRange";
+import { getDatesInDateRange } from "../features/appointments/freeSlotsDateRange";
 import { buildFreeSlotsShareMessage } from "../features/appointments/freeSlotsShareMessage";
 import {
   listMasterMonthAvailableSlots,
@@ -44,8 +37,6 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
-import { DateTimePickerField } from "./DateTimePickerField";
-import { FreeSlotsShareCard } from "./FreeSlotsShareCard";
 import { FullscreenModal } from "./FullscreenModal";
 import { ServicePickerField } from "./ServicePickerField";
 
@@ -78,26 +69,16 @@ export function FreeSlotsModal({
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [monthDate, setMonthDate] = useState(initialDate);
   const [selectedDate, setSelectedDate] = useState(initialDate);
-  const [shareStartDate, setShareStartDate] = useState(() =>
-    getTodayCalendarDate(workspace.timezone),
-  );
-  const [shareEndDate, setShareEndDate] = useState(() =>
-    addCalendarDays(getTodayCalendarDate(workspace.timezone), 13),
-  );
-  const [shareFormat, setShareFormat] = useState<"text" | "image">("text");
   const [selectedStart, setSelectedStart] = useState<string | null>(null);
   const [slots, setSlots] = useState<MonthAvailableSlot[]>([]);
   const [shareSlots, setShareSlots] = useState<ShareableFreeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [shareStatus, setShareStatus] = useState<
-    "idle" | "opened" | "downloaded" | "failed"
-  >("idle");
-  const shareCardRef = useRef<View>(null);
-  const shareRangeValid = isValidFreeSlotsShareRange(
-    shareStartDate,
-    shareEndDate,
+  const [shareStatus, setShareStatus] = useState<"idle" | "opened" | "failed">(
+    "idle",
   );
+  const shareStartDate = getTodayCalendarDate(workspace.timezone);
+  const shareEndDate = addCalendarDays(shareStartDate, 13);
 
   useEffect(() => {
     if (!visible) return;
@@ -110,13 +91,7 @@ export function FreeSlotsModal({
   }, [initialDate, services, visible]);
 
   useEffect(() => {
-    if (
-      !visible ||
-      demoData ||
-      !client ||
-      (activeMode === "share" && !shareRangeValid)
-    ) {
-      if (activeMode === "share" && !shareRangeValid) setShareSlots([]);
+    if (!visible || demoData || !client) {
       setIsLoading(false);
       setHasError(false);
       return;
@@ -125,7 +100,6 @@ export function FreeSlotsModal({
     let active = true;
     setIsLoading(true);
     setHasError(false);
-    if (activeMode === "share") setShareSlots([]);
     const request =
       activeMode === "share"
         ? listMasterShareableFreeSlots(
@@ -164,7 +138,6 @@ export function FreeSlotsModal({
     shareEndDate,
     shareStartDate,
     serviceId,
-    shareRangeValid,
     visible,
     workspace.id,
   ]);
@@ -237,75 +210,18 @@ export function FreeSlotsModal({
   const selectedService = services.find((service) => service.id === serviceId);
   const shareMessage = buildFreeSlotsShareMessage({
     availabilityNote: t("mobile.freeSlotsShareAvailabilityNote"),
-    heading: t("mobile.freeSlots"),
+    heading: t("mobile.freeSlotsShareDescription"),
     locale,
     slots: displaySlots,
     timezone: workspace.timezone,
     workspaceName: workspace.name,
   });
-  const shareDisabled =
-    !shareRangeValid || !shareDates.length || isLoading || hasError;
-  const shareCardDays = shareDates.map((date) => ({
-    date,
-    times: (shareSlotsByDate.get(date) ?? []).map((slot) =>
-      formatTime(new Date(slot.starts_at), locale, {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: workspace.timezone,
-      }),
-    ),
-  }));
-  const periodLabel = `${formatDate(
-    new Date(`${shareStartDate}T12:00:00.000Z`),
-    locale,
-    { day: "numeric", month: "short", timeZone: "UTC", year: "numeric" },
-  )} – ${formatDate(new Date(`${shareEndDate}T12:00:00.000Z`), locale, {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  })}`;
+  const shareDisabled = !shareDates.length || isLoading || hasError;
 
   async function shareSchedule() {
     if (shareDisabled) return;
     setShareStatus("idle");
     try {
-      if (shareFormat === "image") {
-        if (!shareCardRef.current) throw new Error("Share card is unavailable");
-        const imageUri = await captureRef(shareCardRef, {
-          format: "png",
-          quality: 1,
-          result: Platform.OS === "web" ? "data-uri" : "tmpfile",
-        });
-        if (Platform.OS === "web") {
-          const imageFile = await createShareImageFile(imageUri);
-          const webNavigator = (
-            globalThis as typeof globalThis & { navigator?: WebShareNavigator }
-          ).navigator;
-          if (!webNavigator) throw new Error("Web sharing is unavailable");
-          if (
-            webNavigator.share &&
-            webNavigator.canShare?.({ files: [imageFile] })
-          ) {
-            await webNavigator.share({
-              files: [imageFile],
-              title: t("mobile.freeSlots"),
-            });
-            setShareStatus("opened");
-          } else {
-            downloadShareImage(imageFile);
-            setShareStatus("downloaded");
-          }
-        } else {
-          await Sharing.shareAsync(imageUri, {
-            dialogTitle: t("mobile.freeSlots"),
-            mimeType: "image/png",
-            UTI: "public.png",
-          });
-          setShareStatus("opened");
-        }
-        return;
-      }
       const result = await Share.share({
         message: shareMessage,
         title: t("mobile.freeSlots"),
@@ -339,9 +255,7 @@ export function FreeSlotsModal({
                 {t(
                   shareStatus === "failed"
                     ? "mobile.freeSlotsShareFailed"
-                    : shareStatus === "downloaded"
-                      ? "mobile.freeSlotsShareDownloaded"
-                      : "mobile.freeSlotsShareOpened",
+                    : "mobile.freeSlotsShareOpened",
                 )}
               </Text>
             ) : null}
@@ -390,77 +304,7 @@ export function FreeSlotsModal({
               : "mobile.freeSlotsDescription",
           )}
         </Text>
-        {activeMode === "share" ? (
-          <>
-            <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsSharePeriod")}
-            </Text>
-            <View style={styles.shareDateFields}>
-              <DateTimePickerField
-                label={t("mobile.freeSlotsShareStartDate")}
-                locale={locale}
-                mode="date"
-                onChange={(date) => {
-                  setShareStartDate(date);
-                  setShareStatus("idle");
-                }}
-                placeholder={t("mobile.freeSlotsShareStartDate")}
-                t={t}
-                value={shareStartDate}
-              />
-              <DateTimePickerField
-                label={t("mobile.freeSlotsShareEndDate")}
-                locale={locale}
-                mode="date"
-                onChange={(date) => {
-                  setShareEndDate(date);
-                  setShareStatus("idle");
-                }}
-                placeholder={t("mobile.freeSlotsShareEndDate")}
-                t={t}
-                value={shareEndDate}
-              />
-            </View>
-            <Text style={styles.helper}>
-              {t("mobile.freeSlotsShareRangeLimit")}
-            </Text>
-            {!shareRangeValid ? (
-              <Text accessibilityRole="alert" style={styles.errorMessage}>
-                {t(
-                  getFreeSlotsShareRangeError(shareStartDate, shareEndDate) ===
-                    "too_long"
-                    ? "mobile.freeSlotsShareRangeTooLong"
-                    : "mobile.freeSlotsShareInvalidRange",
-                )}
-              </Text>
-            ) : null}
-            <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsShareFormat")}
-            </Text>
-            <View accessibilityRole="tablist" style={styles.modeTabs}>
-              <ModeTab
-                active={shareFormat === "text"}
-                label={t("mobile.freeSlotsShareTextFormat")}
-                onPress={() => {
-                  setShareFormat("text");
-                  setShareStatus("idle");
-                }}
-              />
-              <ModeTab
-                active={shareFormat === "image"}
-                label={t("mobile.freeSlotsShareGraphicFormat")}
-                onPress={() => {
-                  setShareFormat("image");
-                  setShareStatus("idle");
-                }}
-              />
-            </View>
-            <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsSharePreview")}
-            </Text>
-          </>
-        ) : null}
-        {activeMode === "book" ? (
+        {activeMode === "share" ? null : (
           <>
             <Text style={styles.sectionTitle}>
               {t("mobile.freeSlotsChooseService")}
@@ -511,7 +355,7 @@ export function FreeSlotsModal({
               </Pressable>
             </View>
           </>
-        ) : null}
+        )}
         {activeMode === "book" ? (
           <>
             <Text style={styles.sectionTitle}>
@@ -602,15 +446,6 @@ export function FreeSlotsModal({
           <Text style={styles.message}>
             {t("mobile.freeSlotsNoAvailability")}
           </Text>
-        ) : activeMode === "share" && shareFormat === "image" ? (
-          <FreeSlotsShareCard
-            days={shareCardDays}
-            locale={locale}
-            periodLabel={periodLabel}
-            ref={shareCardRef}
-            title={t("mobile.freeSlotsShareGraphicTitle")}
-            workspaceName={workspace.name}
-          />
         ) : activeMode === "share" ? (
           <View style={styles.shareSchedule}>
             {shareDates.map((date) => (
@@ -742,39 +577,6 @@ function PrimaryButton({
   );
 }
 
-async function createShareImageFile(imageUri: string) {
-  const response = await fetch(imageUri);
-  const image = await response.blob();
-  return new File([image], "free-appointment-times.png", {
-    type: "image/png",
-  });
-}
-
-function downloadShareImage(image: File) {
-  const imageUrl = URL.createObjectURL(image);
-  const webDocument = (
-    globalThis as typeof globalThis & { document?: WebDownloadDocument }
-  ).document;
-  if (!webDocument) throw new Error("File download is unavailable");
-  const link = webDocument.createElement("a");
-  link.download = image.name;
-  link.href = imageUrl;
-  link.click();
-  globalThis.setTimeout(() => URL.revokeObjectURL(imageUrl), 1_000);
-}
-
-type WebShareNavigator = {
-  canShare?: (data: { files: File[] }) => boolean;
-  share?: (data: { files: File[]; title: string }) => Promise<void>;
-};
-
-type WebDownloadDocument = {
-  createElement: (tag: "a") => {
-    click: () => void;
-    download: string;
-    href: string;
-  };
-};
 const styles = StyleSheet.create({
   arrowText: { color: colors.primaryText, fontSize: 24, lineHeight: 28 },
   availabilityDot: {
@@ -867,7 +669,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
   },
-  shareDateFields: { gap: 12 },
   shareDay: {
     borderBottomColor: colors.borderSubtle,
     borderBottomWidth: StyleSheet.hairlineWidth,

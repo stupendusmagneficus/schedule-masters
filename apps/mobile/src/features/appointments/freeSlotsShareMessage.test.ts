@@ -4,7 +4,7 @@ import { buildFreeSlotsShareMessage } from "./freeSlotsShareMessage";
 describe("buildFreeSlotsShareMessage", () => {
   it("groups slots by local day and formats times in the workspace timezone", () => {
     const message = buildFreeSlotsShareMessage({
-      heading: "Free slots",
+      heading: "Free slots for the next 14 days.",
       availabilityNote: "Start time depends on the service selected.",
       locale: "en",
       slots: [
@@ -25,16 +25,17 @@ describe("buildFreeSlotsShareMessage", () => {
       workspaceName: "Beauty studio",
     });
 
+    expect(message.startsWith("Free slots for the next 14 days.\n")).toBe(true);
     expect(message).toContain("Beauty studio");
     expect(message).toContain("Start time depends on the service selected.");
     expect(message).toContain("January 7, 2030: 09:00 AM, 10:30 AM");
     expect(message).toContain("January 8, 2030: 11:00 AM");
   });
 
-  it("keeps the share text valid when the selected month has no slots", () => {
+  it("keeps the fixed-period heading when there are no slots", () => {
     expect(
       buildFreeSlotsShareMessage({
-        heading: "Free slots",
+        heading: "Free slots for the next 14 days.",
         availabilityNote: "Start time depends on the service selected.",
         locale: "en",
         slots: [],
@@ -42,7 +43,7 @@ describe("buildFreeSlotsShareMessage", () => {
         workspaceName: "Beauty studio",
       }),
     ).toBe(
-      "Free slots\nBeauty studio\nStart time depends on the service selected.\n",
+      "Free slots for the next 14 days.\nBeauty studio\nStart time depends on the service selected.\n",
     );
   });
 });

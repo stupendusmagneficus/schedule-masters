@@ -644,37 +644,34 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
-  test("shares free slots as a graphic card when the browser supports file sharing", async ({
+  test("shares one text schedule for the next two weeks without choosing a service", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.addInitScript(() => {
-      Object.defineProperty(window.navigator, "canShare", {
-        configurable: true,
-        value: () => true,
-      });
       Object.defineProperty(window.navigator, "share", {
         configurable: true,
-        value: async (content: { files?: File[] }) => {
-          window.localStorage.setItem(
-            "sharedImage",
-            content.files?.[0]?.name ?? "",
-          );
+        value: async (content: { text?: string }) => {
+          window.localStorage.setItem("sharedSchedule", content.text ?? "");
         },
       });
     });
     await page.goto("/?demo=1");
     await page.getByRole("button", { name: "Volné termíny" }).click();
-    await page.getByRole("button", { name: "Obrázek" }).click();
     await expect(
-      page.getByText("Volné časy k objednání", { exact: true }),
+      page.getByText("Volné termíny na příštích 14 dní.", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByText("Služba", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Obrázek" })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Text", exact: true }),
+    ).toHaveCount(0);
     await page.getByRole("button", { name: "Sdílet rozvrh" }).click();
     await expect
       .poll(() =>
-        page.evaluate(() => window.localStorage.getItem("sharedImage")),
+        page.evaluate(() => window.localStorage.getItem("sharedSchedule")),
       )
-      .toBe("free-appointment-times.png");
+      .toContain("Elena Beauty");
     await expect(
       page.getByText("Vyberte aplikaci pro odeslání rozvrhu."),
     ).toBeVisible();

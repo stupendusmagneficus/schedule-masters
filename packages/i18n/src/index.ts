@@ -715,13 +715,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Записать клиента",
     "mobile.freeSlotsShareTab": "Поделиться",
     "mobile.freeSlotsBookTab": "Найти и записать",
-    "mobile.freeSlotsShareDescription":
-      "Выберите период, формат и проверьте расписание перед публикацией.",
+    "mobile.freeSlotsShareDescription": "Свободное время на ближайшие 14 дней.",
     "mobile.freeSlotsShareAvailabilityNote":
       "Время начала зависит от выбранной услуги.",
     "mobile.freeSlotsShareAction": "Поделиться расписанием",
     "mobile.freeSlotsShareNoAvailability":
-      "В выбранном периоде нет свободных окон.",
+      "В ближайшие 14 дней нет свободных окон.",
     "mobile.freeSlotsShareFailed": "Не удалось открыть меню отправки.",
     "mobile.freeSlotsShareOpened":
       "Выберите приложение, чтобы отправить расписание.",
@@ -1370,13 +1369,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Objednat klienta",
     "mobile.freeSlotsShareTab": "Sdílet",
     "mobile.freeSlotsBookTab": "Najít a objednat",
-    "mobile.freeSlotsShareDescription":
-      "Vyberte období a formát a před sdílením zkontrolujte rozvrh.",
+    "mobile.freeSlotsShareDescription": "Volné termíny na příštích 14 dní.",
     "mobile.freeSlotsShareAvailabilityNote":
       "Čas začátku závisí na vybrané službě.",
     "mobile.freeSlotsShareAction": "Sdílet rozvrh",
     "mobile.freeSlotsShareNoAvailability":
-      "Ve vybraném období nejsou volné termíny.",
+      "V příštích 14 dnech nejsou volné termíny.",
     "mobile.freeSlotsShareFailed": "Nabídku sdílení se nepodařilo otevřít.",
     "mobile.freeSlotsShareOpened": "Vyberte aplikaci pro odeslání rozvrhu.",
     "mobile.freeSlotsShareDownloaded":
@@ -2020,13 +2018,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Book client",
     "mobile.freeSlotsShareTab": "Share",
     "mobile.freeSlotsBookTab": "Find & book",
-    "mobile.freeSlotsShareDescription":
-      "Choose a period and format, then preview the schedule before sharing.",
+    "mobile.freeSlotsShareDescription": "Available times for the next 14 days.",
     "mobile.freeSlotsShareAvailabilityNote":
       "Start times depend on the service selected.",
     "mobile.freeSlotsShareAction": "Share schedule",
     "mobile.freeSlotsShareNoAvailability":
-      "No times are available in the selected period.",
+      "No times are available in the next 14 days.",
     "mobile.freeSlotsShareFailed": "Couldn't open the share menu.",
     "mobile.freeSlotsShareOpened": "Choose an app to send the schedule.",
     "mobile.freeSlotsShareDownloaded":
