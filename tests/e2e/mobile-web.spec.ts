@@ -330,9 +330,11 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByRole("heading", { name: "Vyberte čas začátku" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Přidat pauzu" }).first(),
-    ).toBeDisabled();
+    await expect(page.getByRole("tab", { name: "Rezervace" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByRole("tab", { name: "Přestávka" })).toBeDisabled();
     await page.getByRole("button", { name: "Nová rezervace" }).last().click();
     await expect(
       page.getByText(

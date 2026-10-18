@@ -284,6 +284,8 @@ export type MessageKey =
   | "mobile.calendarNextWeek"
   | "mobile.calendarTapToBook"
   | "mobile.calendarChooseTime"
+  | "mobile.calendarBookingTab"
+  | "mobile.calendarBreakTab"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
@@ -848,6 +850,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarNextWeek": "Следующая неделя",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
     "mobile.calendarChooseTime": "Выберите время начала",
+    "mobile.calendarBookingTab": "Запись",
+    "mobile.calendarBreakTab": "Перерыв",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
@@ -1443,6 +1447,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarNextWeek": "Následující týden",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
     "mobile.calendarChooseTime": "Vyberte čas začátku",
+    "mobile.calendarBookingTab": "Rezervace",
+    "mobile.calendarBreakTab": "Přestávka",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
@@ -2035,6 +2041,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarNextWeek": "Next week",
     "mobile.calendarTapToBook": "Tap to create a booking",
     "mobile.calendarChooseTime": "Choose a start time",
+    "mobile.calendarBookingTab": "Booking",
+    "mobile.calendarBreakTab": "Break",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",

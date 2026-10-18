@@ -1,4 +1,5 @@
 import type { MessageKey } from "@schedule-app/i18n";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
@@ -35,6 +36,14 @@ export function CalendarSlotActionModal({
   timeOptions,
   visible,
 }: CalendarSlotActionModalProps) {
+  const [selectedAction, setSelectedAction] = useState<"booking" | "break">(
+    "booking",
+  );
+
+  useEffect(() => {
+    if (visible) setSelectedAction("booking");
+  }, [visible]);
+
   function chooseAction(action: () => void) {
     onClose();
     setTimeout(action, 220);
@@ -76,24 +85,94 @@ export function CalendarSlotActionModal({
             );
           })}
         </View>
+        <View accessibilityRole="tablist" style={styles.actionTabs}>
+          <ActionTab
+            active={selectedAction === "booking"}
+            label={t("mobile.calendarBookingTab")}
+            onPress={() => setSelectedAction("booking")}
+          />
+          <ActionTab
+            active={selectedAction === "break"}
+            disabled={!canCreateBreak}
+            label={t("mobile.calendarBreakTab")}
+            onPress={() => setSelectedAction("break")}
+          />
+        </View>
         <ActionButton
-          label={t("mobile.newBooking")}
-          onPress={() => chooseAction(onAddBooking)}
+          disabled={selectedAction === "break" && !canCreateBreak}
+          label={
+            selectedAction === "booking"
+              ? t("mobile.newBooking")
+              : t("mobile.personalBlockAdd")
+          }
+          onPress={() =>
+            chooseAction(
+              selectedAction === "booking" ? onAddBooking : onAddBreak,
+            )
+          }
           variant="primary"
-        />
-        <ActionButton
-          disabled={!canCreateBreak}
-          label={t("mobile.personalBlockAdd")}
-          onPress={() => chooseAction(onAddBreak)}
-          variant="secondary"
         />
       </View>
     </FullscreenModal>
   );
 }
 
+function ActionTab({
+  active,
+  disabled = false,
+  label,
+  onPress,
+}: {
+  readonly active: boolean;
+  readonly disabled?: boolean;
+  readonly label: string;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ disabled, selected: active }}
+      aria-selected={active}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.actionTab,
+        active && styles.actionTabSelected,
+        pressed && styles.actionTabPressed,
+        disabled && styles.actionTabDisabled,
+      ]}
+    >
+      <Text
+        style={[styles.actionTabText, active && styles.actionTabTextSelected]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { gap: 16, padding: 20 },
+  actionTabs: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+    padding: 4,
+  },
+  actionTab: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 8,
+  },
+  actionTabDisabled: { opacity: 0.5 },
+  actionTabPressed: { opacity: 0.8 },
+  actionTabSelected: { backgroundColor: colors.action },
+  actionTabText: { ...typography.label, color: colors.primaryText },
+  actionTabTextSelected: { color: colors.actionText, fontWeight: "700" },
   dateLabel: {
     ...typography.body,
     color: colors.secondaryText,
