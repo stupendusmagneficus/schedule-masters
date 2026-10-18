@@ -587,12 +587,15 @@ test.describe("mobile web smoke", () => {
     await expect(freeSlotsButton).toBeVisible();
     const freeSlotsButtonSize = await freeSlotsButton.boundingBox();
     expect(freeSlotsButtonSize?.height).toBeGreaterThanOrEqual(44);
-    await expect(freeSlotsButton).toHaveCSS("border-color", "rgb(47, 125, 92)");
+    await expect(page.getByText("Volné termíny", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(47, 125, 92)",
+    );
     const freeSlotsButtonBox = await freeSlotsButton.boundingBox();
     const summaryBox = await page
       .getByText("Rezervace", { exact: true })
       .boundingBox();
-    expect(freeSlotsButtonBox?.y).toBeLessThan(summaryBox?.y ?? 0);
+    expect(freeSlotsButtonBox?.y).toBeGreaterThan(summaryBox?.y ?? 0);
     await freeSlotsButton.click();
     await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
       "aria-selected",
