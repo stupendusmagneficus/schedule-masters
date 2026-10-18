@@ -170,6 +170,7 @@ export const slovakMessages: Messages = {
   "mobile.freeSlotsShareGraphicFormat": "Obrázok",
   "mobile.freeSlotsSharePreview": "Ukážka",
   "mobile.freeSlotsShareGraphicTitle": "Voľné časy na rezerváciu",
+  "mobile.freeSlotsShareBookingLink": "Online rezervácia",
   "mobile.bookingRequests": "Žiadosti",
   "mobile.waitingList": "Zoznam náhradníkov",
   "mobile.waitingListAdd": "Pridať do zoznamu náhradníkov",

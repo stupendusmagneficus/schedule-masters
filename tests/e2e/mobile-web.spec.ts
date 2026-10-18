@@ -553,9 +553,17 @@ test.describe("mobile web smoke", () => {
     await page.addInitScript(() => {
       Object.defineProperty(window.navigator, "share", {
         configurable: true,
-        value: async (content: { text?: string }) => {
+        value: async (content: { files?: File[]; text?: string }) => {
           window.localStorage.setItem("sharedSchedule", content.text ?? "");
+          window.localStorage.setItem(
+            "sharedScheduleImageType",
+            content.files?.[0]?.type ?? "",
+          );
         },
+      });
+      Object.defineProperty(window.navigator, "canShare", {
+        configurable: true,
+        value: (content: { files?: File[] }) => Boolean(content.files?.length),
       });
     });
     await page.goto("/?demo=1");
@@ -618,9 +626,12 @@ test.describe("mobile web smoke", () => {
     const sharedSchedule = await page.evaluate(() =>
       window.localStorage.getItem("sharedSchedule"),
     );
-    expect(sharedSchedule).toContain("Elena Beauty");
-    expect(sharedSchedule).toContain("Čas začátku závisí na vybrané službě.");
-    expect(sharedSchedule).not.toContain("Gel manicure");
+    expect(sharedSchedule).toContain("?slug=elena-beauty");
+    expect(
+      await page.evaluate(() =>
+        window.localStorage.getItem("sharedScheduleImageType"),
+      ),
+    ).toBe("image/png");
     await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
@@ -653,16 +664,24 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
-  test("shares one text schedule for the next two weeks without choosing a service", async ({
+  test("shares one branded image for the next two weeks without choosing a service", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.addInitScript(() => {
       Object.defineProperty(window.navigator, "share", {
         configurable: true,
-        value: async (content: { text?: string }) => {
+        value: async (content: { files?: File[]; text?: string }) => {
           window.localStorage.setItem("sharedSchedule", content.text ?? "");
+          window.localStorage.setItem(
+            "sharedScheduleImageType",
+            content.files?.[0]?.type ?? "",
+          );
         },
+      });
+      Object.defineProperty(window.navigator, "canShare", {
+        configurable: true,
+        value: (content: { files?: File[] }) => Boolean(content.files?.length),
       });
     });
     await page.goto("/?demo=1");
@@ -686,7 +705,14 @@ test.describe("mobile web smoke", () => {
       .poll(() =>
         page.evaluate(() => window.localStorage.getItem("sharedSchedule")),
       )
-      .toContain("Elena Beauty");
+      .toContain("?slug=elena-beauty");
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          window.localStorage.getItem("sharedScheduleImageType"),
+        ),
+      )
+      .toBe("image/png");
     await expect(
       page.getByText("Vyberte aplikaci pro odeslání rozvrhu."),
     ).toBeVisible();
