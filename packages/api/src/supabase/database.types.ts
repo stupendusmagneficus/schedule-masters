@@ -807,6 +807,35 @@ export type Database = {
           },
         ]
       }
+      service_translation_requests: {
+        Row: {
+          created_at: string
+          id: number
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_translation_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           archived_at: string | null
@@ -822,6 +851,8 @@ export type Database = {
           name: string
           price_amount: number
           sort_order: number
+          source_locale: "en" | "cz" | "sk" | "ru" | "uk"
+          translations: Json
           updated_at: string
           workspace_id: string
         }
@@ -839,6 +870,8 @@ export type Database = {
           name: string
           price_amount: number
           sort_order?: number
+          source_locale?: "en" | "cz" | "sk" | "ru" | "uk"
+          translations?: Json
           updated_at?: string
           workspace_id: string
         }
@@ -856,6 +889,8 @@ export type Database = {
           name?: string
           price_amount?: number
           sort_order?: number
+          source_locale?: "en" | "cz" | "sk" | "ru" | "uk"
+          translations?: Json
           updated_at?: string
           workspace_id?: string
         }
@@ -1135,6 +1170,10 @@ export type Database = {
           timezone: string
           workspace_name: string
         }[]
+      }
+      claim_service_translation_request: {
+        Args: { p_user_id: string; p_workspace_id: string }
+        Returns: Json
       }
       clear_master_availability_date_override: {
         Args: { p_date: string; p_workspace_id: string }

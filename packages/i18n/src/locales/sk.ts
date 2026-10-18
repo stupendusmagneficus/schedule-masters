@@ -120,6 +120,8 @@ export const slovakMessages: Messages = {
   "workspace.setupStepService": "Prvá služba",
   "workspace.setupStepServiceDescription":
     "Pridajte službu, ktorú si klienti budú môcť vybrať pri rezervácii.",
+  "workspace.aiTranslationNotice":
+    "Neskôr vám aplikácia môže ponúknuť preklady služieb pomocou AI. Sú to iba návrhy: AI sa môže mýliť, preto každý preklad pred uložením skontrolujte a prípadne upravte.",
   "workspace.setupStepSchedule": "Pracovné dni a hodiny",
   "workspace.setupStepScheduleDescription":
     "Vyberte dni a čas, keď prijímate klientov.",
@@ -576,6 +578,20 @@ export const slovakMessages: Messages = {
   "mobile.serviceBufferBefore": "Prestávka pred, minúty",
   "mobile.serviceBufferAfter": "Prestávka po, minúty",
   "mobile.serviceSortOrder": "Poradie",
+  "mobile.serviceSourceLanguage": "Jazyk pôvodného názvu",
+  "mobile.serviceTranslationReviewHint":
+    "AI sa môže mýliť alebo zmeniť význam. Každý preklad pred uložením skontrolujte a podľa potreby upravte. Názov, popis a kategória sa odosielajú službe OpenAI; používanie API môže byť účtované samostatne.",
+  "mobile.serviceTranslationQuotaWarning":
+    "Pre tento pracovný priestor zostáva na tento mesiac {remaining} z {limit} bezplatných generovaní AI prekladov.",
+  "mobile.serviceTranslationQuotaExceeded":
+    "Mesačný bezplatný limit generovania AI prekladov bol vyčerpaný. Obnoví sa na začiatku budúceho mesiaca.",
+  "mobile.serviceTranslateWithAi": "Navrhnúť preklady pomocou AI",
+  "mobile.serviceTranslationLoading": "Pripravujú sa preklady…",
+  "mobile.serviceTranslationFailed":
+    "Preklady sa nepodarilo pripraviť. Skúste to znova.",
+  "mobile.serviceTranslationNameRequired": "Najprv zadajte názov služby.",
+  "mobile.serviceTranslationsShow": "Zobraziť preklady",
+  "mobile.serviceTranslationsHide": "Skryť preklady",
   "mobile.serviceSave": "Uložiť službu",
   "mobile.serviceCreate": "Vytvoriť službu",
   "mobile.serviceArchiveConfirm":

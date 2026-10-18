@@ -27,6 +27,9 @@ export function ServiceStep({
       <Text style={styles.stepDescription}>
         {t("workspace.setupStepServiceDescription")}
       </Text>
+      <Text style={styles.aiTranslationNotice}>
+        {t("workspace.aiTranslationNotice")}
+      </Text>
       <Text style={styles.label}>{t("workspace.servicePlaceholder")} *</Text>
       <TextInput
         autoCapitalize="sentences"
@@ -89,6 +92,15 @@ const styles = StyleSheet.create({
     borderRadius: radii.surface,
     gap: 16,
     padding: 20,
+  },
+  aiTranslationNotice: {
+    ...typography.caption,
+    backgroundColor: colors.subtleSurface,
+    borderColor: colors.borderSubtle,
+    borderRadius: radii.surface,
+    borderWidth: 1,
+    color: colors.secondaryText,
+    padding: 12,
   },
   error: { ...typography.caption, color: colors.danger },
   input: {

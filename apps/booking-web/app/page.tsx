@@ -27,6 +27,7 @@ import {
   parseDateInput,
 } from "../src/utils/dates";
 import { isValidBookingEmail } from "../src/utils/emailValidation";
+import { getLocalizedServiceContent } from "../src/utils/serviceSelection";
 
 const localeStorageKey = "schedule-app-locale";
 const demoWorkspaceId = "00000000-0000-0000-0000-000000000001";
@@ -47,6 +48,7 @@ const demoContext: PublicBookingContext = {
       name: "Demo manicure",
       description: "Careful manicure with a clean, polished finish.",
       category: "Manicure",
+      translations: {},
       durationMinutes: 60,
       priceAmount: 700,
       currency: "CZK",
@@ -307,7 +309,7 @@ export default function HomePage() {
                 60_000,
           ).toISOString(),
           serviceName: selectedServices
-            .map((service) => service.name)
+            .map((service) => getLocalizedServiceContent(service, locale).name)
             .join(" + "),
           durationMinutes: selectedServices.reduce(
             (total, service) => total + service.durationMinutes,
@@ -318,7 +320,7 @@ export default function HomePage() {
             0,
           ),
           serviceItems: selectedServices.map((service) => ({
-            serviceName: service.name,
+            serviceName: getLocalizedServiceContent(service, locale).name,
             durationMinutes: service.durationMinutes,
             priceAmount: service.priceAmount,
             currency: service.currency,
@@ -367,7 +369,13 @@ export default function HomePage() {
         throw new Error(bookingError.message);
       }
       analytics.track(analyticsEvents.publicBookingSucceeded, { locale });
-      setConfirmation(data as unknown as PublicBookingResult);
+      const bookingResult = data as unknown as PublicBookingResult;
+      setConfirmation({
+        ...bookingResult,
+        serviceName: selectedServices
+          .map((service) => getLocalizedServiceContent(service, locale).name)
+          .join(" + "),
+      });
     } catch {
       analytics.track(analyticsEvents.publicBookingFailed, {
         locale,

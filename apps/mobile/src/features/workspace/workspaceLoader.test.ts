@@ -158,7 +158,7 @@ describe("loadMasterWorkspace", () => {
     await expect(loadMasterWorkspace(client, userId)).resolves.toEqual({
       kind: "ready",
       memberRole: "owner",
-      services: [service],
+      services: [{ ...service, translations: {} }],
       workspace: {
         ...workspace,
         bookingIntervalMinutes: 15,

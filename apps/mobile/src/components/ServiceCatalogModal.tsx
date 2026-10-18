@@ -307,6 +307,8 @@ export function ServiceCatalogModal({
         isSaving={controller.isSaving}
         onClose={() => setEditorVisible(false)}
         onSave={save}
+        onTranslate={controller.translate}
+        locale={locale}
         service={editingService}
         t={t}
         visible={isEditorVisible}

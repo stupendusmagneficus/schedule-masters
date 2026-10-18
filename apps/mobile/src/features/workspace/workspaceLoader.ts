@@ -1,4 +1,4 @@
-import type { Database } from "@schedule-app/api";
+import { type Database, parseServiceTranslations } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Service, Workspace } from "../../types";
@@ -42,7 +42,7 @@ export async function loadMasterWorkspace(
   const serviceResult = await client
     .from("services")
     .select(
-      "id, name, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at",
+      "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at, source_locale, translations",
     )
     .eq("workspace_id", member.workspace_id)
     .eq("is_active", true)
@@ -64,7 +64,10 @@ export async function loadMasterWorkspace(
   return {
     kind: "ready",
     memberRole: member.role,
-    services: serviceResult.data ?? [],
+    services: (serviceResult.data ?? []).map((service) => ({
+      ...service,
+      translations: parseServiceTranslations(service.translations),
+    })),
     workspace: {
       ...workspaceResult.data,
       bookingIntervalMinutes:

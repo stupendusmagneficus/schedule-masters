@@ -9,6 +9,7 @@ import {
   listServices,
   restoreService,
   type ServiceDraft,
+  suggestServiceTranslations,
   updateService,
 } from "./serviceCatalog";
 
@@ -105,6 +106,20 @@ export function useServiceCatalog({
     [client, mutate, workspaceId],
   );
 
+  const translate = useCallback(
+    (
+      draft: Pick<
+        ServiceDraft,
+        "category" | "description" | "name" | "sourceLocale"
+      >,
+    ) => {
+      if (!client)
+        return Promise.reject(new Error("Supabase is not configured"));
+      return suggestServiceTranslations(client, workspaceId, draft);
+    },
+    [client, workspaceId],
+  );
+
   const activeServices = useMemo(
     () =>
       services.filter((service) => service.is_active && !service.archived_at),
@@ -121,6 +136,7 @@ export function useServiceCatalog({
     load,
     restore,
     services,
+    translate,
     update,
   };
 }

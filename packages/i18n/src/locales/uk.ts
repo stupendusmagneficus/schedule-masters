@@ -120,6 +120,8 @@ export const ukrainianMessages: Messages = {
   "workspace.setupStepService": "Перша послуга",
   "workspace.setupStepServiceDescription":
     "Додайте послугу, яку клієнти зможуть вибрати під час запису.",
+  "workspace.aiTranslationNotice":
+    "Пізніше застосунок зможе запропонувати переклади послуги за допомогою ШІ. Це лише чернетки: ШІ може помилитися, тому перевірте й за потреби відредагуйте переклад перед збереженням.",
   "workspace.setupStepSchedule": "Робочі дні та години",
   "workspace.setupStepScheduleDescription":
     "Виберіть дні та час, коли ви приймаєте клієнтів.",
@@ -572,6 +574,20 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceBufferBefore": "Перерва до, хвилин",
   "mobile.serviceBufferAfter": "Перерва після, хвилин",
   "mobile.serviceSortOrder": "Порядок сортування",
+  "mobile.serviceSourceLanguage": "Мова вихідної назви",
+  "mobile.serviceTranslationReviewHint":
+    "ШІ може помилитися або змінити зміст. Перевірте кожен переклад і за потреби відредагуйте його перед збереженням. Назва, опис і категорія надсилаються до OpenAI; використання API може оплачуватися окремо.",
+  "mobile.serviceTranslationQuotaWarning":
+    "Для цього робочого простору цього місяця залишилося {remaining} із {limit} безкоштовних генерацій перекладу ШІ.",
+  "mobile.serviceTranslationQuotaExceeded":
+    "Місячний безкоштовний ліміт генерацій перекладу ШІ вичерпано. Він оновиться на початку наступного місяця.",
+  "mobile.serviceTranslateWithAi": "Запропонувати переклади за допомогою ШІ",
+  "mobile.serviceTranslationLoading": "Готуємо переклади…",
+  "mobile.serviceTranslationFailed":
+    "Не вдалося підготувати переклади. Спробуйте ще раз.",
+  "mobile.serviceTranslationNameRequired": "Спочатку введіть назву послуги.",
+  "mobile.serviceTranslationsShow": "Показати переклади",
+  "mobile.serviceTranslationsHide": "Сховати переклади",
   "mobile.serviceSave": "Зберегти послугу",
   "mobile.serviceCreate": "Створити послугу",
   "mobile.serviceArchiveConfirm":

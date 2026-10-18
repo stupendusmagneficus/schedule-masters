@@ -1,4 +1,20 @@
-import type { PublicBookingService } from "@schedule-app/api";
+import type {
+  PublicBookingService,
+  ServiceLocale,
+  ServiceTranslation,
+} from "@schedule-app/api";
+
+export function getLocalizedServiceContent(
+  service: PublicBookingService,
+  locale: ServiceLocale,
+): ServiceTranslation {
+  const translation = service.translations?.[locale];
+  return {
+    name: translation?.name?.trim() || service.name,
+    description: translation?.description?.trim() || service.description,
+    category: translation?.category?.trim() || service.category,
+  };
+}
 
 export function getServiceSelectionSummary(
   services: readonly PublicBookingService[],

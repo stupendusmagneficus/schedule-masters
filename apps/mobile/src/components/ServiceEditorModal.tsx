@@ -1,4 +1,5 @@
-import type { MessageKey } from "@schedule-app/i18n";
+import type { ServiceLocale } from "@schedule-app/api";
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -13,6 +14,8 @@ import {
 import {
   createServiceDraft,
   type ServiceDraft,
+  ServiceTranslationQuotaExceededError,
+  type ServiceTranslationResult,
   type ServiceValidationError,
   validateServiceDraft,
 } from "../features/services/serviceCatalog";
@@ -28,6 +31,13 @@ type ServiceEditorModalProps = {
   readonly isSaving: boolean;
   readonly onClose: () => void;
   readonly onSave: (draft: ServiceDraft) => Promise<void>;
+  readonly onTranslate: (
+    draft: Pick<
+      ServiceDraft,
+      "category" | "description" | "name" | "sourceLocale"
+    >,
+  ) => Promise<ServiceTranslationResult>;
+  readonly locale: SupportedLocale;
   readonly service: Service | null;
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -39,24 +49,44 @@ export function ServiceEditorModal({
   isSaving,
   onClose,
   onSave,
+  onTranslate,
+  locale,
   service,
   t,
   visible,
 }: ServiceEditorModalProps) {
   const [draft, setDraft] = useState<ServiceDraft>(() =>
-    createServiceDraft(service),
+    createServiceDraft(service, locale),
   );
   const [validationError, setValidationError] =
     useState<ServiceValidationError | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showTranslations, setShowTranslations] = useState(false);
+  const [translationError, setTranslationError] = useState<string | null>(null);
+  const [translationQuota, setTranslationQuota] = useState<
+    ServiceTranslationResult["quota"] | null
+  >(null);
 
   useEffect(() => {
     if (!visible) return;
-    setDraft(createServiceDraft(service));
+    setDraft(createServiceDraft(service, locale));
     setValidationError(null);
-  }, [service, visible]);
+    setTranslationError(null);
+    setTranslationQuota(null);
+    setShowTranslations(
+      Boolean(service && Object.keys(service.translations ?? {}).length),
+    );
+  }, [locale, service, visible]);
 
   function updateDraft(patch: Partial<ServiceDraft>) {
-    setDraft((current) => ({ ...current, ...patch }));
+    const sourceContentChanged =
+      "name" in patch || "description" in patch || "category" in patch;
+    setDraft((current) => ({
+      ...current,
+      ...patch,
+      ...(sourceContentChanged ? { translations: {} } : {}),
+    }));
+    if (sourceContentChanged) setShowTranslations(false);
     setValidationError(null);
   }
 
@@ -72,14 +102,78 @@ export function ServiceEditorModal({
     }
   }
 
+  async function handleTranslate() {
+    if (!draft.name.trim()) {
+      setTranslationError(t("mobile.serviceTranslationNameRequired"));
+      return;
+    }
+    setIsTranslating(true);
+    setTranslationError(null);
+    try {
+      const result = await onTranslate({
+        ...draft,
+        sourceLocale: draft.sourceLocale ?? locale,
+      });
+      setDraft((current) => ({
+        ...current,
+        translations: { ...result.translations, ...current.translations },
+      }));
+      setTranslationQuota(result.quota);
+      setShowTranslations(true);
+    } catch (error) {
+      if (error instanceof ServiceTranslationQuotaExceededError) {
+        setTranslationQuota(error.quota);
+        setTranslationError(
+          error.quota ? null : t("mobile.serviceTranslationQuotaExceeded"),
+        );
+        return;
+      }
+      setTranslationError(t("mobile.serviceTranslationFailed"));
+    } finally {
+      setIsTranslating(false);
+    }
+  }
+
+  function updateTranslation(
+    targetLocale: ServiceLocale,
+    patch: Partial<{
+      name: string;
+      description: string | null;
+      category: string | null;
+    }>,
+  ) {
+    setDraft((current) => ({
+      ...current,
+      translations: {
+        ...current.translations,
+        [targetLocale]: {
+          name: current.translations?.[targetLocale]?.name ?? "",
+          description:
+            current.translations?.[targetLocale]?.description ?? null,
+          category: current.translations?.[targetLocale]?.category ?? null,
+          ...patch,
+        },
+      },
+    }));
+  }
+
   const errorMessage = validationError
     ? validationMessage(validationError, t)
     : error;
+  const quotaNotice =
+    translationQuota?.remaining === 0
+      ? t("mobile.serviceTranslationQuotaExceeded")
+      : translationQuota &&
+          translationQuota.remaining <= translationQuota.limit * 0.2
+        ? t("mobile.serviceTranslationQuotaWarning")
+            .replace("{remaining}", String(translationQuota.remaining))
+            .replace("{limit}", String(translationQuota.limit))
+        : null;
 
   return (
     <FullscreenModal
       closeLabel={t("common.cancel")}
-      closeDisabled={isSaving}
+      closeDisabled={isSaving || isTranslating}
       onClose={onClose}
       title={service ? t("mobile.serviceEdit") : t("mobile.serviceCreate")}
       visible={visible}
@@ -92,14 +186,14 @@ export function ServiceEditorModal({
           ) : null}
           <View style={styles.actionRow}>
             <ActionButton
-              disabled={isSaving}
+              disabled={isSaving || isTranslating}
               label={t("common.cancel")}
               onPress={onClose}
               style={styles.actionButton}
               variant="neutral"
             />
             <ActionButton
-              disabled={isSaving}
+              disabled={isSaving || isTranslating}
               label={t("mobile.serviceSave")}
               loading={isSaving}
               loadingLabel={t("common.loading")}
@@ -115,6 +209,7 @@ export function ServiceEditorModal({
         <ScrollView
           contentContainerStyle={styles.form}
           keyboardShouldPersistTaps="handled"
+          pointerEvents={isTranslating ? "none" : "auto"}
         >
           <Text style={styles.description}>
             {t("mobile.servicesDescription")}
@@ -184,6 +279,120 @@ export function ServiceEditorModal({
             onChangeText={(description) => updateDraft({ description })}
             value={draft.description}
           />
+          <View style={styles.translationSection}>
+            <Text style={styles.label}>
+              {t("mobile.serviceSourceLanguage")}
+            </Text>
+            <View style={styles.localeOptions}>
+              {serviceLocales.map((option) => (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    selected: draft.sourceLocale === option.locale,
+                  }}
+                  key={option.locale}
+                  onPress={() => {
+                    updateDraft({
+                      sourceLocale: option.locale,
+                      translations: {},
+                    });
+                    setShowTranslations(false);
+                  }}
+                  style={[
+                    styles.categoryOption,
+                    draft.sourceLocale === option.locale &&
+                      styles.categoryOptionSelected,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.categoryOptionText,
+                      draft.sourceLocale === option.locale &&
+                        styles.categoryOptionTextSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.categoryHint}>
+              {t("mobile.serviceTranslationReviewHint")}
+            </Text>
+            <ActionButton
+              disabled={isTranslating || isSaving}
+              label={t("mobile.serviceTranslateWithAi")}
+              loading={isTranslating}
+              loadingLabel={t("mobile.serviceTranslationLoading")}
+              onPress={() => void handleTranslate()}
+              variant="secondary"
+            />
+            {quotaNotice ? (
+              <Text
+                accessibilityRole="alert"
+                style={[
+                  styles.quotaNotice,
+                  translationQuota?.remaining === 0 && styles.quotaExhausted,
+                ]}
+              >
+                {quotaNotice}
+              </Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setShowTranslations((current) => !current)}
+              style={styles.translationToggle}
+            >
+              <Text style={styles.categoryOptionText}>
+                {t(
+                  showTranslations
+                    ? "mobile.serviceTranslationsHide"
+                    : "mobile.serviceTranslationsShow",
+                )}
+              </Text>
+            </Pressable>
+            {translationError ? (
+              <Text accessibilityRole="alert" style={styles.error}>
+                {translationError}
+              </Text>
+            ) : null}
+            {showTranslations &&
+              serviceLocales
+                .filter((option) => option.locale !== draft.sourceLocale)
+                .map(({ label, locale: targetLocale }) => (
+                  <View key={targetLocale} style={styles.translationFields}>
+                    <Text style={styles.label}>{label}</Text>
+                    <Field
+                      label={`${t("mobile.serviceName").replace(" *", "")} · ${label}`}
+                      onChangeText={(name) =>
+                        updateTranslation(targetLocale, { name })
+                      }
+                      value={draft.translations?.[targetLocale]?.name ?? ""}
+                    />
+                    <Field
+                      label={`${t("mobile.serviceDescription")} · ${label}`}
+                      multiline
+                      onChangeText={(description) =>
+                        updateTranslation(targetLocale, { description })
+                      }
+                      value={
+                        draft.translations?.[targetLocale]?.description ?? ""
+                      }
+                    />
+                    {draft.category.trim() ? (
+                      <Field
+                        label={`${t("mobile.serviceCategory")} · ${label}`}
+                        onChangeText={(category) =>
+                          updateTranslation(targetLocale, { category })
+                        }
+                        value={
+                          draft.translations?.[targetLocale]?.category ?? ""
+                        }
+                      />
+                    ) : null}
+                  </View>
+                ))}
+          </View>
           <View style={styles.row}>
             <View style={styles.rowField}>
               <Field
@@ -311,12 +520,31 @@ function validationMessage(
   return t(keys[error]);
 }
 
+const serviceLocales: readonly { label: string; locale: ServiceLocale }[] = [
+  { label: "English", locale: "en" },
+  { label: "Čeština", locale: "cz" },
+  { label: "Slovenčina", locale: "sk" },
+  { label: "Русский", locale: "ru" },
+  { label: "Українська", locale: "uk" },
+];
+
 const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", gap: 12 },
   actions: { gap: 12 },
   body: { flex: 1 },
   categoryField: { gap: 8, marginTop: 16 },
   categoryHint: { ...typography.caption, color: colors.secondaryText },
+  quotaNotice: {
+    ...typography.caption,
+    backgroundColor: colors.pendingSoft,
+    borderRadius: radii.surface,
+    color: colors.pendingText,
+    padding: 12,
+  },
+  quotaExhausted: {
+    backgroundColor: colors.dangerSoft,
+    color: colors.danger,
+  },
   categoryOptions: { flexDirection: "row", gap: 8 },
   categoryOption: {
     alignItems: "center",
@@ -369,4 +597,19 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 12 },
   rowField: { flex: 1, minWidth: 0 },
   title: { ...typography.section, color: colors.primaryText },
+  localeOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  translationFields: {
+    borderColor: colors.border,
+    borderRadius: radii.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 4,
+    marginTop: 8,
+    padding: 12,
+  },
+  translationSection: { gap: 12, marginTop: 20 },
+  translationToggle: {
+    alignSelf: "flex-start",
+    minHeight: 44,
+    justifyContent: "center",
+  },
 });

@@ -111,6 +111,7 @@ export type MessageKey =
   | "workspace.setupStepMasterDescription"
   | "workspace.setupStepService"
   | "workspace.setupStepServiceDescription"
+  | "workspace.aiTranslationNotice"
   | "workspace.setupStepSchedule"
   | "workspace.setupStepScheduleDescription"
   | "workspace.setupCompleteTitle"
@@ -499,6 +500,16 @@ export type MessageKey =
   | "mobile.serviceBufferBefore"
   | "mobile.serviceBufferAfter"
   | "mobile.serviceSortOrder"
+  | "mobile.serviceSourceLanguage"
+  | "mobile.serviceTranslationReviewHint"
+  | "mobile.serviceTranslationQuotaWarning"
+  | "mobile.serviceTranslationQuotaExceeded"
+  | "mobile.serviceTranslateWithAi"
+  | "mobile.serviceTranslationLoading"
+  | "mobile.serviceTranslationFailed"
+  | "mobile.serviceTranslationNameRequired"
+  | "mobile.serviceTranslationsShow"
+  | "mobile.serviceTranslationsHide"
   | "mobile.serviceSave"
   | "mobile.serviceCreate"
   | "mobile.serviceArchiveConfirm"
@@ -692,6 +703,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "Первая услуга",
     "workspace.setupStepServiceDescription":
       "Добавьте услугу, которую клиенты смогут выбрать при записи.",
+    "workspace.aiTranslationNotice":
+      "Позже приложение сможет предложить переводы услуги с помощью ИИ. Это только черновики: ИИ может ошибиться, поэтому проверьте и при необходимости измените перевод перед сохранением.",
     "workspace.setupStepSchedule": "Рабочие дни и часы",
     "workspace.setupStepScheduleDescription":
       "Выберите дни и общий интервал, когда вы принимаете клиентов.",
@@ -1150,6 +1163,20 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Перерыв до, минут",
     "mobile.serviceBufferAfter": "Перерыв после, минут",
     "mobile.serviceSortOrder": "Порядок",
+    "mobile.serviceSourceLanguage": "Язык исходного названия",
+    "mobile.serviceTranslationReviewHint":
+      "ИИ может ошибиться или неверно передать смысл. Проверьте каждый перевод и при необходимости исправьте его перед сохранением. Название, описание и категория отправляются в OpenAI; использование API может оплачиваться отдельно.",
+    "mobile.serviceTranslationQuotaWarning":
+      "Осталось {remaining} из {limit} бесплатных генераций ИИ-перевода на этот месяц для рабочего пространства.",
+    "mobile.serviceTranslationQuotaExceeded":
+      "Месячный бесплатный лимит генераций ИИ-перевода исчерпан. Он обновится в начале следующего месяца.",
+    "mobile.serviceTranslateWithAi": "Предложить перевод с помощью ИИ",
+    "mobile.serviceTranslationLoading": "Готовим переводы…",
+    "mobile.serviceTranslationFailed":
+      "Не удалось подготовить перевод. Попробуйте ещё раз.",
+    "mobile.serviceTranslationNameRequired": "Сначала введите название услуги.",
+    "mobile.serviceTranslationsShow": "Показать переводы",
+    "mobile.serviceTranslationsHide": "Скрыть переводы",
     "mobile.serviceSave": "Сохранить услугу",
     "mobile.serviceCreate": "Создать услугу",
     "mobile.serviceArchiveConfirm":
@@ -1352,6 +1379,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "První služba",
     "workspace.setupStepServiceDescription":
       "Přidejte službu, kterou si klienti vyberou při rezervaci.",
+    "workspace.aiTranslationNotice":
+      "Později vám aplikace může nabídnout překlady služeb pomocí AI. Jde pouze o návrhy: AI se může mýlit, proto překlad před uložením zkontrolujte a případně upravte.",
     "workspace.setupStepSchedule": "Pracovní dny a hodiny",
     "workspace.setupStepScheduleDescription":
       "Vyberte dny a časový interval, kdy přijímáte klienty.",
@@ -1805,6 +1834,20 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Pauza před, minuty",
     "mobile.serviceBufferAfter": "Pauza po, minuty",
     "mobile.serviceSortOrder": "Pořadí",
+    "mobile.serviceSourceLanguage": "Jazyk původního názvu",
+    "mobile.serviceTranslationReviewHint":
+      "AI se může mýlit nebo změnit význam. Každý překlad před uložením zkontrolujte a případně upravte. Název, popis a kategorie se odesílají službě OpenAI; používání API může být zpoplatněno zvlášť.",
+    "mobile.serviceTranslationQuotaWarning":
+      "Pro tento pracovní prostor zbývá na tento měsíc {remaining} z {limit} bezplatných generování AI překladů.",
+    "mobile.serviceTranslationQuotaExceeded":
+      "Měsíční bezplatný limit generování AI překladů byl vyčerpán. Obnoví se na začátku příštího měsíce.",
+    "mobile.serviceTranslateWithAi": "Navrhnout překlad pomocí AI",
+    "mobile.serviceTranslationLoading": "Připravují se překlady…",
+    "mobile.serviceTranslationFailed":
+      "Překlad se nepodařilo připravit. Zkuste to znovu.",
+    "mobile.serviceTranslationNameRequired": "Nejprve zadejte název služby.",
+    "mobile.serviceTranslationsShow": "Zobrazit překlady",
+    "mobile.serviceTranslationsHide": "Skrýt překlady",
     "mobile.serviceSave": "Uložit službu",
     "mobile.serviceCreate": "Vytvořit službu",
     "mobile.serviceArchiveConfirm":
@@ -2007,6 +2050,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "First service",
     "workspace.setupStepServiceDescription":
       "Add the service clients will be able to choose when booking.",
+    "workspace.aiTranslationNotice":
+      "Later, the app can suggest AI translations for your service. These are drafts only: AI can make mistakes, so review and edit each translation before saving.",
     "workspace.setupStepSchedule": "Working days and hours",
     "workspace.setupStepScheduleDescription":
       "Choose the days and time range when you accept clients.",
@@ -2465,6 +2510,20 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceBufferBefore": "Buffer before, minutes",
     "mobile.serviceBufferAfter": "Buffer after, minutes",
     "mobile.serviceSortOrder": "Sort order",
+    "mobile.serviceSourceLanguage": "Source name language",
+    "mobile.serviceTranslationReviewHint":
+      "AI can make mistakes or change the meaning. Review each translation and edit it before saving if needed. The name, description, and category are sent to OpenAI; API usage may be billed separately.",
+    "mobile.serviceTranslationQuotaWarning":
+      "{remaining} of {limit} free AI translation generations remain for this workspace this month.",
+    "mobile.serviceTranslationQuotaExceeded":
+      "The free monthly AI translation generation limit has been reached. It resets at the start of next month.",
+    "mobile.serviceTranslateWithAi": "Suggest translations with AI",
+    "mobile.serviceTranslationLoading": "Preparing translations…",
+    "mobile.serviceTranslationFailed":
+      "Could not prepare translations. Try again.",
+    "mobile.serviceTranslationNameRequired": "Enter the service name first.",
+    "mobile.serviceTranslationsShow": "Show translations",
+    "mobile.serviceTranslationsHide": "Hide translations",
     "mobile.serviceSave": "Save service",
     "mobile.serviceCreate": "Create service",
     "mobile.serviceArchiveConfirm":
