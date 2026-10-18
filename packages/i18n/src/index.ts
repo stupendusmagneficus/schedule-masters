@@ -364,6 +364,8 @@ export type MessageKey =
   | "mobile.financeActual"
   | "mobile.financeActualDescription"
   | "mobile.financeProfitUnavailable"
+  | "mobile.financeShowDetails"
+  | "mobile.financeHideDetails"
   | "mobile.financeAppointments"
   | "mobile.financePreviousMonth"
   | "mobile.financeNextMonth"
@@ -953,6 +955,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeActualDescription": "Сумма оплаты, указанная мастером",
     "mobile.financeProfitUnavailable":
       "Это не прибыль: расходы здесь не учитываются.",
+    "mobile.financeShowDetails": "Показать подробности",
+    "mobile.financeHideDetails": "Скрыть подробности",
     "mobile.financeAppointments": "Записи",
     "mobile.financePreviousMonth": "Предыдущий месяц",
     "mobile.financeNextMonth": "Следующий месяц",
@@ -1557,6 +1561,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeActualDescription": "Částka platby zadaná poskytovatelem",
     "mobile.financeProfitUnavailable":
       "Nejde o zisk: výdaje se zde nezohledňují.",
+    "mobile.financeShowDetails": "Zobrazit podrobnosti",
+    "mobile.financeHideDetails": "Skrýt podrobnosti",
     "mobile.financeAppointments": "Rezervace",
     "mobile.financePreviousMonth": "Předchozí měsíc",
     "mobile.financeNextMonth": "Následující měsíc",
@@ -2160,6 +2166,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeActualDescription": "Payment amount entered by the provider",
     "mobile.financeProfitUnavailable":
       "This is not profit: expenses are not included.",
+    "mobile.financeShowDetails": "Show details",
+    "mobile.financeHideDetails": "Hide details",
     "mobile.financeAppointments": "Bookings",
     "mobile.financePreviousMonth": "Previous month",
     "mobile.financeNextMonth": "Next month",

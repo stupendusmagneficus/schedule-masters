@@ -110,6 +110,34 @@ test.describe("mobile web smoke", () => {
     }
   });
 
+  test("keeps the Finance month snapshot focused and moves secondary metrics behind details", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Finance" }).click();
+
+    await expect(page.getByText("Přijato", { exact: true })).toBeVisible();
+    await expect(page.getByText("Očekává se", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Dokončené rezervace", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Zobrazit podrobnosti" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Nadcházející rezervace", { exact: true }),
+    ).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Zobrazit podrobnosti" }).click();
+    await expect(
+      page.getByText("Nadcházející rezervace", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Skrýt podrobnosti" }),
+    ).toBeVisible();
+  });
+
   test("opens Profile from the five bottom tabs at a narrow viewport", async ({
     page,
   }) => {

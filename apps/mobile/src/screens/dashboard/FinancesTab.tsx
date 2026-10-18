@@ -52,6 +52,7 @@ export function FinancesTab({
     const today = getTodayCalendarDate(workspace.timezone);
     return `${today.slice(0, 7)}-01`;
   });
+  const [showDetails, setShowDetails] = useState(false);
   const financeData = useFinanceData({
     client,
     demoData,
@@ -137,50 +138,65 @@ export function FinancesTab({
         ) : (
           <>
             <InfoCard style={styles.summaryCard}>
-              <Text style={styles.sectionTitle}>
-                {t("mobile.financeIncome")}
-              </Text>
-              <View style={styles.incomeRow}>
-                <View style={styles.incomeColumn}>
-                  <View style={styles.incomeLabelRow}>
-                    <View style={[styles.statusDot, styles.completedDot]} />
-                    <Text style={styles.incomeLabel}>
-                      {t("mobile.financeActual")}
-                    </Text>
-                  </View>
-                  <Text style={styles.amount} numberOfLines={2}>
-                    {receivedAmounts}
+              <View style={styles.receivedSummary}>
+                <Text style={styles.incomeLabel}>
+                  {t("mobile.financeActual")}
+                </Text>
+                <Text style={styles.amount} numberOfLines={2}>
+                  {receivedAmounts}
+                </Text>
+                <Text style={styles.helper}>
+                  {t("mobile.financeActualDescription")}
+                </Text>
+              </View>
+              <View style={styles.secondaryMetrics}>
+                <View style={styles.secondaryMetric}>
+                  <Text style={styles.incomeLabel}>
+                    {t("mobile.financeExpected")}
                   </Text>
-                  <Text style={styles.helper}>
-                    {t("mobile.financeActualDescription")}
-                  </Text>
-                </View>
-                <View style={styles.incomeColumn}>
-                  <View style={styles.incomeLabelRow}>
-                    <View style={[styles.statusDot, styles.expectedDot]} />
-                    <Text style={styles.incomeLabel}>
-                      {t("mobile.financeExpected")}
-                    </Text>
-                  </View>
-                  <Text style={styles.amount} numberOfLines={2}>
+                  <Text style={styles.secondaryAmount} numberOfLines={2}>
                     {expectedAmounts}
                   </Text>
                   <Text style={styles.helper}>
                     {t("mobile.financeExpectedDescription")}
                   </Text>
                 </View>
+                <View style={styles.secondaryMetric}>
+                  <Text style={styles.incomeLabel}>
+                    {t("mobile.financeCompletedAppointments")}
+                  </Text>
+                  <Text style={styles.secondaryAmount}>
+                    {summary.completedCount}
+                  </Text>
+                </View>
               </View>
             </InfoCard>
 
-            <InfoCard style={styles.appointmentsCard}>
-              <Text style={styles.sectionTitle}>
-                {t("mobile.financeAppointments")}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showDetails }}
+              onPress={() => setShowDetails((current) => !current)}
+              style={({ pressed }) => [
+                styles.detailsToggle,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.detailsToggleLabel}>
+                {t(
+                  showDetails
+                    ? "mobile.financeHideDetails"
+                    : "mobile.financeShowDetails",
+                )}
               </Text>
+              <MaterialCommunityIcons
+                color={colors.accent}
+                name={showDetails ? "chevron-up" : "chevron-down"}
+                size={22}
+              />
+            </Pressable>
+
+            {showDetails ? (
               <View style={styles.metricsGrid}>
-                <MetricCard
-                  label={t("mobile.financeCompletedAppointments")}
-                  value={String(summary.completedCount)}
-                />
                 <MetricCard
                   label={t("mobile.financeUpcomingAppointments")}
                   value={String(summary.upcomingCount)}
@@ -208,17 +224,7 @@ export function FinancesTab({
                   )}
                 />
               </View>
-            </InfoCard>
-            <View style={styles.notice}>
-              <MaterialCommunityIcons
-                color={colors.secondaryText}
-                name="information-outline"
-                size={18}
-              />
-              <Text style={styles.noticeText}>
-                {t("mobile.financeProfitUnavailable")}
-              </Text>
-            </View>
+            ) : null}
           </>
         )
       ) : null}
@@ -259,10 +265,10 @@ function MetricCard({
   readonly value: string;
 }) {
   return (
-    <InfoCard style={styles.metricCard}>
+    <View style={styles.metricCard}>
       <Text style={styles.metricValue}>{value}</Text>
       <Text style={styles.metricLabel}>{label}</Text>
-    </InfoCard>
+    </View>
   );
 }
 
@@ -279,24 +285,34 @@ function formatAmounts(
 }
 
 const styles = StyleSheet.create({
-  amount: { ...typography.metric, color: colors.primaryText, marginTop: 8 },
-  appointmentsCard: { gap: 12 },
-  completedDot: { backgroundColor: colors.accent },
+  amount: { ...typography.display, color: colors.primaryText, marginTop: 4 },
   content: {
     gap: spacing.section,
   },
-  hidden: { display: "none" },
-  expectedDot: { backgroundColor: colors.primaryText },
-  helper: { ...typography.caption, color: colors.secondaryText, marginTop: 4 },
-  incomeColumn: { flex: 1, minWidth: 0 },
-  incomeLabel: { ...typography.caption, color: colors.secondaryText },
-  incomeLabelRow: { alignItems: "center", flexDirection: "row", gap: 6 },
-  incomeRow: {
+  detailsToggle: {
+    alignItems: "center",
+    alignSelf: "flex-start",
     flexDirection: "row",
-    gap: spacing.section,
-    marginTop: spacing.section,
+    gap: 4,
+    minHeight: 44,
+    paddingHorizontal: 4,
   },
-  metricCard: { flexBasis: "45%", flexGrow: 1, gap: 4, minWidth: 0 },
+  detailsToggleLabel: {
+    ...typography.label,
+    color: colors.accent,
+  },
+  hidden: { display: "none" },
+  helper: { ...typography.caption, color: colors.secondaryText, marginTop: 4 },
+  incomeLabel: { ...typography.caption, color: colors.secondaryText },
+  metricCard: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: 8,
+    flexBasis: "45%",
+    flexGrow: 1,
+    gap: 4,
+    minWidth: 0,
+    padding: 12,
+  },
   metricLabel: { ...typography.caption, color: colors.secondaryText },
   metricValue: { ...typography.label, color: colors.primaryText },
   metricsGrid: {
@@ -323,22 +339,25 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
   monthSelector: { alignItems: "center", flexDirection: "row", gap: 12 },
-  notice: {
-    alignItems: "flex-start",
-    backgroundColor: colors.subtleSurface,
-    borderRadius: radii.surface,
-    flexDirection: "row",
-    gap: 8,
-    padding: 12,
-  },
-  noticeText: { ...typography.caption, color: colors.secondaryText, flex: 1 },
+  receivedSummary: { gap: 2 },
   pressed: { opacity: 0.75 },
   retryButton: { alignSelf: "flex-start", marginLeft: -10, marginTop: 4 },
+  secondaryAmount: {
+    ...typography.metric,
+    color: colors.primaryText,
+    marginTop: 4,
+  },
+  secondaryMetric: { flex: 1, minWidth: 0 },
+  secondaryMetrics: {
+    borderTopColor: colors.border,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: spacing.section,
+    paddingTop: spacing.section,
+  },
   state: { alignItems: "center", gap: 8, paddingVertical: 28 },
   summaryCard: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accentSoft,
   },
-  sectionTitle: { ...typography.label, color: colors.primaryText },
-  statusDot: { borderRadius: 4, height: 8, width: 8 },
 });

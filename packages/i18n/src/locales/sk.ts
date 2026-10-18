@@ -423,6 +423,8 @@ export const slovakMessages: Messages = {
   "mobile.financeActualDescription": "Suma platby zadaná poskytovateľom služby",
   "mobile.financeProfitUnavailable":
     "Toto nie je zisk: výdavky nie sú zahrnuté.",
+  "mobile.financeShowDetails": "Zobraziť podrobnosti",
+  "mobile.financeHideDetails": "Skryť podrobnosti",
   "mobile.financeAppointments": "Rezervácie",
   "mobile.financePreviousMonth": "Predchádzajúci mesiac",
   "mobile.financeNextMonth": "Nasledujúci mesiac",
