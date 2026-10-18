@@ -425,6 +425,11 @@ export type MessageKey =
   | "mobile.financeNewCustomers"
   | "mobile.financeReturningCustomers"
   | "mobile.financeBookedHours"
+  | "mobile.financeWeeklyIncome"
+  | "mobile.financeNoReceivedIncome"
+  | "mobile.profileWorkingDays"
+  | "mobile.profileBookingInterval"
+  | "mobile.profileOpenBooking"
   | "mobile.paymentReceived"
   | "mobile.paymentAmountHint"
   | "mobile.paymentAmountInvalid"
@@ -1080,6 +1085,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeNewCustomers": "Новые клиенты",
     "mobile.financeReturningCustomers": "Повторные клиенты",
     "mobile.financeBookedHours": "Занято часов",
+    "mobile.financeWeeklyIncome": "Доход по неделям",
+    "mobile.financeNoReceivedIncome": "Полученных оплат пока нет.",
+    "mobile.profileWorkingDays": "Рабочих дней в неделю: {count}",
+    "mobile.profileBookingInterval": "Шаг записи: {minutes} мин",
+    "mobile.profileOpenBooking": "Открыть страницу записи",
     "mobile.paymentReceived": "Получено за запись",
     "mobile.paymentAmountHint": "Цена услуги",
     "mobile.paymentAmountInvalid":
@@ -1753,6 +1763,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeNewCustomers": "Noví klienti",
     "mobile.financeReturningCustomers": "Vracející se klienti",
     "mobile.financeBookedHours": "Obsazené hodiny",
+    "mobile.financeWeeklyIncome": "Příjem po týdnech",
+    "mobile.financeNoReceivedIncome": "Zatím nebyly přijaty žádné platby.",
+    "mobile.profileWorkingDays": "Pracovní dny v týdnu: {count}",
+    "mobile.profileBookingInterval": "Krok rezervace: {minutes} min",
+    "mobile.profileOpenBooking": "Otevřít rezervační stránku",
     "mobile.paymentReceived": "Přijato za rezervaci",
     "mobile.paymentAmountHint": "Cena služby",
     "mobile.paymentAmountInvalid":
@@ -2426,6 +2441,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeNewCustomers": "New customers",
     "mobile.financeReturningCustomers": "Returning customers",
     "mobile.financeBookedHours": "Booked hours",
+    "mobile.financeWeeklyIncome": "Income by week",
+    "mobile.financeNoReceivedIncome": "No payments have been received yet.",
+    "mobile.profileWorkingDays": "Working days per week: {count}",
+    "mobile.profileBookingInterval": "Booking interval: {minutes} min",
+    "mobile.profileOpenBooking": "Open booking page",
     "mobile.paymentReceived": "Received for appointment",
     "mobile.paymentAmountHint": "Service price",
     "mobile.paymentAmountInvalid":

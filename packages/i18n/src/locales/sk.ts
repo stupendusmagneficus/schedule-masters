@@ -494,6 +494,11 @@ export const slovakMessages: Messages = {
   "mobile.financeNewCustomers": "Noví klienti",
   "mobile.financeReturningCustomers": "Vracajúci sa klienti",
   "mobile.financeBookedHours": "Obsadené hodiny",
+  "mobile.financeWeeklyIncome": "Príjem podľa týždňov",
+  "mobile.financeNoReceivedIncome": "Zatiaľ neboli prijaté žiadne platby.",
+  "mobile.profileWorkingDays": "Pracovné dni v týždni: {count}",
+  "mobile.profileBookingInterval": "Krok rezervácie: {minutes} min",
+  "mobile.profileOpenBooking": "Otvoriť rezervačnú stránku",
   "mobile.paymentReceived": "Prijatá suma za rezerváciu",
   "mobile.paymentAmountHint": "Cena služby",
   "mobile.paymentAmountInvalid":
