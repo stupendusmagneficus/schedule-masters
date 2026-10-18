@@ -38,6 +38,7 @@ import type { DashboardTabProps } from "./types";
 
 type CustomersTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
+  readonly historyRefreshVersion: number;
   readonly onCreateBooking: (customer: CustomerProfile) => void;
   readonly onSelectAppointment: (appointment: MasterAppointment) => void;
   readonly workspace: Workspace;
@@ -46,6 +47,7 @@ type CustomersTabProps = DashboardTabProps & {
 
 export function CustomersTab({
   client,
+  historyRefreshVersion,
   locale,
   onCreateBooking,
   onSelectAppointment,
@@ -56,6 +58,7 @@ export function CustomersTab({
   const [search, setSearch] = useState("");
   const directory = useCustomerDirectory({
     client,
+    historyRefreshVersion,
     search,
     workspaceId: workspace.id,
   });
@@ -234,6 +237,9 @@ export function CustomersTab({
                 />
               </View>
               <Text style={styles.body}>{visit.service_name}</Text>
+              {visit.master_note ? (
+                <Text style={styles.helper}>{visit.master_note}</Text>
+              ) : null}
               <Text style={styles.helper}>
                 {formatCurrency(visit.price_amount, visit.currency, locale)}
               </Text>

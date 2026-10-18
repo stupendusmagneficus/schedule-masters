@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -35,6 +35,8 @@ type AppointmentDetailsModalProps = {
   readonly onClose: () => void;
   readonly onStatusChange: (status: AppointmentStatus) => Promise<void>;
   readonly onPaymentSave?: (amount: number) => Promise<boolean>;
+  readonly onNoteSave?: (note: string) => Promise<boolean>;
+  readonly onCancelFutureSeries?: () => Promise<boolean>;
   readonly customerPhone: string | null;
   readonly customerContactLoading: boolean;
   readonly customerContactError: boolean;
@@ -61,6 +63,8 @@ export function AppointmentDetailsModal({
   onClose,
   onStatusChange,
   onPaymentSave,
+  onNoteSave,
+  onCancelFutureSeries,
   customerPhone,
   customerContactLoading,
   customerContactError,
@@ -78,6 +82,16 @@ export function AppointmentDetailsModal({
   );
   const [paymentDraft, setPaymentDraft] = useState<string | null>(null);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState(appointment?.master_note ?? "");
+  const [noteMessage, setNoteMessage] = useState<string | null>(null);
+  const [isSavingNote, setSavingNote] = useState(false);
+  const [confirmSeriesCancellation, setConfirmSeriesCancellation] =
+    useState(false);
+  const [seriesCancellationError, setSeriesCancellationError] = useState(false);
+  useEffect(() => {
+    setNoteDraft(appointment?.master_note ?? "");
+    setNoteMessage(null);
+  }, [appointment?.master_note]);
   const [pendingStatus, setPendingStatus] = useState<AppointmentStatus | null>(
     null,
   );
@@ -237,6 +251,110 @@ export function AppointmentDetailsModal({
                 />
               </View>
             </InfoCard>
+
+            {onNoteSave ? (
+              <InfoCard>
+                <Text style={styles.sectionTitle}>{t("mobile.visitNote")}</Text>
+                <TextInput
+                  accessibilityLabel={t("mobile.visitNote")}
+                  editable={!isSavingNote}
+                  maxLength={1000}
+                  multiline
+                  onChangeText={(value) => {
+                    setNoteDraft(value);
+                    setNoteMessage(null);
+                  }}
+                  placeholder={t("mobile.visitNotePlaceholder")}
+                  placeholderTextColor={colors.secondaryText}
+                  style={styles.noteInput}
+                  textAlignVertical="top"
+                  value={noteDraft}
+                />
+                <ActionButton
+                  disabled={
+                    isSavingNote ||
+                    noteDraft === (appointment.master_note ?? "")
+                  }
+                  label={t("mobile.visitNoteSave")}
+                  loading={isSavingNote}
+                  onPress={async () => {
+                    setSavingNote(true);
+                    const saved = await onNoteSave(noteDraft);
+                    setSavingNote(false);
+                    setNoteMessage(
+                      saved
+                        ? t("mobile.visitNoteSaved")
+                        : t("mobile.visitNoteSaveFailed"),
+                    );
+                  }}
+                  variant="secondary"
+                />
+                {noteMessage ? (
+                  <Text
+                    accessibilityRole={
+                      noteMessage === t("mobile.visitNoteSaved")
+                        ? undefined
+                        : "alert"
+                    }
+                    style={
+                      noteMessage === t("mobile.visitNoteSaved")
+                        ? styles.helper
+                        : styles.error
+                    }
+                  >
+                    {noteMessage}
+                  </Text>
+                ) : null}
+              </InfoCard>
+            ) : null}
+
+            {appointment.appointment_series_id && onCancelFutureSeries ? (
+              <InfoCard>
+                <Text style={styles.sectionTitle}>
+                  {t("mobile.recurringCancelFuture")}
+                </Text>
+                {confirmSeriesCancellation ? (
+                  <>
+                    <Text style={styles.helper}>
+                      {t("mobile.recurringCancelPrompt")}
+                    </Text>
+                    {seriesCancellationError ? (
+                      <Text accessibilityRole="alert" style={styles.error}>
+                        {t("mobile.recurringCancelFailed")}
+                      </Text>
+                    ) : null}
+                    <View style={styles.confirmationActions}>
+                      <ActionButton
+                        disabled={isSaving}
+                        label={t("common.cancel")}
+                        onPress={() => setConfirmSeriesCancellation(false)}
+                        style={styles.confirmationAction}
+                        variant="quiet"
+                      />
+                      <ActionButton
+                        disabled={isSaving}
+                        label={t("mobile.recurringCancelConfirm")}
+                        loading={isSaving}
+                        onPress={() => {
+                          setSeriesCancellationError(false);
+                          void onCancelFutureSeries().then((cancelled) => {
+                            if (!cancelled) setSeriesCancellationError(true);
+                          });
+                        }}
+                        style={styles.confirmationAction}
+                        variant="destructiveConfirm"
+                      />
+                    </View>
+                  </>
+                ) : (
+                  <ActionButton
+                    label={t("mobile.recurringCancelFuture")}
+                    onPress={() => setConfirmSeriesCancellation(true)}
+                    variant="destructive"
+                  />
+                )}
+              </InfoCard>
+            ) : null}
 
             {appointment.status === "completed" && onPaymentSave ? (
               <InfoCard>
@@ -524,6 +642,16 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     minHeight: 52,
     paddingHorizontal: 16,
+  },
+  noteInput: {
+    ...typography.body,
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: 1,
+    color: colors.primaryText,
+    marginBottom: 12,
+    minHeight: 112,
+    padding: 12,
   },
   sectionTitle: {
     ...typography.section,

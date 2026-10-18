@@ -1277,6 +1277,8 @@ export type Database = {
           id: string
           is_new_customer: boolean
           is_returning_customer: boolean
+          master_note: string | null
+          appointment_series_id: string | null
           occupied_ends_at: string
           occupied_starts_at: string
           paid_amount: number
@@ -1286,6 +1288,41 @@ export type Database = {
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
+      }
+      create_master_recurring_bookings: {
+        Args: {
+          p_customer_id?: string
+          p_excluded_dates?: string[]
+          p_email?: string
+          p_idempotency_key: string
+          p_interval_weeks: number
+          p_master_note?: string
+          p_name?: string
+          p_occurrence_count: number
+          p_phone?: string
+          p_service_ids: string[]
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
+      preview_master_recurring_bookings: {
+        Args: {
+          p_interval_weeks: number
+          p_occurrence_count: number
+          p_service_ids: string[]
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: {
+          available: boolean
+          local_date: string
+          starts_at: string
+        }[]
+      }
+      cancel_master_appointment_series_future: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: Json
       }
       list_master_availability_blocks: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
@@ -1321,9 +1358,18 @@ export type Database = {
           price_amount: number
           service_name: string
           source: Database["public"]["Enums"]["appointment_source"]
+          master_note: string | null
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
+      }
+      set_master_appointment_note: {
+        Args: {
+          p_appointment_id: string
+          p_master_note: string | null
+          p_workspace_id: string
+        }
+        Returns: Json
       }
       list_master_customers: {
         Args: { p_search?: string; p_workspace_id: string }

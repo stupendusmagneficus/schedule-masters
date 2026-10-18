@@ -139,6 +139,18 @@ export type MessageKey =
   | "mobile.freeSlotsShareNoAvailability"
   | "mobile.freeSlotsShareFailed"
   | "mobile.freeSlotsShareOpened"
+  | "mobile.freeSlotsShareDownloaded"
+  | "mobile.freeSlotsSharePeriod"
+  | "mobile.freeSlotsShareStartDate"
+  | "mobile.freeSlotsShareEndDate"
+  | "mobile.freeSlotsShareRangeLimit"
+  | "mobile.freeSlotsShareInvalidRange"
+  | "mobile.freeSlotsShareRangeTooLong"
+  | "mobile.freeSlotsShareFormat"
+  | "mobile.freeSlotsShareTextFormat"
+  | "mobile.freeSlotsShareGraphicFormat"
+  | "mobile.freeSlotsSharePreview"
+  | "mobile.freeSlotsShareGraphicTitle"
   | "mobile.bookingRequests"
   | "mobile.waitingList"
   | "mobile.waitingListAdd"
@@ -196,6 +208,29 @@ export type MessageKey =
   | "mobile.statusCompleted"
   | "mobile.statusNoShow"
   | "mobile.appointmentDetails"
+  | "mobile.visitNote"
+  | "mobile.visitNotePlaceholder"
+  | "mobile.visitNoteSave"
+  | "mobile.visitNoteSaved"
+  | "mobile.visitNoteSaveFailed"
+  | "mobile.recurringBooking"
+  | "mobile.recurringBookingHint"
+  | "mobile.recurringWeekly"
+  | "mobile.recurringBiweekly"
+  | "mobile.recurringOccurrenceCount"
+  | "mobile.recurringCancelFuture"
+  | "mobile.recurringCancelPrompt"
+  | "mobile.recurringCancelConfirm"
+  | "mobile.recurringCancelled"
+  | "mobile.recurringCancelFailed"
+  | "mobile.recurringByCount"
+  | "mobile.recurringByDate"
+  | "mobile.recurringEndDate"
+  | "mobile.recurringInvalidEndDate"
+  | "mobile.recurringPreviewFailed"
+  | "mobile.recurringConflict"
+  | "mobile.recurringSkipDate"
+  | "mobile.recurringDateSkipped"
   | "mobile.appointmentStatus"
   | "mobile.appointmentStatusUpdated"
   | "mobile.appointmentDate"
@@ -685,6 +720,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsShareFailed": "Не удалось открыть меню отправки.",
     "mobile.freeSlotsShareOpened":
       "Выберите приложение, чтобы отправить расписание.",
+    "mobile.freeSlotsShareDownloaded":
+      "Изображение скачано. Теперь его можно отправить через приложение для сообщений.",
+    "mobile.freeSlotsSharePeriod": "Период публикации",
+    "mobile.freeSlotsShareStartDate": "С даты",
+    "mobile.freeSlotsShareEndDate": "По дату",
+    "mobile.freeSlotsShareRangeLimit": "Можно выбрать период до 90 дней.",
+    "mobile.freeSlotsShareInvalidRange":
+      "Дата окончания не может быть раньше даты начала.",
+    "mobile.freeSlotsShareRangeTooLong":
+      "Период не может быть длиннее 90 дней.",
+    "mobile.freeSlotsShareFormat": "Формат",
+    "mobile.freeSlotsShareTextFormat": "Текст",
+    "mobile.freeSlotsShareGraphicFormat": "Изображение",
+    "mobile.freeSlotsSharePreview": "Предпросмотр",
+    "mobile.freeSlotsShareGraphicTitle": "Свободное время для записи",
     "mobile.bookingRequests": "Заявки",
     "mobile.waitingList": "Лист ожидания",
     "mobile.waitingListAdd": "Добавить в лист ожидания",
@@ -755,6 +805,33 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusCompleted": "Завершено",
     "mobile.statusNoShow": "Клиент не пришёл",
     "mobile.appointmentDetails": "Детали записи",
+    "mobile.visitNote": "Заметка к визиту",
+    "mobile.visitNotePlaceholder": "Добавьте заметку для следующего визита",
+    "mobile.visitNoteSave": "Сохранить заметку",
+    "mobile.visitNoteSaved": "Заметка сохранена",
+    "mobile.visitNoteSaveFailed": "Не удалось сохранить заметку.",
+    "mobile.recurringBooking": "Повторять запись",
+    "mobile.recurringBookingHint":
+      "Создадим отдельные записи. Максимум — 24 посещения; каждое время проверяется на доступность.",
+    "mobile.recurringWeekly": "Каждую неделю",
+    "mobile.recurringBiweekly": "Раз в 2 недели",
+    "mobile.recurringOccurrenceCount": "Всего посещений (2–24)",
+    "mobile.recurringCancelFuture": "Отменить будущие записи серии",
+    "mobile.recurringCancelPrompt":
+      "Будут отменены только будущие ожидающие подтверждения и подтверждённые записи серии. Завершённые визиты останутся в истории.",
+    "mobile.recurringCancelConfirm": "Отменить будущие записи",
+    "mobile.recurringCancelled": "Будущие записи серии отменены",
+    "mobile.recurringCancelFailed": "Не удалось отменить серию записей.",
+    "mobile.recurringByCount": "По числу посещений",
+    "mobile.recurringByDate": "До даты",
+    "mobile.recurringEndDate": "Последняя дата серии",
+    "mobile.recurringInvalidEndDate":
+      "Дата окончания должна включать минимум два посещения.",
+    "mobile.recurringPreviewFailed":
+      "Не удалось проверить доступность повторов. Попробуйте изменить время или повторить загрузку.",
+    "mobile.recurringConflict": "Это время занято или день закрыт.",
+    "mobile.recurringSkipDate": "Пропустить дату",
+    "mobile.recurringDateSkipped": "Дата пропущена",
     "mobile.appointmentStatus": "Статус",
     "mobile.appointmentStatusUpdated": "Статус записи обновлён",
     "mobile.appointmentDate": "Дата",
@@ -1293,6 +1370,20 @@ const messages: Record<SupportedLocale, Messages> = {
       "Tento měsíc nejsou pro vybranou službu volné termíny.",
     "mobile.freeSlotsShareFailed": "Nabídku sdílení se nepodařilo otevřít.",
     "mobile.freeSlotsShareOpened": "Vyberte aplikaci pro odeslání rozvrhu.",
+    "mobile.freeSlotsShareDownloaded":
+      "Obrázek se stáhl. Nyní ho můžete poslat přes aplikaci pro zprávy.",
+    "mobile.freeSlotsSharePeriod": "Období sdílení",
+    "mobile.freeSlotsShareStartDate": "Od data",
+    "mobile.freeSlotsShareEndDate": "Do data",
+    "mobile.freeSlotsShareRangeLimit": "Lze vybrat období až 90 dnů.",
+    "mobile.freeSlotsShareInvalidRange":
+      "Datum konce nesmí být před datem začátku.",
+    "mobile.freeSlotsShareRangeTooLong": "Období nesmí být delší než 90 dnů.",
+    "mobile.freeSlotsShareFormat": "Formát",
+    "mobile.freeSlotsShareTextFormat": "Text",
+    "mobile.freeSlotsShareGraphicFormat": "Obrázek",
+    "mobile.freeSlotsSharePreview": "Náhled",
+    "mobile.freeSlotsShareGraphicTitle": "Volné časy k objednání",
     "mobile.bookingRequests": "Žádosti",
     "mobile.waitingList": "Seznam náhradníků",
     "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
@@ -1363,6 +1454,33 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusCompleted": "Dokončeno",
     "mobile.statusNoShow": "Klient nepřišel",
     "mobile.appointmentDetails": "Detail rezervace",
+    "mobile.visitNote": "Poznámka k návštěvě",
+    "mobile.visitNotePlaceholder": "Přidejte poznámku pro další návštěvu",
+    "mobile.visitNoteSave": "Uložit poznámku",
+    "mobile.visitNoteSaved": "Poznámka byla uložena",
+    "mobile.visitNoteSaveFailed": "Poznámku se nepodařilo uložit.",
+    "mobile.recurringBooking": "Opakovat rezervaci",
+    "mobile.recurringBookingHint":
+      "Vytvoříme samostatné rezervace. Nejvýše 24 návštěv; dostupnost ověříme pro každý termín.",
+    "mobile.recurringWeekly": "Každý týden",
+    "mobile.recurringBiweekly": "Každé 2 týdny",
+    "mobile.recurringOccurrenceCount": "Celkem návštěv (2–24)",
+    "mobile.recurringCancelFuture": "Zrušit budoucí rezervace série",
+    "mobile.recurringCancelPrompt":
+      "Zruší se pouze budoucí čekající a potvrzené rezervace série. Dokončené návštěvy zůstanou v historii.",
+    "mobile.recurringCancelConfirm": "Zrušit budoucí rezervace",
+    "mobile.recurringCancelled": "Budoucí rezervace série byly zrušeny",
+    "mobile.recurringCancelFailed": "Sérii rezervací se nepodařilo zrušit.",
+    "mobile.recurringByCount": "Podle počtu návštěv",
+    "mobile.recurringByDate": "Do data",
+    "mobile.recurringEndDate": "Poslední datum série",
+    "mobile.recurringInvalidEndDate":
+      "Datum ukončení musí zahrnovat alespoň dvě návštěvy.",
+    "mobile.recurringPreviewFailed":
+      "Dostupnost opakovaných termínů se nepodařilo ověřit. Zkuste změnit čas nebo načtení zopakovat.",
+    "mobile.recurringConflict": "Tento čas je obsazený nebo je den zavřený.",
+    "mobile.recurringSkipDate": "Přeskočit datum",
+    "mobile.recurringDateSkipped": "Datum přeskočeno",
     "mobile.appointmentStatus": "Stav",
     "mobile.appointmentStatusUpdated": "Stav rezervace byl aktualizován",
     "mobile.appointmentDate": "Datum",
@@ -1898,6 +2016,21 @@ const messages: Record<SupportedLocale, Messages> = {
       "No times are available for this service this month.",
     "mobile.freeSlotsShareFailed": "Couldn't open the share menu.",
     "mobile.freeSlotsShareOpened": "Choose an app to send the schedule.",
+    "mobile.freeSlotsShareDownloaded":
+      "Image downloaded. You can now send it from your messaging app.",
+    "mobile.freeSlotsSharePeriod": "Sharing period",
+    "mobile.freeSlotsShareStartDate": "From date",
+    "mobile.freeSlotsShareEndDate": "To date",
+    "mobile.freeSlotsShareRangeLimit": "Choose a period of up to 90 days.",
+    "mobile.freeSlotsShareInvalidRange":
+      "The end date must be on or after the start date.",
+    "mobile.freeSlotsShareRangeTooLong":
+      "The period cannot be longer than 90 days.",
+    "mobile.freeSlotsShareFormat": "Format",
+    "mobile.freeSlotsShareTextFormat": "Text",
+    "mobile.freeSlotsShareGraphicFormat": "Image",
+    "mobile.freeSlotsSharePreview": "Preview",
+    "mobile.freeSlotsShareGraphicTitle": "Available appointment times",
     "mobile.bookingRequests": "Requests",
     "mobile.waitingList": "Waiting list",
     "mobile.waitingListAdd": "Add to waiting list",
@@ -1967,6 +2100,33 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.statusCompleted": "Completed",
     "mobile.statusNoShow": "No-show",
     "mobile.appointmentDetails": "Appointment details",
+    "mobile.visitNote": "Visit note",
+    "mobile.visitNotePlaceholder": "Add a note for the next visit",
+    "mobile.visitNoteSave": "Save note",
+    "mobile.visitNoteSaved": "Note saved",
+    "mobile.visitNoteSaveFailed": "Could not save the note.",
+    "mobile.recurringBooking": "Repeat appointment",
+    "mobile.recurringBookingHint":
+      "We’ll create separate appointments. Up to 24 visits; availability is checked for each date.",
+    "mobile.recurringWeekly": "Every week",
+    "mobile.recurringBiweekly": "Every 2 weeks",
+    "mobile.recurringOccurrenceCount": "Total visits (2–24)",
+    "mobile.recurringCancelFuture": "Cancel future appointments in series",
+    "mobile.recurringCancelPrompt":
+      "Only future pending and confirmed appointments in this series will be cancelled. Completed visits stay in history.",
+    "mobile.recurringCancelConfirm": "Cancel future appointments",
+    "mobile.recurringCancelled": "Future appointments in the series cancelled",
+    "mobile.recurringCancelFailed": "Could not cancel the appointment series.",
+    "mobile.recurringByCount": "By number of visits",
+    "mobile.recurringByDate": "Until date",
+    "mobile.recurringEndDate": "Last date in series",
+    "mobile.recurringInvalidEndDate":
+      "The end date must include at least two visits.",
+    "mobile.recurringPreviewFailed":
+      "Could not check availability for repeats. Try changing the time or reload the preview.",
+    "mobile.recurringConflict": "This time is occupied or the day is closed.",
+    "mobile.recurringSkipDate": "Skip date",
+    "mobile.recurringDateSkipped": "Date skipped",
     "mobile.appointmentStatus": "Status",
     "mobile.appointmentStatusUpdated": "Booking status updated",
     "mobile.appointmentDate": "Date",
