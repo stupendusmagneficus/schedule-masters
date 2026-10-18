@@ -200,44 +200,43 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
   });
 
-  test("opens language and public booking link from Profile settings", async ({
+  test("shows language and public booking link directly on Profile", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil" }).click();
 
-    await expect(
-      page.getByRole("button", { name: "Nastavení", exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
-
-    await expect(
-      page.getByRole("heading", { name: "Nastavení" }),
-    ).toBeVisible();
     await expect(page.getByText("Jazyk", { exact: true })).toBeVisible();
     await expect(
       page.getByText("Veřejný odkaz pro rezervace", { exact: true }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Upravit nastavení", exact: true }),
+    ).toBeVisible();
   });
 
-  test("keeps Profile settings and services entries the same height", async ({
+  test("shows key Profile sections without opening settings on narrow screens", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
 
-    const settingsEntry = page.getByRole("button", {
-      name: "Nastavení",
-      exact: true,
-    });
-    const servicesEntry = page.getByRole("button", { name: "Služby: 1" });
-    const [settingsHeight, servicesHeight] = await Promise.all([
-      settingsEntry.evaluate((button) => button.getBoundingClientRect().height),
-      servicesEntry.evaluate((button) => button.getBoundingClientRect().height),
-    ]);
+    await expect(
+      page.getByRole("button", { name: "Upravit nastavení", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Služby: 1" })).toBeVisible();
+    await expect(page.getByRole("radiogroup").getByRole("radio")).toHaveCount(
+      5,
+    );
+    await expect(page.getByText("Veřejný odkaz pro rezervace")).toBeVisible();
 
-    expect(settingsHeight).toBe(servicesHeight);
+    const profileFits = await page
+      .locator("body")
+      .evaluate(
+        (body) => body.scrollWidth <= document.documentElement.clientWidth,
+      );
+    expect(profileFits).toBe(true);
   });
 
   test("saves the Ukrainian locale across reloads without narrow-screen overflow", async ({
@@ -246,7 +245,6 @@ test.describe("mobile web smoke", () => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
-    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
     await expect(page.getByRole("radiogroup").getByRole("radio")).toHaveCount(
       5,
     );
@@ -749,12 +747,14 @@ test.describe("mobile web smoke", () => {
   }) => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
-    await page.getByRole("button", { name: "Nastavení", exact: true }).click();
 
     await expect(
-      page.getByRole("link", {
-        name: "http://localhost:3000/?slug=elena-beauty",
+      page.getByText("http://localhost:3000/?slug=elena-beauty", {
+        exact: true,
       }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Otevřít rezervační stránku" }),
     ).toBeVisible();
   });
   test("keeps service editor fields vertically separated", async ({ page }) => {
