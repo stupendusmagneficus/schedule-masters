@@ -31,6 +31,8 @@ export type AppointmentStatus =
   Database["public"]["Enums"]["appointment_status"];
 export type RecurringAppointmentPreview =
   Database["public"]["Functions"]["preview_master_recurring_bookings"]["Returns"][number];
+export type FutureSeriesAppointment =
+  Database["public"]["Functions"]["list_master_appointment_series_future"]["Returns"][number];
 
 export type ManualBookingDraft = {
   readonly customerId: string | null;
@@ -262,6 +264,19 @@ export async function cancelMasterAppointmentSeriesFuture(
     throw new Error("Recurring booking cancellation response is invalid");
   }
   return count;
+}
+
+export async function listMasterFutureSeriesAppointments(
+  client: ManualBookingClient,
+  workspaceId: string,
+  appointmentId: string,
+): Promise<FutureSeriesAppointment[]> {
+  const { data, error } = await client.rpc(
+    "list_master_appointment_series_future",
+    { p_appointment_id: appointmentId, p_workspace_id: workspaceId },
+  );
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 export async function listMasterAppointments(

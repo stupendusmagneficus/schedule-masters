@@ -520,6 +520,197 @@ describe("Supabase public booking contract", () => {
     },
   );
 
+  rlsIntegrationTest(
+    "previews future series cancellations and preserves the appointment history",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const serviceId = randomUUID();
+      const email = `recurring-series-${suffix}@example.test`;
+      const password = `Test-${randomUUID()}-Aa1!`;
+      let userId: string | undefined;
+      let outsiderId: string | undefined;
+
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert({
+              id: workspaceId,
+              name: "Recurring series test",
+              slug: `recurring-series-${suffix}`,
+              timezone: "Europe/Prague",
+            })
+          ).error,
+        ).toBeNull();
+        const owner = await createAuthenticatedTestUser({
+          admin,
+          email,
+          password,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        userId = owner.user.id;
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              role: "owner",
+              user_id: userId,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("services").insert({
+              duration_minutes: 60,
+              id: serviceId,
+              name: "Recurring service",
+              price_amount: 700,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("availability_rules").insert({
+              day_of_week: 1,
+              end_local_time: "12:00",
+              start_local_time: "09:00",
+              valid_from: "2030-01-01",
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const conflict = await owner.client.rpc(
+          "create_master_booking_with_services",
+          {
+            p_idempotency_key: `recurring-conflict-${suffix}`,
+            p_name: "Recurring customer",
+            p_service_ids: [serviceId],
+            p_starts_at: "2030-01-14T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(conflict.error).toBeNull();
+
+        const preview = await owner.client.rpc(
+          "preview_master_recurring_bookings",
+          {
+            p_interval_weeks: 1,
+            p_occurrence_count: 3,
+            p_service_ids: [serviceId],
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(preview.error).toBeNull();
+        expect(
+          preview.data?.map(({ available, local_date }) => ({
+            available,
+            local_date,
+          })),
+        ).toEqual([
+          { available: true, local_date: "2030-01-07" },
+          { available: false, local_date: "2030-01-14" },
+          { available: true, local_date: "2030-01-21" },
+        ]);
+
+        const creation = await owner.client.rpc(
+          "create_master_recurring_bookings",
+          {
+            p_excluded_dates: ["2030-01-14"],
+            p_idempotency_key: `recurring-series-${suffix}`,
+            p_interval_weeks: 1,
+            p_name: "Recurring customer",
+            p_occurrence_count: 3,
+            p_service_ids: [serviceId],
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(creation.error).toBeNull();
+        const appointmentIds = (
+          creation.data as { appointments: Array<{ id: string }> }
+        ).appointments.map(({ id }) => id);
+        expect(appointmentIds).toHaveLength(2);
+
+        const replay = await owner.client.rpc(
+          "create_master_recurring_bookings",
+          {
+            p_excluded_dates: ["2030-01-14"],
+            p_idempotency_key: `recurring-series-${suffix}`,
+            p_interval_weeks: 1,
+            p_name: "Recurring customer",
+            p_occurrence_count: 3,
+            p_service_ids: [serviceId],
+            p_starts_at: "2030-01-07T08:00:00.000Z",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(replay.error).toBeNull();
+        expect(
+          (
+            replay.data as { appointments: Array<{ id: string }> }
+          ).appointments.map(({ id }) => id),
+        ).toEqual(appointmentIds);
+
+        const futureAppointments = await owner.client.rpc(
+          "list_master_appointment_series_future",
+          { p_appointment_id: appointmentIds[0], p_workspace_id: workspaceId },
+        );
+        expect(futureAppointments.error).toBeNull();
+        expect(futureAppointments.data).toHaveLength(2);
+
+        const outsider = await createAuthenticatedTestUser({
+          admin,
+          email: `recurring-series-outsider-${suffix}@example.test`,
+          password: `Test-${randomUUID()}-Aa1!`,
+          publishableKey: supabasePublishableKey,
+          url: supabaseUrl,
+        });
+        outsiderId = outsider.user.id;
+        const denied = await outsider.client.rpc(
+          "list_master_appointment_series_future",
+          { p_appointment_id: appointmentIds[0], p_workspace_id: workspaceId },
+        );
+        expect(denied.error?.code).toBe("42501");
+
+        const cancellation = await owner.client.rpc(
+          "cancel_master_appointment_series_future",
+          { p_appointment_id: appointmentIds[0], p_workspace_id: workspaceId },
+        );
+        expect(cancellation.error).toBeNull();
+        expect(cancellation.data).toMatchObject({ cancelledCount: 2 });
+        const retainedAppointments = await admin
+          .from("appointments")
+          .select("id, status")
+          .in("id", appointmentIds)
+          .eq("workspace_id", workspaceId)
+          .order("id");
+        expect(retainedAppointments.error).toBeNull();
+        expect(retainedAppointments.data).toHaveLength(2);
+        expect(retainedAppointments.data?.map(({ status }) => status)).toEqual([
+          "cancelled_by_master",
+          "cancelled_by_master",
+        ]);
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+        if (userId) await admin.auth.admin.deleteUser(userId);
+        if (outsiderId) await admin.auth.admin.deleteUser(outsiderId);
+      }
+    },
+    30_000,
+  );
+
   integrationTest(
     "rejects public booking requests without a valid email address",
     async () => {

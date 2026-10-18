@@ -23,6 +23,7 @@ import type { DemoData } from "../demo/types";
 import {
   type AppointmentStatus,
   cancelMasterAppointmentSeriesFuture,
+  listMasterFutureSeriesAppointments,
   type MasterAppointment,
   setMasterAppointmentNote,
   setMasterAppointmentPaidAmount,
@@ -374,6 +375,15 @@ export function DashboardScreen({
     }
   }
 
+  async function loadFutureSeriesAppointments() {
+    if (!client || !selectedAppointment) return [];
+    return listMasterFutureSeriesAppointments(
+      client,
+      workspace.id,
+      selectedAppointment.id,
+    );
+  }
+
   async function openCustomerPhoneAction(action: "call" | "sms") {
     const url = customerPhone.phone
       ? buildCustomerPhoneUrl(customerPhone.phone, action)
@@ -666,6 +676,7 @@ export function DashboardScreen({
         onPaymentSave={saveAppointmentPayment}
         onNoteSave={saveAppointmentNote}
         onCancelFutureSeries={cancelFutureSeriesAppointments}
+        onLoadFutureSeriesAppointments={loadFutureSeriesAppointments}
         customerPhone={customerPhone.phone}
         customerContactLoading={customerPhone.isLoading}
         customerContactError={customerPhone.error}

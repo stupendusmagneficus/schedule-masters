@@ -254,6 +254,11 @@ export const ukrainianMessages: Messages = {
   "mobile.recurringCancelFuture": "Скасувати майбутні записи серії",
   "mobile.recurringCancelPrompt":
     "Будуть скасовані лише майбутні записи серії, що очікують підтвердження або підтверджені. Завершені візити залишаться в історії.",
+  "mobile.recurringCancelAffectedTitle": "Буде скасовано:",
+  "mobile.recurringCancelNoFuture": "Немає майбутніх записів для скасування.",
+  "mobile.recurringCancelPreviewFailed":
+    "Не вдалося завантажити список записів. Спробуйте ще раз перед скасуванням.",
+  "mobile.recurringCancelRetry": "Спробувати ще раз",
   "mobile.recurringCancelConfirm": "Скасувати майбутні записи",
   "mobile.recurringCancelled": "Майбутні записи серії скасовано",
   "mobile.recurringCancelFailed": "Не вдалося скасувати серію записів.",

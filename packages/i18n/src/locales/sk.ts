@@ -255,6 +255,12 @@ export const slovakMessages: Messages = {
   "mobile.recurringCancelFuture": "Zrušiť budúce rezervácie série",
   "mobile.recurringCancelPrompt":
     "Zrušia sa iba budúce čakajúce a potvrdené rezervácie série. Dokončené návštevy zostanú v histórii.",
+  "mobile.recurringCancelAffectedTitle": "Zrušia sa tieto rezervácie:",
+  "mobile.recurringCancelNoFuture":
+    "Nie sú žiadne budúce rezervácie na zrušenie.",
+  "mobile.recurringCancelPreviewFailed":
+    "Zoznam rezervácií sa nepodarilo načítať. Pred zrušením to skúste znova.",
+  "mobile.recurringCancelRetry": "Skúsiť znova",
   "mobile.recurringCancelConfirm": "Zrušiť budúce rezervácie",
   "mobile.recurringCancelled": "Budúce rezervácie série boli zrušené",
   "mobile.recurringCancelFailed": "Sériu rezervácií sa nepodarilo zrušiť.",
