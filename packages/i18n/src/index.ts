@@ -222,6 +222,10 @@ export type MessageKey =
   | "mobile.recurringOccurrenceCount"
   | "mobile.recurringCancelFuture"
   | "mobile.recurringCancelPrompt"
+  | "mobile.recurringCancelAffectedTitle"
+  | "mobile.recurringCancelNoFuture"
+  | "mobile.recurringCancelPreviewFailed"
+  | "mobile.recurringCancelRetry"
   | "mobile.recurringCancelConfirm"
   | "mobile.recurringCancelled"
   | "mobile.recurringCancelFailed"
@@ -825,6 +829,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.recurringCancelFuture": "Отменить будущие записи серии",
     "mobile.recurringCancelPrompt":
       "Будут отменены только будущие ожидающие подтверждения и подтверждённые записи серии. Завершённые визиты останутся в истории.",
+    "mobile.recurringCancelAffectedTitle": "Будут отменены:",
+    "mobile.recurringCancelNoFuture": "Будущих записей для отмены нет.",
+    "mobile.recurringCancelPreviewFailed":
+      "Не удалось загрузить список записей. Повторите попытку перед отменой.",
+    "mobile.recurringCancelRetry": "Загрузить ещё раз",
     "mobile.recurringCancelConfirm": "Отменить будущие записи",
     "mobile.recurringCancelled": "Будущие записи серии отменены",
     "mobile.recurringCancelFailed": "Не удалось отменить серию записей.",
@@ -1478,6 +1487,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.recurringCancelFuture": "Zrušit budoucí rezervace série",
     "mobile.recurringCancelPrompt":
       "Zruší se pouze budoucí čekající a potvrzené rezervace série. Dokončené návštěvy zůstanou v historii.",
+    "mobile.recurringCancelAffectedTitle": "Budou zrušeny:",
+    "mobile.recurringCancelNoFuture":
+      "Nejsou žádné budoucí rezervace ke zrušení.",
+    "mobile.recurringCancelPreviewFailed":
+      "Seznam rezervací se nepodařilo načíst. Před zrušením to zkuste znovu.",
+    "mobile.recurringCancelRetry": "Načíst znovu",
     "mobile.recurringCancelConfirm": "Zrušit budoucí rezervace",
     "mobile.recurringCancelled": "Budoucí rezervace série byly zrušeny",
     "mobile.recurringCancelFailed": "Sérii rezervací se nepodařilo zrušit.",
@@ -2128,6 +2143,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.recurringCancelFuture": "Cancel future appointments in series",
     "mobile.recurringCancelPrompt":
       "Only future pending and confirmed appointments in this series will be cancelled. Completed visits stay in history.",
+    "mobile.recurringCancelAffectedTitle": "Appointments to be cancelled:",
+    "mobile.recurringCancelNoFuture":
+      "There are no future appointments to cancel.",
+    "mobile.recurringCancelPreviewFailed":
+      "Could not load the appointment list. Retry before cancelling.",
+    "mobile.recurringCancelRetry": "Try again",
     "mobile.recurringCancelConfirm": "Cancel future appointments",
     "mobile.recurringCancelled": "Future appointments in the series cancelled",
     "mobile.recurringCancelFailed": "Could not cancel the appointment series.",

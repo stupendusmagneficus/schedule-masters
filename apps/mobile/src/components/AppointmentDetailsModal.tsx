@@ -14,6 +14,7 @@ import {
 import { getAppointmentStatusActions } from "../features/appointments/appointmentActions";
 import type {
   AppointmentStatus,
+  FutureSeriesAppointment,
   MasterAppointment,
 } from "../features/appointments/manualBooking";
 import { parseAppointmentPayment } from "../features/finance/appointmentPayment";
@@ -37,6 +38,9 @@ type AppointmentDetailsModalProps = {
   readonly onPaymentSave?: (amount: number) => Promise<boolean>;
   readonly onNoteSave?: (note: string) => Promise<boolean>;
   readonly onCancelFutureSeries?: () => Promise<boolean>;
+  readonly onLoadFutureSeriesAppointments?: () => Promise<
+    FutureSeriesAppointment[]
+  >;
   readonly customerPhone: string | null;
   readonly customerContactLoading: boolean;
   readonly customerContactError: boolean;
@@ -65,6 +69,7 @@ export function AppointmentDetailsModal({
   onPaymentSave,
   onNoteSave,
   onCancelFutureSeries,
+  onLoadFutureSeriesAppointments,
   customerPhone,
   customerContactLoading,
   customerContactError,
@@ -88,6 +93,11 @@ export function AppointmentDetailsModal({
   const [confirmSeriesCancellation, setConfirmSeriesCancellation] =
     useState(false);
   const [seriesCancellationError, setSeriesCancellationError] = useState(false);
+  const [futureSeriesAppointments, setFutureSeriesAppointments] = useState<
+    FutureSeriesAppointment[]
+  >([]);
+  const [isLoadingFutureSeries, setLoadingFutureSeries] = useState(false);
+  const [futureSeriesLoadError, setFutureSeriesLoadError] = useState(false);
   useEffect(() => {
     setNoteDraft(appointment?.master_note ?? "");
     setNoteMessage(null);
@@ -107,6 +117,19 @@ export function AppointmentDetailsModal({
   const actions = appointment
     ? getAppointmentStatusActions(appointment.status, t)
     : [];
+
+  async function loadFutureSeriesAppointments() {
+    if (!onLoadFutureSeriesAppointments) return;
+    setLoadingFutureSeries(true);
+    setFutureSeriesLoadError(false);
+    try {
+      setFutureSeriesAppointments(await onLoadFutureSeriesAppointments());
+    } catch {
+      setFutureSeriesLoadError(true);
+    } finally {
+      setLoadingFutureSeries(false);
+    }
+  }
 
   async function saveStatus(status: AppointmentStatus) {
     setPendingStatus(status);
@@ -318,6 +341,49 @@ export function AppointmentDetailsModal({
                     <Text style={styles.helper}>
                       {t("mobile.recurringCancelPrompt")}
                     </Text>
+                    {isLoadingFutureSeries ? (
+                      <ActivityIndicator color={colors.action} />
+                    ) : futureSeriesLoadError ? (
+                      <View>
+                        <Text accessibilityRole="alert" style={styles.error}>
+                          {t("mobile.recurringCancelPreviewFailed")}
+                        </Text>
+                        <ActionButton
+                          label={t("mobile.recurringCancelRetry")}
+                          onPress={() => void loadFutureSeriesAppointments()}
+                          variant="secondary"
+                        />
+                      </View>
+                    ) : futureSeriesAppointments.length === 0 ? (
+                      <Text style={styles.helper}>
+                        {t("mobile.recurringCancelNoFuture")}
+                      </Text>
+                    ) : (
+                      <View style={styles.futureSeriesList}>
+                        <Text style={styles.detailLabel}>
+                          {t("mobile.recurringCancelAffectedTitle")}
+                        </Text>
+                        {futureSeriesAppointments.map((item) => (
+                          <View key={item.id} style={styles.futureSeriesRow}>
+                            <Text style={styles.detailValue}>
+                              {formatDate(new Date(item.starts_at), locale, {
+                                day: "numeric",
+                                month: "short",
+                                timeZone: timezone,
+                              })}{" "}
+                              {formatTime(new Date(item.starts_at), locale, {
+                                hour: "numeric",
+                                minute: "2-digit",
+                                timeZone: timezone,
+                              })}
+                            </Text>
+                            <Text style={styles.detailLabel}>
+                              {item.service_name}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                     {seriesCancellationError ? (
                       <Text accessibilityRole="alert" style={styles.error}>
                         {t("mobile.recurringCancelFailed")}
@@ -325,14 +391,19 @@ export function AppointmentDetailsModal({
                     ) : null}
                     <View style={styles.confirmationActions}>
                       <ActionButton
-                        disabled={isSaving}
+                        disabled={isSaving || isLoadingFutureSeries}
                         label={t("common.cancel")}
                         onPress={() => setConfirmSeriesCancellation(false)}
                         style={styles.confirmationAction}
                         variant="quiet"
                       />
                       <ActionButton
-                        disabled={isSaving}
+                        disabled={
+                          isSaving ||
+                          isLoadingFutureSeries ||
+                          futureSeriesLoadError ||
+                          futureSeriesAppointments.length === 0
+                        }
                         label={t("mobile.recurringCancelConfirm")}
                         loading={isSaving}
                         onPress={() => {
@@ -349,7 +420,10 @@ export function AppointmentDetailsModal({
                 ) : (
                   <ActionButton
                     label={t("mobile.recurringCancelFuture")}
-                    onPress={() => setConfirmSeriesCancellation(true)}
+                    onPress={() => {
+                      setConfirmSeriesCancellation(true);
+                      void loadFutureSeriesAppointments();
+                    }}
                     variant="destructive"
                   />
                 )}
@@ -616,6 +690,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   detailValue: { ...typography.body, color: colors.primaryText },
+  futureSeriesList: { gap: 8, marginTop: 12 },
+  futureSeriesRow: {
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 8,
+  },
   details: { marginTop: 12 },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
   header: { gap: 6 },

@@ -7,6 +7,7 @@ import {
   createMasterBooking,
   deduplicateManualBookingCustomers,
   listMasterAvailableSlots,
+  listMasterFutureSeriesAppointments,
   listMasterMonthAvailableSlots,
   type ManualBookingDraft,
   validateManualBookingDraft,
@@ -205,6 +206,32 @@ describe("multi-service manual booking API", () => {
         p_workspace_id: "workspace-id",
       },
     );
+  });
+
+  it("loads only the future appointments affected by series cancellation", async () => {
+    const rows = [
+      {
+        ends_at: "2030-01-10T10:00:00.000Z",
+        id: "appointment-id",
+        service_name: "Manicure",
+        starts_at: "2030-01-10T09:00:00.000Z",
+        status: "confirmed",
+      },
+    ];
+    const rpc = vi.fn().mockResolvedValue({ data: rows, error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    await expect(
+      listMasterFutureSeriesAppointments(
+        client,
+        "workspace-id",
+        "appointment-id",
+      ),
+    ).resolves.toEqual(rows);
+    expect(rpc).toHaveBeenCalledWith("list_master_appointment_series_future", {
+      p_appointment_id: "appointment-id",
+      p_workspace_id: "workspace-id",
+    });
   });
 
   it("creates one appointment with the ordered service selection", async () => {
