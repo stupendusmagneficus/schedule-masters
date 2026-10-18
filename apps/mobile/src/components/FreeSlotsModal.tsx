@@ -171,6 +171,7 @@ export function FreeSlotsModal({
     activeMode,
     demoData,
     selectedDate,
+    shareEndDate,
     shareSlots,
     shareStartDate,
     slots,
