@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  freeSlotsAction: { borderRadius: radii.pill, minHeight: 40 },
+  freeSlotsAction: { borderRadius: radii.pill, minHeight: 44 },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
