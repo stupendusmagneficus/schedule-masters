@@ -230,7 +230,7 @@ test.describe("mobile web smoke", () => {
           document.documentElement.clientWidth,
       );
     expect(localePickerFits).toBe(true);
-    await page.getByRole("radio", { name: "UK" }).click();
+    await page.getByRole("radio", { name: "UA" }).click();
 
     await expect(page.getByText("Мова", { exact: true })).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("lang", "uk");
