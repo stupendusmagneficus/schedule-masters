@@ -2,19 +2,18 @@ import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import ViewShot, { type ViewShotRef } from "react-native-view-shot";
 import type { DemoData } from "../demo/types";
 import { getDatesInDateRange } from "../features/appointments/freeSlotsDateRange";
-import { buildFreeSlotsShareMessage } from "../features/appointments/freeSlotsShareMessage";
 import {
   listMasterMonthAvailableSlots,
   listMasterShareableFreeSlots,
@@ -25,6 +24,10 @@ import {
   buildMonthAvailabilityCalendar,
   getAvailableDates,
 } from "../features/appointments/monthAvailability";
+import {
+  captureFreeSlotsCard,
+  shareFreeSlotsImage,
+} from "../features/appointments/shareFreeSlotsImage";
 import {
   addCalendarDays,
   getTodayCalendarDate,
@@ -37,11 +40,13 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
+import { FreeSlotsShareCard } from "./FreeSlotsShareCard";
 import { FullscreenModal } from "./FullscreenModal";
 import { ServicePickerField } from "./ServicePickerField";
 
 type FreeSlotsModalProps = {
   readonly client: SupabaseClient<Database> | null;
+  readonly bookingUrl: string;
   readonly demoData?: DemoData;
   readonly initialDate: string;
   readonly locale: SupportedLocale;
@@ -55,6 +60,7 @@ type FreeSlotsModalProps = {
 
 export function FreeSlotsModal({
   client,
+  bookingUrl,
   demoData,
   initialDate,
   locale,
@@ -74,9 +80,15 @@ export function FreeSlotsModal({
   const [shareSlots, setShareSlots] = useState<ShareableFreeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [shareStatus, setShareStatus] = useState<"idle" | "opened" | "failed">(
-    "idle",
-  );
+  const [shareImage, setShareImage] = useState<{
+    readonly key: string;
+    readonly uri: string;
+  } | null>(null);
+  const [isPreparingShareImage, setIsPreparingShareImage] = useState(false);
+  const [shareStatus, setShareStatus] = useState<
+    "idle" | "opened" | "downloaded" | "failed"
+  >("idle");
+  const shareCardRef = useRef<ViewShotRef | null>(null);
   const shareStartDate = getTodayCalendarDate(workspace.timezone);
   const shareEndDate = addCalendarDays(shareStartDate, 13);
 
@@ -184,9 +196,10 @@ export function FreeSlotsModal({
   );
   const availableDates = getAvailableDates(calendar.slotsByDate);
   const selectedDaySlots = calendar.slotsByDate.get(selectedDate) ?? [];
-  const shareDates = [
-    ...new Set(displaySlots.map((slot) => slot.available_date)),
-  ].sort();
+  const shareDates = useMemo(
+    () => [...new Set(displaySlots.map((slot) => slot.available_date))].sort(),
+    [displaySlots],
+  );
   const shareSlotsByDate = useMemo(() => {
     const grouped = new Map<string, MonthAvailableSlot[]>();
     for (const slot of displaySlots) {
@@ -196,6 +209,58 @@ export function FreeSlotsModal({
     }
     return grouped;
   }, [displaySlots]);
+  const shareImageKey = JSON.stringify({
+    bookingUrl,
+    locale,
+    slots: displaySlots.map(({ available_date, starts_at }) => [
+      available_date,
+      starts_at,
+    ]),
+    timezone: workspace.timezone,
+    workspaceName: workspace.name,
+  });
+  useEffect(() => {
+    if (
+      !visible ||
+      activeMode !== "share" ||
+      !shareDates.length ||
+      isLoading ||
+      hasError ||
+      !shareCardRef.current
+    ) {
+      setShareImage(null);
+      setIsPreparingShareImage(false);
+      return;
+    }
+
+    let active = true;
+    const card = shareCardRef.current;
+    const imageKey = shareImageKey;
+    setShareImage(null);
+    setIsPreparingShareImage(true);
+    void captureFreeSlotsCard(card)
+      .then((imageUri) => {
+        if (!active) return;
+        setShareImage({ key: imageKey, uri: imageUri });
+        setShareStatus("idle");
+        setIsPreparingShareImage(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setShareStatus("failed");
+        setIsPreparingShareImage(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [
+    activeMode,
+    hasError,
+    isLoading,
+    shareDates.length,
+    shareImageKey,
+    visible,
+  ]);
   const weekdayLabels = calendar.dates.slice(0, 7).map((date) =>
     formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
       timeZone: "UTC",
@@ -208,27 +273,21 @@ export function FreeSlotsModal({
     { month: "long", timeZone: "UTC", year: "numeric" },
   );
   const selectedService = services.find((service) => service.id === serviceId);
-  const shareMessage = buildFreeSlotsShareMessage({
-    availabilityNote: t("mobile.freeSlotsShareAvailabilityNote"),
-    heading: t("mobile.freeSlots"),
-    locale,
-    slots: displaySlots,
-    timezone: workspace.timezone,
-    workspaceName: workspace.name,
-  });
-  const shareDisabled = !shareDates.length || isLoading || hasError;
+  const shareDisabled =
+    !shareDates.length || isLoading || hasError || isPreparingShareImage;
 
   async function shareSchedule() {
     if (shareDisabled) return;
     setShareStatus("idle");
     try {
-      const result = await Share.share({
-        message: shareMessage,
-        title: t("mobile.freeSlots"),
-      });
-      if (!result || result.action === Share.sharedAction) {
-        setShareStatus("opened");
-      }
+      if (!shareCardRef.current) return;
+      const result = await shareFreeSlotsImage(
+        (shareImage?.key === shareImageKey && shareImage.uri) ||
+          (await captureFreeSlotsCard(shareCardRef.current)),
+        bookingUrl,
+        t("mobile.freeSlots"),
+      );
+      setShareStatus(result === "cancelled" ? "idle" : result);
     } catch {
       setShareStatus("failed");
     }
@@ -255,7 +314,9 @@ export function FreeSlotsModal({
                 {t(
                   shareStatus === "failed"
                     ? "mobile.freeSlotsShareFailed"
-                    : "mobile.freeSlotsShareOpened",
+                    : shareStatus === "downloaded"
+                      ? "mobile.freeSlotsShareDownloaded"
+                      : "mobile.freeSlotsShareOpened",
                 )}
               </Text>
             ) : null}
@@ -297,13 +358,11 @@ export function FreeSlotsModal({
             }}
           />
         </View>
-        <Text style={styles.description}>
-          {t(
-            activeMode === "share"
-              ? "mobile.freeSlotsShareDescription"
-              : "mobile.freeSlotsDescription",
-          )}
-        </Text>
+        {activeMode !== "share" ? (
+          <Text style={styles.description}>
+            {t("mobile.freeSlotsDescription")}
+          </Text>
+        ) : null}
         {activeMode === "share" ? null : (
           <>
             <Text style={styles.sectionTitle}>
@@ -447,34 +506,20 @@ export function FreeSlotsModal({
             {t("mobile.freeSlotsNoAvailability")}
           </Text>
         ) : activeMode === "share" ? (
-          <View style={styles.shareSchedule}>
-            {shareDates.map((date) => (
-              <View key={date} style={styles.shareDay}>
-                <Text style={styles.shareDate}>
-                  {formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
-                    day: "numeric",
-                    month: "long",
-                    timeZone: "UTC",
-                    year: "numeric",
-                  })}
-                </Text>
-                <Text style={styles.shareTimes}>
-                  {(shareSlotsByDate.get(date) ?? [])
-                    .map((slot) =>
-                      formatTime(new Date(slot.starts_at), locale, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: workspace.timezone,
-                      }),
-                    )
-                    .join(" · ")}
-                </Text>
-              </View>
-            ))}
-            <Text style={styles.shareNote}>
-              {t("mobile.freeSlotsShareAvailabilityNote")}
-            </Text>
-          </View>
+          <ViewShot
+            options={{ format: "png", quality: 1 }}
+            ref={shareCardRef}
+            style={styles.shareCardCapture}
+          >
+            <FreeSlotsShareCard
+              bookingUrl={bookingUrl}
+              dates={shareDates}
+              locale={locale}
+              slotsByDate={shareSlotsByDate}
+              t={t}
+              workspace={workspace}
+            />
+          </ViewShot>
         ) : !selectedDaySlots.length ? (
           <Text style={styles.message}>{t("mobile.freeSlotsNoSlots")}</Text>
         ) : (
@@ -628,6 +673,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 8,
   },
+  shareCardCapture: { alignSelf: "stretch" },
   monthTitle: {
     ...typography.section,
     color: colors.primaryText,
@@ -662,32 +708,6 @@ const styles = StyleSheet.create({
   modeTabTextActive: { color: colors.primaryText, fontWeight: "700" },
   footerContent: { gap: 8 },
   errorMessage: { ...typography.caption, color: colors.danger },
-  shareSchedule: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.surface,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  shareDay: {
-    borderBottomColor: colors.borderSubtle,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  shareDate: {
-    ...typography.label,
-    color: colors.primaryText,
-    fontWeight: "700",
-  },
-  shareTimes: { ...typography.body, color: colors.secondaryText },
-  shareNote: {
-    ...typography.caption,
-    color: colors.secondaryText,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
   outsideDay: { opacity: 0 },
   pressed: { opacity: 0.78 },
   sectionTitle: {

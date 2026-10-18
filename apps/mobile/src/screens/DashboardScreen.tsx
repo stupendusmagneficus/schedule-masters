@@ -581,6 +581,7 @@ export function DashboardScreen({
         visible={isNewBookingNoticeVisible}
       />
       <FreeSlotsModal
+        bookingUrl={bookingUrl}
         client={client}
         demoData={demoData}
         initialDate={calendar.selectedDate}
