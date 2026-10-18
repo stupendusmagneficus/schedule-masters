@@ -119,6 +119,49 @@ export function TodayTab({
   const appointmentCount = demoData
     ? demoAppointments.length
     : visibleAppointments.length;
+  const summaryLoading =
+    appointmentsLoading &&
+    !appointmentsRefreshing &&
+    masterAppointments.length === 0;
+  const bookingRequestsCard =
+    !demoData && showBookingRequests ? (
+      <DashboardActionCard
+        accessibilityLabel={
+          bookingRequestCount === null
+            ? t("mobile.bookingRequests")
+            : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
+        }
+        description={
+          bookingRequestsError ? (
+            <View style={styles.requestError}>
+              <MaterialCommunityIcons
+                accessibilityElementsHidden
+                color={colors.danger}
+                name="alert-circle-outline"
+                size={20}
+              />
+              <Text style={styles.requestErrorText}>
+                {waitingListCount === null
+                  ? t("common.error")
+                  : t("mobile.waitingListStale")}
+              </Text>
+            </View>
+          ) : undefined
+        }
+        onPress={onOpenBookingRequests}
+        title={t("mobile.bookingRequests")}
+        trailing={
+          bookingRequestsLoading && bookingRequestCount === null ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
+            <View style={styles.requestCount}>
+              <Text style={styles.requestCountText}>{bookingRequestCount}</Text>
+            </View>
+          ) : null
+        }
+      />
+    ) : null;
+  const hasBookingRequests = (bookingRequestCount ?? 0) > 0;
   const nextLiveAppointment = activeAppointments[0];
 
   return (
@@ -159,6 +202,30 @@ export function TodayTab({
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
+
+      {summaryLoading ||
+      (!appointmentsLoading && !appointmentsError) ||
+      appointmentsRefreshing ||
+      masterAppointments.length > 0 ||
+      demoData ? (
+        <SummaryMetrics
+          metrics={[
+            {
+              id: "bookings",
+              label: t("mobile.bookings"),
+              value: summaryLoading ? "—" : String(appointmentCount),
+            },
+            {
+              id: "received-revenue",
+              label: t("mobile.receivedRevenue"),
+              tone: "accent",
+              value: summaryLoading ? "—" : receivedRevenue,
+            },
+          ]}
+        />
+      ) : null}
+
+      {hasBookingRequests ? bookingRequestsCard : null}
 
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
@@ -255,66 +322,7 @@ export function TodayTab({
         </InfoCard>
       ) : null}
 
-      {!demoData && showBookingRequests ? (
-        <DashboardActionCard
-          accessibilityLabel={
-            bookingRequestCount === null
-              ? t("mobile.bookingRequests")
-              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
-          }
-          description={
-            bookingRequestsError ? (
-              <View style={styles.requestError}>
-                <MaterialCommunityIcons
-                  accessibilityElementsHidden
-                  color={colors.danger}
-                  name="alert-circle-outline"
-                  size={20}
-                />
-                <Text style={styles.requestErrorText}>
-                  {waitingListCount === null
-                    ? t("common.error")
-                    : t("mobile.waitingListStale")}
-                </Text>
-              </View>
-            ) : undefined
-          }
-          onPress={onOpenBookingRequests}
-          title={t("mobile.bookingRequests")}
-          trailing={
-            bookingRequestsLoading && bookingRequestCount === null ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
-              <View style={styles.requestCount}>
-                <Text style={styles.requestCountText}>
-                  {bookingRequestCount}
-                </Text>
-              </View>
-            ) : null
-          }
-        />
-      ) : null}
-
-      {(!appointmentsLoading && !appointmentsError) ||
-      appointmentsRefreshing ||
-      masterAppointments.length > 0 ||
-      demoData ? (
-        <SummaryMetrics
-          metrics={[
-            {
-              id: "bookings",
-              label: t("mobile.bookings"),
-              value: String(appointmentCount),
-            },
-            {
-              id: "received-revenue",
-              label: t("mobile.receivedRevenue"),
-              tone: "accent",
-              value: receivedRevenue,
-            },
-          ]}
-        />
-      ) : null}
+      {!hasBookingRequests ? bookingRequestsCard : null}
 
       {!demoData && !isPastDate ? (
         <DashboardActionCard
@@ -417,11 +425,26 @@ const styles = StyleSheet.create({
   scheduleHeader: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.compact,
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  freeSlotsAction: { borderRadius: radii.pill, minHeight: 44 },
+  scheduleTitle: { flexShrink: 1 },
+  freeSlotsLink: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 4,
+  },
+  freeSlotsText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
+  freeSlotsPressed: { opacity: 0.72 },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
@@ -454,25 +477,27 @@ function ScheduleSectionHeader({
 }) {
   return (
     <View style={styles.scheduleHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, styles.scheduleTitle]}>{title}</Text>
       {isLoading ? (
         <ActivityIndicator color={colors.accent} size="small" />
       ) : null}
       {showFreeSlots ? (
-        <ActionButton
-          icon={
-            <MaterialCommunityIcons
-              color={colors.accent}
-              name="calendar-search"
-              size={18}
-            />
-          }
-          label={t("mobile.freeSlots")}
+        <Pressable
+          accessibilityLabel={t("mobile.freeSlots")}
+          accessibilityRole="button"
           onPress={onOpenFreeSlots}
-          size="compact"
-          style={styles.freeSlotsAction}
-          variant="secondary"
-        />
+          style={({ pressed }) => [
+            styles.freeSlotsLink,
+            pressed && styles.freeSlotsPressed,
+          ]}
+        >
+          <MaterialCommunityIcons
+            color={colors.accent}
+            name="calendar-search"
+            size={18}
+          />
+          <Text style={styles.freeSlotsText}>{t("mobile.freeSlots")}</Text>
+        </Pressable>
       ) : null}
     </View>
   );

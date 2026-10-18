@@ -29,9 +29,9 @@ Scores are source-review estimates, not usability-study scores.
 
 ## Findings and recommendations
 
-### P1 — Make Today read as a daily command center
+### P1 — Make Today read as a daily command center — implemented
 
-`TodayTab` currently places the “Free slots” action before the bookings and received-revenue summary. The approved screen specification puts the compact daily summary and next appointment first, with secondary discovery actions after them. Keep “New booking” as the persistent primary action, show the day’s booking/revenue summary immediately under the title, then the next appointment and chronological schedule. Place free slots and waiting/request queues after the core day context, ordered by operational urgency.
+`TodayTab` now places the bookings and received-revenue summary immediately under the date header, followed by the chronological schedule with the next appointment marked first. During a cold load, the summary keeps its space with neutral placeholders so content does not jump when values arrive. Free-slot discovery is a quiet inline action in the schedule heading. When at least one booking request exists, its action appears before the schedule; with zero or an unknown count it remains after the schedule. The waiting list remains below the schedule. The persistent booking action and day navigation remain unchanged.
 
 Evidence: `apps/mobile/src/screens/dashboard/TodayTab.tsx`; dashboard composition and floating action in `apps/mobile/src/screens/DashboardScreen.tsx`.
 
@@ -83,7 +83,7 @@ Evidence: motion and feedback requirements in `docs/design/DESIGN.md`; shared fe
 ## Recommended next design work
 
 1. Run a real device/simulator pass at narrow and wide supported phone sizes, including Czech/Slovak long labels and large accessibility text.
-2. Simplify Today’s top-of-screen order and verify that the next appointment is visible without scrolling on a typical phone.
+2. ~~Simplify Today’s top-of-screen order and verify that the next appointment is visible without scrolling on a typical phone.~~ **Implemented:** summary first, then schedule; device visibility still needs visual QA.
 3. ~~Convert customer history from separate cards to compact separated rows.~~ **Implemented:** one history surface, compact rows, and expandable localized notes.
 4. Review modal use screen by screen: keep full-screen for multi-step work, and use native sheets for quick selections and confirmations where the shared component system allows it.
 5. Capture screenshots for Today, Calendar day/week/month, Customers list/detail, Finance and Profile; record any clipping, overlap, keyboard occlusion or scroll jumps before making shared-system changes.
