@@ -1,10 +1,11 @@
 export const colors = {
   accent: "#2F7D5C",
   accentPressed: "#256246",
-  accentSoft: "#F4F7F5",
+  accentSoft: "#E8F2ED",
   action: "#2F7D5C",
   actionPressed: "#256246",
   actionText: "#FFFFFF",
+  // Maps to border.control: interactive outlines need stronger contrast than card dividers.
   border: "#7E8983",
   borderSubtle: "#EBEFEC",
   canvas: "#F7F8F7",

@@ -516,7 +516,7 @@ test.describe("mobile web smoke", () => {
       .evaluateAll((buttons) => {
         const unselectedDate = buttons.find(
           (button) =>
-            getComputedStyle(button).backgroundColor !== "rgb(244, 247, 245)",
+            getComputedStyle(button).backgroundColor !== "rgb(232, 242, 237)",
         );
         return unselectedDate?.getAttribute("aria-label") ?? null;
       });
@@ -528,7 +528,7 @@ test.describe("mobile web smoke", () => {
 
     await expect(dateInAnotherWeek).toHaveCSS(
       "background-color",
-      "rgb(244, 247, 245)",
+      "rgb(232, 242, 237)",
     );
   });
 
@@ -731,7 +731,7 @@ test.describe("mobile web smoke", () => {
 
     const dayTab = page.getByRole("tab", { name: "Den", exact: true });
     await expect(dayTab).toHaveCSS("border-color", "rgb(47, 125, 92)");
-    await expect(dayTab).toHaveCSS("background-color", "rgb(244, 247, 245)");
+    await expect(dayTab).toHaveCSS("background-color", "rgb(232, 242, 237)");
 
     const previousDate = page.getByRole("button", {
       name: "Předchozí datum",
