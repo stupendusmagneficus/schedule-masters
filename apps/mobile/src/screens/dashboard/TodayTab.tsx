@@ -88,6 +88,7 @@ export function TodayTab({
   const selectedDateValue = new Date(`${selectedDate}T12:00:00.000Z`);
   const todayDate = getTodayCalendarDate(workspace.timezone);
   const isToday = selectedDate === todayDate;
+  const isPastDate = selectedDate < todayDate;
   const showBookingRequests = shouldShowBookingRequests(
     selectedDate,
     todayDate,
@@ -296,7 +297,7 @@ export function TodayTab({
         />
       ) : null}
 
-      {!demoData ? (
+      {!demoData && !isPastDate ? (
         <DashboardActionCard
           accessibilityLabel={
             waitingListCount === null
