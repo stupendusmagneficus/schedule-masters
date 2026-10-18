@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import { ActionButton } from "./ActionButton";
-import { FullscreenModal } from "./FullscreenModal";
+import { BottomSheet } from "./BottomSheet";
 
 export type CalendarTimeOption = {
   readonly label: string;
@@ -50,7 +50,7 @@ export function CalendarSlotActionModal({
   }
 
   return (
-    <FullscreenModal
+    <BottomSheet
       closeLabel={t("common.cancel")}
       onClose={onClose}
       title={t("mobile.calendarChooseTime")}
@@ -113,7 +113,7 @@ export function CalendarSlotActionModal({
           variant="primary"
         />
       </View>
-    </FullscreenModal>
+    </BottomSheet>
   );
 }
 
