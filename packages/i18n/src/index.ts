@@ -293,6 +293,8 @@ export type MessageKey =
   | "mobile.customerContact"
   | "mobile.customerHistory"
   | "mobile.customerHistoryEmpty"
+  | "mobile.customerNoteShowMore"
+  | "mobile.customerNoteShowLess"
   | "mobile.customerNote"
   | "mobile.customerDelete"
   | "mobile.customerDeleteConfirm"
@@ -908,6 +910,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContact": "Контакты",
     "mobile.customerHistory": "История записей",
     "mobile.customerHistoryEmpty": "Записей пока нет.",
+    "mobile.customerNoteShowMore": "Показать полностью",
+    "mobile.customerNoteShowLess": "Свернуть заметку",
     "mobile.customerNote": "Заметка мастера",
     "mobile.customerDelete": "Удалить клиента",
     "mobile.customerDeleteConfirm":
@@ -1558,6 +1562,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContact": "Kontakty",
     "mobile.customerHistory": "Historie rezervací",
     "mobile.customerHistoryEmpty": "Zatím nemá žádné rezervace.",
+    "mobile.customerNoteShowMore": "Zobrazit celé",
+    "mobile.customerNoteShowLess": "Skrýt poznámku",
     "mobile.customerNote": "Poznámka mistra",
     "mobile.customerDelete": "Odstranit klienta",
     "mobile.customerDeleteConfirm":
@@ -2206,6 +2212,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContact": "Contact",
     "mobile.customerHistory": "Booking history",
     "mobile.customerHistoryEmpty": "There are no bookings yet.",
+    "mobile.customerNoteShowMore": "Show full note",
+    "mobile.customerNoteShowLess": "Collapse note",
     "mobile.customerNote": "Master's note",
     "mobile.customerDelete": "Delete customer",
     "mobile.customerDeleteConfirm":

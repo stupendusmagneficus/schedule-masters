@@ -342,6 +342,8 @@ export const slovakMessages: Messages = {
   "mobile.customerContact": "Kontakt",
   "mobile.customerHistory": "História rezervácií",
   "mobile.customerHistoryEmpty": "Zatiaľ nemá žiadne rezervácie.",
+  "mobile.customerNoteShowMore": "Zobraziť celú poznámku",
+  "mobile.customerNoteShowLess": "Skryť poznámku",
   "mobile.customerNote": "Poznámka majstra",
   "mobile.customerDelete": "Odstrániť klienta",
   "mobile.customerDeleteConfirm":

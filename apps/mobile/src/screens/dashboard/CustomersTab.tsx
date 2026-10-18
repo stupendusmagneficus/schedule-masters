@@ -72,6 +72,9 @@ export function CustomersTab({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isDeletingCustomer, setDeletingCustomer] = useState(false);
   const [deleteCustomerError, setDeleteCustomerError] = useState(false);
+  const [expandedVisitNotes, setExpandedVisitNotes] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   async function deleteSelectedCustomer() {
     if (!client || !selected) return;
@@ -211,41 +214,93 @@ export function CustomersTab({
             </Text>
           </InfoCard>
         ) : null}
-        {directory.history.map((visit) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${formatAccessibleDate(new Date(visit.starts_at), locale, workspace.timezone)} ${visit.service_name}`}
-            key={visit.id}
-            onPress={() => onSelectAppointment(visit)}
-          >
-            <InfoCard style={styles.visitCard}>
-              <View style={styles.visitHeading}>
-                <Text style={styles.visitDate}>
-                  {formatCompactDate(new Date(visit.starts_at), locale, {
-                    timeZone: workspace.timezone,
-                  })}
-                  {" · "}
-                  {formatTime(new Date(visit.starts_at), locale, {
-                    hour: "numeric",
-                    minute: "2-digit",
-                    timeZone: workspace.timezone,
-                  })}
-                </Text>
-                <AppointmentStatusBadge
-                  label={getAppointmentStatusLabel(visit.status, t)}
-                  status={visit.status}
-                />
-              </View>
-              <Text style={styles.body}>{visit.service_name}</Text>
-              {visit.master_note ? (
-                <Text style={styles.helper}>{visit.master_note}</Text>
-              ) : null}
-              <Text style={styles.helper}>
-                {formatCurrency(visit.price_amount, visit.currency, locale)}
-              </Text>
-            </InfoCard>
-          </Pressable>
-        ))}
+        {directory.history.length > 0 ? (
+          <InfoCard style={styles.historyCard}>
+            {directory.history.map((visit, index) => {
+              const noteExpanded = expandedVisitNotes.has(visit.id);
+              const noteCanCollapse = (visit.master_note?.length ?? 0) > 80;
+
+              return (
+                <View
+                  key={visit.id}
+                  style={index > 0 ? styles.visitRowSeparated : undefined}
+                >
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${formatAccessibleDate(new Date(visit.starts_at), locale, workspace.timezone)} ${visit.service_name}`}
+                    onPress={() => onSelectAppointment(visit)}
+                    style={styles.visitRow}
+                  >
+                    <View style={styles.visitHeading}>
+                      <Text style={styles.visitDate}>
+                        {formatCompactDate(new Date(visit.starts_at), locale, {
+                          timeZone: workspace.timezone,
+                        })}
+                        {" · "}
+                        {formatTime(new Date(visit.starts_at), locale, {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZone: workspace.timezone,
+                        })}
+                      </Text>
+                      <AppointmentStatusBadge
+                        label={getAppointmentStatusLabel(visit.status, t)}
+                        status={visit.status}
+                      />
+                    </View>
+                    <View style={styles.visitServiceRow}>
+                      <Text style={styles.body}>{visit.service_name}</Text>
+                      <Text style={styles.helper}>
+                        {formatCurrency(
+                          visit.price_amount,
+                          visit.currency,
+                          locale,
+                        )}
+                      </Text>
+                    </View>
+                  </Pressable>
+                  {visit.master_note ? (
+                    <View style={styles.visitNote}>
+                      <Text
+                        numberOfLines={noteExpanded ? undefined : 2}
+                        style={styles.helper}
+                      >
+                        {visit.master_note}
+                      </Text>
+                      {noteCanCollapse ? (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t(
+                            noteExpanded
+                              ? "mobile.customerNoteShowLess"
+                              : "mobile.customerNoteShowMore",
+                          )}
+                          onPress={() =>
+                            setExpandedVisitNotes((current) => {
+                              const next = new Set(current);
+                              if (noteExpanded) next.delete(visit.id);
+                              else next.add(visit.id);
+                              return next;
+                            })
+                          }
+                          style={styles.noteToggle}
+                        >
+                          <Text style={styles.noteToggleText}>
+                            {t(
+                              noteExpanded
+                                ? "mobile.customerNoteShowLess"
+                                : "mobile.customerNoteShowMore",
+                            )}
+                          </Text>
+                        </Pressable>
+                      ) : null}
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+          </InfoCard>
+        ) : null}
         {showDeleteConfirmation ? (
           <InfoCard style={styles.deleteConfirmation}>
             <Text style={styles.body}>{t("mobile.customerDeleteConfirm")}</Text>
@@ -555,12 +610,35 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   title: { ...typography.heading, color: colors.primaryText },
-  visitCard: { gap: 8 },
+  historyCard: { gap: 0, paddingVertical: 4 },
+  noteToggle: {
+    alignSelf: "flex-start",
+    justifyContent: "center",
+    minHeight: 44,
+  },
+  noteToggleText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "600",
+  },
   visitDate: { ...typography.label, color: colors.primaryText, flexShrink: 1 },
+  visitNote: { gap: 2, paddingTop: 4 },
   visitHeading: {
     alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "space-between",
+  },
+  visitRow: { gap: 4, paddingVertical: 8 },
+  visitRowSeparated: {
+    borderTopColor: colors.borderSubtle,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 8,
+  },
+  visitServiceRow: {
+    alignItems: "baseline",
+    flexDirection: "row",
     gap: 8,
     justifyContent: "space-between",
   },

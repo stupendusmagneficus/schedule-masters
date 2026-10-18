@@ -35,9 +35,9 @@ Scores are source-review estimates, not usability-study scores.
 
 Evidence: `apps/mobile/src/screens/dashboard/TodayTab.tsx`; dashboard composition and floating action in `apps/mobile/src/screens/DashboardScreen.tsx`.
 
-### P1 — Reduce the “stack of cards” effect on Customers
+### P1 — Reduce the “stack of cards” effect on Customers — implemented
 
-The customer list has compact rows, but the detail view wraps every visit in an `InfoCard` inside a tappable row. A long history therefore becomes a tall stack of equally prominent boxes. Use one history surface with separators and compact date/service/price rows; keep the selected visit detail in the existing appointment detail flow. Keep visit notes visible in the history as a short, subdued second line and expand long notes on demand.
+The customer list has compact rows, but the detail view wrapped every visit in an `InfoCard` inside a tappable row. A long history therefore became a tall stack of equally prominent boxes. The history now uses one surface with separators and compact date/service/price rows; selecting a visit still opens the existing appointment detail flow. Visit notes stay visible as subdued text and long notes can be expanded on demand. Labels are localized in all supported languages.
 
 Evidence: `apps/mobile/src/screens/dashboard/CustomersTab.tsx`.
 
@@ -84,7 +84,7 @@ Evidence: motion and feedback requirements in `docs/design/DESIGN.md`; shared fe
 
 1. Run a real device/simulator pass at narrow and wide supported phone sizes, including Czech/Slovak long labels and large accessibility text.
 2. Simplify Today’s top-of-screen order and verify that the next appointment is visible without scrolling on a typical phone.
-3. Convert customer history from separate cards to compact separated rows.
+3. ~~Convert customer history from separate cards to compact separated rows.~~ **Implemented:** one history surface, compact rows, and expandable localized notes.
 4. Review modal use screen by screen: keep full-screen for multi-step work, and use native sheets for quick selections and confirmations where the shared component system allows it.
 5. Capture screenshots for Today, Calendar day/week/month, Customers list/detail, Finance and Profile; record any clipping, overlap, keyboard occlusion or scroll jumps before making shared-system changes.
 
