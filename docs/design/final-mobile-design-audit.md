@@ -1,6 +1,6 @@
 # Final mobile product design audit
 
-**Scope:** master app UX and UI, based on the current React Native/Expo screen and component source and the approved design system.
+**Scope:** master app UX and UI plus the customer-facing booking web flow, based on the current React Native/Expo, Next.js, and approved design-system source.
 **Date:** 2026-10-18
 **Review type:** source-backed heuristic review. A simulator/device visual pass was not available in this session, so layout, motion and touch behavior still need a visual QA pass before treating this as a measured usability audit.
 
@@ -22,7 +22,7 @@ Scores are source-review estimates, not usability-study scores.
 | Calendar workflow | 8/10 | Day/week/month modes, slot actions and full-screen month browsing fit a scheduling product well. |
 | Action hierarchy | 8/10 | Shared green/neutral/destructive variants align with the button hierarchy. |
 | Feedback and recovery | 8/10 | Most data flows have loading, empty, error and retry states; review actual transitions on device. |
-| Consistency | 7/10 | Shared headers, fields, buttons and modal shell exist, but the high-level page composition still varies. |
+| Consistency | 7/10 | Shared headers, fields, buttons and modal shell exist; token adapters now distinguish interactive control borders from quiet surface borders. |
 | Accessibility | 7/10 | Roles and labels are used often and targets are generally sized for touch; verify Dynamic Type/large text and VoiceOver on physical platforms. |
 | Platform character | 5/10 | Several screens use the same card-and-scroll template where native lists/sheets would feel more direct. |
 | Visual distinctiveness | 6/10 | The green and neutral palette is calm and consistent but the repeated outlines make the product feel like a form dashboard. |
@@ -47,6 +47,12 @@ The dashboard root uses one `ScrollView` and swaps tab content inside it, while 
 
 Evidence: `apps/mobile/src/screens/DashboardScreen.tsx`, `apps/mobile/src/components/DashboardPageHeader.tsx`.
 
+### P1 — Bring mobile theme values back in line with the approved tokens — implemented
+
+`docs/design/design-tokens.json` is the source of truth. The mobile selected-state background now uses the canonical `brand.accentSoft` value. The stronger mobile control outline is preserved and formalized as `border.control`, distinct from the lighter surface border and divider tokens, so the contrast choice is explicit rather than an undocumented override.
+
+Evidence: `apps/mobile/src/theme/tokens.ts`, `apps/booking-web/app/globals.css`, `docs/design/design-tokens.json`, `docs/architecture/ui-conventions.md`.
+
 ### P2 — Use list and sheet patterns for frequent, shallow interactions
 
 `FullscreenModal` provides a consistent shell for complex booking and editing flows. Keep it for multi-step tasks. For short selections or confirmation, use a platform sheet/modal with a clear dismissal gesture and safe-area support rather than another full-screen page. For long repeatable content, prefer a native-feeling list with separators and virtualization over nested scroll containers or many cards.
@@ -58,6 +64,12 @@ Evidence: shared shell at `apps/mobile/src/components/FullscreenModal.tsx`; repe
 The tab bar uses five equal-width items with 11px labels. It scales labels down to 85%, which can preserve fit but can make them small. Verify the Czech and Slovak labels at large accessibility text sizes and on narrow phones. If labels no longer fit, consider icon plus selected label, a two-row bottom bar, or a native tab pattern instead of shrinking text. Keep the existing 44pt minimum touch-target rule.
 
 Evidence: `apps/mobile/src/components/BottomNavigation.tsx`; approved accessibility rules in `docs/design/DESIGN.md` and `docs/architecture/ui-conventions.md`.
+
+### P2 — Keep the customer booking flow’s compact mobile layout
+
+The booking page already has a responsive 720px content limit, a narrow-screen layout, visible focus styles, 44px controls and reduced-motion support. Preserve this focused linear flow. During visual QA, verify the multi-service summary, long localized labels, date/time selection and error/success states at 320–375px and with browser zoom; avoid importing the master dashboard’s card-heavy navigation into this customer flow.
+
+Evidence: `apps/booking-web/app/globals.css`, `apps/booking-web/src/components/PublicServicePicker.tsx`, `apps/booking-web/app/page.tsx`.
 
 ### P2 — Protect the calendar’s high-density advantage
 
@@ -86,7 +98,7 @@ Evidence: motion and feedback requirements in `docs/design/DESIGN.md`; shared fe
 2. ~~Simplify Today’s top-of-screen order and verify that the next appointment is visible without scrolling on a typical phone.~~ **Implemented:** summary first, then schedule; device visibility still needs visual QA.
 3. ~~Convert customer history from separate cards to compact separated rows.~~ **Implemented:** one history surface, compact rows, and expandable localized notes.
 4. Review modal use screen by screen: keep full-screen for multi-step work, and use native sheets for quick selections and confirmations where the shared component system allows it.
-5. Capture screenshots for Today, Calendar day/week/month, Customers list/detail, Finance and Profile; record any clipping, overlap, keyboard occlusion or scroll jumps before making shared-system changes.
+5. Capture screenshots for Today, Calendar day/week/month, Customers list/detail, Finance, Profile and public booking; record any clipping, overlap, keyboard occlusion or scroll jumps before making shared-system changes.
 
 ## Visual verification limits
 

@@ -85,6 +85,10 @@ provide hierarchy without heavy chrome.
 - `surface.subtle` — input backgrounds and secondary regions.
 - `content.primary` / `content.secondary` / `content.muted` — hierarchy.
 - `status.*` — success, warning, danger and informational feedback.
+- `border.default` and `border.strong` — quiet surface outlines and stronger
+  grouping edges. `border.control` is reserved for interactive control outlines
+  that need stronger separation from the surface; subtle dividers use the
+  separate subtle-border token.
 
 Do not use raw hex values in screens. If a new color is needed, add it here with a semantic name and a documented reason.
 

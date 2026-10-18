@@ -33,9 +33,22 @@
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },
     "border": {
-      "default": { "value": "#D8DEDA", "type": "color" },
-      "strong": { "value": "#B8C2BB", "type": "color" },
-      "focus": { "value": "#2F7D5C", "type": "color" }
+      "default": {
+        "value": "#D8DEDA",
+        "type": "color"
+      },
+      "strong": {
+        "value": "#B8C2BB",
+        "type": "color"
+      },
+      "control": {
+        "value": "#7E8983",
+        "type": "color"
+      },
+      "focus": {
+        "value": "#2F7D5C",
+        "type": "color"
+      }
     },
     "status": {
       "success": { "value": "#2F7D5C", "type": "color" },
