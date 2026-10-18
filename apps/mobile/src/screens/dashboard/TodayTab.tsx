@@ -123,6 +123,45 @@ export function TodayTab({
     appointmentsLoading &&
     !appointmentsRefreshing &&
     masterAppointments.length === 0;
+  const bookingRequestsCard =
+    !demoData && showBookingRequests ? (
+      <DashboardActionCard
+        accessibilityLabel={
+          bookingRequestCount === null
+            ? t("mobile.bookingRequests")
+            : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
+        }
+        description={
+          bookingRequestsError ? (
+            <View style={styles.requestError}>
+              <MaterialCommunityIcons
+                accessibilityElementsHidden
+                color={colors.danger}
+                name="alert-circle-outline"
+                size={20}
+              />
+              <Text style={styles.requestErrorText}>
+                {waitingListCount === null
+                  ? t("common.error")
+                  : t("mobile.waitingListStale")}
+              </Text>
+            </View>
+          ) : undefined
+        }
+        onPress={onOpenBookingRequests}
+        title={t("mobile.bookingRequests")}
+        trailing={
+          bookingRequestsLoading && bookingRequestCount === null ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
+            <View style={styles.requestCount}>
+              <Text style={styles.requestCountText}>{bookingRequestCount}</Text>
+            </View>
+          ) : null
+        }
+      />
+    ) : null;
+  const hasBookingRequests = (bookingRequestCount ?? 0) > 0;
   const nextLiveAppointment = activeAppointments[0];
 
   return (
@@ -185,6 +224,8 @@ export function TodayTab({
           ]}
         />
       ) : null}
+
+      {hasBookingRequests ? bookingRequestsCard : null}
 
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
@@ -281,45 +322,7 @@ export function TodayTab({
         </InfoCard>
       ) : null}
 
-      {!demoData && showBookingRequests ? (
-        <DashboardActionCard
-          accessibilityLabel={
-            bookingRequestCount === null
-              ? t("mobile.bookingRequests")
-              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
-          }
-          description={
-            bookingRequestsError ? (
-              <View style={styles.requestError}>
-                <MaterialCommunityIcons
-                  accessibilityElementsHidden
-                  color={colors.danger}
-                  name="alert-circle-outline"
-                  size={20}
-                />
-                <Text style={styles.requestErrorText}>
-                  {waitingListCount === null
-                    ? t("common.error")
-                    : t("mobile.waitingListStale")}
-                </Text>
-              </View>
-            ) : undefined
-          }
-          onPress={onOpenBookingRequests}
-          title={t("mobile.bookingRequests")}
-          trailing={
-            bookingRequestsLoading && bookingRequestCount === null ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
-              <View style={styles.requestCount}>
-                <Text style={styles.requestCountText}>
-                  {bookingRequestCount}
-                </Text>
-              </View>
-            ) : null
-          }
-        />
-      ) : null}
+      {!hasBookingRequests ? bookingRequestsCard : null}
 
       {!demoData && !isPastDate ? (
         <DashboardActionCard

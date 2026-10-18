@@ -31,7 +31,7 @@ Scores are source-review estimates, not usability-study scores.
 
 ### P1 — Make Today read as a daily command center — implemented
 
-`TodayTab` now places the bookings and received-revenue summary immediately under the date header, followed by the chronological schedule with the next appointment marked first. During a cold load, the summary keeps its space with neutral placeholders so content does not jump when values arrive. Free-slot discovery is a quiet inline action in the schedule heading; booking requests and the waiting list remain separate actions after the schedule. The persistent booking action and day navigation remain unchanged.
+`TodayTab` now places the bookings and received-revenue summary immediately under the date header, followed by the chronological schedule with the next appointment marked first. During a cold load, the summary keeps its space with neutral placeholders so content does not jump when values arrive. Free-slot discovery is a quiet inline action in the schedule heading. When at least one booking request exists, its action appears before the schedule; with zero or an unknown count it remains after the schedule. The waiting list remains below the schedule. The persistent booking action and day navigation remain unchanged.
 
 Evidence: `apps/mobile/src/screens/dashboard/TodayTab.tsx`; dashboard composition and floating action in `apps/mobile/src/screens/DashboardScreen.tsx`.
 
