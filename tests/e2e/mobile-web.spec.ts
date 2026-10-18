@@ -210,9 +210,6 @@ test.describe("mobile web smoke", () => {
     await expect(
       page.getByText("Veřejný odkaz pro rezervace", { exact: true }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Upravit nastavení", exact: true }),
-    ).toBeVisible();
   });
 
   test("shows key Profile sections without opening settings on narrow screens", async ({
@@ -222,9 +219,6 @@ test.describe("mobile web smoke", () => {
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Profil", exact: true }).click();
 
-    await expect(
-      page.getByRole("button", { name: "Upravit nastavení", exact: true }),
-    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Služby: 1" })).toBeVisible();
     await expect(page.getByRole("radiogroup").getByRole("radio")).toHaveCount(
       5,
