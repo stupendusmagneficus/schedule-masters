@@ -71,7 +71,7 @@ export function FreeSlotsModal({
   visible,
   workspace,
 }: FreeSlotsModalProps) {
-  const [activeMode, setActiveMode] = useState<"share" | "book">("book");
+  const [activeMode, setActiveMode] = useState<"share" | "book">("share");
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [monthDate, setMonthDate] = useState(initialDate);
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -98,7 +98,7 @@ export function FreeSlotsModal({
     setSelectedDate(initialDate);
     setSelectedStart(null);
     setServiceId(services[0]?.id ?? "");
-    setActiveMode("book");
+    setActiveMode("share");
     setShareStatus("idle");
   }, [initialDate, services, visible]);
 
@@ -342,18 +342,18 @@ export function FreeSlotsModal({
       <ScrollView contentContainerStyle={styles.content}>
         <View accessibilityRole="tablist" style={styles.modeTabs}>
           <ModeTab
-            active={activeMode === "book"}
-            label={t("mobile.freeSlotsBookTab")}
-            onPress={() => {
-              setActiveMode("book");
-              setShareStatus("idle");
-            }}
-          />
-          <ModeTab
             active={activeMode === "share"}
             label={t("mobile.freeSlotsShareTab")}
             onPress={() => {
               setActiveMode("share");
+              setShareStatus("idle");
+            }}
+          />
+          <ModeTab
+            active={activeMode === "book"}
+            label={t("mobile.freeSlotsBookTab")}
+            onPress={() => {
+              setActiveMode("book");
               setShareStatus("idle");
             }}
           />

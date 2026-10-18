@@ -605,13 +605,6 @@ test.describe("mobile web smoke", () => {
       .boundingBox();
     expect(freeSlotsButtonBox?.y).toBeGreaterThan(summaryBox?.y ?? 0);
     await freeSlotsButton.click();
-    await expect(
-      page.getByRole("tab", { name: "Najít a objednat" }),
-    ).toHaveAttribute("aria-selected", "true");
-    await expect(
-      page.getByRole("button", { name: "Objednat klienta" }),
-    ).toBeVisible();
-    await page.getByRole("tab", { name: "Sdílet" }).click();
     await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
       "aria-selected",
       "true",
@@ -633,6 +626,9 @@ test.describe("mobile web smoke", () => {
       ),
     ).toBe("image/png");
     await page.getByRole("tab", { name: "Najít a objednat" }).click();
+    await expect(
+      page.getByRole("button", { name: "Objednat klienta" }),
+    ).toBeVisible();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: selectedDate }),
@@ -653,7 +649,12 @@ test.describe("mobile web smoke", () => {
     await page.getByRole("button", { name: "Volné termíny" }).click();
     await expect(
       page.getByRole("tab", { name: "Najít a objednat" }),
-    ).toHaveAttribute("aria-selected", "true");
+    ).toHaveAttribute("aria-selected", "false");
+    await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await page.getByRole("button", { name: "11:00", exact: true }).click();
     await page.getByRole("button", { name: "Objednat klienta" }).click();
 
@@ -688,8 +689,11 @@ test.describe("mobile web smoke", () => {
     await page.getByRole("button", { name: "Volné termíny" }).click();
     await expect(
       page.getByRole("tab", { name: "Najít a objednat" }),
-    ).toHaveAttribute("aria-selected", "true");
-    await page.getByRole("tab", { name: "Sdílet" }).click();
+    ).toHaveAttribute("aria-selected", "false");
+    await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(page.getByText("EB", { exact: true })).toBeVisible();
     await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
     await expect(
