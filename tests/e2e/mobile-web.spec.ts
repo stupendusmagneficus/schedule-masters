@@ -597,6 +597,13 @@ test.describe("mobile web smoke", () => {
       .boundingBox();
     expect(freeSlotsButtonBox?.y).toBeGreaterThan(summaryBox?.y ?? 0);
     await freeSlotsButton.click();
+    await expect(
+      page.getByRole("tab", { name: "Najít a objednat" }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("button", { name: "Objednat klienta" }),
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "Sdílet" }).click();
     await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
       "aria-selected",
       "true",
@@ -633,7 +640,9 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
 
     await page.getByRole("button", { name: "Volné termíny" }).click();
-    await page.getByRole("tab", { name: "Najít a objednat" }).click();
+    await expect(
+      page.getByRole("tab", { name: "Najít a objednat" }),
+    ).toHaveAttribute("aria-selected", "true");
     await page.getByRole("button", { name: "11:00", exact: true }).click();
     await page.getByRole("button", { name: "Objednat klienta" }).click();
 
@@ -658,6 +667,10 @@ test.describe("mobile web smoke", () => {
     });
     await page.goto("/?demo=1");
     await page.getByRole("button", { name: "Volné termíny" }).click();
+    await expect(
+      page.getByRole("tab", { name: "Najít a objednat" }),
+    ).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Sdílet" }).click();
     await expect(
       page.getByText("Volné termíny na příštích 14 dní.", { exact: true }),
     ).toBeVisible();
