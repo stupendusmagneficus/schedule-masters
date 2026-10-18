@@ -340,6 +340,8 @@ export const ukrainianMessages: Messages = {
   "mobile.customerContact": "Контакт",
   "mobile.customerHistory": "Історія записів",
   "mobile.customerHistoryEmpty": "Записів поки немає.",
+  "mobile.customerNoteShowMore": "Показати повністю",
+  "mobile.customerNoteShowLess": "Згорнути примітку",
   "mobile.customerNote": "Примітка майстра",
   "mobile.customerDelete": "Видалити клієнта",
   "mobile.customerDeleteConfirm":
