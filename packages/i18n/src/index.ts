@@ -68,7 +68,13 @@ export type MessageKey =
   | "workspace.bookingIntervalHelp"
   | "workspace.bookingInterval15"
   | "workspace.bookingInterval30"
+  | "workspace.bookingInterval45"
   | "workspace.bookingInterval60"
+  | "workspace.bookingInterval90"
+  | "workspace.bookingIntervalCustom"
+  | "workspace.bookingIntervalCustomLabel"
+  | "workspace.bookingIntervalCustomPlaceholder"
+  | "workspace.bookingIntervalCustomHelp"
   | "workspace.startTimeLabel"
   | "workspace.endTimeLabel"
   | "workspace.workingDaysLabel"
@@ -575,7 +581,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Выберите, как часто показывать варианты времени. Длительность задаётся отдельно у каждой услуги.",
     "workspace.bookingInterval15": "Каждые 15 мин",
     "workspace.bookingInterval30": "Каждые 30 мин",
+    "workspace.bookingInterval45": "Каждые 45 мин",
     "workspace.bookingInterval60": "Каждые 60 мин",
+    "workspace.bookingInterval90": "Каждые 90 мин",
+    "workspace.bookingIntervalCustom": "Другой шаг",
+    "workspace.bookingIntervalCustomLabel": "Шаг записи в минутах",
+    "workspace.bookingIntervalCustomPlaceholder": "От 5 до 420 минут",
+    "workspace.bookingIntervalCustomHelp":
+      "Укажите значение, кратное 5 минутам (от 5 до 420).",
     "workspace.startTimeLabel": "Начало рабочего дня",
     "workspace.endTimeLabel": "Конец рабочего дня",
     "workspace.workingDaysLabel": "Рабочие дни",
@@ -596,7 +609,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Введите корректную цену не меньше 0 Kč.",
     "workspace.durationInvalid":
       "Введите целую длительность услуги от 1 до 1440 минут.",
-    "workspace.bookingIntervalInvalid": "Выберите шаг 15, 30 или 60 минут.",
+    "workspace.bookingIntervalInvalid":
+      "Укажите шаг от 5 до 420 минут, кратный 5.",
     "workspace.workingDaysInvalid": "Выберите хотя бы один рабочий день.",
     "workspace.scheduleInvalid":
       "Введите время в формате ЧЧ:ММ. Конец дня должен быть позже начала.",
@@ -1165,7 +1179,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Určuje, jak často se zobrazí možné časy. Délka se nastavuje zvlášť u každé služby.",
     "workspace.bookingInterval15": "Každých 15 min",
     "workspace.bookingInterval30": "Každých 30 min",
+    "workspace.bookingInterval45": "Každých 45 min",
     "workspace.bookingInterval60": "Každých 60 min",
+    "workspace.bookingInterval90": "Každých 90 min",
+    "workspace.bookingIntervalCustom": "Vlastní krok",
+    "workspace.bookingIntervalCustomLabel": "Krok rezervace v minutách",
+    "workspace.bookingIntervalCustomPlaceholder": "Od 5 do 420 minut",
+    "workspace.bookingIntervalCustomHelp":
+      "Zadejte hodnotu v násobcích 5 minut (od 5 do 420).",
     "workspace.startTimeLabel": "Začátek pracovní doby",
     "workspace.endTimeLabel": "Konec pracovní doby",
     "workspace.workingDaysLabel": "Pracovní dny",
@@ -1185,7 +1206,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupInvalidService": "Zkontrolujte název služby a cenu.",
     "workspace.priceInvalid": "Zadejte platnou cenu od 0 Kč výše.",
     "workspace.durationInvalid": "Zadejte celé číslo od 1 do 1440 minut.",
-    "workspace.bookingIntervalInvalid": "Vyberte krok 15, 30 nebo 60 minut.",
+    "workspace.bookingIntervalInvalid":
+      "Zadejte krok od 5 do 420 minut, který je násobkem 5.",
     "workspace.workingDaysInvalid": "Vyberte alespoň jeden pracovní den.",
     "workspace.scheduleInvalid":
       "Zadejte čas ve formátu HH:MM. Konec musí být později než začátek.",
@@ -1745,7 +1767,14 @@ const messages: Record<SupportedLocale, Messages> = {
       "Choose how often start times are offered. Service duration is set separately for each service.",
     "workspace.bookingInterval15": "Every 15 min",
     "workspace.bookingInterval30": "Every 30 min",
+    "workspace.bookingInterval45": "Every 45 min",
     "workspace.bookingInterval60": "Every 60 min",
+    "workspace.bookingInterval90": "Every 90 min",
+    "workspace.bookingIntervalCustom": "Custom step",
+    "workspace.bookingIntervalCustomLabel": "Booking step in minutes",
+    "workspace.bookingIntervalCustomPlaceholder": "From 5 to 420 minutes",
+    "workspace.bookingIntervalCustomHelp":
+      "Enter a value in 5-minute increments (from 5 to 420).",
     "workspace.startTimeLabel": "Workday starts",
     "workspace.endTimeLabel": "Workday ends",
     "workspace.workingDaysLabel": "Working days",
@@ -1766,7 +1795,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.priceInvalid": "Enter a valid price of 0 CZK or more.",
     "workspace.durationInvalid":
       "Enter a whole number between 1 and 1440 minutes.",
-    "workspace.bookingIntervalInvalid": "Choose 15, 30 or 60 minutes.",
+    "workspace.bookingIntervalInvalid":
+      "Enter a step from 5 to 420 minutes in 5-minute increments.",
     "workspace.workingDaysInvalid": "Choose at least one working day.",
     "workspace.scheduleInvalid":
       "Enter time in HH:MM format. The end must be after the start.",

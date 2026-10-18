@@ -64,7 +64,14 @@ export const slovakMessages: Messages = {
     "Určuje, ako často sa zobrazia možné časy. Trvanie sa nastavuje zvlášť pri každej službe.",
   "workspace.bookingInterval15": "Každých 15 min",
   "workspace.bookingInterval30": "Každých 30 min",
+  "workspace.bookingInterval45": "Každých 45 min",
   "workspace.bookingInterval60": "Každých 60 min",
+  "workspace.bookingInterval90": "Každých 90 min",
+  "workspace.bookingIntervalCustom": "Vlastný krok",
+  "workspace.bookingIntervalCustomLabel": "Krok rezervácie v minútach",
+  "workspace.bookingIntervalCustomPlaceholder": "Od 5 do 420 minút",
+  "workspace.bookingIntervalCustomHelp":
+    "Zadajte hodnotu v násobkoch 5 minút (od 5 do 420).",
   "workspace.startTimeLabel": "Začiatok pracovného dňa",
   "workspace.endTimeLabel": "Koniec pracovného dňa",
   "workspace.workingDaysLabel": "Pracovné dni",
@@ -85,7 +92,8 @@ export const slovakMessages: Messages = {
   "workspace.priceInvalid": "Zadajte platnú cenu od 0 CZK.",
   "workspace.durationInvalid":
     "Zadajte celé trvanie služby od 1 do 1440 minút.",
-  "workspace.bookingIntervalInvalid": "Vyberte krok 15, 30 alebo 60 minút.",
+  "workspace.bookingIntervalInvalid":
+    "Zadajte krok od 5 do 420 minút, ktorý je násobkom 5.",
   "workspace.workingDaysInvalid": "Vyberte aspoň jeden pracovný deň.",
   "workspace.scheduleInvalid":
     "Zadajte čas vo formáte HH:MM. Koniec musí byť neskôr ako začiatok.",

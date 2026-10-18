@@ -94,7 +94,7 @@ describe("Supabase public booking contract", () => {
 
         const availability = await admin.from("availability_rules").insert({
           day_of_week: 1,
-          end_local_time: "11:00",
+          end_local_time: "12:00",
           start_local_time: "09:00",
           valid_from: workDate,
           workspace_id: workspaceId,
@@ -116,25 +116,38 @@ describe("Supabase public booking contract", () => {
           "2030-01-07T08:30:00.000Z",
           "2030-01-07T08:45:00.000Z",
           "2030-01-07T09:00:00.000Z",
+          "2030-01-07T09:15:00.000Z",
+          "2030-01-07T09:30:00.000Z",
+          "2030-01-07T09:45:00.000Z",
+          "2030-01-07T10:00:00.000Z",
         ]);
 
         const updateInterval = await admin
           .from("workspaces")
-          .update({ booking_interval_minutes: 60 })
+          .update({ booking_interval_minutes: 77 })
           .eq("id", workspaceId);
-        expect(updateInterval.error).toBeNull();
+        expect(updateInterval.error).not.toBeNull();
 
-        const hourlySlots = await supabase?.rpc("get_public_available_slots", {
-          p_date: workDate,
-          p_service_id: serviceId,
-          p_slug: slug,
-        });
-        expect(hourlySlots?.error).toBeNull();
+        const saveCustomInterval = await admin
+          .from("workspaces")
+          .update({ booking_interval_minutes: 75 })
+          .eq("id", workspaceId);
+        expect(saveCustomInterval.error).toBeNull();
+
+        const customIntervalSlots = await supabase?.rpc(
+          "get_public_available_slots",
+          {
+            p_date: workDate,
+            p_service_id: serviceId,
+            p_slug: slug,
+          },
+        );
+        expect(customIntervalSlots?.error).toBeNull();
         expect(
-          hourlySlots?.data?.map((slot) =>
+          customIntervalSlots?.data?.map((slot) =>
             new Date(slot.starts_at).toISOString(),
           ),
-        ).toEqual(["2030-01-07T08:00:00.000Z", "2030-01-07T09:00:00.000Z"]);
+        ).toEqual(["2030-01-07T08:00:00.000Z", "2030-01-07T09:15:00.000Z"]);
       } finally {
         await admin.from("workspaces").delete().eq("id", workspaceId);
       }

@@ -87,9 +87,12 @@ describe("onboarding booking interval", () => {
     expect(validateSetupStep(draft, 2)).toBeNull();
   });
 
-  it("rejects unsupported booking start intervals", () => {
+  it("accepts custom booking start intervals and rejects values off the 5-minute grid", () => {
     expect(
       validateSetupStep({ ...draft, bookingIntervalMinutes: 45 as 30 }, 2),
+    ).toBeNull();
+    expect(
+      validateSetupStep({ ...draft, bookingIntervalMinutes: 77 as 30 }, 2),
     ).toBe("bookingInterval");
   });
 });
