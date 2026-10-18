@@ -56,6 +56,7 @@ export type CalendarDataController = CalendarData & {
   readonly goToToday: () => void;
   readonly goToTodayDay: () => void;
   readonly isLoading: boolean;
+  readonly isRefreshing: boolean;
   readonly isSaving: boolean;
   readonly range: CalendarDateRange;
   readonly reload: () => Promise<void>;
@@ -94,8 +95,10 @@ export function useCalendarData({
     blocks: [],
     dateOverrides: [],
   });
+  const hasLoadedRangeRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(client));
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [requestGuard] = useState(createWorkspaceRequestGuard);
   const [operationGuard] = useState(createWorkspaceRequestGuard);
@@ -116,6 +119,8 @@ export function useCalendarData({
         if (requestGuard.isCurrent(requestId)) {
           setError(null);
           setIsLoading(false);
+          setIsRefreshing(false);
+          hasLoadedRangeRef.current = false;
         }
         return;
       }
@@ -124,6 +129,8 @@ export function useCalendarData({
         if (requestGuard.isCurrent(requestId)) {
           setData({ appointments: [], blocks: [], dateOverrides: [] });
           setIsLoading(false);
+          setIsRefreshing(false);
+          hasLoadedRangeRef.current = false;
         }
         return;
       }
@@ -139,12 +146,18 @@ export function useCalendarData({
           setData(cachedData);
           setError(null);
           setIsLoading(false);
+          setIsRefreshing(false);
+          hasLoadedRangeRef.current = true;
         }
         return;
       }
 
-      setData({ appointments: [], blocks: [], dateOverrides: [] });
+      if (!refresh) {
+        setData({ appointments: [], blocks: [], dateOverrides: [] });
+        hasLoadedRangeRef.current = false;
+      }
       setIsLoading(true);
+      setIsRefreshing(refresh && hasLoadedRangeRef.current);
       setError(null);
       try {
         const nextData = await loadCachedCalendarData(
@@ -153,13 +166,19 @@ export function useCalendarData({
           timezone,
           range,
         );
-        if (requestGuard.isCurrent(requestId)) setData(nextData);
+        if (requestGuard.isCurrent(requestId)) {
+          setData(nextData);
+          hasLoadedRangeRef.current = true;
+        }
       } catch (loadError) {
         if (requestGuard.isCurrent(requestId)) {
           setError(loadError instanceof Error ? loadError.message : "unknown");
         }
       } finally {
-        if (requestGuard.isCurrent(requestId)) setIsLoading(false);
+        if (requestGuard.isCurrent(requestId)) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       }
     },
     [client, range, requestGuard, timezone, view, workspaceId],
@@ -205,6 +224,8 @@ export function useCalendarData({
         if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
         invalidateCalendarDataCache(client, workspaceId, undefined, false);
         setData({ appointments: [], blocks: [], dateOverrides: [] });
+        hasLoadedRangeRef.current = false;
+        setIsRefreshing(false);
         if (event === "SIGNED_IN") {
           reloadTimeout = setTimeout(() => invokeLatestReload(reloadRef), 0);
         } else {
@@ -363,6 +384,7 @@ export function useCalendarData({
 
   const goToPrevious = useCallback(() => {
     const nextDate = moveCalendarDate(selectedDate, view, -1);
+    setIsRefreshing(false);
     setIsLoading(
       Boolean(
         client &&
@@ -379,6 +401,7 @@ export function useCalendarData({
   }, [client, selectedDate, timezone, view, workspaceId]);
   const goToNext = useCallback(() => {
     const nextDate = moveCalendarDate(selectedDate, view, 1);
+    setIsRefreshing(false);
     setIsLoading(
       Boolean(
         client &&
@@ -395,6 +418,7 @@ export function useCalendarData({
   }, [client, selectedDate, timezone, view, workspaceId]);
   const goToToday = useCallback(() => {
     const today = getTodayCalendarDate(timezone);
+    setIsRefreshing(false);
     setIsLoading(
       Boolean(
         client &&
@@ -411,6 +435,7 @@ export function useCalendarData({
   }, [client, timezone, view, workspaceId]);
   const goToTodayDay = useCallback(() => {
     const today = getTodayCalendarDate(timezone);
+    setIsRefreshing(false);
     setIsLoading(
       Boolean(
         client &&
@@ -429,6 +454,7 @@ export function useCalendarData({
     (date: string) => {
       if (!isCalendarDate(date)) return;
       if (client && date !== selectedDate && view !== "month") {
+        setIsRefreshing(false);
         setIsLoading(
           !hasCachedCalendarData(
             client,
@@ -445,6 +471,7 @@ export function useCalendarData({
   const setView = useCallback(
     (nextView: CalendarView) => {
       if (client && nextView !== view) {
+        setIsRefreshing(false);
         setIsLoading(
           nextView !== "month" &&
             !hasCachedCalendarData(
@@ -469,6 +496,7 @@ export function useCalendarData({
     goToToday,
     goToTodayDay,
     isLoading,
+    isRefreshing,
     isSaving,
     range,
     reload,

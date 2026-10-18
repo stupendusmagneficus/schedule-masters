@@ -525,9 +525,14 @@ export function CalendarTab({
           <InfoCard>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderCopy}>
-                <Text style={styles.sectionTitle}>
-                  {t("mobile.personalBlocks")}
-                </Text>
+                <View style={styles.sectionTitleRow}>
+                  <Text style={styles.sectionTitle}>
+                    {t("mobile.personalBlocks")}
+                  </Text>
+                  {calendar.isRefreshing ? (
+                    <ActivityIndicator color={colors.accent} size="small" />
+                  ) : null}
+                </View>
                 <Text style={styles.helper}>
                   {t("mobile.personalBlockDescription")}
                 </Text>
@@ -544,7 +549,7 @@ export function CalendarTab({
                 variant="secondary"
               />
             </View>
-            {calendar.isLoading ? (
+            {calendar.isLoading && !calendar.isRefreshing ? (
               <Text style={styles.helper}>{t("common.loading")}</Text>
             ) : personalBlocks.length ? (
               <View style={styles.blocksList}>
@@ -918,6 +923,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sectionHeaderCopy: { flex: 1 },
+  sectionTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.compact,
+  },
   viewButton: {
     alignItems: "center",
     borderColor: "transparent",
