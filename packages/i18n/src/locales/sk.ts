@@ -146,6 +146,15 @@ export const slovakMessages: Messages = {
   "mobile.freeSlotsLoadFailed":
     "Voľné termíny sa nepodarilo načítať. Skúste to znova.",
   "mobile.freeSlotsBook": "Objednať klienta",
+  "mobile.freeSlotsShareTab": "Zdieľať",
+  "mobile.freeSlotsBookTab": "Nájsť a objednať",
+  "mobile.freeSlotsShareDescription":
+    "Zdieľajte voľné termíny s klientom cez aplikáciu na správy.",
+  "mobile.freeSlotsShareAction": "Zdieľať rozvrh",
+  "mobile.freeSlotsShareNoAvailability":
+    "Tento mesiac nie sú pre vybranú službu voľné termíny.",
+  "mobile.freeSlotsShareFailed": "Ponuku zdieľania sa nepodarilo otvoriť.",
+  "mobile.freeSlotsShareOpened": "Vyberte aplikáciu na odoslanie rozvrhu.",
   "mobile.bookingRequests": "Žiadosti",
   "mobile.waitingList": "Zoznam náhradníkov",
   "mobile.waitingListAdd": "Pridať do zoznamu náhradníkov",

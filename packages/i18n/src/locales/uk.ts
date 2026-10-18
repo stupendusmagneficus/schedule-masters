@@ -146,6 +146,15 @@ export const ukrainianMessages: Messages = {
   "mobile.freeSlotsLoadFailed":
     "Не вдалося завантажити вільний час. Спробуйте ще раз.",
   "mobile.freeSlotsBook": "Записати клієнта",
+  "mobile.freeSlotsShareTab": "Поділитися",
+  "mobile.freeSlotsBookTab": "Знайти й записати",
+  "mobile.freeSlotsShareDescription":
+    "Поділіться вільними вікнами з клієнтом через застосунок для повідомлень.",
+  "mobile.freeSlotsShareAction": "Поділитися розкладом",
+  "mobile.freeSlotsShareNoAvailability":
+    "Цього місяця для цієї послуги немає вільних вікон.",
+  "mobile.freeSlotsShareFailed": "Не вдалося відкрити меню надсилання.",
+  "mobile.freeSlotsShareOpened": "Виберіть застосунок, щоб надіслати розклад.",
   "mobile.bookingRequests": "Заявки",
   "mobile.waitingList": "Список очікування",
   "mobile.waitingListAdd": "Додати до списку очікування",
