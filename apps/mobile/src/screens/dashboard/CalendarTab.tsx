@@ -16,7 +16,10 @@ import {
 import { ActionButton } from "../../components/ActionButton";
 import { AvailabilityDateOverrideModal } from "../../components/AvailabilityDateOverrideModal";
 import { BulkAvailabilityOverrideModal } from "../../components/BulkAvailabilityOverrideModal";
-import { CalendarSlotActionModal } from "../../components/CalendarSlotActionModal";
+import {
+  CalendarSlotActionModal,
+  type CalendarTimeOption,
+} from "../../components/CalendarSlotActionModal";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
@@ -41,10 +44,10 @@ import {
 } from "../../features/availability/personalBlocks";
 import type { CalendarView } from "../../features/calendar/calendar";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
+import { getCalendarTimeOptions } from "../../features/calendar/calendarTimeOptions";
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
-  getDayTimelineSlotStart,
 } from "../../features/calendar/dayTimeline";
 import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
 import {
@@ -113,7 +116,18 @@ export function CalendarTab({
   const [slotAction, setSlotAction] = useState<{
     readonly date: string;
     readonly startsAt: string;
+    readonly timeOptions: readonly string[];
   } | null>(null);
+  const openSlotAction = (date: string, minute: number, endMinute: number) => {
+    const timeOptions = getCalendarTimeOptions({
+      date,
+      endMinute,
+      minute,
+      timezone: workspace.timezone,
+    });
+    if (!timeOptions.length) return;
+    setSlotAction({ date, startsAt: timeOptions[0], timeOptions });
+  };
   const openBlockEditor = (
     initialDraft: PersonalBlockDraft,
     blockId: string | null = null,
@@ -402,14 +416,12 @@ export function CalendarTab({
                 onPressTime={
                   onSelectTime
                     ? (date, minute) =>
-                        setSlotAction({
+                        openSlotAction(
                           date,
-                          startsAt: getDayTimelineSlotStart(
-                            date,
-                            minute,
-                            workspace.timezone,
-                          ),
-                        })
+                          minute,
+                          week.find((day) => day.date === date)?.endMinute ??
+                            17 * 60,
+                        )
                     : undefined
                 }
                 selectedDate={calendar.selectedDate}
@@ -428,14 +440,11 @@ export function CalendarTab({
                 onPressEmptySlot={
                   onSelectTime
                     ? (minute) =>
-                        setSlotAction({
-                          date: calendar.selectedDate,
-                          startsAt: getDayTimelineSlotStart(
-                            calendar.selectedDate,
-                            minute,
-                            workspace.timezone,
-                          ),
-                        })
+                        openSlotAction(
+                          calendar.selectedDate,
+                          minute,
+                          timeline.endMinute,
+                        )
                     : undefined
                 }
                 t={t}
@@ -633,6 +642,15 @@ export function CalendarTab({
       />
       <CalendarSlotActionModal
         canCreateBreak={Boolean(client)}
+        dateLabel={
+          slotAction
+            ? formatAccessibleDate(
+                new Date(slotAction.startsAt),
+                locale,
+                workspace.timezone,
+              )
+            : ""
+        }
         onAddBreak={() => {
           if (!slotAction) return;
           openBlockEditor(
@@ -646,20 +664,37 @@ export function CalendarTab({
           if (slotAction) onSelectTime?.(slotAction.date, slotAction.startsAt);
         }}
         onClose={() => setSlotAction(null)}
-        t={t}
-        timeLabel={
-          slotAction
-            ? formatTime(new Date(slotAction.startsAt), locale, {
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone: workspace.timezone,
-              })
-            : ""
+        onSelectTime={(startsAt) =>
+          setSlotAction((current) =>
+            current ? { ...current, startsAt } : current,
+          )
         }
+        selectedStartsAt={slotAction?.startsAt ?? ""}
+        t={t}
+        timeOptions={getFormattedTimeOptions(
+          slotAction?.timeOptions ?? [],
+          locale,
+          workspace.timezone,
+        )}
         visible={slotAction !== null}
       />
     </>
   );
+}
+
+function getFormattedTimeOptions(
+  values: readonly string[],
+  locale: DashboardTabProps["locale"],
+  timezone: string,
+): CalendarTimeOption[] {
+  return values.map((startsAt) => ({
+    label: formatTime(new Date(startsAt), locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: timezone,
+    }),
+    startsAt,
+  }));
 }
 
 function CalendarViewButton({

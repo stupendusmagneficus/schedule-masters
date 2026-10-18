@@ -330,7 +330,7 @@ export const slovakMessages: Messages = {
   "mobile.calendarPreviousWeek": "Predchádzajúci týždeň",
   "mobile.calendarNextWeek": "Nasledujúci týždeň",
   "mobile.calendarTapToBook": "Ťuknutím vytvoríte rezerváciu",
-  "mobile.calendarSlotActionTitle": "Čo chcete pridať?",
+  "mobile.calendarChooseTime": "Vyberte čas začiatku",
   "mobile.calendarDayView": "Deň",
   "mobile.calendarWeekView": "Týždeň",
   "mobile.calendarMonthView": "Mesiac",
