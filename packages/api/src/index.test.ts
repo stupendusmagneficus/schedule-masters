@@ -35,6 +35,7 @@ describe("parsePublicBookingContext", () => {
         {
           id: "service-1",
           name: "Manicure",
+          translations: {},
           description: null,
           category: "Nails",
           durationMinutes: 60,
