@@ -490,7 +490,7 @@ export const ukrainianMessages: Messages = {
   "mobile.financeNewCustomers": "Нові клієнти",
   "mobile.financeReturningCustomers": "Постійні клієнти",
   "mobile.financeBookedHours": "Зайняті години",
-  "mobile.financeWeeklyIncome": "Отримано за тижнями",
+  "mobile.financeWeeklyIncome": "Дохід за тижнями",
   "mobile.financeNoReceivedIncome": "Отриманих оплат поки немає.",
   "mobile.profileWorkingDays": "Робочих днів на тиждень: {count}",
   "mobile.profileBookingInterval": "Крок запису: {minutes} хв",
