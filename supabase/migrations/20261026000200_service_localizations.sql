@@ -16,6 +16,9 @@ create table public.service_translation_requests (
   created_at timestamptz not null default now()
 );
 
+create index service_translation_requests_workspace_created_at_idx
+  on public.service_translation_requests (workspace_id, created_at);
+
 alter table public.service_translation_requests enable row level security;
 revoke all on public.service_translation_requests from anon, authenticated;
 grant select, insert, delete on public.service_translation_requests to service_role;
@@ -25,35 +28,52 @@ create function public.claim_service_translation_request(
   p_workspace_id uuid,
   p_user_id uuid
 )
-returns boolean
+returns jsonb
 language plpgsql
 security definer
 set search_path = public, pg_temp
 as $$
 declare
   v_request_count integer;
+  v_month_start timestamptz :=
+    date_trunc('month', now() at time zone 'UTC') at time zone 'UTC';
+  v_next_month_start timestamptz := v_month_start + interval '1 month';
 begin
-  delete from public.service_translation_requests
-   where created_at <= now() - interval '24 hours';
-
   perform pg_advisory_xact_lock(
-    hashtextextended(p_workspace_id::text || ':' || p_user_id::text, 0)
+    hashtextextended(p_workspace_id::text, 0)
   );
+
+  delete from public.service_translation_requests
+   where workspace_id = p_workspace_id
+     and created_at < v_month_start - interval '12 months';
 
   select count(*)::integer
     into v_request_count
     from public.service_translation_requests
    where workspace_id = p_workspace_id
-     and user_id = p_user_id
-     and created_at > now() - interval '24 hours';
+     and created_at >= v_month_start
+     and created_at < v_next_month_start;
 
-  if v_request_count >= 100 then
-    return false;
+  if v_request_count >= 20 then
+    return jsonb_build_object(
+      'allowed', false,
+      'used', v_request_count,
+      'limit', 20,
+      'remaining', 0,
+      'resetsAt', v_next_month_start
+    );
   end if;
 
   insert into public.service_translation_requests (workspace_id, user_id)
   values (p_workspace_id, p_user_id);
-  return true;
+
+  return jsonb_build_object(
+    'allowed', true,
+    'used', v_request_count + 1,
+    'limit', 20,
+    'remaining', 19 - v_request_count,
+    'resetsAt', v_next_month_start
+  );
 end;
 $$;
 

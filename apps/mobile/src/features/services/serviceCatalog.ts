@@ -4,6 +4,7 @@ import {
   type ServiceLocale,
   type ServiceTranslations,
 } from "@schedule-app/api";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Service } from "../../types";
@@ -41,6 +42,28 @@ export type ServiceCatalogFilters = {
 };
 
 type ServiceClient = SupabaseClient<Database>;
+
+export type ServiceTranslationQuota = {
+  readonly limit: number;
+  readonly remaining: number;
+  readonly resetsAt: string;
+  readonly used: number;
+};
+
+export type ServiceTranslationResult = {
+  readonly quota: ServiceTranslationQuota;
+  readonly translations: ServiceTranslations;
+};
+
+export class ServiceTranslationQuotaExceededError extends Error {
+  readonly quota: ServiceTranslationQuota | null;
+
+  constructor(quota: ServiceTranslationQuota | null) {
+    super("translation_quota_exceeded");
+    this.name = "ServiceTranslationQuotaExceededError";
+    this.quota = quota;
+  }
+}
 
 const serviceFields =
   "id, name, category, description, duration_minutes, buffer_before_minutes, buffer_after_minutes, price_amount, currency, is_active, sort_order, archived_at, source_locale, translations";
@@ -216,7 +239,7 @@ export async function suggestServiceTranslations(
     ServiceDraft,
     "category" | "description" | "name" | "sourceLocale"
   >,
-): Promise<ServiceTranslations> {
+): Promise<ServiceTranslationResult> {
   const { data, error } = await client.functions.invoke(
     "translate-service-content",
     {
@@ -229,7 +252,23 @@ export async function suggestServiceTranslations(
       },
     },
   );
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (
+      error instanceof FunctionsHttpError &&
+      error.context instanceof Response
+    ) {
+      const body = (await error.context
+        .clone()
+        .json()
+        .catch(() => null)) as Record<string, unknown> | null;
+      if (body?.error === "translation_quota_exceeded") {
+        throw new ServiceTranslationQuotaExceededError(
+          parseServiceTranslationQuota(body.quota),
+        );
+      }
+    }
+    throw new Error(error.message);
+  }
   if (!data || typeof data.translations !== "object") {
     throw new Error("Translation response is invalid");
   }
@@ -237,7 +276,34 @@ export async function suggestServiceTranslations(
   if (Object.keys(translations).length !== 4) {
     throw new Error("Translation response is incomplete");
   }
-  return translations;
+  const quota = parseServiceTranslationQuota(data.quota);
+  if (!quota) throw new Error("Translation quota response is invalid");
+  return { translations, quota };
+}
+
+function parseServiceTranslationQuota(
+  value: unknown,
+): ServiceTranslationQuota | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const quota = value as Record<string, unknown>;
+  if (
+    typeof quota.used !== "number" ||
+    typeof quota.limit !== "number" ||
+    typeof quota.remaining !== "number" ||
+    typeof quota.resetsAt !== "string" ||
+    !Number.isInteger(quota.used) ||
+    !Number.isInteger(quota.limit) ||
+    !Number.isInteger(quota.remaining) ||
+    Number.isNaN(Date.parse(quota.resetsAt))
+  ) {
+    return null;
+  }
+  return {
+    used: quota.used,
+    limit: quota.limit,
+    remaining: quota.remaining,
+    resetsAt: quota.resetsAt,
+  };
 }
 
 function toServiceInput(draft: ServiceDraft) {

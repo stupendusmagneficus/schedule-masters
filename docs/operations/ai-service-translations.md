@@ -10,10 +10,14 @@ master-authored text when a translation is missing.
 AI is only called after the master presses the translation action. The booking
 page never calls the AI provider. The edge function checks the user session and
 workspace membership, limits source fields to the service editor's maximum
-lengths, and allows at most 100 requests per workspace member in a rolling
-24-hour window. Service name, description, and category are sent to OpenAI for
-generation. Usage records contain only workspace, user, and request time; they
-do not contain service text.
+lengths, and allows 20 generation requests per workspace in each UTC calendar
+month. The mobile editor warns the master after 16 requests and reports when
+the allowance is exhausted; it resets at the start of the next month. All
+workspace members share the same allowance. Service name, description, and
+category are sent to OpenAI for generation. Usage records contain only
+workspace, user, and request time; they do not contain service text. A request
+is counted before contacting OpenAI, including provider failures, to prevent
+unmetered retries.
 
 ## Provider setup
 

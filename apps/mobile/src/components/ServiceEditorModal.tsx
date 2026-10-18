@@ -1,6 +1,6 @@
 import type { MessageKey } from "@schedule-app/i18n";
 import type { SupportedLocale } from "@schedule-app/i18n";
-import type { ServiceLocale, ServiceTranslations } from "@schedule-app/api";
+import type { ServiceLocale } from "@schedule-app/api";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -14,7 +14,9 @@ import {
 
 import {
   createServiceDraft,
+  ServiceTranslationQuotaExceededError,
   type ServiceDraft,
+  type ServiceTranslationResult,
   type ServiceValidationError,
   validateServiceDraft,
 } from "../features/services/serviceCatalog";
@@ -35,7 +37,7 @@ type ServiceEditorModalProps = {
       ServiceDraft,
       "category" | "description" | "name" | "sourceLocale"
     >,
-  ) => Promise<ServiceTranslations>;
+  ) => Promise<ServiceTranslationResult>;
   readonly locale: SupportedLocale;
   readonly service: Service | null;
   readonly t: (key: MessageKey) => string;
@@ -62,12 +64,16 @@ export function ServiceEditorModal({
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslations, setShowTranslations] = useState(false);
   const [translationError, setTranslationError] = useState<string | null>(null);
+  const [translationQuota, setTranslationQuota] = useState<
+    ServiceTranslationResult["quota"] | null
+  >(null);
 
   useEffect(() => {
     if (!visible) return;
     setDraft(createServiceDraft(service, locale));
     setValidationError(null);
     setTranslationError(null);
+    setTranslationQuota(null);
     setShowTranslations(
       Boolean(service && Object.keys(service.translations ?? {}).length),
     );
@@ -105,16 +111,24 @@ export function ServiceEditorModal({
     setIsTranslating(true);
     setTranslationError(null);
     try {
-      const translations = await onTranslate({
+      const result = await onTranslate({
         ...draft,
         sourceLocale: draft.sourceLocale ?? locale,
       });
       setDraft((current) => ({
         ...current,
-        translations: { ...translations, ...current.translations },
+        translations: { ...result.translations, ...current.translations },
       }));
+      setTranslationQuota(result.quota);
       setShowTranslations(true);
-    } catch {
+    } catch (error) {
+      if (error instanceof ServiceTranslationQuotaExceededError) {
+        setTranslationQuota(error.quota);
+        setTranslationError(
+          error.quota ? null : t("mobile.serviceTranslationQuotaExceeded"),
+        );
+        return;
+      }
       setTranslationError(t("mobile.serviceTranslationFailed"));
     } finally {
       setIsTranslating(false);
@@ -147,6 +161,15 @@ export function ServiceEditorModal({
   const errorMessage = validationError
     ? validationMessage(validationError, t)
     : error;
+  const quotaNotice =
+    translationQuota?.remaining === 0
+      ? t("mobile.serviceTranslationQuotaExceeded")
+      : translationQuota &&
+          translationQuota.remaining <= translationQuota.limit * 0.2
+        ? t("mobile.serviceTranslationQuotaWarning")
+            .replace("{remaining}", String(translationQuota.remaining))
+            .replace("{limit}", String(translationQuota.limit))
+        : null;
 
   return (
     <FullscreenModal
@@ -305,6 +328,17 @@ export function ServiceEditorModal({
               onPress={() => void handleTranslate()}
               variant="secondary"
             />
+            {quotaNotice ? (
+              <Text
+                accessibilityRole="alert"
+                style={[
+                  styles.quotaNotice,
+                  translationQuota?.remaining === 0 && styles.quotaExhausted,
+                ]}
+              >
+                {quotaNotice}
+              </Text>
+            ) : null}
             <Pressable
               accessibilityRole="button"
               onPress={() => setShowTranslations((current) => !current)}
@@ -501,6 +535,17 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   categoryField: { gap: 8, marginTop: 16 },
   categoryHint: { ...typography.caption, color: colors.secondaryText },
+  quotaNotice: {
+    ...typography.caption,
+    backgroundColor: colors.pendingSoft,
+    borderRadius: radii.surface,
+    color: colors.pendingText,
+    padding: 12,
+  },
+  quotaExhausted: {
+    backgroundColor: colors.dangerSoft,
+    color: colors.danger,
+  },
   categoryOptions: { flexDirection: "row", gap: 8 },
   categoryOption: {
     alignItems: "center",

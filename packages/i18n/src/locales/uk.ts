@@ -577,6 +577,10 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceSourceLanguage": "Мова вихідної назви",
   "mobile.serviceTranslationReviewHint":
     "ШІ може помилитися або змінити зміст. Перевірте кожен переклад і за потреби відредагуйте його перед збереженням. Назва, опис і категорія надсилаються до OpenAI; використання API може оплачуватися окремо.",
+  "mobile.serviceTranslationQuotaWarning":
+    "Для цього робочого простору цього місяця залишилося {remaining} із {limit} безкоштовних генерацій перекладу ШІ.",
+  "mobile.serviceTranslationQuotaExceeded":
+    "Місячний безкоштовний ліміт генерацій перекладу ШІ вичерпано. Він оновиться на початку наступного місяця.",
   "mobile.serviceTranslateWithAi": "Запропонувати переклади за допомогою ШІ",
   "mobile.serviceTranslationLoading": "Готуємо переклади…",
   "mobile.serviceTranslationFailed":

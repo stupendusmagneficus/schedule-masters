@@ -8,6 +8,12 @@ type ServiceContent = {
   readonly description: string | null;
   readonly name: string;
 };
+type TranslationQuota = {
+  readonly limit: number;
+  readonly remaining: number;
+  readonly resetsAt: string;
+  readonly used: number;
+};
 
 const localeNames: Record<Locale, string> = {
   en: "English",
@@ -158,8 +164,21 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
     if (!quotaResponse.ok) {
       return jsonResponse({ error: "translation_quota_check_failed" }, 503);
     }
-    if ((await quotaResponse.json()) !== true) {
-      return jsonResponse({ error: "translation_quota_exceeded" }, 429);
+    const quotaPayload = await quotaResponse.json();
+    if (
+      !quotaPayload ||
+      typeof quotaPayload !== "object" ||
+      Array.isArray(quotaPayload)
+    ) {
+      return jsonResponse({ error: "translation_quota_check_failed" }, 503);
+    }
+    const quotaResult = quotaPayload as Record<string, unknown>;
+    const quota = parseQuota(quotaResult);
+    if (!quota) {
+      return jsonResponse({ error: "translation_quota_check_failed" }, 503);
+    }
+    if (quotaResult.allowed !== true) {
+      return jsonResponse({ error: "translation_quota_exceeded", quota }, 429);
     }
 
     const targetLocales = locales.filter((locale) => locale !== sourceLocale);
@@ -223,7 +242,29 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
     }
     if (!translations)
       return jsonResponse({ error: "translation_provider_failed" }, 502);
-    return jsonResponse({ translations });
+    return jsonResponse({ translations, quota });
+  };
+}
+
+function parseQuota(value: Record<string, unknown>): TranslationQuota | null {
+  if (
+    typeof value.allowed !== "boolean" ||
+    typeof value.used !== "number" ||
+    typeof value.limit !== "number" ||
+    typeof value.remaining !== "number" ||
+    typeof value.resetsAt !== "string" ||
+    !Number.isInteger(value.used) ||
+    !Number.isInteger(value.limit) ||
+    !Number.isInteger(value.remaining) ||
+    Number.isNaN(Date.parse(value.resetsAt))
+  ) {
+    return null;
+  }
+  return {
+    used: value.used,
+    limit: value.limit,
+    remaining: value.remaining,
+    resetsAt: value.resetsAt,
   };
 }
 

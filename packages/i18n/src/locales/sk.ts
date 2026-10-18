@@ -581,6 +581,10 @@ export const slovakMessages: Messages = {
   "mobile.serviceSourceLanguage": "Jazyk pôvodného názvu",
   "mobile.serviceTranslationReviewHint":
     "AI sa môže mýliť alebo zmeniť význam. Každý preklad pred uložením skontrolujte a podľa potreby upravte. Názov, popis a kategória sa odosielajú službe OpenAI; používanie API môže byť účtované samostatne.",
+  "mobile.serviceTranslationQuotaWarning":
+    "Pre tento pracovný priestor zostáva na tento mesiac {remaining} z {limit} bezplatných generovaní AI prekladov.",
+  "mobile.serviceTranslationQuotaExceeded":
+    "Mesačný bezplatný limit generovania AI prekladov bol vyčerpaný. Obnoví sa na začiatku budúceho mesiaca.",
   "mobile.serviceTranslateWithAi": "Navrhnúť preklady pomocou AI",
   "mobile.serviceTranslationLoading": "Pripravujú sa preklady…",
   "mobile.serviceTranslationFailed":
