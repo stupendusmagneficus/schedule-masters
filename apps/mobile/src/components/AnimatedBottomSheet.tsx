@@ -146,7 +146,13 @@ export function AnimatedBottomSheet({
 }
 
 const styles = StyleSheet.create({
-  animatedSheet: { alignSelf: "center", maxWidth: 720, width: "100%" },
+  animatedSheet: {
+    alignSelf: "center",
+    bottom: 0,
+    maxWidth: 720,
+    position: "absolute",
+    width: "100%",
+  },
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.overlay,

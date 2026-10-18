@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import { AnimatedBottomSheet } from "./AnimatedBottomSheet";
@@ -48,12 +48,7 @@ export function BottomSheet({
           />
         </Pressable>
       </View>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        {children}
-      </ScrollView>
+      {children}
     </AnimatedBottomSheet>
   );
 }
@@ -66,7 +61,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 48,
   },
-  content: { gap: 16, padding: 20 },
   header: {
     alignItems: "center",
     backgroundColor: colors.surface,
