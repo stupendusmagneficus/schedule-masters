@@ -148,12 +148,13 @@ export const slovakMessages: Messages = {
   "mobile.freeSlotsBook": "Objednať klienta",
   "mobile.freeSlotsShareTab": "Zdieľať",
   "mobile.freeSlotsBookTab": "Nájsť a objednať",
-  "mobile.freeSlotsShareDescription": "Voľné termíny na nasledujúcich 14 dní.",
+  "mobile.freeSlotsShareDescription":
+    "Vyberte obdobie a formát a pred zdieľaním skontrolujte rozvrh.",
   "mobile.freeSlotsShareAvailabilityNote":
     "Čas začiatku závisí od vybranej služby.",
   "mobile.freeSlotsShareAction": "Zdieľať rozvrh",
   "mobile.freeSlotsShareNoAvailability":
-    "V nasledujúcich 14 dňoch nie sú voľné termíny.",
+    "Vo vybranom období nie sú voľné termíny.",
   "mobile.freeSlotsShareFailed": "Ponuku zdieľania sa nepodarilo otvoriť.",
   "mobile.freeSlotsShareOpened": "Vyberte aplikáciu na odoslanie rozvrhu.",
   "mobile.freeSlotsShareDownloaded":
