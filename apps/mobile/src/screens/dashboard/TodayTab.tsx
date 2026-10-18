@@ -128,80 +128,6 @@ export function TodayTab({
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
 
-      {hasActiveServices || demoData ? (
-        <ActionButton
-          icon={
-            <MaterialCommunityIcons
-              color={colors.accent}
-              name="calendar-search"
-              size={20}
-            />
-          }
-          label={t("mobile.freeSlots")}
-          onPress={onOpenFreeSlots}
-          style={styles.freeSlotsAction}
-          variant="secondary"
-        />
-      ) : null}
-
-      {(!appointmentsLoading && !appointmentsError) || demoData ? (
-        <SummaryMetrics
-          metrics={[
-            {
-              id: "bookings",
-              label: t("mobile.bookings"),
-              value: String(appointmentCount),
-            },
-            {
-              id: "received-revenue",
-              label: t("mobile.receivedRevenue"),
-              tone: "accent",
-              value: receivedRevenue,
-            },
-          ]}
-        />
-      ) : null}
-
-      {!demoData && showBookingRequests ? (
-        <DashboardActionCard
-          accessibilityLabel={
-            bookingRequestCount === null
-              ? t("mobile.bookingRequests")
-              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
-          }
-          description={
-            bookingRequestsError ? (
-              <View style={styles.requestError}>
-                <MaterialCommunityIcons
-                  accessibilityElementsHidden
-                  color={colors.danger}
-                  name="alert-circle-outline"
-                  size={20}
-                />
-                <Text style={styles.requestErrorText}>
-                  {waitingListCount === null
-                    ? t("common.error")
-                    : t("mobile.waitingListStale")}
-                </Text>
-              </View>
-            ) : undefined
-          }
-          onPress={onOpenBookingRequests}
-          title={t("mobile.bookingRequests")}
-          trailing={
-            bookingRequestsLoading && bookingRequestCount === null ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
-              <View style={styles.requestCount}>
-                <Text style={styles.requestCountText}>
-                  {bookingRequestCount}
-                </Text>
-              </View>
-            ) : null
-          }
-        />
-      ) : null}
-
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
           <Text style={styles.sectionTitle}>
@@ -271,6 +197,80 @@ export function TodayTab({
             </Text>
           )}
         </InfoCard>
+      ) : null}
+
+      {!demoData && showBookingRequests ? (
+        <DashboardActionCard
+          accessibilityLabel={
+            bookingRequestCount === null
+              ? t("mobile.bookingRequests")
+              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
+          }
+          description={
+            bookingRequestsError ? (
+              <View style={styles.requestError}>
+                <MaterialCommunityIcons
+                  accessibilityElementsHidden
+                  color={colors.danger}
+                  name="alert-circle-outline"
+                  size={20}
+                />
+                <Text style={styles.requestErrorText}>
+                  {waitingListCount === null
+                    ? t("common.error")
+                    : t("mobile.waitingListStale")}
+                </Text>
+              </View>
+            ) : undefined
+          }
+          onPress={onOpenBookingRequests}
+          title={t("mobile.bookingRequests")}
+          trailing={
+            bookingRequestsLoading && bookingRequestCount === null ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : bookingRequestsError ? null : bookingRequestCount !== null ? (
+              <View style={styles.requestCount}>
+                <Text style={styles.requestCountText}>
+                  {bookingRequestCount}
+                </Text>
+              </View>
+            ) : null
+          }
+        />
+      ) : null}
+
+      {hasActiveServices || demoData ? (
+        <ActionButton
+          icon={
+            <MaterialCommunityIcons
+              color={colors.accent}
+              name="calendar-search"
+              size={20}
+            />
+          }
+          label={t("mobile.freeSlots")}
+          onPress={onOpenFreeSlots}
+          style={styles.freeSlotsAction}
+          variant="secondary"
+        />
+      ) : null}
+
+      {(!appointmentsLoading && !appointmentsError) || demoData ? (
+        <SummaryMetrics
+          metrics={[
+            {
+              id: "bookings",
+              label: t("mobile.bookings"),
+              value: String(appointmentCount),
+            },
+            {
+              id: "received-revenue",
+              label: t("mobile.receivedRevenue"),
+              tone: "accent",
+              value: receivedRevenue,
+            },
+          ]}
+        />
       ) : null}
 
       {!demoData ? (
