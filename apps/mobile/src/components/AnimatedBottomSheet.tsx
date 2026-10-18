@@ -23,6 +23,22 @@ type AnimatedBottomSheetProps = {
   readonly visible: boolean;
 };
 
+type MotionPreferenceQuery = {
+  readonly matches: boolean;
+  addEventListener?: (
+    event: "change",
+    listener: (event: { readonly matches: boolean }) => void,
+  ) => void;
+  removeEventListener?: (
+    event: "change",
+    listener: (event: { readonly matches: boolean }) => void,
+  ) => void;
+};
+
+type BrowserWindow = {
+  matchMedia?: (query: string) => MotionPreferenceQuery;
+};
+
 export function AnimatedBottomSheet({
   children,
   onClose,
@@ -37,6 +53,20 @@ export function AnimatedBottomSheet({
   const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (Platform.OS === "web") {
+      const browserWindow = globalThis as typeof globalThis & BrowserWindow;
+      const mediaQuery = browserWindow.matchMedia?.(
+        "(prefers-reduced-motion: reduce)",
+      );
+      const updatePreference = (event?: { readonly matches: boolean }) => {
+        setReduceMotion(event?.matches ?? mediaQuery?.matches ?? false);
+      };
+      updatePreference();
+      mediaQuery?.addEventListener?.("change", updatePreference);
+      return () =>
+        mediaQuery?.removeEventListener?.("change", updatePreference);
+    }
+
     let isMounted = true;
     AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
       if (isMounted) setReduceMotion(enabled);
@@ -71,7 +101,7 @@ export function AnimatedBottomSheet({
           }),
           Animated.timing(progress, {
             toValue: 1,
-            duration: reduceMotionRef.current ? 0 : 220,
+            duration: reduceMotionRef.current ? 180 : 280,
             easing: Easing.out(Easing.cubic),
             useNativeDriver: Platform.OS !== "web",
           }),
@@ -87,7 +117,7 @@ export function AnimatedBottomSheet({
         }),
         Animated.timing(progress, {
           toValue: 0,
-          duration: reduceMotionRef.current ? 0 : 180,
+          duration: reduceMotionRef.current ? 160 : 220,
           easing: Easing.in(Easing.cubic),
           useNativeDriver: Platform.OS !== "web",
         }),
@@ -103,7 +133,7 @@ export function AnimatedBottomSheet({
 
   const translateY = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [48, 0],
+    outputRange: [reduceMotion ? 0 : 32, 0],
   });
 
   return (
@@ -129,7 +159,10 @@ export function AnimatedBottomSheet({
           />
         </Animated.View>
         <Animated.View
-          style={[styles.animatedSheet, { transform: [{ translateY }] }]}
+          style={[
+            styles.animatedSheet,
+            { opacity: progress, transform: [{ translateY }] },
+          ]}
         >
           <SafeAreaView edges={["bottom"]} style={[styles.sheet, sheetStyle]}>
             {showHandle ? (
