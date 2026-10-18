@@ -480,6 +480,9 @@ export function DashboardScreen({
             waitingListError={Boolean(waitingList.error)}
             waitingListLoading={waitingList.isLoading}
             defaultCurrency={bookingServices[0]?.currency ?? "CZK"}
+            onGoToToday={calendar.goToTodayDay}
+            onNextDay={calendar.goToNext}
+            onPreviousDay={calendar.goToPrevious}
             onRetryAppointments={() => void calendar.reload()}
             onOpenBookingRequests={() => {
               setBookingRequestActionError(false);
