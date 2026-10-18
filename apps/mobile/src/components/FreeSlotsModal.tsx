@@ -2,7 +2,7 @@ import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,23 +13,23 @@ import {
   View,
 } from "react-native";
 import type { DemoData } from "../demo/types";
-import {
-  getDateRangeDayCount,
-  getDatesInDateRange,
-  getMonthStartsInDateRange,
-  MAX_FREE_SLOTS_SHARE_DAYS,
-} from "../features/appointments/freeSlotsDateRange";
+import { getDatesInDateRange } from "../features/appointments/freeSlotsDateRange";
 import { buildFreeSlotsShareMessage } from "../features/appointments/freeSlotsShareMessage";
 import {
   listMasterMonthAvailableSlots,
+  listMasterShareableFreeSlots,
   type MonthAvailableSlot,
+  type ShareableFreeSlot,
 } from "../features/appointments/manualBooking";
 import {
   buildMonthAvailabilityCalendar,
   getAvailableDates,
 } from "../features/appointments/monthAvailability";
-import { shareFreeSlotsGraphic } from "../features/appointments/shareFreeSlotsGraphic";
-import { moveCalendarDate } from "../features/calendar/calendar";
+import {
+  addCalendarDays,
+  getTodayCalendarDate,
+  moveCalendarDate,
+} from "../features/calendar/calendar";
 import {
   getDayTimelineSlotStart,
   timeToMinutes,
@@ -37,7 +37,6 @@ import {
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service, Workspace } from "../types";
-import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 import { ServicePickerField } from "./ServicePickerField";
 
@@ -69,29 +68,21 @@ export function FreeSlotsModal({
   const [activeMode, setActiveMode] = useState<"share" | "book">("share");
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [monthDate, setMonthDate] = useState(initialDate);
-  const [shareStartDate, setShareStartDate] = useState(() =>
-    getMonthBoundary(initialDate, "start"),
-  );
-  const [shareEndDate, setShareEndDate] = useState(() =>
-    getMonthBoundary(initialDate, "end"),
-  );
-  const [shareFormat, setShareFormat] = useState<"text" | "graphic">("text");
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const [selectedStart, setSelectedStart] = useState<string | null>(null);
   const [slots, setSlots] = useState<MonthAvailableSlot[]>([]);
+  const [shareSlots, setShareSlots] = useState<ShareableFreeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [shareStatus, setShareStatus] = useState<
-    "idle" | "opened" | "downloaded" | "failed"
-  >("idle");
-  const shareCardRef = useRef<View>(null);
+  const [shareStatus, setShareStatus] = useState<"idle" | "opened" | "failed">(
+    "idle",
+  );
+  const shareStartDate = getTodayCalendarDate(workspace.timezone);
+  const shareEndDate = addCalendarDays(shareStartDate, 13);
 
   useEffect(() => {
     if (!visible) return;
     setMonthDate(initialDate);
-    setShareStartDate(getMonthBoundary(initialDate, "start"));
-    setShareEndDate(getMonthBoundary(initialDate, "end"));
-    setShareFormat("text");
     setSelectedDate(initialDate);
     setSelectedStart(null);
     setServiceId(services[0]?.id ?? "");
@@ -99,19 +90,8 @@ export function FreeSlotsModal({
     setShareStatus("idle");
   }, [initialDate, services, visible]);
 
-  const shareRangeDays = getDateRangeDayCount(shareStartDate, shareEndDate);
-  const shareRangeValid =
-    shareRangeDays !== null && shareRangeDays <= MAX_FREE_SLOTS_SHARE_DAYS;
-  const queryMonthKey =
-    activeMode === "share"
-      ? shareRangeValid
-        ? getMonthStartsInDateRange(shareStartDate, shareEndDate).join(",")
-        : ""
-      : `${monthDate.slice(0, 7)}-01`;
-
   useEffect(() => {
-    if (!visible || !serviceId || demoData || !client || !queryMonthKey) {
-      if (!demoData) setSlots([]);
+    if (!visible || demoData || !client) {
       setIsLoading(false);
       setHasError(false);
       return;
@@ -120,25 +100,27 @@ export function FreeSlotsModal({
     let active = true;
     setIsLoading(true);
     setHasError(false);
-    setSlots([]);
-    void Promise.all(
-      queryMonthKey
-        .split(",")
-        .map((month) =>
-          listMasterMonthAvailableSlots(client, workspace.id, serviceId, month),
-        ),
-    )
-      .then((monthSlots) => {
-        if (!active) return;
-        const availableSlots = monthSlots.flat();
-        setSlots(availableSlots);
-        setSelectedDate((current) =>
-          availableSlots.some((slot) => slot.available_date === current)
-            ? current
-            : (availableSlots[0]?.available_date ??
-              `${monthDate.slice(0, 7)}-01`),
-        );
-      })
+    const request =
+      activeMode === "share"
+        ? listMasterShareableFreeSlots(
+            client,
+            workspace.id,
+            shareStartDate,
+            shareEndDate,
+          ).then((result) => {
+            if (active) setShareSlots(result);
+          })
+        : serviceId
+          ? listMasterMonthAvailableSlots(
+              client,
+              workspace.id,
+              serviceId,
+              monthDate,
+            ).then((result) => {
+              if (active) setSlots(result);
+            })
+          : Promise.resolve();
+    void request
       .catch(() => {
         if (active) setHasError(true);
       })
@@ -149,10 +131,12 @@ export function FreeSlotsModal({
       active = false;
     };
   }, [
+    activeMode,
     client,
     demoData,
     monthDate,
-    queryMonthKey,
+    shareEndDate,
+    shareStartDate,
     serviceId,
     visible,
     workspace.id,
@@ -160,16 +144,10 @@ export function FreeSlotsModal({
 
   const displaySlots = useMemo(() => {
     if (!demoData) {
-      return activeMode === "share"
-        ? slots.filter(
-            (slot) =>
-              slot.available_date >= shareStartDate &&
-              slot.available_date <= shareEndDate,
-          )
-        : slots;
+      return activeMode === "share" ? shareSlots : slots;
     }
     const dates =
-      activeMode === "share" && shareRangeValid
+      activeMode === "share"
         ? getDatesInDateRange(shareStartDate, shareEndDate)
         : [selectedDate];
     return dates.flatMap((date) =>
@@ -194,7 +172,7 @@ export function FreeSlotsModal({
     demoData,
     selectedDate,
     shareEndDate,
-    shareRangeValid,
+    shareSlots,
     shareStartDate,
     slots,
     workspace.timezone,
@@ -208,9 +186,7 @@ export function FreeSlotsModal({
   const selectedDaySlots = calendar.slotsByDate.get(selectedDate) ?? [];
   const shareDates = [
     ...new Set(displaySlots.map((slot) => slot.available_date)),
-  ]
-    .filter((date) => date >= shareStartDate && date <= shareEndDate)
-    .sort();
+  ].sort();
   const shareSlotsByDate = useMemo(() => {
     const grouped = new Map<string, MonthAvailableSlot[]>();
     for (const slot of displaySlots) {
@@ -233,32 +209,19 @@ export function FreeSlotsModal({
   );
   const selectedService = services.find((service) => service.id === serviceId);
   const shareMessage = buildFreeSlotsShareMessage({
+    availabilityNote: t("mobile.freeSlotsShareAvailabilityNote"),
     heading: t("mobile.freeSlots"),
     locale,
-    serviceName: selectedService?.name ?? "",
     slots: displaySlots,
     timezone: workspace.timezone,
     workspaceName: workspace.name,
   });
-  const shareDisabled =
-    !selectedService ||
-    !shareDates.length ||
-    !shareRangeValid ||
-    isLoading ||
-    hasError;
+  const shareDisabled = !shareDates.length || isLoading || hasError;
 
   async function shareSchedule() {
     if (shareDisabled) return;
     setShareStatus("idle");
     try {
-      if (shareFormat === "graphic") {
-        const result = await shareFreeSlotsGraphic(
-          shareCardRef,
-          t("mobile.freeSlots"),
-        );
-        setShareStatus(result === "downloaded" ? "downloaded" : "opened");
-        return;
-      }
       const result = await Share.share({
         message: shareMessage,
         title: t("mobile.freeSlots"),
@@ -292,9 +255,7 @@ export function FreeSlotsModal({
                 {t(
                   shareStatus === "failed"
                     ? "mobile.freeSlotsShareFailed"
-                    : shareStatus === "downloaded"
-                      ? "mobile.freeSlotsShareDownloaded"
-                      : "mobile.freeSlotsShareOpened",
+                    : "mobile.freeSlotsShareOpened",
                 )}
               </Text>
             ) : null}
@@ -343,124 +304,57 @@ export function FreeSlotsModal({
               : "mobile.freeSlotsDescription",
           )}
         </Text>
-        <Text style={styles.sectionTitle}>
-          {t("mobile.freeSlotsChooseService")}
-        </Text>
-        <ServicePickerField
-          label={t("mobile.freeSlotsChooseService")}
-          locale={locale}
-          onSelect={(service) => {
-            setServiceId(service.id);
-            setSelectedStart(null);
-            setShareStatus("idle");
-          }}
-          selectedService={selectedService ?? null}
-          services={services}
-          t={t}
-        />
-
-        {activeMode === "share" ? (
+        {activeMode === "share" ? null : (
           <>
             <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsSharePeriod")}
+              {t("mobile.freeSlotsChooseService")}
             </Text>
-            <View style={styles.dateRange}>
-              <DateTimePickerField
-                label={t("mobile.freeSlotsShareStartDate")}
-                locale={locale}
-                mode="date"
-                onChange={(date) => {
-                  setShareStartDate(date);
-                  setShareStatus("idle");
-                }}
-                placeholder={t("mobile.freeSlotsShareStartDate")}
-                t={t}
-                value={shareStartDate}
-              />
-              <DateTimePickerField
-                label={t("mobile.freeSlotsShareEndDate")}
-                locale={locale}
-                mode="date"
-                onChange={(date) => {
-                  setShareEndDate(date);
-                  setShareStatus("idle");
-                }}
-                placeholder={t("mobile.freeSlotsShareEndDate")}
-                t={t}
-                value={shareEndDate}
-              />
-            </View>
-            <Text style={styles.helper}>
-              {t("mobile.freeSlotsShareRangeLimit")}
-            </Text>
-            {shareRangeDays === null ? (
-              <Text accessibilityRole="alert" style={styles.errorMessage}>
-                {t("mobile.freeSlotsShareInvalidRange")}
-              </Text>
-            ) : !shareRangeValid ? (
-              <Text accessibilityRole="alert" style={styles.errorMessage}>
-                {t("mobile.freeSlotsShareRangeTooLong")}
-              </Text>
-            ) : null}
-            <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsShareFormat")}
-            </Text>
-            <View accessibilityRole="tablist" style={styles.modeTabs}>
-              <ModeTab
-                active={shareFormat === "text"}
-                label={t("mobile.freeSlotsShareTextFormat")}
+            <ServicePickerField
+              label={t("mobile.freeSlotsChooseService")}
+              locale={locale}
+              onSelect={(service) => {
+                setServiceId(service.id);
+                setSelectedStart(null);
+                setShareStatus("idle");
+              }}
+              selectedService={selectedService ?? null}
+              services={services}
+              t={t}
+            />
+            <View style={styles.monthHeader}>
+              <Pressable
+                accessibilityLabel={t("mobile.calendarPreviousMonth")}
+                accessibilityRole="button"
                 onPress={() => {
-                  setShareFormat("text");
+                  const previous = moveCalendarDate(monthDate, "month", -1);
+                  setMonthDate(previous);
+                  setSelectedDate(previous);
+                  setSelectedStart(null);
                   setShareStatus("idle");
                 }}
-              />
-              <ModeTab
-                active={shareFormat === "graphic"}
-                label={t("mobile.freeSlotsShareGraphicFormat")}
+                style={styles.monthArrow}
+              >
+                <Text style={styles.arrowText}>‹</Text>
+              </Pressable>
+              <Text accessibilityLiveRegion="polite" style={styles.monthTitle}>
+                {monthLabel}
+              </Text>
+              <Pressable
+                accessibilityLabel={t("mobile.calendarNextMonth")}
+                accessibilityRole="button"
                 onPress={() => {
-                  setShareFormat("graphic");
+                  const next = moveCalendarDate(monthDate, "month", 1);
+                  setMonthDate(next);
+                  setSelectedDate(next);
+                  setSelectedStart(null);
                   setShareStatus("idle");
                 }}
-              />
+                style={styles.monthArrow}
+              >
+                <Text style={styles.arrowText}>›</Text>
+              </Pressable>
             </View>
-            <Text style={styles.sectionTitle}>
-              {t("mobile.freeSlotsSharePreview")}
-            </Text>
           </>
-        ) : (
-          <View style={styles.monthHeader}>
-            <Pressable
-              accessibilityLabel={t("mobile.calendarPreviousMonth")}
-              accessibilityRole="button"
-              onPress={() => {
-                const previous = moveCalendarDate(monthDate, "month", -1);
-                setMonthDate(previous);
-                setSelectedDate(previous);
-                setSelectedStart(null);
-                setShareStatus("idle");
-              }}
-              style={styles.monthArrow}
-            >
-              <Text style={styles.arrowText}>‹</Text>
-            </Pressable>
-            <Text accessibilityLiveRegion="polite" style={styles.monthTitle}>
-              {monthLabel}
-            </Text>
-            <Pressable
-              accessibilityLabel={t("mobile.calendarNextMonth")}
-              accessibilityRole="button"
-              onPress={() => {
-                const next = moveCalendarDate(monthDate, "month", 1);
-                setMonthDate(next);
-                setSelectedDate(next);
-                setSelectedStart(null);
-                setShareStatus("idle");
-              }}
-              style={styles.monthArrow}
-            >
-              <Text style={styles.arrowText}>›</Text>
-            </Pressable>
-          </View>
         )}
         {activeMode === "book" ? (
           <>
@@ -535,7 +429,7 @@ export function FreeSlotsModal({
             </Text>
           </>
         ) : null}
-        {activeMode === "share" && !shareRangeValid ? null : isLoading ? (
+        {isLoading ? (
           <View accessibilityLiveRegion="polite" style={styles.status}>
             <ActivityIndicator color={colors.accent} />
             <Text style={styles.helper}>{t("common.loading")}</Text>
@@ -553,76 +447,34 @@ export function FreeSlotsModal({
             {t("mobile.freeSlotsNoAvailability")}
           </Text>
         ) : activeMode === "share" ? (
-          shareFormat === "text" ? (
-            <View style={styles.shareSchedule}>
-              {shareDates.map((date) => (
-                <View key={date} style={styles.shareDay}>
-                  <Text style={styles.shareDate}>
-                    {formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
-                      day: "numeric",
-                      month: "long",
-                      timeZone: "UTC",
-                      year: "numeric",
-                    })}
-                  </Text>
-                  <Text style={styles.shareTimes}>
-                    {(shareSlotsByDate.get(date) ?? [])
-                      .map((slot) =>
-                        formatTime(new Date(slot.starts_at), locale, {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          timeZone: workspace.timezone,
-                        }),
-                      )
-                      .join(" · ")}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View
-              ref={shareCardRef}
-              collapsable={false}
-              style={styles.graphicCard}
-            >
-              <View style={styles.graphicHeader}>
-                <Text style={styles.graphicBrand}>Schedule Masters</Text>
-                <Text style={styles.graphicBadge}>{t("mobile.freeSlots")}</Text>
-              </View>
-              <Text style={styles.graphicTitle}>
-                {t("mobile.freeSlotsShareGraphicTitle")}
-              </Text>
-              <Text style={styles.graphicWorkspace}>{workspace.name}</Text>
-              {selectedService?.name ? (
-                <Text style={styles.graphicService}>
-                  {selectedService.name}
+          <View style={styles.shareSchedule}>
+            {shareDates.map((date) => (
+              <View key={date} style={styles.shareDay}>
+                <Text style={styles.shareDate}>
+                  {formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
+                    day: "numeric",
+                    month: "long",
+                    timeZone: "UTC",
+                    year: "numeric",
+                  })}
                 </Text>
-              ) : null}
-              {shareDates.map((date) => (
-                <View key={date} style={styles.graphicDay}>
-                  <Text style={styles.graphicDate}>
-                    {formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
-                      day: "numeric",
-                      month: "short",
-                      weekday: "short",
-                      timeZone: "UTC",
-                    })}
-                  </Text>
-                  <Text style={styles.graphicTimes}>
-                    {(shareSlotsByDate.get(date) ?? [])
-                      .map((slot) =>
-                        formatTime(new Date(slot.starts_at), locale, {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          timeZone: workspace.timezone,
-                        }),
-                      )
-                      .join(" · ")}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )
+                <Text style={styles.shareTimes}>
+                  {(shareSlotsByDate.get(date) ?? [])
+                    .map((slot) =>
+                      formatTime(new Date(slot.starts_at), locale, {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: workspace.timezone,
+                      }),
+                    )
+                    .join(" · ")}
+                </Text>
+              </View>
+            ))}
+            <Text style={styles.shareNote}>
+              {t("mobile.freeSlotsShareAvailabilityNote")}
+            </Text>
+          </View>
         ) : !selectedDaySlots.length ? (
           <Text style={styles.message}>{t("mobile.freeSlotsNoSlots")}</Text>
         ) : (
@@ -725,13 +577,6 @@ function PrimaryButton({
   );
 }
 
-function getMonthBoundary(date: string, edge: "start" | "end") {
-  const [year, month] = date.slice(0, 7).split("-").map(Number);
-  if (edge === "start") return `${year}-${String(month).padStart(2, "0")}-01`;
-  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  return `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
-}
-
 const styles = StyleSheet.create({
   arrowText: { color: colors.primaryText, fontSize: 24, lineHeight: 28 },
   availabilityDot: {
@@ -763,7 +608,6 @@ const styles = StyleSheet.create({
     width: "14.2857%",
   },
   dayText: { color: colors.primaryText, fontSize: 14, lineHeight: 17 },
-  dateRange: { flexDirection: "row", gap: 12 },
   description: {
     ...typography.body,
     color: colors.secondaryText,
@@ -818,69 +662,6 @@ const styles = StyleSheet.create({
   modeTabTextActive: { color: colors.primaryText, fontWeight: "700" },
   footerContent: { gap: 8 },
   errorMessage: { ...typography.caption, color: colors.danger },
-  graphicBadge: {
-    ...typography.caption,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
-  graphicBrand: {
-    ...typography.label,
-    color: colors.actionText,
-    fontWeight: "700",
-  },
-  graphicCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radii.surface,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  graphicDate: {
-    ...typography.caption,
-    color: colors.primaryText,
-    fontWeight: "700",
-    width: "34%",
-  },
-  graphicDay: {
-    borderTopColor: colors.borderSubtle,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 12,
-    marginHorizontal: 16,
-    paddingVertical: 8,
-  },
-  graphicHeader: {
-    alignItems: "center",
-    backgroundColor: colors.action,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  graphicService: {
-    ...typography.caption,
-    color: colors.accent,
-    marginBottom: 8,
-  },
-  graphicTimes: {
-    ...typography.caption,
-    color: colors.secondaryText,
-    flex: 1,
-  },
-  graphicTitle: {
-    ...typography.section,
-    color: colors.primaryText,
-    fontWeight: "700",
-    marginBottom: 4,
-    marginTop: 16,
-    paddingHorizontal: 16,
-  },
-  graphicWorkspace: {
-    ...typography.label,
-    color: colors.secondaryText,
-    marginBottom: 8,
-    paddingHorizontal: 16,
-  },
   shareSchedule: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -901,6 +682,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   shareTimes: { ...typography.body, color: colors.secondaryText },
+  shareNote: {
+    ...typography.caption,
+    color: colors.secondaryText,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
   outsideDay: { opacity: 0 },
   pressed: { opacity: 0.78 },
   sectionTitle: {

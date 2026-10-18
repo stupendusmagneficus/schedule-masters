@@ -5,8 +5,8 @@ describe("buildFreeSlotsShareMessage", () => {
   it("groups slots by local day and formats times in the workspace timezone", () => {
     const message = buildFreeSlotsShareMessage({
       heading: "Free slots",
+      availabilityNote: "Start time depends on the service selected.",
       locale: "en",
-      serviceName: "Manicure",
       slots: [
         {
           available_date: "2030-01-07",
@@ -25,7 +25,8 @@ describe("buildFreeSlotsShareMessage", () => {
       workspaceName: "Beauty studio",
     });
 
-    expect(message).toContain("Manicure · Beauty studio");
+    expect(message).toContain("Beauty studio");
+    expect(message).toContain("Start time depends on the service selected.");
     expect(message).toContain("January 7, 2030: 09:00 AM, 10:30 AM");
     expect(message).toContain("January 8, 2030: 11:00 AM");
   });
@@ -34,12 +35,14 @@ describe("buildFreeSlotsShareMessage", () => {
     expect(
       buildFreeSlotsShareMessage({
         heading: "Free slots",
+        availabilityNote: "Start time depends on the service selected.",
         locale: "en",
-        serviceName: "Manicure",
         slots: [],
         timezone: "Europe/Prague",
         workspaceName: "Beauty studio",
       }),
-    ).toBe("Free slots\nManicure · Beauty studio\n");
+    ).toBe(
+      "Free slots\nBeauty studio\nStart time depends on the service selected.\n",
+    );
   });
 });

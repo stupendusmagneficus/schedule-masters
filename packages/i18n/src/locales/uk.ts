@@ -148,11 +148,12 @@ export const ukrainianMessages: Messages = {
   "mobile.freeSlotsBook": "Записати клієнта",
   "mobile.freeSlotsShareTab": "Поділитися",
   "mobile.freeSlotsBookTab": "Знайти й записати",
-  "mobile.freeSlotsShareDescription":
-    "Поділіться вільними вікнами з клієнтом через застосунок для повідомлень.",
+  "mobile.freeSlotsShareDescription": "Вільний час на наступні 14 днів.",
+  "mobile.freeSlotsShareAvailabilityNote":
+    "Час початку залежить від обраної послуги.",
   "mobile.freeSlotsShareAction": "Поділитися розкладом",
   "mobile.freeSlotsShareNoAvailability":
-    "Цього місяця для цієї послуги немає вільних вікон.",
+    "У наступні 14 днів немає вільних вікон.",
   "mobile.freeSlotsShareFailed": "Не вдалося відкрити меню надсилання.",
   "mobile.freeSlotsShareOpened": "Виберіть застосунок, щоб надіслати розклад.",
   "mobile.freeSlotsShareDownloaded":

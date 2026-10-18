@@ -1425,6 +1425,14 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      list_master_shareable_free_slots: {
+        Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
+        Returns: {
+          available_date: string
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       list_master_waiting_list: {
         Args: { p_workspace_id: string }
         Returns: {

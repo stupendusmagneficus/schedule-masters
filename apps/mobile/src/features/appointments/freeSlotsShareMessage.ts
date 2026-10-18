@@ -11,15 +11,15 @@ type FreeSlotForSharing = {
 
 export function buildFreeSlotsShareMessage({
   heading,
+  availabilityNote,
   locale,
-  serviceName,
   slots,
   timezone,
   workspaceName,
 }: {
   readonly heading: string;
+  readonly availabilityNote: string;
   readonly locale: SupportedLocale;
-  readonly serviceName: string;
   readonly slots: readonly FreeSlotForSharing[];
   readonly timezone: string;
   readonly workspaceName: string;
@@ -50,7 +50,5 @@ export function buildFreeSlotsShareMessage({
       return `${dateLabel}: ${times.join(", ")}`;
     });
 
-  return [heading, `${serviceName} · ${workspaceName}`, "", ...schedule].join(
-    "\n",
-  );
+  return [heading, workspaceName, availabilityNote, "", ...schedule].join("\n");
 }
