@@ -119,6 +119,10 @@ export function TodayTab({
   const appointmentCount = demoData
     ? demoAppointments.length
     : visibleAppointments.length;
+  const summaryLoading =
+    appointmentsLoading &&
+    !appointmentsRefreshing &&
+    masterAppointments.length === 0;
   const nextLiveAppointment = activeAppointments[0];
 
   return (
@@ -160,15 +164,34 @@ export function TodayTab({
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
       ) : null}
 
+      {summaryLoading ||
+      (!appointmentsLoading && !appointmentsError) ||
+      appointmentsRefreshing ||
+      masterAppointments.length > 0 ||
+      demoData ? (
+        <SummaryMetrics
+          metrics={[
+            {
+              id: "bookings",
+              label: t("mobile.bookings"),
+              value: summaryLoading ? "—" : String(appointmentCount),
+            },
+            {
+              id: "received-revenue",
+              label: t("mobile.receivedRevenue"),
+              tone: "accent",
+              value: summaryLoading ? "—" : receivedRevenue,
+            },
+          ]}
+        />
+      ) : null}
+
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
           <ScheduleSectionHeader
-            onOpenFreeSlots={onOpenFreeSlots}
-            showFreeSlots={Boolean(hasActiveServices || demoData)}
             title={
               isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
             }
-            t={t}
           />
           {demoAppointments.length ? (
             <View style={styles.appointmentsList}>
@@ -194,13 +217,10 @@ export function TodayTab({
       {!demoData ? (
         <InfoCard style={styles.scheduleCard}>
           <ScheduleSectionHeader
-            onOpenFreeSlots={onOpenFreeSlots}
-            showFreeSlots={Boolean(hasActiveServices)}
             title={
               isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
             }
             isLoading={appointmentsRefreshing}
-            t={t}
           />
           {appointmentsLoading && !appointmentsRefreshing ? (
             <View accessibilityLiveRegion="polite" style={styles.state}>
@@ -295,25 +315,8 @@ export function TodayTab({
         />
       ) : null}
 
-      {(!appointmentsLoading && !appointmentsError) ||
-      appointmentsRefreshing ||
-      masterAppointments.length > 0 ||
-      demoData ? (
-        <SummaryMetrics
-          metrics={[
-            {
-              id: "bookings",
-              label: t("mobile.bookings"),
-              value: String(appointmentCount),
-            },
-            {
-              id: "received-revenue",
-              label: t("mobile.receivedRevenue"),
-              tone: "accent",
-              value: receivedRevenue,
-            },
-          ]}
-        />
+      {hasActiveServices || demoData ? (
+        <FreeSlotsAction onPress={onOpenFreeSlots} t={t} />
       ) : null}
 
       {!demoData && !isPastDate ? (
@@ -421,7 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  freeSlotsAction: { borderRadius: radii.pill, minHeight: 44 },
+  freeSlotsAction: { alignSelf: "flex-start", borderRadius: radii.pill },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
@@ -441,16 +444,10 @@ const styles = StyleSheet.create({
 
 function ScheduleSectionHeader({
   isLoading = false,
-  onOpenFreeSlots,
-  showFreeSlots,
   title,
-  t,
 }: {
   readonly isLoading?: boolean;
-  readonly onOpenFreeSlots: () => void;
-  readonly showFreeSlots: boolean;
   readonly title: string;
-  readonly t: TodayTabProps["t"];
 }) {
   return (
     <View style={styles.scheduleHeader}>
@@ -458,23 +455,32 @@ function ScheduleSectionHeader({
       {isLoading ? (
         <ActivityIndicator color={colors.accent} size="small" />
       ) : null}
-      {showFreeSlots ? (
-        <ActionButton
-          icon={
-            <MaterialCommunityIcons
-              color={colors.accent}
-              name="calendar-search"
-              size={18}
-            />
-          }
-          label={t("mobile.freeSlots")}
-          onPress={onOpenFreeSlots}
-          size="compact"
-          style={styles.freeSlotsAction}
-          variant="secondary"
-        />
-      ) : null}
     </View>
+  );
+}
+
+function FreeSlotsAction({
+  onPress,
+  t,
+}: {
+  readonly onPress: () => void;
+  readonly t: TodayTabProps["t"];
+}) {
+  return (
+    <ActionButton
+      icon={
+        <MaterialCommunityIcons
+          color={colors.accent}
+          name="calendar-search"
+          size={18}
+        />
+      }
+      label={t("mobile.freeSlots")}
+      onPress={onPress}
+      size="compact"
+      style={styles.freeSlotsAction}
+      variant="secondary"
+    />
   );
 }
 
