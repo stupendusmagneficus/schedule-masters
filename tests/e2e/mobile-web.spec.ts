@@ -318,13 +318,17 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
     await expect(page.getByText("Anna K.", { exact: true })).toBeVisible();
 
+    // Pick a future date so the demo still works after the current day's
+    // morning slots have passed.
+    await page.getByRole("button", { name: "Následující datum" }).click();
+
     await page
       .getByRole("button", {
         name: /08:00, Klepnutím vytvoříte rezervaci/,
       })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Co přidat v tomto čase?" }),
+      page.getByRole("heading", { name: "Vyberte čas začátku" }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Přidat pauzu" }).first(),

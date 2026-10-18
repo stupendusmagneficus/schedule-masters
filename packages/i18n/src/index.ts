@@ -283,7 +283,7 @@ export type MessageKey =
   | "mobile.calendarPreviousWeek"
   | "mobile.calendarNextWeek"
   | "mobile.calendarTapToBook"
-  | "mobile.calendarSlotActionTitle"
+  | "mobile.calendarChooseTime"
   | "mobile.calendarDayView"
   | "mobile.calendarWeekView"
   | "mobile.calendarMonthView"
@@ -847,7 +847,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Предыдущая неделя",
     "mobile.calendarNextWeek": "Следующая неделя",
     "mobile.calendarTapToBook": "Нажмите, чтобы создать запись",
-    "mobile.calendarSlotActionTitle": "Что добавить на это время?",
+    "mobile.calendarChooseTime": "Выберите время начала",
     "mobile.calendarDayView": "День",
     "mobile.calendarWeekView": "Неделя",
     "mobile.calendarMonthView": "Месяц",
@@ -1442,7 +1442,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Předchozí týden",
     "mobile.calendarNextWeek": "Následující týden",
     "mobile.calendarTapToBook": "Klepnutím vytvoříte rezervaci",
-    "mobile.calendarSlotActionTitle": "Co přidat v tomto čase?",
+    "mobile.calendarChooseTime": "Vyberte čas začátku",
     "mobile.calendarDayView": "Den",
     "mobile.calendarWeekView": "Týden",
     "mobile.calendarMonthView": "Měsíc",
@@ -2034,7 +2034,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarPreviousWeek": "Previous week",
     "mobile.calendarNextWeek": "Next week",
     "mobile.calendarTapToBook": "Tap to create a booking",
-    "mobile.calendarSlotActionTitle": "What would you like to add?",
+    "mobile.calendarChooseTime": "Choose a start time",
     "mobile.calendarDayView": "Day",
     "mobile.calendarWeekView": "Week",
     "mobile.calendarMonthView": "Month",

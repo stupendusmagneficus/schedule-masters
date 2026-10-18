@@ -328,7 +328,7 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarPreviousWeek": "Попередній тиждень",
   "mobile.calendarNextWeek": "Наступний тиждень",
   "mobile.calendarTapToBook": "Натисніть, щоб створити запис",
-  "mobile.calendarSlotActionTitle": "Що додати на цей час?",
+  "mobile.calendarChooseTime": "Виберіть час початку",
   "mobile.calendarDayView": "День",
   "mobile.calendarWeekView": "Тиждень",
   "mobile.calendarMonthView": "Місяць",
