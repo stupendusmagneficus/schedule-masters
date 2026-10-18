@@ -48,6 +48,7 @@ import { getCalendarTimeOptions } from "../../features/calendar/calendarTimeOpti
 import {
   buildDayTimeline,
   buildDemoDayTimeline,
+  getDayTimelineSlotStart,
 } from "../../features/calendar/dayTimeline";
 import { buildDemoMonthCalendar } from "../../features/calendar/demoMonthCalendar";
 import {
@@ -125,8 +126,14 @@ export function CalendarTab({
       minute,
       timezone: workspace.timezone,
     });
-    if (!timeOptions.length) return;
-    setSlotAction({ date, startsAt: timeOptions[0], timeOptions });
+    const startsAt =
+      timeOptions[0] ??
+      getDayTimelineSlotStart(date, minute, workspace.timezone);
+    setSlotAction({
+      date,
+      startsAt,
+      timeOptions: timeOptions.length ? timeOptions : [startsAt],
+    });
   };
   const openBlockEditor = (
     initialDraft: PersonalBlockDraft,
@@ -454,6 +461,7 @@ export function CalendarTab({
             {calendar.isLoading && !demoData ? (
               <View
                 accessibilityLiveRegion="polite"
+                pointerEvents="none"
                 style={styles.calendarLoadingOverlay}
               >
                 <ActivityIndicator color={colors.accent} size="small" />

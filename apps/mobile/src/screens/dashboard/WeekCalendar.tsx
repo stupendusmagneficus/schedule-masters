@@ -222,7 +222,9 @@ export function WeekCalendar({
                   accessibilityHint={t("mobile.calendarTapToBook")}
                   accessibilityLabel={`${formatTimelineTime(minute)}, ${formatDateLabel(day.date, locale, timezone)}`}
                   accessibilityRole="button"
-                  disabled={day.isClosed || !onPressTime}
+                  disabled={
+                    day.isClosed || minute >= day.endMinute || !onPressTime
+                  }
                   key={minute}
                   onPress={() => onPressTime?.(day.date, minute)}
                   style={({ pressed }) => [

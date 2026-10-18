@@ -135,6 +135,7 @@ export type MessageKey =
   | "mobile.freeSlotsShareTab"
   | "mobile.freeSlotsBookTab"
   | "mobile.freeSlotsShareDescription"
+  | "mobile.freeSlotsShareAvailabilityNote"
   | "mobile.freeSlotsShareAction"
   | "mobile.freeSlotsShareNoAvailability"
   | "mobile.freeSlotsShareFailed"
@@ -712,11 +713,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Записать клиента",
     "mobile.freeSlotsShareTab": "Поделиться",
     "mobile.freeSlotsBookTab": "Найти и записать",
-    "mobile.freeSlotsShareDescription":
-      "Поделитесь свободными окнами с клиентом через приложение для сообщений.",
+    "mobile.freeSlotsShareDescription": "Свободное время на ближайшие 14 дней.",
+    "mobile.freeSlotsShareAvailabilityNote":
+      "Время начала зависит от выбранной услуги.",
     "mobile.freeSlotsShareAction": "Поделиться расписанием",
     "mobile.freeSlotsShareNoAvailability":
-      "В этом месяце нет свободных окон для выбранной услуги.",
+      "В ближайшие 14 дней нет свободных окон.",
     "mobile.freeSlotsShareFailed": "Не удалось открыть меню отправки.",
     "mobile.freeSlotsShareOpened":
       "Выберите приложение, чтобы отправить расписание.",
@@ -1363,11 +1365,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Objednat klienta",
     "mobile.freeSlotsShareTab": "Sdílet",
     "mobile.freeSlotsBookTab": "Najít a objednat",
-    "mobile.freeSlotsShareDescription":
-      "Sdílejte volné termíny s klientem přes aplikaci pro zprávy.",
+    "mobile.freeSlotsShareDescription": "Volné termíny na příštích 14 dní.",
+    "mobile.freeSlotsShareAvailabilityNote":
+      "Čas začátku závisí na vybrané službě.",
     "mobile.freeSlotsShareAction": "Sdílet rozvrh",
     "mobile.freeSlotsShareNoAvailability":
-      "Tento měsíc nejsou pro vybranou službu volné termíny.",
+      "V příštích 14 dnech nejsou volné termíny.",
     "mobile.freeSlotsShareFailed": "Nabídku sdílení se nepodařilo otevřít.",
     "mobile.freeSlotsShareOpened": "Vyberte aplikaci pro odeslání rozvrhu.",
     "mobile.freeSlotsShareDownloaded":
@@ -2009,11 +2012,12 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsBook": "Book client",
     "mobile.freeSlotsShareTab": "Share",
     "mobile.freeSlotsBookTab": "Find & book",
-    "mobile.freeSlotsShareDescription":
-      "Share available times with a client through your messaging app.",
+    "mobile.freeSlotsShareDescription": "Available times for the next 14 days.",
+    "mobile.freeSlotsShareAvailabilityNote":
+      "Start times depend on the service selected.",
     "mobile.freeSlotsShareAction": "Share schedule",
     "mobile.freeSlotsShareNoAvailability":
-      "No times are available for this service this month.",
+      "No times are available in the next 14 days.",
     "mobile.freeSlotsShareFailed": "Couldn't open the share menu.",
     "mobile.freeSlotsShareOpened": "Choose an app to send the schedule.",
     "mobile.freeSlotsShareDownloaded":

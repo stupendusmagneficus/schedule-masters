@@ -9,7 +9,6 @@ describe("getCalendarTimeOptions", () => {
         date: "2030-01-07",
         endMinute: 12 * 60,
         minute: 11 * 60,
-        now: new Date("2030-01-01T00:00:00.000Z"),
         timezone: "Europe/Prague",
       }),
     ).toEqual([
@@ -26,7 +25,6 @@ describe("getCalendarTimeOptions", () => {
         date: "2030-01-07",
         endMinute: 13 * 60,
         minute: 11 * 60 + 30,
-        now: new Date("2030-01-01T00:00:00.000Z"),
         timezone: "Europe/Prague",
       }),
     ).toEqual([
@@ -37,15 +35,19 @@ describe("getCalendarTimeOptions", () => {
     ]);
   });
 
-  it("keeps choices before closing time and excludes past choices today", () => {
+  it("keeps choices before closing time, including past choices", () => {
     expect(
       getCalendarTimeOptions({
         date: "2030-01-07",
         endMinute: 12 * 60 + 30,
         minute: 11 * 60,
-        now: new Date("2030-01-07T10:15:00.000Z"),
         timezone: "Europe/Prague",
       }),
-    ).toEqual(["2030-01-07T10:30:00.000Z", "2030-01-07T10:45:00.000Z"]);
+    ).toEqual([
+      "2030-01-07T10:00:00.000Z",
+      "2030-01-07T10:15:00.000Z",
+      "2030-01-07T10:30:00.000Z",
+      "2030-01-07T10:45:00.000Z",
+    ]);
   });
 });
