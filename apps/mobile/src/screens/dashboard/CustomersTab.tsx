@@ -376,77 +376,85 @@ export function CustomersTab({
           </Text>
         </InfoCard>
       ) : null}
-      {directory.customers.map((customer) => {
-        const phoneUrl = customer.phone
-          ? buildCustomerPhoneUrl(customer.phone, "call")
-          : null;
+      {directory.customers.length > 0 ? (
+        <InfoCard style={styles.customerList}>
+          {directory.customers.map((customer, index) => {
+            const phoneUrl = customer.phone
+              ? buildCustomerPhoneUrl(customer.phone, "call")
+              : null;
 
-        return (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={customer.name}
-            key={customer.id}
-            onPress={() => directory.selectCustomer(customer)}
-          >
-            <InfoCard style={styles.customerRow}>
-              <View style={styles.customerCopy}>
-                <Text style={styles.customerName}>{customer.name}</Text>
-                {customer.phone ? (
-                  phoneUrl ? (
-                    <Pressable
-                      accessibilityHint={customer.phone}
-                      accessibilityLabel={`${t("mobile.customerCall")}: ${customer.phone}`}
-                      accessibilityRole="link"
-                      onPress={(event) => {
-                        event.stopPropagation();
-                        void Linking.openURL(phoneUrl).catch(() =>
-                          Alert.alert(t("mobile.customerContactActionFailed")),
-                        );
-                      }}
-                      style={styles.phoneLink}
-                    >
-                      <MaterialCommunityIcons
-                        color={colors.secondaryText}
-                        name="phone-outline"
-                        size={16}
-                      />
-                      <Text numberOfLines={1} style={styles.phoneText}>
-                        {customer.phone}
-                      </Text>
-                    </Pressable>
-                  ) : (
-                    <View style={styles.phoneLink}>
-                      <MaterialCommunityIcons
-                        color={colors.secondaryText}
-                        name="phone-outline"
-                        size={16}
-                      />
-                      <Text numberOfLines={1} style={styles.phoneText}>
-                        {customer.phone}
-                      </Text>
-                    </View>
-                  )
-                ) : null}
-              </View>
+            return (
               <Pressable
-                accessibilityLabel={t("mobile.openCustomerDetails")}
                 accessibilityRole="button"
-                onPress={(event) => {
-                  event.stopPropagation();
-                  directory.selectCustomer(customer);
-                }}
-                style={styles.detailsButton}
+                accessibilityLabel={customer.name}
+                key={customer.id}
+                onPress={() => directory.selectCustomer(customer)}
+                style={[
+                  styles.customerRow,
+                  index > 0 && styles.customerRowSeparated,
+                ]}
               >
-                <MaterialCommunityIcons
-                  color={colors.secondaryText}
-                  name="dots-horizontal"
-                  size={24}
-                />
+                <View style={styles.customerCopy}>
+                  <Text style={styles.customerName}>{customer.name}</Text>
+                  {customer.phone ? (
+                    phoneUrl ? (
+                      <Pressable
+                        accessibilityHint={customer.phone}
+                        accessibilityLabel={`${t("mobile.customerCall")}: ${customer.phone}`}
+                        accessibilityRole="link"
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          void Linking.openURL(phoneUrl).catch(() =>
+                            Alert.alert(
+                              t("mobile.customerContactActionFailed"),
+                            ),
+                          );
+                        }}
+                        style={styles.phoneLink}
+                      >
+                        <MaterialCommunityIcons
+                          color={colors.secondaryText}
+                          name="phone-outline"
+                          size={16}
+                        />
+                        <Text numberOfLines={1} style={styles.phoneText}>
+                          {customer.phone}
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <View style={styles.phoneLink}>
+                        <MaterialCommunityIcons
+                          color={colors.secondaryText}
+                          name="phone-outline"
+                          size={16}
+                        />
+                        <Text numberOfLines={1} style={styles.phoneText}>
+                          {customer.phone}
+                        </Text>
+                      </View>
+                    )
+                  ) : null}
+                </View>
+                <Pressable
+                  accessibilityLabel={t("mobile.openCustomerDetails")}
+                  accessibilityRole="button"
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    directory.selectCustomer(customer);
+                  }}
+                  style={styles.detailsButton}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.secondaryText}
+                    name="dots-horizontal"
+                    size={24}
+                  />
+                </Pressable>
               </Pressable>
-            </InfoCard>
-          </Pressable>
-        );
-      })}
+            );
+          })}
+        </InfoCard>
+      ) : null}
     </View>
   );
 }
@@ -531,8 +539,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
-    padding: 8,
+    minHeight: 64,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
+  customerRowSeparated: {
+    borderTopColor: colors.borderSubtle,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  customerList: { gap: 0, padding: 0 },
   detailsButton: {
     alignItems: "center",
     borderRadius: radii.control,
