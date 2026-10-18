@@ -1104,16 +1104,6 @@ export type Database = {
         Args: { p_appointment_id: string; p_workspace_id: string }
         Returns: Json
       }
-      list_master_appointment_series_future: {
-        Args: { p_appointment_id: string; p_workspace_id: string }
-        Returns: {
-          ends_at: string
-          id: string
-          service_name: string
-          starts_at: string
-          status: Database["public"]["Enums"]["appointment_status"]
-        }[]
-      }
       check_public_booking_request: { Args: never; Returns: undefined }
       claim_booking_decision_emails: {
         Args: { p_batch_size?: number }
@@ -1337,6 +1327,16 @@ export type Database = {
       is_workspace_member: {
         Args: { target_workspace_id: string }
         Returns: boolean
+      }
+      list_master_appointment_series_future: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          ends_at: string
+          id: string
+          service_name: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
       }
       list_master_appointment_services: {
         Args: { p_appointment_id: string; p_workspace_id: string }
