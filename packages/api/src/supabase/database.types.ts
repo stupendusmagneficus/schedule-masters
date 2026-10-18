@@ -1426,11 +1426,7 @@ export type Database = {
         }[]
       }
       list_master_shareable_free_slots: {
-        Args: {
-          p_from_date: string
-          p_to_date: string
-          p_workspace_id: string
-        }
+        Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
         Returns: {
           available_date: string
           ends_at: string

@@ -608,8 +608,9 @@ test.describe("mobile web smoke", () => {
     const sharedSchedule = await page.evaluate(() =>
       window.localStorage.getItem("sharedSchedule"),
     );
-    expect(sharedSchedule).toContain("Gel manicure");
     expect(sharedSchedule).toContain("Elena Beauty");
+    expect(sharedSchedule).toContain("Čas začátku závisí na vybrané službě.");
+    expect(sharedSchedule).not.toContain("Gel manicure");
     await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
