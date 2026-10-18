@@ -112,9 +112,7 @@ export function DateTimePickerField({
           />
         ) : null}
       </Pressable>
-      {isOpen &&
-      (Platform.OS === "ios" || Platform.OS === "web") &&
-      mode === "date" ? (
+      {(Platform.OS === "ios" || Platform.OS === "web") && mode === "date" ? (
         <CalendarDatePickerSheet
           initialDate={draftDate}
           locale={locale}
@@ -124,6 +122,7 @@ export function DateTimePickerField({
             setOpen(false);
           }}
           t={t}
+          visible={isOpen}
         />
       ) : null}
       {isOpen &&

@@ -1,16 +1,9 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { ReactNode } from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
+import { AnimatedBottomSheet } from "./AnimatedBottomSheet";
 
 type BottomSheetProps = {
   readonly children: ReactNode;
@@ -28,66 +21,44 @@ export function BottomSheet({
   visible,
 }: BottomSheetProps) {
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="slide"
-      onRequestClose={onClose}
-      statusBarTranslucent
-      transparent
+    <AnimatedBottomSheet
+      onClose={onClose}
+      sheetStyle={styles.sheet}
       visible={visible}
     >
-      <View style={styles.overlay}>
+      <View style={styles.header}>
+        <View style={styles.headerSpacer} />
+        <Text accessibilityRole="header" numberOfLines={1} style={styles.title}>
+          {title}
+        </Text>
         <Pressable
-          accessibilityElementsHidden
-          accessible={false}
-          importantForAccessibility="no-hide-descendants"
+          accessibilityLabel={closeLabel}
+          accessibilityRole="button"
+          hitSlop={4}
           onPress={onClose}
-          style={styles.backdrop}
-        />
-        <SafeAreaView edges={["bottom"]} style={styles.sheet}>
-          <View accessibilityElementsHidden style={styles.handleArea}>
-            <View style={styles.handle} />
-          </View>
-          <View style={styles.header}>
-            <View style={styles.headerSpacer} />
-            <Text
-              accessibilityRole="header"
-              numberOfLines={1}
-              style={styles.title}
-            >
-              {title}
-            </Text>
-            <Pressable
-              accessibilityLabel={closeLabel}
-              accessibilityRole="button"
-              hitSlop={4}
-              onPress={onClose}
-              style={({ pressed }) => [
-                styles.closeButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialCommunityIcons
-                color={colors.primaryText}
-                name="close"
-                size={26}
-              />
-            </Pressable>
-          </View>
-          <ScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            {children}
-          </ScrollView>
-        </SafeAreaView>
+          style={({ pressed }) => [
+            styles.closeButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialCommunityIcons
+            color={colors.primaryText}
+            name="close"
+            size={26}
+          />
+        </Pressable>
       </View>
-    </Modal>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
+    </AnimatedBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFill },
   closeButton: {
     alignItems: "center",
     borderRadius: radii.control,
@@ -96,13 +67,6 @@ const styles = StyleSheet.create({
     width: 48,
   },
   content: { gap: 16, padding: 20 },
-  handle: {
-    backgroundColor: colors.border,
-    borderRadius: radii.control,
-    height: 4,
-    width: 32,
-  },
-  handleArea: { alignItems: "center", height: 20, justifyContent: "center" },
   header: {
     alignItems: "center",
     backgroundColor: colors.surface,
@@ -113,21 +77,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   headerSpacer: { width: 48 },
-  overlay: {
-    backgroundColor: colors.overlay,
-    flex: 1,
-    justifyContent: "flex-end",
-  },
   pressed: { opacity: 0.7 },
-  sheet: {
-    alignSelf: "center",
-    backgroundColor: colors.canvas,
-    borderTopLeftRadius: radii.surface,
-    borderTopRightRadius: radii.surface,
-    maxHeight: "85%",
-    overflow: "hidden",
-    width: "100%",
-  },
+  sheet: { maxHeight: "85%" },
   title: {
     ...typography.label,
     color: colors.primaryText,
