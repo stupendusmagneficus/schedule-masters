@@ -120,6 +120,8 @@ export const ukrainianMessages: Messages = {
   "workspace.setupStepService": "Перша послуга",
   "workspace.setupStepServiceDescription":
     "Додайте послугу, яку клієнти зможуть вибрати під час запису.",
+  "workspace.aiTranslationNotice":
+    "Пізніше застосунок зможе запропонувати переклади послуги за допомогою ШІ. Це лише чернетки: ШІ може помилитися, тому перевірте й за потреби відредагуйте переклад перед збереженням.",
   "workspace.setupStepSchedule": "Робочі дні та години",
   "workspace.setupStepScheduleDescription":
     "Виберіть дні та час, коли ви приймаєте клієнтів.",
@@ -574,7 +576,7 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceSortOrder": "Порядок сортування",
   "mobile.serviceSourceLanguage": "Мова вихідної назви",
   "mobile.serviceTranslationReviewHint":
-    "Назва, опис і категорія надсилаються до OpenAI. Запити можуть оплачуватися окремо. Перевірте й відредагуйте чернетки перед збереженням.",
+    "ШІ може помилитися або змінити зміст. Перевірте кожен переклад і за потреби відредагуйте його перед збереженням. Назва, опис і категорія надсилаються до OpenAI; використання API може оплачуватися окремо.",
   "mobile.serviceTranslateWithAi": "Запропонувати переклади за допомогою ШІ",
   "mobile.serviceTranslationLoading": "Готуємо переклади…",
   "mobile.serviceTranslationFailed":

@@ -111,6 +111,7 @@ export type MessageKey =
   | "workspace.setupStepMasterDescription"
   | "workspace.setupStepService"
   | "workspace.setupStepServiceDescription"
+  | "workspace.aiTranslationNotice"
   | "workspace.setupStepSchedule"
   | "workspace.setupStepScheduleDescription"
   | "workspace.setupCompleteTitle"
@@ -700,6 +701,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "Первая услуга",
     "workspace.setupStepServiceDescription":
       "Добавьте услугу, которую клиенты смогут выбрать при записи.",
+    "workspace.aiTranslationNotice":
+      "Позже приложение сможет предложить переводы услуги с помощью ИИ. Это только черновики: ИИ может ошибиться, поэтому проверьте и при необходимости измените перевод перед сохранением.",
     "workspace.setupStepSchedule": "Рабочие дни и часы",
     "workspace.setupStepScheduleDescription":
       "Выберите дни и общий интервал, когда вы принимаете клиентов.",
@@ -1160,7 +1163,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrder": "Порядок",
     "mobile.serviceSourceLanguage": "Язык исходного названия",
     "mobile.serviceTranslationReviewHint":
-      "Название, описание и категория будут отправлены в OpenAI. Запросы могут тарифицироваться. Проверьте и измените черновики перед сохранением.",
+      "ИИ может ошибиться или неверно передать смысл. Проверьте каждый перевод и при необходимости исправьте его перед сохранением. Название, описание и категория отправляются в OpenAI; использование API может оплачиваться отдельно.",
     "mobile.serviceTranslateWithAi": "Предложить перевод с помощью ИИ",
     "mobile.serviceTranslationLoading": "Готовим переводы…",
     "mobile.serviceTranslationFailed":
@@ -1370,6 +1373,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "První služba",
     "workspace.setupStepServiceDescription":
       "Přidejte službu, kterou si klienti vyberou při rezervaci.",
+    "workspace.aiTranslationNotice":
+      "Později vám aplikace může nabídnout překlady služeb pomocí AI. Jde pouze o návrhy: AI se může mýlit, proto překlad před uložením zkontrolujte a případně upravte.",
     "workspace.setupStepSchedule": "Pracovní dny a hodiny",
     "workspace.setupStepScheduleDescription":
       "Vyberte dny a časový interval, kdy přijímáte klienty.",
@@ -1825,7 +1830,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrder": "Pořadí",
     "mobile.serviceSourceLanguage": "Jazyk původního názvu",
     "mobile.serviceTranslationReviewHint":
-      "Název, popis a kategorie se odešlou službě OpenAI. Požadavky mohou být zpoplatněny. Před uložením návrhy zkontrolujte a upravte.",
+      "AI se může mýlit nebo změnit význam. Každý překlad před uložením zkontrolujte a případně upravte. Název, popis a kategorie se odesílají službě OpenAI; používání API může být zpoplatněno zvlášť.",
     "mobile.serviceTranslateWithAi": "Navrhnout překlad pomocí AI",
     "mobile.serviceTranslationLoading": "Připravují se překlady…",
     "mobile.serviceTranslationFailed":
@@ -2035,6 +2040,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupStepService": "First service",
     "workspace.setupStepServiceDescription":
       "Add the service clients will be able to choose when booking.",
+    "workspace.aiTranslationNotice":
+      "Later, the app can suggest AI translations for your service. These are drafts only: AI can make mistakes, so review and edit each translation before saving.",
     "workspace.setupStepSchedule": "Working days and hours",
     "workspace.setupStepScheduleDescription":
       "Choose the days and time range when you accept clients.",
@@ -2495,7 +2502,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrder": "Sort order",
     "mobile.serviceSourceLanguage": "Source name language",
     "mobile.serviceTranslationReviewHint":
-      "The name, description, and category are sent to OpenAI. Requests may incur charges. Review and edit the drafts before saving.",
+      "AI can make mistakes or change the meaning. Review each translation and edit it before saving if needed. The name, description, and category are sent to OpenAI; API usage may be billed separately.",
     "mobile.serviceTranslateWithAi": "Suggest translations with AI",
     "mobile.serviceTranslationLoading": "Preparing translations…",
     "mobile.serviceTranslationFailed":

@@ -120,6 +120,8 @@ export const slovakMessages: Messages = {
   "workspace.setupStepService": "Prvá služba",
   "workspace.setupStepServiceDescription":
     "Pridajte službu, ktorú si klienti budú môcť vybrať pri rezervácii.",
+  "workspace.aiTranslationNotice":
+    "Neskôr vám aplikácia môže ponúknuť preklady služieb pomocou AI. Sú to iba návrhy: AI sa môže mýliť, preto každý preklad pred uložením skontrolujte a prípadne upravte.",
   "workspace.setupStepSchedule": "Pracovné dni a hodiny",
   "workspace.setupStepScheduleDescription":
     "Vyberte dni a čas, keď prijímate klientov.",
@@ -578,7 +580,7 @@ export const slovakMessages: Messages = {
   "mobile.serviceSortOrder": "Poradie",
   "mobile.serviceSourceLanguage": "Jazyk pôvodného názvu",
   "mobile.serviceTranslationReviewHint":
-    "Názov, popis a kategória sa odošlú službe OpenAI. Požiadavky môžu byť spoplatnené. Pred uložením návrhy skontrolujte a upravte.",
+    "AI sa môže mýliť alebo zmeniť význam. Každý preklad pred uložením skontrolujte a podľa potreby upravte. Názov, popis a kategória sa odosielajú službe OpenAI; používanie API môže byť účtované samostatne.",
   "mobile.serviceTranslateWithAi": "Navrhnúť preklady pomocou AI",
   "mobile.serviceTranslationLoading": "Pripravujú sa preklady…",
   "mobile.serviceTranslationFailed":
