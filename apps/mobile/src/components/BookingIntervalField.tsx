@@ -1,5 +1,6 @@
 import type { MessageKey } from "@schedule-app/i18n";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import {
   type BookingIntervalMinutes,
@@ -18,7 +19,9 @@ type BookingIntervalFieldProps = {
 const optionLabels: Record<BookingIntervalMinutes, MessageKey> = {
   15: "workspace.bookingInterval15",
   30: "workspace.bookingInterval30",
+  45: "workspace.bookingInterval45",
   60: "workspace.bookingInterval60",
+  90: "workspace.bookingInterval90",
 };
 
 export function BookingIntervalField({
@@ -27,6 +30,15 @@ export function BookingIntervalField({
   t,
   value,
 }: BookingIntervalFieldProps) {
+  const [customValue, setCustomValue] = useState(String(value));
+  const customSelected = !bookingIntervalOptions.includes(
+    value as (typeof bookingIntervalOptions)[number],
+  );
+
+  useEffect(() => {
+    setCustomValue(String(value));
+  }, [value]);
+
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -54,13 +66,61 @@ export function BookingIntervalField({
             </Pressable>
           );
         })}
+        <Pressable
+          accessibilityLabel={t("workspace.bookingIntervalCustom")}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: customSelected }}
+          onPress={() => {
+            const initialValue = customSelected ? value : 5;
+            setCustomValue(String(initialValue));
+            onChange(initialValue);
+          }}
+          style={[styles.option, customSelected && styles.optionSelected]}
+        >
+          <Text
+            style={[
+              styles.optionText,
+              customSelected && styles.optionTextSelected,
+            ]}
+          >
+            {t("workspace.bookingIntervalCustom")}
+          </Text>
+        </Pressable>
       </View>
+      {customSelected && (
+        <View style={styles.customField}>
+          <TextInput
+            accessibilityLabel={t("workspace.bookingIntervalCustomLabel")}
+            keyboardType="number-pad"
+            onChangeText={(text) => {
+              setCustomValue(text.replace(/\D/g, ""));
+              onChange(text ? Number(text) : 0);
+            }}
+            placeholder={t("workspace.bookingIntervalCustomPlaceholder")}
+            style={styles.customInput}
+            value={customValue}
+          />
+          <Text style={styles.help}>
+            {t("workspace.bookingIntervalCustomHelp")}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   field: { gap: 8 },
+  customField: { gap: 4 },
+  customInput: {
+    ...typography.body,
+    borderColor: colors.border,
+    borderRadius: radii.control,
+    borderWidth: 1,
+    color: colors.primaryText,
+    minHeight: 48,
+    paddingHorizontal: 12,
+  },
   help: { ...typography.caption, color: colors.secondaryText },
   label: { ...typography.label, color: colors.primaryText },
   option: {
@@ -68,7 +128,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
-    flex: 1,
+    minWidth: 76,
     justifyContent: "center",
     minHeight: 44,
     paddingHorizontal: 8,
@@ -77,7 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
   },
-  options: { flexDirection: "row", gap: 8 },
+  options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   optionText: { ...typography.label, color: colors.primaryText },
   optionTextSelected: { color: colors.accent, fontWeight: "700" },
 });

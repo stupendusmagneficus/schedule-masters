@@ -64,7 +64,14 @@ export const ukrainianMessages: Messages = {
     "Визначає, як часто показувати доступний час. Тривалість задається окремо для кожної послуги.",
   "workspace.bookingInterval15": "Кожні 15 хв",
   "workspace.bookingInterval30": "Кожні 30 хв",
+  "workspace.bookingInterval45": "Кожні 45 хв",
   "workspace.bookingInterval60": "Кожні 60 хв",
+  "workspace.bookingInterval90": "Кожні 90 хв",
+  "workspace.bookingIntervalCustom": "Інший крок",
+  "workspace.bookingIntervalCustomLabel": "Крок запису в хвилинах",
+  "workspace.bookingIntervalCustomPlaceholder": "Від 5 до 420 хвилин",
+  "workspace.bookingIntervalCustomHelp":
+    "Вкажіть значення, кратне 5 хвилинам (від 5 до 420).",
   "workspace.startTimeLabel": "Початок робочого дня",
   "workspace.endTimeLabel": "Кінець робочого дня",
   "workspace.workingDaysLabel": "Робочі дні",
@@ -85,7 +92,8 @@ export const ukrainianMessages: Messages = {
   "workspace.priceInvalid": "Введіть коректну ціну від 0 CZK.",
   "workspace.durationInvalid":
     "Введіть цілу тривалість послуги від 1 до 1440 хвилин.",
-  "workspace.bookingIntervalInvalid": "Виберіть крок 15, 30 або 60 хвилин.",
+  "workspace.bookingIntervalInvalid":
+    "Вкажіть крок від 5 до 420 хвилин, кратний 5.",
   "workspace.workingDaysInvalid": "Виберіть хоча б один робочий день.",
   "workspace.scheduleInvalid":
     "Введіть час у форматі HH:MM. Кінець має бути пізніше за початок.",

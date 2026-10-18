@@ -68,11 +68,8 @@ export async function loadMasterWorkspace(
     workspace: {
       ...workspaceResult.data,
       bookingIntervalMinutes:
-        (workspaceResult.data.booking_interval_minutes as
-          | 15
-          | 30
-          | 60
-          | null) ?? defaultBookingIntervalMinutes,
+        workspaceResult.data.booking_interval_minutes ??
+        defaultBookingIntervalMinutes,
       availabilityRules: (availabilityResult.data ?? []).map((rule) => ({
         dayOfWeek: rule.day_of_week,
         endLocalTime: rule.end_local_time,

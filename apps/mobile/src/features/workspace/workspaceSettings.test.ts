@@ -17,14 +17,20 @@ describe("workspace settings validation", () => {
     expect(validateWorkspaceSettings(validDraft)).toBeNull();
   });
 
-  it("accepts only supported booking start intervals", () => {
+  it("accepts custom booking start intervals and rejects values off the 5-minute grid", () => {
     expect(
       validateWorkspaceSettings({ ...validDraft, bookingIntervalMinutes: 15 }),
     ).toBeNull();
     expect(
       validateWorkspaceSettings({
         ...validDraft,
-        bookingIntervalMinutes: 45 as 30,
+        bookingIntervalMinutes: 75,
+      }),
+    ).toBeNull();
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        bookingIntervalMinutes: 77,
       }),
     ).toBe("bookingInterval");
   });
