@@ -4,7 +4,6 @@ type CalendarTimeOptionsInput = {
   readonly date: string;
   readonly endMinute: number;
   readonly minute: number;
-  readonly now?: Date;
   readonly timezone: string;
 };
 
@@ -15,7 +14,6 @@ export function getCalendarTimeOptions({
   date,
   endMinute,
   minute,
-  now = new Date(),
   timezone,
 }: CalendarTimeOptionsInput): string[] {
   const firstMinute =
@@ -27,7 +25,7 @@ export function getCalendarTimeOptions({
     if (candidateMinute >= endMinute || candidateMinute >= 24 * 60) break;
 
     const startsAt = getDayTimelineSlotStart(date, candidateMinute, timezone);
-    if (new Date(startsAt).getTime() > now.getTime()) options.push(startsAt);
+    options.push(startsAt);
   }
 
   return options;

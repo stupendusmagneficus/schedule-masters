@@ -25,6 +25,8 @@ export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];
 export type MonthAvailableSlot =
   Database["public"]["Functions"]["get_master_month_available_slots"]["Returns"][number];
+export type ShareableFreeSlot =
+  Database["public"]["Functions"]["list_master_shareable_free_slots"]["Returns"][number];
 export type AppointmentStatus =
   Database["public"]["Enums"]["appointment_status"];
 export type RecurringAppointmentPreview =
@@ -125,6 +127,21 @@ export async function listMasterMonthAvailableSlots(
   const { data, error } = await client.rpc("get_master_month_available_slots", {
     p_month_start: monthStart,
     p_service_id: serviceId,
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function listMasterShareableFreeSlots(
+  client: ManualBookingClient,
+  workspaceId: string,
+  fromDate: string,
+  toDate: string,
+): Promise<ShareableFreeSlot[]> {
+  const { data, error } = await client.rpc("list_master_shareable_free_slots", {
+    p_from_date: fromDate,
+    p_to_date: toDate,
     p_workspace_id: workspaceId,
   });
   if (error) throw new Error(error.message);
