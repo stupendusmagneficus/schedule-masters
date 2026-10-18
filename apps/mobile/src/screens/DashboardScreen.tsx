@@ -464,6 +464,7 @@ export function DashboardScreen({
             masterAppointments={calendar.appointments}
             appointmentsError={calendar.error}
             appointmentsLoading={calendar.isLoading}
+            appointmentsRefreshing={calendar.isRefreshing}
             bookingRequestCount={
               bookingRequests.error ? null : bookingRequests.requests.length
             }

@@ -39,6 +39,7 @@ type TodayTabProps = DashboardTabProps & {
   readonly masterAppointments?: readonly MasterAppointment[];
   readonly appointmentsError?: string | null;
   readonly appointmentsLoading?: boolean;
+  readonly appointmentsRefreshing?: boolean;
   readonly bookingRequestCount: number | null;
   readonly bookingRequestsError: boolean;
   readonly bookingRequestsLoading: boolean;
@@ -65,6 +66,7 @@ export function TodayTab({
   masterAppointments = [],
   appointmentsError = null,
   appointmentsLoading = false,
+  appointmentsRefreshing = false,
   onRetryAppointments,
   bookingRequestCount,
   bookingRequestsError,
@@ -197,14 +199,15 @@ export function TodayTab({
             title={
               isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
             }
+            isLoading={appointmentsRefreshing}
             t={t}
           />
-          {appointmentsLoading ? (
+          {appointmentsLoading && !appointmentsRefreshing ? (
             <View accessibilityLiveRegion="polite" style={styles.state}>
               <ActivityIndicator color={colors.accent} />
               <Text style={styles.helper}>{t("common.loading")}</Text>
             </View>
-          ) : appointmentsError ? (
+          ) : appointmentsError && masterAppointments.length === 0 ? (
             <View style={styles.retryState}>
               <Text style={styles.error}>{t("mobile.todayLoadFailed")}</Text>
               <ActionButton
@@ -228,6 +231,19 @@ export function TodayTab({
                   timezone={workspace.timezone}
                 />
               ))}
+              {appointmentsError ? (
+                <View style={styles.inlineRetryState}>
+                  <Text style={styles.error}>
+                    {t("mobile.todayLoadFailed")}
+                  </Text>
+                  <ActionButton
+                    label={t("mobile.todayRetry")}
+                    onPress={() => onRetryAppointments?.()}
+                    size="compact"
+                    variant="quiet"
+                  />
+                </View>
+              ) : null}
             </View>
           ) : (
             <Text style={styles.helper}>
@@ -279,7 +295,10 @@ export function TodayTab({
         />
       ) : null}
 
-      {(!appointmentsLoading && !appointmentsError) || demoData ? (
+      {(!appointmentsLoading && !appointmentsError) ||
+      appointmentsRefreshing ||
+      masterAppointments.length > 0 ||
+      demoData ? (
         <SummaryMetrics
           metrics={[
             {
@@ -350,6 +369,12 @@ const styles = StyleSheet.create({
   error: { ...typography.body, color: colors.danger },
   retryButton: { alignSelf: "flex-start", marginLeft: -10, marginTop: -8 },
   retryState: { alignItems: "flex-start", gap: 4 },
+  inlineRetryState: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.compact,
+  },
   state: { alignItems: "center", flexDirection: "row", gap: 10 },
   nextLabel: { ...typography.caption, color: colors.accent, fontWeight: "700" },
   pressed: { opacity: 0.78 },
@@ -415,11 +440,13 @@ const styles = StyleSheet.create({
 });
 
 function ScheduleSectionHeader({
+  isLoading = false,
   onOpenFreeSlots,
   showFreeSlots,
   title,
   t,
 }: {
+  readonly isLoading?: boolean;
   readonly onOpenFreeSlots: () => void;
   readonly showFreeSlots: boolean;
   readonly title: string;
@@ -428,6 +455,9 @@ function ScheduleSectionHeader({
   return (
     <View style={styles.scheduleHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator color={colors.accent} size="small" />
+      ) : null}
       {showFreeSlots ? (
         <ActionButton
           icon={
