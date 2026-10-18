@@ -358,7 +358,7 @@ export async function setMasterAppointmentNote(
   }
   const { data, error } = await client.rpc("set_master_appointment_note", {
     p_appointment_id: appointmentId,
-    p_master_note: trimmedNote || null,
+    p_master_note: trimmedNote,
     p_workspace_id: workspaceId,
   });
   if (error) throw new Error(error.message);
