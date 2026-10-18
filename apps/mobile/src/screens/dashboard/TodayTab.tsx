@@ -46,6 +46,9 @@ type TodayTabProps = DashboardTabProps & {
   readonly waitingListError: boolean;
   readonly waitingListLoading: boolean;
   readonly defaultCurrency: string;
+  readonly onGoToToday: () => void;
+  readonly onNextDay: () => void;
+  readonly onPreviousDay: () => void;
   readonly onRetryAppointments?: () => void;
   readonly onOpenBookingRequests: () => void;
   readonly onOpenWaitingList: () => void;
@@ -70,6 +73,9 @@ export function TodayTab({
   waitingListError,
   waitingListLoading,
   defaultCurrency,
+  onGoToToday,
+  onNextDay,
+  onPreviousDay,
   onOpenBookingRequests,
   onOpenWaitingList,
   onOpenFreeSlots,
@@ -116,13 +122,36 @@ export function TodayTab({
     <View style={styles.content}>
       <DashboardPageHeader
         centeredTitle
-        subtitle={dateLabel}
-        subtitleAccessibilityLabel={formatAccessibleDate(
-          selectedDateValue,
-          locale,
-          workspace.timezone,
-        )}
-        title={t("mobile.today")}
+        leadingAction={{
+          accessibilityLabel: t("mobile.calendarPrevious"),
+          icon: "arrow-left",
+          onPress: onPreviousDay,
+        }}
+        subtitle={isToday ? dateLabel : undefined}
+        subtitleAccessibilityLabel={
+          isToday
+            ? formatAccessibleDate(
+                selectedDateValue,
+                locale,
+                workspace.timezone,
+              )
+            : undefined
+        }
+        subtitleAction={
+          isToday
+            ? undefined
+            : {
+                accessibilityLabel: t("mobile.today"),
+                label: t("mobile.today"),
+                onPress: onGoToToday,
+              }
+        }
+        title={isToday ? t("mobile.today") : dateLabel}
+        trailingAction={{
+          accessibilityLabel: t("mobile.calendarNext"),
+          icon: "arrow-right",
+          onPress: onNextDay,
+        }}
       />
       {demoData ? (
         <Text style={styles.demoLabel}>{t("mobile.demoMode")}</Text>
@@ -130,9 +159,14 @@ export function TodayTab({
 
       {demoData && (
         <InfoCard style={styles.scheduleCard}>
-          <Text style={styles.sectionTitle}>
-            {isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")}
-          </Text>
+          <ScheduleSectionHeader
+            onOpenFreeSlots={onOpenFreeSlots}
+            showFreeSlots={Boolean(hasActiveServices || demoData)}
+            title={
+              isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
+            }
+            t={t}
+          />
           {demoAppointments.length ? (
             <View style={styles.appointmentsList}>
               {demoAppointments.map((appointment, index) => (
@@ -156,9 +190,14 @@ export function TodayTab({
 
       {!demoData ? (
         <InfoCard style={styles.scheduleCard}>
-          <Text style={styles.sectionTitle}>
-            {isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")}
-          </Text>
+          <ScheduleSectionHeader
+            onOpenFreeSlots={onOpenFreeSlots}
+            showFreeSlots={Boolean(hasActiveServices)}
+            title={
+              isToday ? t("mobile.todaySchedule") : t("mobile.daySchedule")
+            }
+            t={t}
+          />
           {appointmentsLoading ? (
             <View accessibilityLiveRegion="polite" style={styles.state}>
               <ActivityIndicator color={colors.accent} />
@@ -239,22 +278,6 @@ export function TodayTab({
         />
       ) : null}
 
-      {hasActiveServices || demoData ? (
-        <ActionButton
-          icon={
-            <MaterialCommunityIcons
-              color={colors.accent}
-              name="calendar-search"
-              size={20}
-            />
-          }
-          label={t("mobile.freeSlots")}
-          onPress={onOpenFreeSlots}
-          style={styles.freeSlotsAction}
-          variant="secondary"
-        />
-      ) : null}
-
       {(!appointmentsLoading && !appointmentsError) || demoData ? (
         <SummaryMetrics
           metrics={[
@@ -329,11 +352,7 @@ const styles = StyleSheet.create({
   state: { alignItems: "center", flexDirection: "row", gap: 10 },
   nextLabel: { ...typography.caption, color: colors.accent, fontWeight: "700" },
   pressed: { opacity: 0.78 },
-  sectionTitle: {
-    color: colors.primaryText,
-    marginBottom: 10,
-    ...typography.section,
-  },
+  sectionTitle: { color: colors.primaryText, ...typography.section },
   serviceName: {
     ...typography.body,
     color: colors.primaryText,
@@ -369,7 +388,14 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   scheduleCard: { marginTop: 8 },
-  freeSlotsAction: { alignSelf: "flex-start", borderRadius: radii.pill },
+  scheduleHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.compact,
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  freeSlotsAction: { borderRadius: radii.pill, minHeight: 40 },
   appointmentDetails: { flex: 1, gap: 2 },
   appointmentRow: { alignItems: "center", flexDirection: "row", gap: 10 },
   avatar: {
@@ -386,6 +412,40 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
+
+function ScheduleSectionHeader({
+  onOpenFreeSlots,
+  showFreeSlots,
+  title,
+  t,
+}: {
+  readonly onOpenFreeSlots: () => void;
+  readonly showFreeSlots: boolean;
+  readonly title: string;
+  readonly t: TodayTabProps["t"];
+}) {
+  return (
+    <View style={styles.scheduleHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {showFreeSlots ? (
+        <ActionButton
+          icon={
+            <MaterialCommunityIcons
+              color={colors.accent}
+              name="calendar-search"
+              size={18}
+            />
+          }
+          label={t("mobile.freeSlots")}
+          onPress={onOpenFreeSlots}
+          size="compact"
+          style={styles.freeSlotsAction}
+          variant="secondary"
+        />
+      ) : null}
+    </View>
+  );
+}
 
 function formatReceivedRevenue(
   amounts: Readonly<Record<string, number>>,
