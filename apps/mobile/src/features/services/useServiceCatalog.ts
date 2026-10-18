@@ -8,8 +8,8 @@ import {
   createService,
   listServices,
   restoreService,
-  suggestServiceTranslations,
   type ServiceDraft,
+  suggestServiceTranslations,
   updateService,
 } from "./serviceCatalog";
 

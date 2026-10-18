@@ -1,6 +1,5 @@
-import type { MessageKey } from "@schedule-app/i18n";
-import type { SupportedLocale } from "@schedule-app/i18n";
 import type { ServiceLocale } from "@schedule-app/api";
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -14,8 +13,8 @@ import {
 
 import {
   createServiceDraft,
-  ServiceTranslationQuotaExceededError,
   type ServiceDraft,
+  ServiceTranslationQuotaExceededError,
   type ServiceTranslationResult,
   type ServiceValidationError,
   validateServiceDraft,

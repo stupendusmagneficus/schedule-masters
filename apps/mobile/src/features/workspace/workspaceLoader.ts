@@ -1,4 +1,4 @@
-import { parseServiceTranslations, type Database } from "@schedule-app/api";
+import { type Database, parseServiceTranslations } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Service, Workspace } from "../../types";

@@ -1,11 +1,11 @@
 import {
-  parseServiceTranslations,
   type Database,
+  parseServiceTranslations,
   type ServiceLocale,
   type ServiceTranslations,
 } from "@schedule-app/api";
-import { FunctionsHttpError } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 
 import type { Service } from "../../types";
 
