@@ -2,15 +2,16 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
+import { LocalePicker } from "../../components/LocalePicker";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
-import { SettingsModal } from "../../components/SettingsModal";
+import { WorkspaceSettingsModal } from "../../components/WorkspaceSettingsModal";
 import type { ServiceCatalogController } from "../../features/services/useServiceCatalog";
 import type { WorkspaceSettingsDraft } from "../../features/workspace/workspaceSettings";
-import { colors } from "../../theme/tokens";
+import { colors, radii } from "../../theme/tokens";
 import { typography } from "../../theme/typography";
 import type { Workspace } from "../../types";
 import type { DashboardTabProps } from "./types";
@@ -46,7 +47,8 @@ export function ProfileTab({
   t,
   workspace,
 }: ProfileTabProps) {
-  const [isSettingsVisible, setSettingsVisible] = useState(false);
+  const [isWorkspaceSettingsVisible, setWorkspaceSettingsVisible] =
+    useState(false);
 
   return (
     <View style={styles.content}>
@@ -54,27 +56,70 @@ export function ProfileTab({
         subtitle={workspace.name}
         title={t("mobile.profile")}
       />
-      <InfoCard style={styles.settingsCard}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("mobile.settings")}
-          onPress={() => setSettingsVisible(true)}
-          style={styles.settingsEntry}
-        >
-          <Text style={styles.settingsTitle}>{t("mobile.settings")}</Text>
-          <MaterialCommunityIcons
-            color={colors.secondaryText}
-            name="chevron-right"
-            size={24}
+      <InfoCard style={styles.workspaceCard}>
+        <View style={styles.cardHeading}>
+          <View style={styles.iconCircle}>
+            <MaterialCommunityIcons
+              color={colors.accent}
+              name="storefront-outline"
+              size={22}
+            />
+          </View>
+          <View style={styles.headingText}>
+            <Text style={styles.sectionTitle}>{workspace.name}</Text>
+            <Text style={styles.helper}>
+              {t("mobile.profileWorkingDays").replace(
+                "{count}",
+                String(workspace.availabilityRules.length),
+              )}
+            </Text>
+            <Text style={styles.helper}>
+              {t("mobile.profileBookingInterval").replace(
+                "{minutes}",
+                String(workspace.bookingIntervalMinutes),
+              )}
+            </Text>
+          </View>
+        </View>
+        {canManageWorkspace && client ? (
+          <ActionButton
+            label={t("workspace.settingsEdit")}
+            onPress={() => setWorkspaceSettingsVisible(true)}
+            size="compact"
+            variant="secondary"
           />
-        </Pressable>
+        ) : null}
       </InfoCard>
+
+      <InfoCard>
+        <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
+        <Text selectable style={styles.bookingUrl}>
+          {bookingUrl}
+        </Text>
+        <Text style={styles.helper}>
+          {t("mobile.publicBookingDescription")}
+        </Text>
+        <ActionButton
+          label={t("mobile.profileOpenBooking")}
+          onPress={onOpenBookingLink}
+          size="compact"
+          style={styles.cardAction}
+          variant="secondary"
+        />
+      </InfoCard>
+
       <ServiceCatalogCard
         controller={serviceCatalog}
         editable={canManageServices}
         locale={locale}
         t={t}
       />
+
+      <InfoCard>
+        <Text style={styles.sectionTitle}>{t("common.language")}</Text>
+        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
+      </InfoCard>
+
       {signOutFailed ? (
         <Text accessibilityRole="alert" style={styles.signOutError}>
           {t("auth.signOutFailed")}
@@ -88,39 +133,43 @@ export function ProfileTab({
         onPress={onSignOut}
         variant="destructive"
       />
-      <SettingsModal
-        bookingUrl={bookingUrl}
-        canManageWorkspace={canManageWorkspace}
-        client={client}
-        locale={locale}
-        onClose={() => setSettingsVisible(false)}
-        onLocaleChange={onLocaleChange}
-        onOpenBookingLink={onOpenBookingLink}
-        onWorkspaceSaved={onWorkspaceSaved}
-        t={t}
-        visible={isSettingsVisible}
-        workspace={workspace}
-      />
+      {canManageWorkspace && client ? (
+        <WorkspaceSettingsModal
+          client={client}
+          closeIcon="close"
+          locale={locale}
+          onClose={() => setWorkspaceSettingsVisible(false)}
+          onSaved={onWorkspaceSaved}
+          t={t}
+          visible={isWorkspaceSettingsVisible}
+          workspace={workspace}
+        />
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   content: { gap: 16 },
-  settingsCard: { padding: 0 },
-  settingsEntry: {
+  workspaceCard: { gap: 16 },
+  cardHeading: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
+  iconCircle: {
     alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 68,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.pill,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
-  settingsTitle: {
-    ...typography.section,
-    color: colors.primaryText,
-    flex: 1,
+  headingText: { flex: 1, gap: 4 },
+  sectionTitle: { ...typography.section, color: colors.primaryText },
+  helper: { ...typography.caption, color: colors.secondaryText },
+  bookingUrl: {
+    ...typography.label,
+    color: colors.accent,
     fontWeight: "700",
+    marginTop: 4,
   },
+  cardAction: { alignSelf: "flex-start", marginTop: 8 },
   signOutError: { ...typography.body, color: colors.danger },
 });

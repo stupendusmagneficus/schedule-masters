@@ -3,6 +3,7 @@ import type { Database } from "@schedule-app/api";
 import {
   formatCurrency,
   formatDate,
+  type MessageKey,
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -76,6 +77,11 @@ export function FinancesTab({
   });
   const expectedAmounts = formatAmounts(summary.expectedByCurrency, locale);
   const receivedAmounts = formatAmounts(summary.paidByCurrency, locale);
+  const weeklyIncome = summarizeWeeklyIncome(
+    financeData.appointments,
+    month,
+    workspace.timezone,
+  );
   const hasAppointments = financeData.appointments.some((appointment) => {
     return formatDateInTimeZone(
       new Date(appointment.starts_at),
@@ -138,39 +144,38 @@ export function FinancesTab({
         ) : (
           <>
             <InfoCard style={styles.summaryCard}>
-              <View style={styles.receivedSummary}>
+              <Text style={styles.incomeLabel}>
+                {t("mobile.financeActual")}
+              </Text>
+              <Text style={styles.amount} numberOfLines={2}>
+                {receivedAmounts}
+              </Text>
+              <Text style={styles.helper}>
+                {t("mobile.financeActualDescription")}
+              </Text>
+            </InfoCard>
+
+            <View style={styles.secondaryMetrics}>
+              <InfoCard style={styles.secondaryMetric}>
                 <Text style={styles.incomeLabel}>
-                  {t("mobile.financeActual")}
+                  {t("mobile.financeExpected")}
                 </Text>
-                <Text style={styles.amount} numberOfLines={2}>
-                  {receivedAmounts}
+                <Text style={styles.secondaryAmount} numberOfLines={2}>
+                  {expectedAmounts}
                 </Text>
                 <Text style={styles.helper}>
-                  {t("mobile.financeActualDescription")}
+                  {t("mobile.financeExpectedDescription")}
                 </Text>
-              </View>
-              <View style={styles.secondaryMetrics}>
-                <View style={styles.secondaryMetric}>
-                  <Text style={styles.incomeLabel}>
-                    {t("mobile.financeExpected")}
-                  </Text>
-                  <Text style={styles.secondaryAmount} numberOfLines={2}>
-                    {expectedAmounts}
-                  </Text>
-                  <Text style={styles.helper}>
-                    {t("mobile.financeExpectedDescription")}
-                  </Text>
-                </View>
-                <View style={styles.secondaryMetric}>
-                  <Text style={styles.incomeLabel}>
-                    {t("mobile.financeCompletedAppointments")}
-                  </Text>
-                  <Text style={styles.secondaryAmount}>
-                    {summary.completedCount}
-                  </Text>
-                </View>
-              </View>
-            </InfoCard>
+              </InfoCard>
+              <InfoCard style={styles.secondaryMetric}>
+                <Text style={styles.incomeLabel}>
+                  {t("mobile.financeCompletedAppointments")}
+                </Text>
+                <Text style={styles.secondaryAmount}>
+                  {summary.completedCount}
+                </Text>
+              </InfoCard>
+            </View>
 
             <Pressable
               accessibilityRole="button"
@@ -196,34 +201,41 @@ export function FinancesTab({
             </Pressable>
 
             {showDetails ? (
-              <View style={styles.metricsGrid}>
-                <MetricCard
-                  label={t("mobile.financeUpcomingAppointments")}
-                  value={String(summary.upcomingCount)}
+              <>
+                <IncomeByWeekChart
+                  locale={locale}
+                  t={t}
+                  weeklyIncome={weeklyIncome}
                 />
-                <MetricCard
-                  label={t("mobile.financeCanceledAppointments")}
-                  value={String(summary.canceledCount)}
-                />
-                <MetricCard
-                  label={t("mobile.financeNoShowAppointments")}
-                  value={String(summary.noShowCount)}
-                />
-                <MetricCard
-                  label={t("mobile.financeNewCustomers")}
-                  value={String(summary.newCustomerCount)}
-                />
-                <MetricCard
-                  label={t("mobile.financeReturningCustomers")}
-                  value={String(summary.returningCustomerCount)}
-                />
-                <MetricCard
-                  label={t("mobile.financeBookedHours")}
-                  value={String(
-                    Math.round((summary.bookedMinutes / 60) * 10) / 10,
-                  )}
-                />
-              </View>
+                <View style={styles.metricsGrid}>
+                  <MetricCard
+                    label={t("mobile.financeUpcomingAppointments")}
+                    value={String(summary.upcomingCount)}
+                  />
+                  <MetricCard
+                    label={t("mobile.financeCanceledAppointments")}
+                    value={String(summary.canceledCount)}
+                  />
+                  <MetricCard
+                    label={t("mobile.financeNoShowAppointments")}
+                    value={String(summary.noShowCount)}
+                  />
+                  <MetricCard
+                    label={t("mobile.financeNewCustomers")}
+                    value={String(summary.newCustomerCount)}
+                  />
+                  <MetricCard
+                    label={t("mobile.financeReturningCustomers")}
+                    value={String(summary.returningCustomerCount)}
+                  />
+                  <MetricCard
+                    label={t("mobile.financeBookedHours")}
+                    value={String(
+                      Math.round((summary.bookedMinutes / 60) * 10) / 10,
+                    )}
+                  />
+                </View>
+              </>
             ) : null}
           </>
         )
@@ -272,6 +284,126 @@ function MetricCard({
   );
 }
 
+function IncomeByWeekChart({
+  locale,
+  t,
+  weeklyIncome,
+}: {
+  readonly locale: SupportedLocale;
+  readonly t: (key: MessageKey) => string;
+  readonly weeklyIncome: readonly WeeklyIncome[];
+}) {
+  const currencies = [
+    ...new Set(
+      weeklyIncome.flatMap((week) =>
+        Object.entries(week.amounts)
+          .filter(([, amount]) => amount > 0)
+          .map(([currency]) => currency),
+      ),
+    ),
+  ].sort();
+  if (currencies.length === 0) {
+    return (
+      <InfoCard>
+        <Text style={styles.sectionTitle}>
+          {t("mobile.financeWeeklyIncome")}
+        </Text>
+        <Text style={styles.helper}>{t("mobile.financeNoReceivedIncome")}</Text>
+      </InfoCard>
+    );
+  }
+
+  return (
+    <InfoCard style={styles.chartCard}>
+      <Text style={styles.sectionTitle}>{t("mobile.financeWeeklyIncome")}</Text>
+      {currencies.map((currency) => {
+        const maximum = Math.max(
+          ...weeklyIncome.map((week) => week.amounts[currency] ?? 0),
+          1,
+        );
+        return (
+          <View key={currency} style={styles.currencyChart}>
+            <Text style={styles.chartCurrency}>{currency}</Text>
+            <View style={styles.chartRows}>
+              {weeklyIncome.map((week) => {
+                const value = week.amounts[currency] ?? 0;
+                const width: `${number}%` =
+                  value === 0 ? "0%" : `${(value / maximum) * 100}%`;
+                return (
+                  <View
+                    accessibilityLabel={`${week.label}: ${formatCurrency(value, locale, currency)}`}
+                    accessibilityRole="text"
+                    key={week.label}
+                    style={styles.chartRow}
+                  >
+                    <View style={styles.chartRowHeading}>
+                      <Text style={styles.chartWeek}>{week.label}</Text>
+                      <Text style={styles.chartValue}>
+                        {value > 0
+                          ? formatCurrency(value, locale, currency)
+                          : "—"}
+                      </Text>
+                    </View>
+                    <View style={styles.chartBarTrack}>
+                      <View style={[styles.chartBar, { width }]} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
+    </InfoCard>
+  );
+}
+
+type WeeklyIncome = {
+  readonly amounts: Readonly<Record<string, number>>;
+  readonly label: string;
+};
+
+function summarizeWeeklyIncome(
+  appointments: readonly {
+    readonly currency: string;
+    readonly paid_amount: number | string;
+    readonly starts_at: string;
+    readonly status: string;
+  }[],
+  month: string,
+  timezone: string,
+): WeeklyIncome[] {
+  const monthKey = month.slice(0, 7);
+  const firstDay = new Date(`${monthKey}-01T00:00:00.000Z`).getUTCDay();
+  const mondayOffset = (firstDay + 6) % 7;
+  const daysInMonth = new Date(
+    Date.UTC(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)), 0),
+  ).getUTCDate();
+  const weekCount = Math.ceil((mondayOffset + daysInMonth) / 7);
+  const buckets = Array.from({ length: weekCount }, (_, index) => ({
+    amounts: {} as Record<string, number>,
+    label: `${Math.max(1, index * 7 - mondayOffset + 1)}–${Math.min(daysInMonth, (index + 1) * 7 - mondayOffset)}`,
+  }));
+
+  for (const appointment of appointments) {
+    if (appointment.status !== "completed") continue;
+    const localDate = formatDateInTimeZone(
+      new Date(appointment.starts_at),
+      timezone,
+    );
+    if (!localDate.startsWith(monthKey)) continue;
+    const day = Number(localDate.slice(8, 10));
+    const weekIndex = Math.floor((day - 1 + mondayOffset) / 7);
+    const currency = appointment.currency.trim().toUpperCase();
+    const amount = Number(appointment.paid_amount);
+    if (!currency || !Number.isFinite(amount)) continue;
+    buckets[weekIndex].amounts[currency] =
+      (buckets[weekIndex].amounts[currency] ?? 0) + amount;
+  }
+
+  return buckets;
+}
+
 function formatAmounts(
   amounts: Readonly<Record<string, number>>,
   locale: SupportedLocale,
@@ -303,6 +435,7 @@ const styles = StyleSheet.create({
   },
   hidden: { display: "none" },
   helper: { ...typography.caption, color: colors.secondaryText, marginTop: 4 },
+  sectionTitle: { ...typography.section, color: colors.primaryText },
   incomeLabel: { ...typography.caption, color: colors.secondaryText },
   metricCard: {
     backgroundColor: colors.subtleSurface,
@@ -347,17 +480,45 @@ const styles = StyleSheet.create({
     color: colors.primaryText,
     marginTop: 4,
   },
-  secondaryMetric: { flex: 1, minWidth: 0 },
+  secondaryMetric: { flex: 1, minWidth: 0, padding: 12 },
   secondaryMetrics: {
-    borderTopColor: colors.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
-    gap: spacing.section,
-    paddingTop: spacing.section,
+    gap: spacing.control,
   },
   state: { alignItems: "center", gap: 8, paddingVertical: 28 },
   summaryCard: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accentSoft,
+    gap: 4,
   },
+  chartCard: { gap: 16 },
+  currencyChart: { gap: 8 },
+  chartCurrency: {
+    ...typography.label,
+    color: colors.secondaryText,
+    fontWeight: "700",
+  },
+  chartRows: { gap: 12 },
+  chartRow: { gap: 4 },
+  chartRowHeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  chartValue: {
+    ...typography.caption,
+    color: colors.secondaryText,
+  },
+  chartBarTrack: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    height: 10,
+    overflow: "hidden",
+  },
+  chartBar: {
+    backgroundColor: colors.accent,
+    borderRadius: radii.control,
+    height: "100%",
+  },
+  chartWeek: { ...typography.caption, color: colors.secondaryText },
 });
