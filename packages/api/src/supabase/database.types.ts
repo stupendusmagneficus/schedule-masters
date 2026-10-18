@@ -139,6 +139,48 @@ export type Database = {
           },
         ]
       }
+      appointment_series: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          id: string
+          interval_weeks: number
+          occurrence_count: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          interval_weeks: number
+          occurrence_count: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          interval_weeks?: number
+          occurrence_count?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_series_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_series_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_services: {
         Row: {
           appointment_id: string
@@ -198,6 +240,7 @@ export type Database = {
       }
       appointments: {
         Row: {
+          appointment_series_id: string | null
           buffer_after_minutes_snapshot: number
           buffer_before_minutes_snapshot: number
           cancellation_reason: string | null
@@ -226,6 +269,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          appointment_series_id?: string | null
           buffer_after_minutes_snapshot?: number
           buffer_before_minutes_snapshot?: number
           cancellation_reason?: string | null
@@ -254,6 +298,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          appointment_series_id?: string | null
           buffer_after_minutes_snapshot?: number
           buffer_before_minutes_snapshot?: number
           cancellation_reason?: string | null
@@ -282,6 +327,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_appointment_series_id_fkey"
+            columns: ["appointment_series_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_series"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_customer_id_fkey"
             columns: ["customer_id"]
@@ -1048,6 +1100,10 @@ export type Database = {
         }
         Returns: Json
       }
+      cancel_master_appointment_series_future: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: Json
+      }
       check_public_booking_request: { Args: never; Returns: undefined }
       claim_booking_decision_emails: {
         Args: { p_batch_size?: number }
@@ -1124,6 +1180,23 @@ export type Database = {
           p_idempotency_key: string
           p_master_note?: string
           p_name?: string
+          p_phone?: string
+          p_service_ids: string[]
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
+      create_master_recurring_bookings: {
+        Args: {
+          p_customer_id?: string
+          p_email?: string
+          p_excluded_dates?: string[]
+          p_idempotency_key: string
+          p_interval_weeks: number
+          p_master_note?: string
+          p_name?: string
+          p_occurrence_count: number
           p_phone?: string
           p_service_ids: string[]
           p_starts_at: string
@@ -1269,6 +1342,7 @@ export type Database = {
       list_master_appointments: {
         Args: { p_from_date: string; p_to_date: string; p_workspace_id: string }
         Returns: {
+          appointment_series_id: string
           currency: string
           customer_id: string
           customer_name: string
@@ -1277,6 +1351,7 @@ export type Database = {
           id: string
           is_new_customer: boolean
           is_returning_customer: boolean
+          master_note: string
           occupied_ends_at: string
           occupied_starts_at: string
           paid_amount: number
@@ -1317,6 +1392,7 @@ export type Database = {
           duration_minutes: number
           ends_at: string
           id: string
+          master_note: string
           paid_amount: number
           price_amount: number
           service_name: string
@@ -1396,6 +1472,20 @@ export type Database = {
         Args: { p_appointment_id: string; p_workspace_id: string }
         Returns: string
       }
+      preview_master_recurring_bookings: {
+        Args: {
+          p_interval_weeks: number
+          p_occurrence_count: number
+          p_service_ids: string[]
+          p_starts_at: string
+          p_workspace_id: string
+        }
+        Returns: {
+          available: boolean
+          local_date: string
+          starts_at: string
+        }[]
+      }
       purge_expired_booking_decision_emails: { Args: never; Returns: number }
       record_customer_link_share: {
         Args: {
@@ -1418,6 +1508,14 @@ export type Database = {
           p_appointment_id: string
           p_reason?: string
           p_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Returns: Json
+      }
+      set_master_appointment_note: {
+        Args: {
+          p_appointment_id: string
+          p_master_note: string
+          p_workspace_id: string
         }
         Returns: Json
       }

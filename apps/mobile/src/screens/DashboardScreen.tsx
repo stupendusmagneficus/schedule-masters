@@ -22,7 +22,9 @@ import { mobileEnv } from "../config/env";
 import type { DemoData } from "../demo/types";
 import {
   type AppointmentStatus,
+  cancelMasterAppointmentSeriesFuture,
   type MasterAppointment,
+  setMasterAppointmentNote,
   setMasterAppointmentPaidAmount,
   setMasterAppointmentStatus,
 } from "../features/appointments/manualBooking";
@@ -90,6 +92,8 @@ export function DashboardScreen({
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("today");
   const [financeRefreshVersion, setFinanceRefreshVersion] = useState(0);
+  const [customerHistoryRefreshVersion, setCustomerHistoryRefreshVersion] =
+    useState(0);
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -326,6 +330,50 @@ export function DashboardScreen({
     }
   }
 
+  async function saveAppointmentNote(note: string): Promise<boolean> {
+    if (!client || !selectedAppointment) return false;
+    setUpdatingAppointment(true);
+    try {
+      const masterNote = await setMasterAppointmentNote(
+        client,
+        workspace.id,
+        selectedAppointment.id,
+        note,
+      );
+      setSelectedAppointment({
+        ...selectedAppointment,
+        master_note: masterNote,
+      });
+      setCustomerHistoryRefreshVersion((version) => version + 1);
+      await calendar.reload();
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
+
+  async function cancelFutureSeriesAppointments(): Promise<boolean> {
+    if (!client || !selectedAppointment?.appointment_series_id) return false;
+    setUpdatingAppointment(true);
+    try {
+      const cancelledCount = await cancelMasterAppointmentSeriesFuture(
+        client,
+        workspace.id,
+        selectedAppointment.id,
+      );
+      await calendar.reload();
+      setSelectedAppointment(null);
+      setFeedback(`${t("mobile.recurringCancelled")} (${cancelledCount})`);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
+
   async function openCustomerPhoneAction(action: "call" | "sms") {
     const url = customerPhone.phone
       ? buildCustomerPhoneUrl(customerPhone.phone, action)
@@ -477,6 +525,7 @@ export function DashboardScreen({
         />
         <CustomersTab
           client={client}
+          historyRefreshVersion={customerHistoryRefreshVersion}
           locale={locale}
           onCreateBooking={(customer) => {
             setManualBookingCustomer(customer);
@@ -610,6 +659,8 @@ export function DashboardScreen({
         }}
         onStatusChange={updateAppointmentStatus}
         onPaymentSave={saveAppointmentPayment}
+        onNoteSave={saveAppointmentNote}
+        onCancelFutureSeries={cancelFutureSeriesAppointments}
         customerPhone={customerPhone.phone}
         customerContactLoading={customerPhone.isLoading}
         customerContactError={customerPhone.error}

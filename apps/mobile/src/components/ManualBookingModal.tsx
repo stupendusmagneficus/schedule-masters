@@ -1,9 +1,11 @@
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency, formatTime } from "@schedule-app/i18n";
+import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,11 +20,14 @@ import {
   type AvailableSlot,
   createIdempotencyKey,
   createMasterBooking,
+  createMasterRecurringBookings,
   listMasterAvailableSlots,
   listMasterCustomers,
   type ManualBookingCustomer,
   type ManualBookingDraft,
   type ManualBookingValidationError,
+  previewMasterRecurringBookings,
+  type RecurringAppointmentPreview,
   validateManualBookingDraft,
 } from "../features/appointments/manualBooking";
 import {
@@ -90,10 +95,29 @@ export function ManualBookingModal({
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState(createIdempotencyKey);
+  const [isRecurring, setRecurring] = useState(false);
+  const [recurrenceIntervalWeeks, setRecurrenceIntervalWeeks] = useState(1);
+  const [recurrenceEndMode, setRecurrenceEndMode] = useState<"count" | "date">(
+    "count",
+  );
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState(() =>
+    addDaysToDate(initialDate, 21),
+  );
+  const [recurrenceOccurrenceCount, setRecurrenceOccurrenceCount] =
+    useState("4");
+  const [recurrencePreview, setRecurrencePreview] = useState<
+    RecurringAppointmentPreview[]
+  >([]);
+  const [excludedRecurrenceDates, setExcludedRecurrenceDates] = useState<
+    string[]
+  >([]);
+  const [isLoadingRecurrencePreview, setLoadingRecurrencePreview] =
+    useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] =
     useState<ManualBookingValidationError | null>(null);
   const initializedKey = useRef<string | null>(null);
+  const recurrencePreviewRequest = useRef(0);
 
   const selectedServices = draft.serviceIds
     .map((id) => services.find((service) => service.id === id))
@@ -103,10 +127,25 @@ export function ManualBookingModal({
     [draft.serviceIds],
   );
   const initialSlotResolved = useRef(false);
+  const recurrenceCount =
+    recurrenceEndMode === "count"
+      ? Math.max(2, Math.min(24, Number(recurrenceOccurrenceCount) || 4))
+      : getRecurrenceCountThroughDate(
+          draft.date,
+          recurrenceEndDate,
+          recurrenceIntervalWeeks,
+        );
 
   useEffect(() => {
     if (!visible) {
       initializedKey.current = null;
+      setRecurring(false);
+      setRecurrenceIntervalWeeks(1);
+      setRecurrenceEndMode("count");
+      setRecurrenceEndDate(addDaysToDate(initialDate, 21));
+      setRecurrenceOccurrenceCount("4");
+      setExcludedRecurrenceDates([]);
+      setRecurrencePreview([]);
       return;
     }
     const defaultServiceId =
@@ -181,6 +220,65 @@ export function ManualBookingModal({
   ]);
 
   useEffect(() => {
+    if (
+      !visible ||
+      !isRecurring ||
+      step !== "review" ||
+      !draft.startsAt ||
+      !serviceIdsForAvailability.length ||
+      recurrenceCount < 2
+    ) {
+      setRecurrencePreview([]);
+      setExcludedRecurrenceDates([]);
+      setLoadingRecurrencePreview(false);
+      return;
+    }
+    const request = ++recurrencePreviewRequest.current;
+    setLoadingRecurrencePreview(true);
+    setExcludedRecurrenceDates([]);
+    const timeout = setTimeout(() => {
+      void previewMasterRecurringBookings(
+        client,
+        workspace.id,
+        serviceIdsForAvailability,
+        draft.startsAt,
+        recurrenceIntervalWeeks,
+        recurrenceCount,
+      )
+        .then((preview) => {
+          if (recurrencePreviewRequest.current !== request) return;
+          setRecurrencePreview(preview);
+        })
+        .catch(() => {
+          if (recurrencePreviewRequest.current === request) {
+            setRecurrencePreview([]);
+            setError(t("mobile.recurringPreviewFailed"));
+          }
+        })
+        .finally(() => {
+          if (recurrencePreviewRequest.current === request) {
+            setLoadingRecurrencePreview(false);
+          }
+        });
+    }, 200);
+    return () => {
+      clearTimeout(timeout);
+      recurrencePreviewRequest.current += 1;
+    };
+  }, [
+    client,
+    draft.startsAt,
+    isRecurring,
+    recurrenceCount,
+    recurrenceIntervalWeeks,
+    serviceIdsForAvailability,
+    step,
+    t,
+    visible,
+    workspace.id,
+  ]);
+
+  useEffect(() => {
     if (!visible || !serviceIdsForAvailability.length || !draft.date) return;
     let active = true;
     setLoadingSlots(true);
@@ -226,6 +324,11 @@ export function ManualBookingModal({
   ]);
 
   function updateDraft(patch: Partial<ManualBookingDraft>) {
+    if (patch.date && recurrenceEndDate < patch.date) {
+      setRecurrenceEndDate(
+        addDaysToDate(patch.date, recurrenceIntervalWeeks * 7),
+      );
+    }
     setDraft((current) => ({ ...current, ...patch }));
     setIdempotencyKey(createIdempotencyKey());
     setValidationError(null);
@@ -297,15 +400,28 @@ export function ManualBookingModal({
     setSaving(true);
     setError(null);
     try {
-      const created = await createMasterBooking(
-        client,
-        workspace.id,
-        draft,
-        idempotencyKey,
-      );
-      if (typeof created.id !== "string")
-        throw new Error("Booking response is invalid");
-      await onCreated(created.id);
+      const appointmentIds = isRecurring
+        ? await createMasterRecurringBookings(
+            client,
+            workspace.id,
+            draft,
+            recurrenceIntervalWeeks,
+            recurrenceCount,
+            excludedRecurrenceDates,
+            `${idempotencyKey}-series`,
+          )
+        : [
+            (
+              await createMasterBooking(
+                client,
+                workspace.id,
+                draft,
+                idempotencyKey,
+              )
+            ).id as string,
+          ];
+      if (!appointmentIds[0]) throw new Error("Booking response is invalid");
+      await onCreated(appointmentIds[0]);
       onClose();
     } catch (nextError) {
       setError(serverErrorMessage(nextError, t));
@@ -356,7 +472,18 @@ export function ManualBookingModal({
             />
           ) : (
             <ActionButton
-              disabled={isSaving}
+              disabled={
+                isSaving ||
+                (isRecurring &&
+                  (isLoadingRecurrencePreview ||
+                    recurrenceCount < 2 ||
+                    recurrencePreview.length !== recurrenceCount ||
+                    recurrencePreview.every(
+                      (item) =>
+                        !item.available ||
+                        excludedRecurrenceDates.includes(item.local_date),
+                    )))
+              }
               label={t("mobile.manualBookingCreate")}
               loading={isSaving}
               loadingLabel={t("common.loading")}
@@ -455,13 +582,167 @@ export function ManualBookingModal({
           )}
 
           {step === "review" ? (
-            <Field
-              label={t("mobile.manualBookingNote")}
-              multiline
-              onChangeText={(masterNote) => updateDraft({ masterNote })}
-              placeholder={t("mobile.manualBookingNotePlaceholder")}
-              value={draft.masterNote}
-            />
+            <>
+              <Field
+                label={t("mobile.manualBookingNote")}
+                multiline
+                onChangeText={(masterNote) => updateDraft({ masterNote })}
+                placeholder={t("mobile.manualBookingNotePlaceholder")}
+                value={draft.masterNote}
+              />
+              <View style={styles.recurrence}>
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: isRecurring }}
+                  onPress={() => setRecurring((value) => !value)}
+                  style={styles.recurrenceToggle}
+                >
+                  <Text style={styles.label}>
+                    {t("mobile.recurringBooking")}
+                  </Text>
+                  <MaterialCommunityIcons
+                    color={isRecurring ? colors.accent : colors.secondaryText}
+                    name={
+                      isRecurring ? "checkbox-marked" : "checkbox-blank-outline"
+                    }
+                    size={24}
+                  />
+                </Pressable>
+                {isRecurring ? (
+                  <>
+                    <Text style={styles.helper}>
+                      {t("mobile.recurringBookingHint")}
+                    </Text>
+                    <View style={styles.recurrenceOptions}>
+                      <ModeButton
+                        active={recurrenceIntervalWeeks === 1}
+                        label={t("mobile.recurringWeekly")}
+                        onPress={() => setRecurrenceIntervalWeeks(1)}
+                      />
+                      <ModeButton
+                        active={recurrenceIntervalWeeks === 2}
+                        label={t("mobile.recurringBiweekly")}
+                        onPress={() => setRecurrenceIntervalWeeks(2)}
+                      />
+                    </View>
+                    <View style={styles.recurrenceOptions}>
+                      <ModeButton
+                        active={recurrenceEndMode === "count"}
+                        label={t("mobile.recurringByCount")}
+                        onPress={() => setRecurrenceEndMode("count")}
+                      />
+                      <ModeButton
+                        active={recurrenceEndMode === "date"}
+                        label={t("mobile.recurringByDate")}
+                        onPress={() => setRecurrenceEndMode("date")}
+                      />
+                    </View>
+                    {recurrenceEndMode === "count" ? (
+                      <Field
+                        keyboardType="number-pad"
+                        label={t("mobile.recurringOccurrenceCount")}
+                        onChangeText={(value) =>
+                          setRecurrenceOccurrenceCount(
+                            value.replace(/[^0-9]/g, "").slice(0, 2),
+                          )
+                        }
+                        placeholder="4"
+                        value={recurrenceOccurrenceCount}
+                      />
+                    ) : (
+                      <DateTimePickerField
+                        label={t("mobile.recurringEndDate")}
+                        locale={locale}
+                        mode="date"
+                        onChange={setRecurrenceEndDate}
+                        placeholder={t("mobile.recurringEndDate")}
+                        t={t}
+                        value={recurrenceEndDate}
+                      />
+                    )}
+                    {isLoadingRecurrencePreview ? (
+                      <View style={styles.previewState}>
+                        <ActivityIndicator color={colors.accent} />
+                        <Text style={styles.helper}>{t("common.loading")}</Text>
+                      </View>
+                    ) : recurrenceCount < 2 ? (
+                      <Text accessibilityRole="alert" style={styles.error}>
+                        {t("mobile.recurringInvalidEndDate")}
+                      </Text>
+                    ) : (
+                      <View style={styles.recurrencePreview}>
+                        {recurrencePreview.map((item) => {
+                          const excluded = excludedRecurrenceDates.includes(
+                            item.local_date,
+                          );
+                          return (
+                            <View
+                              key={item.local_date}
+                              style={styles.recurrencePreviewRow}
+                            >
+                              <View style={styles.recurrencePreviewCopy}>
+                                <Text style={styles.recurrenceDate}>
+                                  {formatDate(
+                                    new Date(
+                                      `${item.local_date}T12:00:00.000Z`,
+                                    ),
+                                    locale,
+                                    {
+                                      day: "numeric",
+                                      month: "short",
+                                      timeZone: "UTC",
+                                    },
+                                  )}
+                                  {" · "}
+                                  {formatTime(
+                                    new Date(item.starts_at),
+                                    locale,
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      timeZone: workspace.timezone,
+                                    },
+                                  )}
+                                </Text>
+                                {!item.available ? (
+                                  <Text style={styles.conflictText}>
+                                    {t("mobile.recurringConflict")}
+                                  </Text>
+                                ) : null}
+                              </View>
+                              {!item.available ? (
+                                <Pressable
+                                  accessibilityRole="checkbox"
+                                  accessibilityState={{ checked: excluded }}
+                                  onPress={() =>
+                                    setExcludedRecurrenceDates((current) =>
+                                      excluded
+                                        ? current.filter(
+                                            (date) => date !== item.local_date,
+                                          )
+                                        : [...current, item.local_date],
+                                    )
+                                  }
+                                  style={styles.skipDateButton}
+                                >
+                                  <Text style={styles.skipDateLabel}>
+                                    {t(
+                                      excluded
+                                        ? "mobile.recurringDateSkipped"
+                                        : "mobile.recurringSkipDate",
+                                    )}
+                                  </Text>
+                                </Pressable>
+                              ) : null}
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </>
+                ) : null}
+              </View>
+            </>
           ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -828,6 +1109,26 @@ function createInitialDraft(
   };
 }
 
+function addDaysToDate(date: string, days: number): string {
+  const value = new Date(`${date}T12:00:00.000Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+
+function getRecurrenceCountThroughDate(
+  startDate: string,
+  endDate: string,
+  intervalWeeks: number,
+): number {
+  const start = Date.parse(`${startDate}T00:00:00.000Z`);
+  const end = Date.parse(`${endDate}T00:00:00.000Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return 0;
+  return Math.min(
+    24,
+    Math.floor((end - start) / (intervalWeeks * 7 * 86400000)) + 1,
+  );
+}
+
 function sameInstant(left: string, right: string): boolean {
   const leftTime = new Date(left).getTime();
   const rightTime = new Date(right).getTime();
@@ -951,6 +1252,61 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   progressNumberActive: { color: colors.inverse },
+  recurrence: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.surface,
+    gap: 10,
+    marginTop: 16,
+    padding: 12,
+  },
+  recurrenceDate: { ...typography.label, color: colors.primaryText },
+  recurrencePreview: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.control,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  recurrencePreviewCopy: { flex: 1, gap: 2 },
+  recurrencePreviewRow: {
+    alignItems: "center",
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 8,
+    minHeight: 44,
+    paddingBottom: 6,
+  },
+  recurrenceOptions: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+  },
+  recurrenceToggle: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 44,
+  },
+  conflictText: { ...typography.caption, color: colors.danger },
+  previewState: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    minHeight: 36,
+  },
+  skipDateButton: {
+    alignItems: "center",
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  skipDateLabel: {
+    ...typography.caption,
+    color: colors.accent,
+    fontWeight: "700",
+  },
   sectionTitle: {
     ...typography.label,
     color: colors.primaryText,

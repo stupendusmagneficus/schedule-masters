@@ -11,11 +11,15 @@ export type MasterAppointment = Omit<
   | "is_returning_customer"
   | "occupied_ends_at"
   | "occupied_starts_at"
+  | "master_note"
+  | "appointment_series_id"
 > & {
   readonly is_new_customer?: boolean;
   readonly is_returning_customer?: boolean;
   readonly occupied_ends_at?: string;
   readonly occupied_starts_at?: string;
+  readonly master_note?: string | null;
+  readonly appointment_series_id?: string | null;
 };
 export type AvailableSlot =
   Database["public"]["Functions"]["get_master_available_slots"]["Returns"][number];
@@ -23,6 +27,8 @@ export type MonthAvailableSlot =
   Database["public"]["Functions"]["get_master_month_available_slots"]["Returns"][number];
 export type AppointmentStatus =
   Database["public"]["Enums"]["appointment_status"];
+export type RecurringAppointmentPreview =
+  Database["public"]["Functions"]["preview_master_recurring_bookings"]["Returns"][number];
 
 export type ManualBookingDraft = {
   readonly customerId: string | null;
@@ -152,6 +158,95 @@ export async function createMasterBooking(
   return data as Record<string, unknown>;
 }
 
+export async function createMasterRecurringBookings(
+  client: ManualBookingClient,
+  workspaceId: string,
+  draft: ManualBookingDraft,
+  intervalWeeks: number,
+  occurrenceCount: number,
+  excludedDates: readonly string[] = [],
+  idempotencyKey = createIdempotencyKey(),
+): Promise<string[]> {
+  const { data, error } = await client.rpc("create_master_recurring_bookings", {
+    p_customer_id: draft.customerId ?? undefined,
+    p_email: draft.email.trim() || undefined,
+    p_excluded_dates: [...excludedDates],
+    p_idempotency_key: idempotencyKey,
+    p_interval_weeks: intervalWeeks,
+    p_master_note: draft.masterNote.trim() || undefined,
+    p_name: draft.name.trim() || undefined,
+    p_occurrence_count: occurrenceCount,
+    p_phone: draft.phone.trim() || undefined,
+    p_service_ids: [...draft.serviceIds],
+    p_starts_at: draft.startsAt,
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Recurring booking response is invalid");
+  }
+  const appointments = (data as { appointments?: unknown }).appointments;
+  if (
+    !Array.isArray(appointments) ||
+    appointments.length === 0 ||
+    appointments.length > occurrenceCount
+  ) {
+    throw new Error("Recurring booking response is invalid");
+  }
+  return appointments.map((appointment) => {
+    if (!appointment || typeof appointment !== "object") {
+      throw new Error("Recurring booking response is invalid");
+    }
+    const id = (appointment as { id?: unknown }).id;
+    if (typeof id !== "string") {
+      throw new Error("Recurring booking response is invalid");
+    }
+    return id;
+  });
+}
+
+export async function previewMasterRecurringBookings(
+  client: ManualBookingClient,
+  workspaceId: string,
+  serviceIds: readonly string[],
+  startsAt: string,
+  intervalWeeks: number,
+  occurrenceCount: number,
+): Promise<RecurringAppointmentPreview[]> {
+  const { data, error } = await client.rpc(
+    "preview_master_recurring_bookings",
+    {
+      p_interval_weeks: intervalWeeks,
+      p_occurrence_count: occurrenceCount,
+      p_service_ids: [...serviceIds],
+      p_starts_at: startsAt,
+      p_workspace_id: workspaceId,
+    },
+  );
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function cancelMasterAppointmentSeriesFuture(
+  client: ManualBookingClient,
+  workspaceId: string,
+  appointmentId: string,
+): Promise<number> {
+  const { data, error } = await client.rpc(
+    "cancel_master_appointment_series_future",
+    { p_appointment_id: appointmentId, p_workspace_id: workspaceId },
+  );
+  if (error) throw new Error(error.message);
+  const count =
+    data && typeof data === "object" && !Array.isArray(data)
+      ? (data as { cancelledCount?: unknown }).cancelledCount
+      : null;
+  if (typeof count !== "number" || !Number.isInteger(count)) {
+    throw new Error("Recurring booking cancellation response is invalid");
+  }
+  return count;
+}
+
 export async function listMasterAppointments(
   client: ManualBookingClient,
   workspaceId: string,
@@ -249,6 +344,32 @@ export async function setMasterAppointmentPaidAmount(
     throw new Error("Appointment payment response is invalid");
   }
   return paidAmount;
+}
+
+export async function setMasterAppointmentNote(
+  client: ManualBookingClient,
+  workspaceId: string,
+  appointmentId: string,
+  note: string,
+): Promise<string | null> {
+  const trimmedNote = note.trim();
+  if (trimmedNote.length > 1000) {
+    throw new Error("Appointment note must be 1000 characters or fewer");
+  }
+  const { data, error } = await client.rpc("set_master_appointment_note", {
+    p_appointment_id: appointmentId,
+    p_master_note: trimmedNote,
+    p_workspace_id: workspaceId,
+  });
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Appointment note response is invalid");
+  }
+  const masterNote = (data as { master_note?: unknown }).master_note;
+  if (masterNote !== null && typeof masterNote !== "string") {
+    throw new Error("Appointment note response is invalid");
+  }
+  return masterNote;
 }
 
 export function createIdempotencyKey(): string {

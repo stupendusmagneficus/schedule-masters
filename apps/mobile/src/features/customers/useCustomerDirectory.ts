@@ -12,12 +12,14 @@ type UseCustomerDirectoryProps = {
   readonly client: SupabaseClient<Database> | null;
   readonly workspaceId: string;
   readonly search: string;
+  readonly historyRefreshVersion: number;
 };
 
 export function useCustomerDirectory({
   client,
   workspaceId,
   search,
+  historyRefreshVersion,
 }: UseCustomerDirectoryProps) {
   const [customers, setCustomers] = useState<CustomerProfile[]>([]);
   const [isLoading, setLoading] = useState(Boolean(client));
@@ -33,6 +35,7 @@ export function useCustomerDirectory({
   const loadedSearch = useRef<string | null>(null);
   const loadedWorkspace = useRef(workspaceId);
   const loadedClient = useRef(client);
+  const previousHistoryRefreshVersion = useRef(historyRefreshVersion);
 
   const reloadHistory = useCallback(async () => {
     if (!client || !selectedCustomer) {
@@ -117,6 +120,12 @@ export function useCustomerDirectory({
     }
     void reloadHistory();
   }, [client, reloadHistory, selectedCustomer]);
+
+  useEffect(() => {
+    if (previousHistoryRefreshVersion.current === historyRefreshVersion) return;
+    previousHistoryRefreshVersion.current = historyRefreshVersion;
+    if (selectedCustomer) void reloadHistory();
+  }, [historyRefreshVersion, reloadHistory, selectedCustomer]);
 
   return {
     customers,
