@@ -297,13 +297,27 @@ export function FreeSlotsModal({
             }}
           />
         </View>
-        <Text style={styles.description}>
-          {t(
-            activeMode === "share"
-              ? "mobile.freeSlotsShareDescription"
-              : "mobile.freeSlotsDescription",
-          )}
-        </Text>
+        {activeMode === "share" ? (
+          <View style={styles.shareMasterHeader}>
+            <View style={styles.shareMasterMonogram}>
+              <Text style={styles.shareMasterMonogramText}>
+                {getWorkspaceMonogram(workspace.name)}
+              </Text>
+            </View>
+            <View style={styles.shareMasterDetails}>
+              <Text accessibilityRole="header" style={styles.shareMasterName}>
+                {workspace.name}
+              </Text>
+              <Text style={styles.shareMasterSubtitle}>
+                {t("mobile.freeSlotsShareDescription")}
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.description}>
+            {t("mobile.freeSlotsDescription")}
+          </Text>
+        )}
         {activeMode === "share" ? null : (
           <>
             <Text style={styles.sectionTitle}>
@@ -577,6 +591,16 @@ function PrimaryButton({
   );
 }
 
+function getWorkspaceMonogram(workspaceName: string) {
+  return workspaceName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => Array.from(word)[0] ?? "")
+    .join("")
+    .toLocaleUpperCase();
+}
+
 const styles = StyleSheet.create({
   arrowText: { color: colors.primaryText, fontSize: 24, lineHeight: 28 },
   availabilityDot: {
@@ -628,6 +652,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 8,
   },
+  shareMasterDetails: { flex: 1, gap: 4 },
+  shareMasterHeader: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+    borderRadius: radii.surface,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    padding: 16,
+  },
+  shareMasterMonogram: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderRadius: radii.control,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  shareMasterMonogramText: {
+    ...typography.label,
+    color: colors.accent,
+    fontWeight: "700",
+  },
+  shareMasterName: {
+    ...typography.section,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
+  shareMasterSubtitle: { ...typography.caption, color: colors.secondaryText },
   monthTitle: {
     ...typography.section,
     color: colors.primaryText,

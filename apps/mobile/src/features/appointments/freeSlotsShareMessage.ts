@@ -50,5 +50,5 @@ export function buildFreeSlotsShareMessage({
       return `${dateLabel}: ${times.join(", ")}`;
     });
 
-  return [heading, workspaceName, availabilityNote, "", ...schedule].join("\n");
+  return [workspaceName, heading, availabilityNote, "", ...schedule].join("\n");
 }

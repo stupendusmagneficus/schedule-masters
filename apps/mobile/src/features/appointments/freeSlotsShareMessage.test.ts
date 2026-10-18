@@ -25,8 +25,9 @@ describe("buildFreeSlotsShareMessage", () => {
       workspaceName: "Beauty studio",
     });
 
-    expect(message.startsWith("Free slots for the next 14 days.\n")).toBe(true);
-    expect(message).toContain("Beauty studio");
+    expect(
+      message.startsWith("Beauty studio\nFree slots for the next 14 days.\n"),
+    ).toBe(true);
     expect(message).toContain("Start time depends on the service selected.");
     expect(message).toContain("January 7, 2030: 09:00 AM, 10:30 AM");
     expect(message).toContain("January 8, 2030: 11:00 AM");
@@ -43,7 +44,7 @@ describe("buildFreeSlotsShareMessage", () => {
         workspaceName: "Beauty studio",
       }),
     ).toBe(
-      "Free slots for the next 14 days.\nBeauty studio\nStart time depends on the service selected.\n",
+      "Beauty studio\nFree slots for the next 14 days.\nStart time depends on the service selected.\n",
     );
   });
 });

@@ -671,6 +671,8 @@ test.describe("mobile web smoke", () => {
       page.getByRole("tab", { name: "Najít a objednat" }),
     ).toHaveAttribute("aria-selected", "true");
     await page.getByRole("tab", { name: "Sdílet" }).click();
+    await expect(page.getByText("EB", { exact: true })).toBeVisible();
+    await expect(page.getByText("Elena Beauty", { exact: true })).toBeVisible();
     await expect(
       page.getByText("Volné termíny na příštích 14 dní.", { exact: true }),
     ).toBeVisible();
