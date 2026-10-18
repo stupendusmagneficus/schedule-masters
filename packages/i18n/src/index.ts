@@ -132,6 +132,13 @@ export type MessageKey =
   | "mobile.freeSlotsNoSlots"
   | "mobile.freeSlotsLoadFailed"
   | "mobile.freeSlotsBook"
+  | "mobile.freeSlotsShareTab"
+  | "mobile.freeSlotsBookTab"
+  | "mobile.freeSlotsShareDescription"
+  | "mobile.freeSlotsShareAction"
+  | "mobile.freeSlotsShareNoAvailability"
+  | "mobile.freeSlotsShareFailed"
+  | "mobile.freeSlotsShareOpened"
   | "mobile.bookingRequests"
   | "mobile.waitingList"
   | "mobile.waitingListAdd"
@@ -666,6 +673,16 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Не удалось загрузить свободные окна. Попробуйте ещё раз.",
     "mobile.freeSlotsBook": "Записать клиента",
+    "mobile.freeSlotsShareTab": "Поделиться",
+    "mobile.freeSlotsBookTab": "Найти и записать",
+    "mobile.freeSlotsShareDescription":
+      "Поделитесь свободными окнами с клиентом через приложение для сообщений.",
+    "mobile.freeSlotsShareAction": "Поделиться расписанием",
+    "mobile.freeSlotsShareNoAvailability":
+      "В этом месяце нет свободных окон для выбранной услуги.",
+    "mobile.freeSlotsShareFailed": "Не удалось открыть меню отправки.",
+    "mobile.freeSlotsShareOpened":
+      "Выберите приложение, чтобы отправить расписание.",
     "mobile.bookingRequests": "Заявки",
     "mobile.waitingList": "Лист ожидания",
     "mobile.waitingListAdd": "Добавить в лист ожидания",
@@ -1263,6 +1280,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Volné termíny se nepodařilo načíst. Zkuste to znovu.",
     "mobile.freeSlotsBook": "Objednat klienta",
+    "mobile.freeSlotsShareTab": "Sdílet",
+    "mobile.freeSlotsBookTab": "Najít a objednat",
+    "mobile.freeSlotsShareDescription":
+      "Sdílejte volné termíny s klientem přes aplikaci pro zprávy.",
+    "mobile.freeSlotsShareAction": "Sdílet rozvrh",
+    "mobile.freeSlotsShareNoAvailability":
+      "Tento měsíc nejsou pro vybranou službu volné termíny.",
+    "mobile.freeSlotsShareFailed": "Nabídku sdílení se nepodařilo otevřít.",
+    "mobile.freeSlotsShareOpened": "Vyberte aplikaci pro odeslání rozvrhu.",
     "mobile.bookingRequests": "Žádosti",
     "mobile.waitingList": "Seznam náhradníků",
     "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
@@ -1857,6 +1883,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsLoadFailed":
       "Couldn't load available times. Please try again.",
     "mobile.freeSlotsBook": "Book client",
+    "mobile.freeSlotsShareTab": "Share",
+    "mobile.freeSlotsBookTab": "Find & book",
+    "mobile.freeSlotsShareDescription":
+      "Share available times with a client through your messaging app.",
+    "mobile.freeSlotsShareAction": "Share schedule",
+    "mobile.freeSlotsShareNoAvailability":
+      "No times are available for this service this month.",
+    "mobile.freeSlotsShareFailed": "Couldn't open the share menu.",
+    "mobile.freeSlotsShareOpened": "Choose an app to send the schedule.",
     "mobile.bookingRequests": "Requests",
     "mobile.waitingList": "Waiting list",
     "mobile.waitingListAdd": "Add to waiting list",

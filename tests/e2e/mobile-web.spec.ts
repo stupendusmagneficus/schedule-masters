@@ -522,6 +522,14 @@ test.describe("mobile web smoke", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 780 });
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, "share", {
+        configurable: true,
+        value: async (content: { text?: string }) => {
+          window.localStorage.setItem("sharedSchedule", content.text ?? "");
+        },
+      });
+    });
     await page.goto("/?demo=1");
 
     const selectedDate = await page.evaluate(() => {
@@ -558,6 +566,23 @@ test.describe("mobile web smoke", () => {
       .boundingBox();
     expect(freeSlotsButtonBox?.y).toBeLessThan(summaryBox?.y ?? 0);
     await freeSlotsButton.click();
+    await expect(page.getByRole("tab", { name: "Sdílet" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(
+      page.getByRole("button", { name: "Sdílet rozvrh" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Sdílet rozvrh" }).click();
+    await expect(
+      page.getByText("Vyberte aplikaci pro odeslání rozvrhu."),
+    ).toBeVisible();
+    const sharedSchedule = await page.evaluate(() =>
+      window.localStorage.getItem("sharedSchedule"),
+    );
+    expect(sharedSchedule).toContain("Gel manicure");
+    expect(sharedSchedule).toContain("Elena Beauty");
+    await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: selectedDate }),
@@ -576,6 +601,7 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
 
     await page.getByRole("button", { name: "Volné termíny" }).click();
+    await page.getByRole("tab", { name: "Najít a objednat" }).click();
     await page.getByRole("button", { name: "11:00", exact: true }).click();
     await page.getByRole("button", { name: "Objednat klienta" }).click();
 
