@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
+import { formatDuration } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -75,8 +76,8 @@ export function ProfileTab({
             </Text>
             <Text style={styles.helper}>
               {t("mobile.profileBookingInterval").replace(
-                "{minutes}",
-                String(workspace.bookingIntervalMinutes),
+                "{duration}",
+                formatDuration(workspace.bookingIntervalMinutes, locale),
               )}
             </Text>
           </View>

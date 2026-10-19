@@ -1,4 +1,8 @@
-import type { MessageKey } from "@schedule-app/i18n";
+import {
+  formatDuration,
+  type MessageKey,
+  type SupportedLocale,
+} from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -11,6 +15,7 @@ import { typography } from "../theme/typography";
 
 type BookingIntervalFieldProps = {
   readonly label: string;
+  readonly locale: SupportedLocale;
   readonly onChange: (value: BookingIntervalMinutes) => void;
   readonly t: (key: MessageKey) => string;
   readonly value: BookingIntervalMinutes;
@@ -26,6 +31,7 @@ const optionLabels: Record<BookingIntervalMinutes, MessageKey> = {
 
 export function BookingIntervalField({
   label,
+  locale,
   onChange,
   t,
   value,
@@ -103,6 +109,12 @@ export function BookingIntervalField({
           <Text style={styles.help}>
             {t("workspace.bookingIntervalCustomHelp")}
           </Text>
+          <Text style={styles.preview}>
+            {t("workspace.bookingIntervalPreview").replace(
+              "{duration}",
+              formatDuration(value, locale),
+            )}
+          </Text>
         </View>
       )}
     </View>
@@ -123,6 +135,7 @@ const styles = StyleSheet.create({
   },
   help: { ...typography.caption, color: colors.secondaryText },
   label: { ...typography.label, color: colors.primaryText },
+  preview: { ...typography.label, color: colors.primaryText },
   option: {
     alignItems: "center",
     borderColor: colors.border,
