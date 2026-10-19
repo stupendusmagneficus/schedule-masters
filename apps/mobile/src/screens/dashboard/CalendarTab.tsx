@@ -499,6 +499,7 @@ export function CalendarTab({
             loadPrevious={monthWindow.loadPrevious}
             locale={locale}
             months={monthItems}
+            closedDateCount={selectionSummary.closedDates.length}
             onCancelSelection={cancelDateSelection}
             onCloseOpenDates={() => setBulkMode("close")}
             onConfigureSelectedDates={() => setBulkMode("configure")}
@@ -519,11 +520,13 @@ export function CalendarTab({
         </CalendarMonthPickerSheet>
         <BulkAvailabilityOverrideModal
           appointmentsByDate={appointmentsByDate}
+          closedDateCount={selectionSummary.closedDates.length}
           dates={bulkActionDates}
           error={calendar.error}
           isSaving={calendar.isSaving}
           locale={locale}
           mode={bulkMode ?? "close"}
+          openDateCount={selectionSummary.openDates.length}
           onApply={applyBulkOverrides}
           onClose={() => setBulkMode(null)}
           t={t}

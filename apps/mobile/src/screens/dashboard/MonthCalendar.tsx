@@ -35,6 +35,7 @@ type MonthCalendarProps = {
   readonly locale: SupportedLocale;
   readonly selectionMode: boolean;
   readonly selectedDates: readonly string[];
+  readonly closedDateCount: number;
   readonly openDateCount: number;
   readonly isBulkSaving: boolean;
   readonly selectionEnabled: boolean;
@@ -58,6 +59,7 @@ export function MonthCalendar({
   locale,
   selectionMode,
   selectedDates,
+  closedDateCount,
   openDateCount,
   isBulkSaving,
   selectionEnabled,
@@ -178,7 +180,13 @@ export function MonthCalendar({
           {selectedDates.length > 0 ? (
             <ActionButton
               disabled={isBulkSaving}
-              label={t("mobile.calendarConfigureSelectedDates")}
+              label={t(
+                closedDateCount > 0 && openDateCount === 0
+                  ? "mobile.calendarOpenAndSetSelectedDates"
+                  : openDateCount > 0 && closedDateCount === 0
+                    ? "mobile.calendarChangeSelectedDateHours"
+                    : "mobile.calendarSetSelectedDatesHours",
+              ).replace("{count}", String(selectedDates.length))}
               onPress={onConfigureSelectedDates}
               variant="primary"
             />
