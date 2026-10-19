@@ -313,11 +313,32 @@ export const slovakMessages: Messages = {
   "mobile.calendarSelectDate": "Vyberte dátum",
   "mobile.calendarSelectDays": "Vybrať dátumy",
   "mobile.calendarSelectionHint":
-    "Klepnutím na dátumy ich pridáte do výberu alebo z neho odoberiete.",
+    "Vyberte dátumy a potom zvoľte, či zmeniť iba tieto dátumy, alebo opakovať rozvrh pre tieto dni v týždni.",
   "mobile.calendarCancelSelection": "Zrušiť výber",
   "mobile.calendarSelectedDatesCount": "Vybrané dátumy: {count}",
   "mobile.calendarOpenClosedDays": "Otvoriť voľné dni: {count}",
   "mobile.calendarCloseOpenDays": "Zatvoriť pracovné dni: {count}",
+  "mobile.calendarWeeklyAction": "Opakovať pre tieto dni v týždni",
+  "mobile.calendarOpenAndSetSelectedDates": "Otvoriť a nastaviť čas: {count}",
+  "mobile.calendarChangeSelectedDateHours": "Zmeniť čas: {count}",
+  "mobile.calendarSetSelectedDatesHours": "Nastaviť čas pre dni: {count}",
+  "mobile.calendarConfigureDatesTitle": "Nastaviť vybrané dátumy",
+  "mobile.calendarConfigureDatesDescription":
+    "Rovnaký pracovný čas sa použije iba pre vybrané dátumy. Týždenný rozvrh sa nezmení.",
+  "mobile.calendarConfigureMixedDatesDescription":
+    "Rovnaký pracovný čas sa použije pre všetky vybrané dátumy: zatvorené dátumy sa otvoria a pracovným sa zmení čas. Týždenný rozvrh sa nezmení.",
+  "mobile.calendarOpenAndSetSelectedDatesTitle":
+    "Otvoriť dátumy a nastaviť čas",
+  "mobile.calendarOpenAndSetSelectedDatesDescription":
+    "Vybrané dátumy sú teraz zatvorené. Nastavte pracovný čas, aby boli otvorené. Zmenia sa iba tieto dátumy; týždenný rozvrh zostane rovnaký.",
+  "mobile.calendarWeeklyTitle": "Rozvrh podľa dní v týždni",
+  "mobile.calendarWeeklyDescription":
+    "Rozvrh pre tieto dni v týždni sa bude opakovať každý týždeň od dneška. Jednorazové zmeny jednotlivých dátumov zostanú bez zmeny.",
+  "mobile.calendarWeeklyOpen": "Pracovný čas",
+  "mobile.calendarWeeklyClosed": "Voľno",
+  "mobile.calendarWeeklyApply": "Uložiť rozvrh",
+  "mobile.calendarWeeklySaveFailed":
+    "Budúca rezervácia je mimo nového pracovného času. Upravte čas alebo odstráňte konfliktný deň v týždni a skúste to znova.",
   "mobile.calendarBulkOpenTitle": "Otvoriť vybrané dni",
   "mobile.calendarBulkCloseTitle": "Zatvoriť vybrané dni",
   "mobile.calendarBulkOpenDescription":

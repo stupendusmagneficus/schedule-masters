@@ -1603,6 +1603,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_master_weekly_availability: {
+        Args: { p_rules: Json; p_workspace_id: string }
+        Returns: Json
+      }
       update_customer_appointment: {
         Args: { p_action: string; p_token: string }
         Returns: Json

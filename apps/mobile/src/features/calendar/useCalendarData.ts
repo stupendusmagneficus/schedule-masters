@@ -20,6 +20,10 @@ import {
   type PersonalBlockDraft,
   updatePersonalBlock,
 } from "../availability/personalBlocks";
+import {
+  saveWeeklyAvailability,
+  type WeeklyAvailabilityDraft,
+} from "../availability/weeklySchedule";
 import { createWorkspaceRequestGuard } from "../workspace/workspaceRequestGuard";
 import {
   type CalendarDateRange,
@@ -67,6 +71,9 @@ export type CalendarDataController = CalendarData & {
   ) => Promise<void>;
   readonly saveDateOverrides: (
     drafts: readonly AvailabilityOverrideDraft[],
+  ) => Promise<void>;
+  readonly saveWeeklyAvailability: (
+    drafts: readonly WeeklyAvailabilityDraft[],
   ) => Promise<void>;
   readonly clearDateOverride: (date: string) => Promise<void>;
   readonly updateBlock: (
@@ -382,6 +389,28 @@ export function useCalendarData({
     [client, operationGuard, reload, workspaceId],
   );
 
+  const saveWeeklyAvailabilityRules = useCallback(
+    async (drafts: readonly WeeklyAvailabilityDraft[]) => {
+      if (!client) return;
+      const requestId = operationGuard.begin();
+      setIsSaving(true);
+      setError(null);
+      try {
+        await saveWeeklyAvailability(client, workspaceId, drafts);
+        invalidateCalendarDataCache(client, workspaceId);
+        await reload();
+      } catch (saveError) {
+        if (operationGuard.isCurrent(requestId)) {
+          setError(saveError instanceof Error ? saveError.message : "unknown");
+        }
+        throw saveError;
+      } finally {
+        if (operationGuard.isCurrent(requestId)) setIsSaving(false);
+      }
+    },
+    [client, operationGuard, reload, workspaceId],
+  );
+
   const goToPrevious = useCallback(() => {
     const nextDate = moveCalendarDate(selectedDate, view, -1);
     setIsRefreshing(false);
@@ -504,6 +533,7 @@ export function useCalendarData({
     saveBlock,
     saveDateOverride,
     saveDateOverrides,
+    saveWeeklyAvailability: saveWeeklyAvailabilityRules,
     selectedDate,
     setSelectedDate,
     setView,

@@ -44,8 +44,9 @@ type MonthCalendarProps = {
   readonly onToggleDate: (date: string) => void;
   readonly onStartSelection: () => void;
   readonly onCancelSelection: () => void;
-  readonly onOpenClosedDates: () => void;
+  readonly onConfigureSelectedDates: () => void;
   readonly onCloseOpenDates: () => void;
+  readonly onRepeatWeekly: () => void;
   readonly t: DashboardTabProps["t"];
 };
 
@@ -67,8 +68,9 @@ export function MonthCalendar({
   onToggleDate,
   onStartSelection,
   onCancelSelection,
-  onOpenClosedDates,
+  onConfigureSelectedDates,
   onCloseOpenDates,
+  onRepeatWeekly,
   t,
 }: MonthCalendarProps) {
   const listRef = useRef<FlatList<MonthItem>>(null);
@@ -175,15 +177,17 @@ export function MonthCalendar({
               )}
             </Text>
           ) : null}
-          {closedDateCount > 0 ? (
+          {selectedDates.length > 0 ? (
             <ActionButton
               disabled={isBulkSaving}
-              label={t("mobile.calendarOpenClosedDays").replace(
-                "{count}",
-                String(closedDateCount),
-              )}
-              loading={isBulkSaving}
-              onPress={onOpenClosedDates}
+              label={t(
+                closedDateCount > 0 && openDateCount === 0
+                  ? "mobile.calendarOpenAndSetSelectedDates"
+                  : openDateCount > 0 && closedDateCount === 0
+                    ? "mobile.calendarChangeSelectedDateHours"
+                    : "mobile.calendarSetSelectedDatesHours",
+              ).replace("{count}", String(selectedDates.length))}
+              onPress={onConfigureSelectedDates}
               variant="primary"
             />
           ) : null}
@@ -196,6 +200,14 @@ export function MonthCalendar({
               )}
               onPress={onCloseOpenDates}
               variant="destructive"
+            />
+          ) : null}
+          {selectedDates.length > 0 ? (
+            <ActionButton
+              disabled={isBulkSaving}
+              label={t("mobile.calendarWeeklyAction")}
+              onPress={onRepeatWeekly}
+              variant="secondary"
             />
           ) : null}
           <ActionButton

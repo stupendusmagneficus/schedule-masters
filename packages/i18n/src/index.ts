@@ -274,6 +274,21 @@ export type MessageKey =
   | "mobile.calendarSelectedDatesCount"
   | "mobile.calendarOpenClosedDays"
   | "mobile.calendarCloseOpenDays"
+  | "mobile.calendarWeeklyAction"
+  | "mobile.calendarOpenAndSetSelectedDates"
+  | "mobile.calendarChangeSelectedDateHours"
+  | "mobile.calendarSetSelectedDatesHours"
+  | "mobile.calendarConfigureDatesTitle"
+  | "mobile.calendarConfigureDatesDescription"
+  | "mobile.calendarConfigureMixedDatesDescription"
+  | "mobile.calendarOpenAndSetSelectedDatesTitle"
+  | "mobile.calendarOpenAndSetSelectedDatesDescription"
+  | "mobile.calendarWeeklyTitle"
+  | "mobile.calendarWeeklyDescription"
+  | "mobile.calendarWeeklyOpen"
+  | "mobile.calendarWeeklyClosed"
+  | "mobile.calendarWeeklyApply"
+  | "mobile.calendarWeeklySaveFailed"
   | "mobile.calendarBulkOpenTitle"
   | "mobile.calendarBulkCloseTitle"
   | "mobile.calendarBulkOpenDescription"
@@ -904,11 +919,31 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectDate": "Выберите дату",
     "mobile.calendarSelectDays": "Выбрать даты",
     "mobile.calendarSelectionHint":
-      "Нажимайте на даты, чтобы добавить или убрать их из выбора.",
+      "Выберите даты, затем решите: изменить только их или повторять график для этих дней недели.",
     "mobile.calendarCancelSelection": "Отменить выбор",
     "mobile.calendarSelectedDatesCount": "Выбрано дат: {count}",
     "mobile.calendarOpenClosedDays": "Открыть выходные: {count}",
     "mobile.calendarCloseOpenDays": "Закрыть рабочие: {count}",
+    "mobile.calendarWeeklyAction": "Повторять для этих дней недели",
+    "mobile.calendarOpenAndSetSelectedDates": "Открыть и задать часы: {count}",
+    "mobile.calendarChangeSelectedDateHours": "Изменить часы: {count}",
+    "mobile.calendarSetSelectedDatesHours": "Задать часы для дат: {count}",
+    "mobile.calendarConfigureDatesTitle": "Настроить выбранные даты",
+    "mobile.calendarConfigureDatesDescription":
+      "Одинаковые часы будут применены только к выбранным датам. Недельное расписание не изменится.",
+    "mobile.calendarConfigureMixedDatesDescription":
+      "Одинаковые часы применятся ко всем выбранным датам: закрытые даты откроются, у рабочих изменятся часы. Недельное расписание не изменится.",
+    "mobile.calendarOpenAndSetSelectedDatesTitle": "Открыть даты и задать часы",
+    "mobile.calendarOpenAndSetSelectedDatesDescription":
+      "Выбранные даты сейчас закрыты. Укажите часы, чтобы сделать их рабочими. Изменятся только эти даты; недельное расписание останется прежним.",
+    "mobile.calendarWeeklyTitle": "Расписание по дням недели",
+    "mobile.calendarWeeklyDescription":
+      "Для выбранных дней недели расписание будет повторяться каждую неделю начиная с сегодняшнего дня. Разовые настройки отдельных дат останутся без изменений.",
+    "mobile.calendarWeeklyOpen": "Рабочие часы",
+    "mobile.calendarWeeklyClosed": "Выходной",
+    "mobile.calendarWeeklyApply": "Сохранить расписание",
+    "mobile.calendarWeeklySaveFailed":
+      "Будущая запись выходит за новые рабочие часы. Измените часы или уберите конфликтующий день недели и попробуйте снова.",
     "mobile.calendarBulkOpenTitle": "Открыть выбранные дни",
     "mobile.calendarBulkCloseTitle": "Закрыть выбранные дни",
     "mobile.calendarBulkOpenDescription":
@@ -1585,11 +1620,33 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectDate": "Vyberte datum",
     "mobile.calendarSelectDays": "Vybrat dny",
     "mobile.calendarSelectionHint":
-      "Klepnutím na data je přidáte do výběru nebo z něj odeberete.",
+      "Vyberte data a pak zvolte, zda změnit pouze tato data, nebo opakovat rozvrh pro tyto dny v týdnu.",
     "mobile.calendarCancelSelection": "Zrušit výběr",
     "mobile.calendarSelectedDatesCount": "Vybraná data: {count}",
     "mobile.calendarOpenClosedDays": "Otevřít volné dny: {count}",
     "mobile.calendarCloseOpenDays": "Uzavřít pracovní dny: {count}",
+    "mobile.calendarWeeklyAction": "Opakovat pro tyto dny v týdnu",
+    "mobile.calendarOpenAndSetSelectedDates":
+      "Otevřít a nastavit dobu: {count}",
+    "mobile.calendarChangeSelectedDateHours": "Změnit dobu: {count}",
+    "mobile.calendarSetSelectedDatesHours": "Nastavit dobu pro dny: {count}",
+    "mobile.calendarConfigureDatesTitle": "Nastavit vybraná data",
+    "mobile.calendarConfigureDatesDescription":
+      "Stejná pracovní doba se použije pouze pro vybraná data. Týdenní rozvrh se nezmění.",
+    "mobile.calendarConfigureMixedDatesDescription":
+      "Stejná pracovní doba se použije pro všechna vybraná data: zavřená data se otevřou a u pracovních se změní hodiny. Týdenní rozvrh se nezmění.",
+    "mobile.calendarOpenAndSetSelectedDatesTitle":
+      "Otevřít data a nastavit dobu",
+    "mobile.calendarOpenAndSetSelectedDatesDescription":
+      "Vybraná data jsou nyní zavřená. Nastavte pracovní dobu, aby byla otevřená. Změní se pouze tato data; týdenní rozvrh zůstane stejný.",
+    "mobile.calendarWeeklyTitle": "Rozvrh podle dnů v týdnu",
+    "mobile.calendarWeeklyDescription":
+      "Rozvrh pro vybrané dny v týdnu se bude opakovat každý týden od dneška. Jednorázové změny jednotlivých dat zůstanou beze změny.",
+    "mobile.calendarWeeklyOpen": "Pracovní doba",
+    "mobile.calendarWeeklyClosed": "Volno",
+    "mobile.calendarWeeklyApply": "Uložit rozvrh",
+    "mobile.calendarWeeklySaveFailed":
+      "Budoucí rezervace je mimo novou pracovní dobu. Upravte dobu nebo odeberte konfliktní den v týdnu a zkuste to znovu.",
     "mobile.calendarBulkOpenTitle": "Otevřít vybrané dny",
     "mobile.calendarBulkCloseTitle": "Uzavřít vybrané dny",
     "mobile.calendarBulkOpenDescription":
@@ -2265,11 +2322,31 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectDate": "Choose a date",
     "mobile.calendarSelectDays": "Select dates",
     "mobile.calendarSelectionHint":
-      "Tap dates to add or remove them from your selection.",
+      "Select dates, then choose whether to change only those dates or repeat the schedule on those weekdays.",
     "mobile.calendarCancelSelection": "Cancel selection",
     "mobile.calendarSelectedDatesCount": "Dates selected: {count}",
     "mobile.calendarOpenClosedDays": "Open days off: {count}",
     "mobile.calendarCloseOpenDays": "Close working days: {count}",
+    "mobile.calendarWeeklyAction": "Repeat for these weekdays",
+    "mobile.calendarOpenAndSetSelectedDates": "Open and set hours: {count}",
+    "mobile.calendarChangeSelectedDateHours": "Change hours: {count}",
+    "mobile.calendarSetSelectedDatesHours": "Set hours for dates: {count}",
+    "mobile.calendarConfigureDatesTitle": "Set selected dates",
+    "mobile.calendarConfigureDatesDescription":
+      "The same hours apply only to the selected dates. Your weekly schedule will not change.",
+    "mobile.calendarConfigureMixedDatesDescription":
+      "The same hours apply to all selected dates: closed dates open and working dates get updated hours. Your weekly schedule will not change.",
+    "mobile.calendarOpenAndSetSelectedDatesTitle": "Open dates and set hours",
+    "mobile.calendarOpenAndSetSelectedDatesDescription":
+      "These dates are currently closed. Set working hours to open them. Only these dates change; your weekly schedule stays the same.",
+    "mobile.calendarWeeklyTitle": "Schedule by weekday",
+    "mobile.calendarWeeklyDescription":
+      "The schedule for these weekdays repeats every week starting today. One-off date changes remain unchanged.",
+    "mobile.calendarWeeklyOpen": "Working hours",
+    "mobile.calendarWeeklyClosed": "Day off",
+    "mobile.calendarWeeklyApply": "Save schedule",
+    "mobile.calendarWeeklySaveFailed":
+      "A future booking falls outside the new working hours. Adjust the hours or remove the conflicting weekday, then try again.",
     "mobile.calendarBulkOpenTitle": "Open selected days",
     "mobile.calendarBulkCloseTitle": "Close selected days",
     "mobile.calendarBulkOpenDescription":

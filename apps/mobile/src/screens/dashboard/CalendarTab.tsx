@@ -23,6 +23,7 @@ import {
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import { PersonalBlockModal } from "../../components/PersonalBlockModal";
+import { WeeklyAvailabilityModal } from "../../components/WeeklyAvailabilityModal";
 import type { DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import {
@@ -85,6 +86,7 @@ type CalendarTabProps = DashboardTabProps & {
   readonly onSelectAppointment?: (appointment: MasterAppointment) => void;
   readonly onSelectTime?: (date: string, startsAt: string) => void;
   readonly onFeedback: (message: string) => void;
+  readonly onWorkspaceSaved: () => void;
   readonly workspace: Workspace;
 };
 
@@ -97,6 +99,7 @@ export function CalendarTab({
   onSelectAppointment,
   onSelectTime,
   onFeedback,
+  onWorkspaceSaved,
   t,
   workspace,
 }: CalendarTabProps) {
@@ -112,7 +115,9 @@ export function CalendarTab({
   const [selectedDateSnapshots, setSelectedDateSnapshots] = useState<
     Record<string, AvailabilityDateSelectionSnapshot>
   >({});
-  const [bulkMode, setBulkMode] = useState<"close" | "open" | null>(null);
+  const [bulkMode, setBulkMode] = useState<"close" | "configure" | null>(null);
+  const [isWeeklyAvailabilityVisible, setWeeklyAvailabilityVisible] =
+    useState(false);
   const [processedDates, setProcessedDates] = useState<string[]>([]);
   const [slotAction, setSlotAction] = useState<{
     readonly date: string;
@@ -232,11 +237,7 @@ export function CalendarTab({
     [selectedDateSnapshots],
   );
   const bulkActionDates =
-    bulkMode === "open"
-      ? selectionSummary.closedDates
-      : bulkMode === "close"
-        ? selectionSummary.openDates
-        : [];
+    bulkMode === "close" ? selectionSummary.openDates : selectedDates;
   const appointmentsByDate = useMemo(
     () =>
       Object.fromEntries(
@@ -323,6 +324,14 @@ export function CalendarTab({
     setSelectedDates([]);
     setSelectedDateSnapshots({});
     setBulkMode(null);
+  };
+  const applyWeeklyAvailability = async (
+    drafts: Parameters<typeof calendar.saveWeeklyAvailability>[0],
+  ) => {
+    await calendar.saveWeeklyAvailability(drafts);
+    onWorkspaceSaved();
+    setWeeklyAvailabilityVisible(false);
+    cancelDateSelection();
   };
 
   return (
@@ -483,7 +492,6 @@ export function CalendarTab({
           visible={calendar.view === "month"}
         >
           <MonthCalendar
-            closedDateCount={selectionSummary.closedDates.length}
             isLoadingNext={monthWindow.isLoadingNext}
             isLoadingPrevious={monthWindow.isLoadingPrevious}
             isBulkSaving={calendar.isSaving}
@@ -491,9 +499,11 @@ export function CalendarTab({
             loadPrevious={monthWindow.loadPrevious}
             locale={locale}
             months={monthItems}
+            closedDateCount={selectionSummary.closedDates.length}
             onCancelSelection={cancelDateSelection}
             onCloseOpenDates={() => setBulkMode("close")}
-            onOpenClosedDates={() => setBulkMode("open")}
+            onConfigureSelectedDates={() => setBulkMode("configure")}
+            onRepeatWeekly={() => setWeeklyAvailabilityVisible(true)}
             onSelectDate={(date) => {
               calendar.setSelectedDate(date);
               calendar.setView("day");
@@ -510,16 +520,28 @@ export function CalendarTab({
         </CalendarMonthPickerSheet>
         <BulkAvailabilityOverrideModal
           appointmentsByDate={appointmentsByDate}
+          closedDateCount={selectionSummary.closedDates.length}
           dates={bulkActionDates}
           error={calendar.error}
           isSaving={calendar.isSaving}
           locale={locale}
           mode={bulkMode ?? "close"}
+          openDateCount={selectionSummary.openDates.length}
           onApply={applyBulkOverrides}
           onClose={() => setBulkMode(null)}
           t={t}
           timezone={workspace.timezone}
           visible={bulkMode !== null}
+        />
+        <WeeklyAvailabilityModal
+          dates={selectedDates}
+          error={calendar.error}
+          isSaving={calendar.isSaving}
+          locale={locale}
+          onApply={applyWeeklyAvailability}
+          onClose={() => setWeeklyAvailabilityVisible(false)}
+          t={t}
+          visible={isWeeklyAvailabilityVisible}
         />
         {calendar.view !== "month" ? (
           <InfoCard>

@@ -311,11 +311,32 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarSelectDate": "Виберіть дату",
   "mobile.calendarSelectDays": "Вибрати дати",
   "mobile.calendarSelectionHint":
-    "Торкніться дат, щоб додати їх до вибору або прибрати з нього.",
+    "Виберіть дати, а потім вирішіть: змінити лише їх або повторювати розклад для цих днів тижня.",
   "mobile.calendarCancelSelection": "Скасувати вибір",
   "mobile.calendarSelectedDatesCount": "Вибрано дат: {count}",
   "mobile.calendarOpenClosedDays": "Відкрити вихідні: {count}",
   "mobile.calendarCloseOpenDays": "Закрити робочі дні: {count}",
+  "mobile.calendarWeeklyAction": "Повторювати для цих днів тижня",
+  "mobile.calendarOpenAndSetSelectedDates": "Відкрити й задати години: {count}",
+  "mobile.calendarChangeSelectedDateHours": "Змінити години: {count}",
+  "mobile.calendarSetSelectedDatesHours": "Задати години для дат: {count}",
+  "mobile.calendarConfigureDatesTitle": "Налаштувати вибрані дати",
+  "mobile.calendarConfigureDatesDescription":
+    "Однаковий робочий час застосовується лише до вибраних дат. Тижневий розклад не зміниться.",
+  "mobile.calendarConfigureMixedDatesDescription":
+    "Однаковий робочий час застосовується до всіх вибраних дат: закриті дати відкриються, а для робочих зміняться години. Тижневий розклад не зміниться.",
+  "mobile.calendarOpenAndSetSelectedDatesTitle":
+    "Відкрити дати й задати години",
+  "mobile.calendarOpenAndSetSelectedDatesDescription":
+    "Вибрані дати зараз закриті. Задайте робочі години, щоб відкрити їх. Зміняться лише ці дати; тижневий розклад залишиться без змін.",
+  "mobile.calendarWeeklyTitle": "Розклад за днями тижня",
+  "mobile.calendarWeeklyDescription":
+    "Розклад для вибраних днів тижня повторюватиметься щотижня, починаючи з сьогодні. Разові зміни окремих дат залишаться без змін.",
+  "mobile.calendarWeeklyOpen": "Робочий час",
+  "mobile.calendarWeeklyClosed": "Вихідний",
+  "mobile.calendarWeeklyApply": "Зберегти розклад",
+  "mobile.calendarWeeklySaveFailed":
+    "Майбутній запис виходить за нові робочі години. Змініть години або приберіть конфліктний день тижня й повторіть спробу.",
   "mobile.calendarBulkOpenTitle": "Відкрити вибрані дні",
   "mobile.calendarBulkCloseTitle": "Закрити вибрані дні",
   "mobile.calendarBulkOpenDescription":

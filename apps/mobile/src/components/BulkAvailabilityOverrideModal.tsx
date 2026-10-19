@@ -23,11 +23,13 @@ type BulkAvailabilityOverrideModalProps = {
   readonly appointmentsByDate: Readonly<
     Record<string, readonly MasterAppointment[]>
   >;
+  readonly closedDateCount: number;
   readonly dates: readonly string[];
   readonly error: string | null;
   readonly isSaving: boolean;
   readonly locale: SupportedLocale;
-  readonly mode: "close" | "open";
+  readonly mode: "close" | "configure";
+  readonly openDateCount: number;
   readonly onApply: (drafts: AvailabilityOverrideDraft[]) => Promise<void>;
   readonly onClose: () => void;
   readonly timezone: string;
@@ -37,11 +39,13 @@ type BulkAvailabilityOverrideModalProps = {
 
 export function BulkAvailabilityOverrideModal({
   appointmentsByDate,
+  closedDateCount,
   dates,
   error,
   isSaving,
   locale,
   mode,
+  openDateCount,
   onApply,
   onClose,
   timezone,
@@ -50,14 +54,14 @@ export function BulkAvailabilityOverrideModal({
 }: BulkAvailabilityOverrideModalProps) {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
-  const kind = mode === "open" ? "modified" : "closed";
+  const kind = mode === "configure" ? "modified" : "closed";
   const drafts = useMemo<AvailabilityOverrideDraft[]>(
     () =>
       dates.map((date) => ({
         date,
-        endLocalTime: mode === "open" ? endTime : null,
+        endLocalTime: mode === "configure" ? endTime : null,
         kind,
-        startLocalTime: mode === "open" ? startTime : null,
+        startLocalTime: mode === "configure" ? startTime : null,
       })),
     [dates, endTime, kind, mode, startTime],
   );
@@ -80,14 +84,22 @@ export function BulkAvailabilityOverrideModal({
   const formattedDates = dates
     .map((date) => formatBulkDate(date, locale))
     .join(", ");
+  const isOpeningClosedDates =
+    mode === "configure" && closedDateCount > 0 && openDateCount === 0;
   const titleKey =
-    mode === "open"
-      ? "mobile.calendarBulkOpenTitle"
-      : "mobile.calendarBulkCloseTitle";
+    mode === "close"
+      ? "mobile.calendarBulkCloseTitle"
+      : isOpeningClosedDates
+        ? "mobile.calendarOpenAndSetSelectedDatesTitle"
+        : "mobile.calendarConfigureDatesTitle";
   const descriptionKey =
-    mode === "open"
-      ? "mobile.calendarBulkOpenDescription"
-      : "mobile.calendarBulkCloseDescription";
+    mode === "close"
+      ? "mobile.calendarBulkCloseDescription"
+      : isOpeningClosedDates
+        ? "mobile.calendarOpenAndSetSelectedDatesDescription"
+        : closedDateCount > 0 && openDateCount > 0
+          ? "mobile.calendarConfigureMixedDatesDescription"
+          : "mobile.calendarConfigureDatesDescription";
 
   useEffect(() => {
     if (!visible) return;
@@ -134,7 +146,7 @@ export function BulkAvailabilityOverrideModal({
             label={t("mobile.calendarBulkApply")}
             loading={isSaving}
             onPress={() => void apply()}
-            variant={mode === "open" ? "primary" : "destructive"}
+            variant={mode === "configure" ? "primary" : "destructive"}
           />
           <ActionButton
             disabled={isSaving}
@@ -160,7 +172,7 @@ export function BulkAvailabilityOverrideModal({
             </Text>
           ))}
         </View>
-        {mode === "open" ? (
+        {mode === "configure" ? (
           <View style={styles.timeFields}>
             <DateTimePickerField
               label={t("mobile.calendarDayStart")}
