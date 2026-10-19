@@ -381,6 +381,40 @@ test.describe("mobile web smoke", () => {
     expect(hasHorizontalOverflow).toBe(false);
   });
 
+  test("uses a large weekly time target with quarter-hour choices", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("tab", { name: "Týden" }).click();
+
+    const slotGroup = page.getByRole("button", { name: /11:00–12:00/ }).first();
+    const target = await slotGroup.boundingBox();
+
+    expect(target?.height).toBeGreaterThanOrEqual(44);
+
+    await slotGroup.click({ position: { x: 12, y: 12 } });
+    await expect(page.getByRole("radio", { name: "11:00" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+
+    await page.getByRole("button", { name: "Zrušit", exact: true }).click();
+    await slotGroup.click({
+      position: { x: 12, y: target ? target.height - 12 : 36 },
+    });
+    await expect(page.getByRole("radio", { name: "11:00" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await page.getByRole("radio", { name: "11:30" }).click();
+    await expect(page.getByRole("radio", { name: "11:30" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+  });
+
   test("confirms personal block deletion inline and allows cancelling it", async ({
     page,
   }) => {

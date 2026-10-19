@@ -103,3 +103,39 @@ Evidence: motion and feedback requirements in `docs/design/DESIGN.md`; shared fe
 ## Visual verification limits
 
 No application tab or device simulator was open for this review. The scorecard and recommendations above are based on source inspection and the approved design rules, not pixel measurements or hands-on gesture testing. This is a final source audit and a focused visual QA checklist, not a claim that the UI has passed device QA.
+
+## Follow-up source audit — 2026-10-19
+
+I rechecked the dashboard screens, the main calendar interaction components, the booking/editing surfaces, the customer-facing booking flow, shared navigation and modal primitives against the approved design rules. This pass updates the priority list with source-backed findings. No code changes or automated tests were part of this audit.
+
+### P1 — Enlarge Week calendar time-slot hit areas — implemented in SCH-137
+
+Each empty time slot in the Week view was a `Pressable` with a height of 24 pt. Selecting a time is a core path to create a booking or personal break, but that target was substantially smaller than the app's 44 pt minimum. The fix preserves the visual density while grouping two rows into one larger target; neighboring hour groups remain separate.
+
+The week grid now keeps its 24 pt visual half-hour rows but combines each adjacent pair into one 48 pt press target. Tapping anywhere in that hour opens the existing quarter-hour picker, where the user chooses the exact time. A final unmatched half-hour gets a 44 pt target. Added unit coverage for grouping and an E2E case for target size and quarter-hour selection. The selected radio option now exposes `aria-checked` on web.
+
+Evidence: `apps/mobile/src/screens/dashboard/WeekCalendar.tsx`, `apps/mobile/src/screens/dashboard/weekCalendarTouchTarget.ts`, and `tests/e2e/mobile-web.spec.ts`. The targeted Playwright E2E passed at a 375 px viewport; mobile unit tests, typecheck, lint, Biome checks, and Expo web export also passed.
+
+### P2 — Bring Month calendar day targets up to the shared minimum
+
+The month view's day buttons are 42 × 42 pt. This is close to the target but still below the documented 44 pt minimum. Increase the interactive area without changing the visual day marker or making neighboring dates ambiguous.
+
+Evidence: `apps/mobile/src/screens/dashboard/MonthCalendar.tsx:271-289` and `:471-487`.
+
+### P2 — Validate the bottom navigation with long labels and larger text
+
+The bottom bar gives five tabs equal width and uses 11 pt labels, which can shrink to 85% to fit. This preserves the layout but can reduce legibility for Czech/Slovak labels and users with larger text preferences. Check all five supported locales at the narrowest supported device width and with the largest practical system text size. If labels become hard to read, prefer a navigation layout adjustment over shrinking the text further.
+
+Evidence: `apps/mobile/src/components/BottomNavigation.tsx:99-116` and `:142-154`; locale and accessibility requirements in `docs/design/DESIGN.md`.
+
+### Confirmed strengths in this pass
+
+- The customer directory is searchable and compact; phone and SMS actions have explicit accessible labels, while details and history are opened on demand (`apps/mobile/src/screens/dashboard/CustomersTab.tsx`).
+- The Finance overview presents received income, expected income, and completed bookings first; secondary metrics and weekly detail are behind an explicit expansion (`apps/mobile/src/screens/dashboard/FinancesTab.tsx`).
+- The public booking form uses associated labels, required email, a notification explanation, live date context, and announced errors (`apps/booking-web/app/page.tsx`). Service selection and appointment management also have semantic button/alert patterns.
+- Shared modal shells provide named close actions, safe-area handling, and consistent headers. Complex booking forms are keyboard-aware and scrollable (`apps/mobile/src/components/BottomSheet.tsx`, `FullscreenModal.tsx`, and `ManualBookingModal.tsx`).
+- Today, Calendar, Customers, Finance, and Profile use a consistent page header and shared action styles. Calendar state and appointment status are exposed with accessible labels, not color alone.
+
+### Audit coverage and limits
+
+Source inspection covered the master app's auth/setup and dashboard areas, shared navigation/actions/modal shells, booking and appointment flows, and the public booking and appointment-management pages. The earlier findings above remain applicable, including reducing repeated card framing and validating larger text. There was no simulator/device session for this pass, so I did not verify actual tap accuracy, scrolling, keyboard occlusion, contrast by rendered pixels, animation, or layout at multiple device sizes. Those are the remaining visual QA checks; the findings above are code-level evidence, not a claim of device usability testing.
