@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
   formatCurrency,
+  formatDuration,
   type MessageKey,
   type SupportedLocale,
 } from "@schedule-app/i18n";
@@ -95,7 +96,7 @@ export function ServicePickerField({
           </Text>
           {selectedService ? (
             <Text numberOfLines={1} style={styles.detail}>
-              {selectedService.duration_minutes} min ·{" "}
+              {formatDuration(selectedService.duration_minutes, locale)} ·{" "}
               {formatCurrency(
                 selectedService.price_amount,
                 locale,
@@ -188,7 +189,7 @@ export function ServicePickerField({
                             </Text>
                           ) : null}
                           <Text style={styles.detail}>
-                            {service.duration_minutes} min ·{" "}
+                            {formatDuration(service.duration_minutes, locale)} ·{" "}
                             {formatCurrency(
                               service.price_amount,
                               locale,

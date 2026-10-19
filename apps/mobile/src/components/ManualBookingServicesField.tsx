@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
   formatCurrency,
+  formatDuration,
   type MessageKey,
   type SupportedLocale,
 } from "@schedule-app/i18n";
@@ -18,6 +19,7 @@ import { moveManualBookingService } from "../features/appointments/manualBooking
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
 import type { Service } from "../types";
+import { ActionButton } from "./ActionButton";
 import { FullscreenModal } from "./FullscreenModal";
 
 type ManualBookingServicesFieldProps = {
@@ -36,6 +38,7 @@ export function ManualBookingServicesField({
   t,
 }: ManualBookingServicesFieldProps) {
   const [isOpen, setOpen] = useState(false);
+  const [pendingServiceIds, setPendingServiceIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [limitReached, setLimitReached] = useState(false);
@@ -97,15 +100,17 @@ export function ManualBookingServicesField({
 
   function toggleService(service: Service) {
     if (
-      !serviceIds.includes(service.id) &&
-      serviceIds.length >= MANUAL_BOOKING_MAX_SERVICES
+      !pendingServiceIds.includes(service.id) &&
+      pendingServiceIds.length >= MANUAL_BOOKING_MAX_SERVICES
     ) {
       setLimitReached(true);
       return;
     }
-    const selectedCurrency = selectedServices[0]?.currency;
+    const selectedCurrency = pendingServiceIds
+      .map((id) => services.find((item) => item.id === id))
+      .find((item): item is Service => Boolean(item))?.currency;
     if (
-      !serviceIds.includes(service.id) &&
+      !pendingServiceIds.includes(service.id) &&
       selectedCurrency &&
       service.currency !== selectedCurrency
     ) {
@@ -114,11 +119,16 @@ export function ManualBookingServicesField({
     }
     setLimitReached(false);
     setCurrencyMismatch(false);
-    onChange(
-      serviceIds.includes(service.id)
-        ? serviceIds.filter((id) => id !== service.id)
-        : [...serviceIds, service.id],
+    setPendingServiceIds(
+      pendingServiceIds.includes(service.id)
+        ? pendingServiceIds.filter((id) => id !== service.id)
+        : [...pendingServiceIds, service.id],
     );
+  }
+
+  function openPicker() {
+    setPendingServiceIds([...serviceIds]);
+    setOpen(true);
   }
 
   return (
@@ -129,7 +139,7 @@ export function ManualBookingServicesField({
         </Text>
         <Pressable
           accessibilityRole="button"
-          onPress={() => setOpen(true)}
+          onPress={openPicker}
           style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
         >
           <MaterialCommunityIcons color={colors.accent} name="plus" size={20} />
@@ -146,7 +156,7 @@ export function ManualBookingServicesField({
               <View style={styles.serviceCopy}>
                 <Text style={styles.serviceName}>{service.name}</Text>
                 <Text style={styles.detail}>
-                  {service.duration_minutes} min ·{" "}
+                  {formatDuration(service.duration_minutes, locale)} ·{" "}
                   {formatCurrency(
                     service.price_amount,
                     locale,
@@ -159,6 +169,7 @@ export function ManualBookingServicesField({
                   disabled={index === 0}
                   label={t("mobile.manualBookingMoveServiceUp")}
                   name="arrow-up"
+                  quiet
                   onPress={() =>
                     onChange(
                       moveManualBookingService(serviceIds, service.id, -1),
@@ -169,6 +180,7 @@ export function ManualBookingServicesField({
                   disabled={index === selectedServices.length - 1}
                   label={t("mobile.manualBookingMoveServiceDown")}
                   name="arrow-down"
+                  quiet
                   onPress={() =>
                     onChange(
                       moveManualBookingService(serviceIds, service.id, 1),
@@ -196,7 +208,8 @@ export function ManualBookingServicesField({
       {selectedServices.length ? (
         <View accessibilityLiveRegion="polite" style={styles.totalRow}>
           <Text style={styles.totalLabel}>
-            {totalDuration} min · {t("mobile.manualBookingTotal")}
+            {formatDuration(totalDuration, locale)} ·{" "}
+            {t("mobile.manualBookingTotal")}
           </Text>
           <Text style={styles.totalValue}>
             {formatCurrency(totalPrice, locale, currency)}
@@ -209,6 +222,16 @@ export function ManualBookingServicesField({
         onClose={close}
         title={t("mobile.manualBookingAddService")}
         visible={isOpen}
+        footer={
+          <ActionButton
+            label={t("common.done")}
+            onPress={() => {
+              onChange(pendingServiceIds);
+              close();
+            }}
+            variant="primary"
+          />
+        }
       >
         <View style={styles.picker}>
           <View style={styles.searchBox}>
@@ -266,7 +289,7 @@ export function ManualBookingServicesField({
                     <Text style={styles.categoryHeading}>{group}</Text>
                   ) : null}
                   {items.map((service) => {
-                    const selected = serviceIds.includes(service.id);
+                    const selected = pendingServiceIds.includes(service.id);
                     return (
                       <Pressable
                         accessibilityRole="button"
@@ -286,7 +309,7 @@ export function ManualBookingServicesField({
                             </Text>
                           ) : null}
                           <Text style={styles.detail}>
-                            {service.duration_minutes} min ·{" "}
+                            {formatDuration(service.duration_minutes, locale)} ·{" "}
                             {formatCurrency(
                               service.price_amount,
                               locale,
@@ -346,11 +369,13 @@ function IconAction({
   label,
   name,
   onPress,
+  quiet = false,
 }: {
   readonly disabled?: boolean;
   readonly label: string;
   readonly name: "arrow-down" | "arrow-up" | "close";
   readonly onPress: () => void;
+  readonly quiet?: boolean;
 }) {
   return (
     <Pressable
@@ -362,9 +387,15 @@ function IconAction({
       style={styles.iconButton}
     >
       <MaterialCommunityIcons
-        color={disabled ? colors.border : colors.secondaryText}
+        color={
+          disabled
+            ? colors.border
+            : quiet
+              ? colors.border
+              : colors.secondaryText
+        }
         name={name}
-        size={20}
+        size={quiet ? 17 : 20}
       />
     </Pressable>
   );

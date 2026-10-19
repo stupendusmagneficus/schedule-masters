@@ -1,6 +1,11 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
+import {
+  formatCurrency,
+  formatDate,
+  formatDuration,
+  formatTime,
+} from "@schedule-app/i18n";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -262,7 +267,7 @@ export function AppointmentDetailsModal({
                 />
                 <DetailRow
                   label={t("mobile.appointmentService")}
-                  value={`${appointment.service_name} · ${appointment.duration_minutes} min`}
+                  value={`${appointment.service_name} · ${formatDuration(appointment.duration_minutes, locale)}`}
                 />
                 <DetailRow
                   label={t("mobile.appointmentPrice")}

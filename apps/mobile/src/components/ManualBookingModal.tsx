@@ -1,7 +1,12 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency, formatDate, formatTime } from "@schedule-app/i18n";
+import {
+  formatCurrency,
+  formatDate,
+  formatDuration,
+  formatTime,
+} from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -28,6 +33,7 @@ import {
   type ManualBookingValidationError,
   previewMasterRecurringBookings,
   type RecurringAppointmentPreview,
+  shouldSearchManualBookingCustomers,
   validateManualBookingDraft,
 } from "../features/appointments/manualBooking";
 import {
@@ -194,19 +200,30 @@ export function ManualBookingModal({
   useEffect(() => {
     if (!visible || !isExistingCustomer || step !== "customer") return;
     let active = true;
-    setLoadingCustomers(true);
-    void listMasterCustomers(client, workspace.id, customerSearch)
-      .then((nextCustomers) => {
-        if (!active) return;
-        setCustomers(nextCustomers);
-      })
-      .catch(() => {
-        if (active) setError(t("mobile.manualBookingLoadFailed"));
-      })
-      .finally(() => {
-        if (active) setLoadingCustomers(false);
-      });
+    const query = customerSearch.trim();
+    if (!shouldSearchManualBookingCustomers(query)) {
+      setCustomers([]);
+      setLoadingCustomers(false);
+      return () => {
+        active = false;
+      };
+    }
+    const timeout = setTimeout(() => {
+      setLoadingCustomers(true);
+      void listMasterCustomers(client, workspace.id, query)
+        .then((nextCustomers) => {
+          if (!active) return;
+          setCustomers(nextCustomers);
+        })
+        .catch(() => {
+          if (active) setError(t("mobile.manualBookingLoadFailed"));
+        })
+        .finally(() => {
+          if (active) setLoadingCustomers(false);
+        });
+    }, 250);
     return () => {
+      clearTimeout(timeout);
       active = false;
     };
   }, [
@@ -892,7 +909,11 @@ function CustomerStep({
             placeholder={t("mobile.manualBookingSearchCustomer")}
             value={customerSearch}
           />
-          {isLoadingCustomers ? (
+          {!shouldSearchManualBookingCustomers(customerSearch) ? (
+            <Text style={styles.helper}>
+              {t("mobile.manualBookingSearchHint")}
+            </Text>
+          ) : isLoadingCustomers ? (
             <Text style={styles.helper}>{t("common.loading")}</Text>
           ) : customers.length ? (
             <View style={styles.customerList}>
@@ -909,9 +930,11 @@ function CustomerStep({
                 >
                   <View style={styles.optionCopy}>
                     <Text style={styles.optionTitle}>{customer.name}</Text>
-                    <Text style={styles.helper}>
-                      {customer.phone || customer.email || "—"}
-                    </Text>
+                    {customer.phone || customer.email ? (
+                      <Text style={styles.helper}>
+                        {customer.phone || customer.email}
+                      </Text>
+                    ) : null}
                   </View>
                   {selectedCustomerId === customer.id ? (
                     <Text style={styles.selectedMark}>✓</Text>
@@ -920,9 +943,7 @@ function CustomerStep({
               ))}
             </View>
           ) : (
-            <Text style={styles.helper}>
-              {t("mobile.manualBookingNoCustomers")}
-            </Text>
+            <Text style={styles.helper}>{t("mobile.customerSearchEmpty")}</Text>
           )}
         </View>
       ) : null}
@@ -991,7 +1012,15 @@ function ReviewStep({
         t("mobile.noServices"),
     ],
     [t("mobile.manualBookingCustomerName"), draft.name],
-    [t("mobile.manualBookingDate"), draft.date],
+    [
+      t("mobile.manualBookingDate"),
+      formatDate(new Date(`${draft.date}T12:00:00.000Z`), locale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      }),
+    ],
     [
       t("mobile.manualBookingTime"),
       `${formatTime(new Date(draft.startsAt), locale, {
@@ -1004,7 +1033,7 @@ function ReviewStep({
         timeZone: workspace.timezone,
       })}`,
     ],
-    [t("mobile.manualBookingDuration"), `${duration} min`],
+    [t("mobile.manualBookingDuration"), formatDuration(duration, locale)],
     [t("mobile.manualBookingPrice"), formatCurrency(price, locale, currency)],
   ];
 
@@ -1016,11 +1045,7 @@ function ReviewStep({
           <Text style={styles.summaryValue}>{value}</Text>
         </View>
       ))}
-      {draft.email || draft.phone ? (
-        <Text style={styles.helper}>
-          {[draft.email, draft.phone].filter(Boolean).join(" · ")}
-        </Text>
-      ) : null}
+      {draft.phone ? <Text style={styles.helper}>{draft.phone}</Text> : null}
     </View>
   );
 }
@@ -1218,9 +1243,10 @@ const styles = StyleSheet.create({
   optionList: { gap: 8, marginTop: 8 },
   optionRow: {
     alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+    borderRadius: radii.surface,
+    borderWidth: 1,
     flexDirection: "row",
     gap: 8,
     padding: 14,
@@ -1262,7 +1288,7 @@ const styles = StyleSheet.create({
   recurrenceDate: { ...typography.label, color: colors.primaryText },
   recurrencePreview: {
     backgroundColor: colors.surface,
-    borderRadius: radii.control,
+    borderRadius: radii.surface,
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,

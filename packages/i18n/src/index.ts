@@ -367,6 +367,7 @@ export type MessageKey =
   | "mobile.manualBookingExistingCustomer"
   | "mobile.manualBookingNewCustomer"
   | "mobile.manualBookingSearchCustomer"
+  | "mobile.manualBookingSearchHint"
   | "mobile.manualBookingNoCustomers"
   | "mobile.manualBookingCustomerName"
   | "mobile.manualBookingCustomerEmail"
@@ -1018,6 +1019,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingExistingCustomer": "Существующий клиент",
     "mobile.manualBookingNewCustomer": "Новый клиент",
     "mobile.manualBookingSearchCustomer": "Поиск клиента",
+    "mobile.manualBookingSearchHint":
+      "Введите имя, телефон или e-mail клиента — покажем только совпадения.",
     "mobile.manualBookingNoCustomers": "Клиенты пока не добавлены.",
     "mobile.manualBookingCustomerName": "Имя клиента *",
     "mobile.manualBookingCustomerEmail": "Email клиента",
@@ -1039,7 +1042,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingDate": "Дата *",
     "mobile.manualBookingTime": "Свободное время *",
     "mobile.manualBookingNoSlots": "На эту дату нет свободных окон.",
-    "mobile.manualBookingDuration": "Длительность, минут *",
+    "mobile.manualBookingDuration": "Длительность записи",
     "mobile.manualBookingPrice": "Цена, Kč *",
     "mobile.manualBookingNote": "Заметка мастера",
     "mobile.manualBookingNotePlaceholder": "Например, клиент из Instagram",
@@ -1185,7 +1188,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationFailed":
       "Не удалось подготовить перевод. Попробуйте ещё раз.",
     "mobile.serviceTranslationNameRequired": "Сначала введите название услуги.",
-    "mobile.serviceTranslationsShow": "Показать переводы",
+    "mobile.serviceTranslationsShow": "Добавить переводы вручную",
     "mobile.serviceTranslationsHide": "Скрыть переводы",
     "mobile.serviceSave": "Сохранить услугу",
     "mobile.serviceCreate": "Создать услугу",
@@ -1698,6 +1701,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingExistingCustomer": "Stávající klient",
     "mobile.manualBookingNewCustomer": "Nový klient",
     "mobile.manualBookingSearchCustomer": "Hledat klienta",
+    "mobile.manualBookingSearchHint":
+      "Zadejte jméno, telefon nebo e-mail klienta. Zobrazíme pouze shody.",
     "mobile.manualBookingNoCustomers": "Zatím nemáte žádné klienty.",
     "mobile.manualBookingCustomerName": "Jméno klienta *",
     "mobile.manualBookingCustomerEmail": "E-mail klienta",
@@ -1718,7 +1723,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingDate": "Datum *",
     "mobile.manualBookingTime": "Volný termín *",
     "mobile.manualBookingNoSlots": "Pro toto datum nejsou volné termíny.",
-    "mobile.manualBookingDuration": "Délka v minutách *",
+    "mobile.manualBookingDuration": "Délka rezervace",
     "mobile.manualBookingPrice": "Cena, Kč *",
     "mobile.manualBookingNote": "Poznámka mistra",
     "mobile.manualBookingNotePlaceholder": "Například klient z Instagramu",
@@ -1861,7 +1866,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationFailed":
       "Překlad se nepodařilo připravit. Zkuste to znovu.",
     "mobile.serviceTranslationNameRequired": "Nejprve zadejte název služby.",
-    "mobile.serviceTranslationsShow": "Zobrazit překlady",
+    "mobile.serviceTranslationsShow": "Zadat překlady ručně",
     "mobile.serviceTranslationsHide": "Skrýt překlady",
     "mobile.serviceSave": "Uložit službu",
     "mobile.serviceCreate": "Vytvořit službu",
@@ -2376,6 +2381,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingExistingCustomer": "Existing customer",
     "mobile.manualBookingNewCustomer": "New customer",
     "mobile.manualBookingSearchCustomer": "Search customers",
+    "mobile.manualBookingSearchHint":
+      "Enter a customer name, phone, or email to see matching results.",
     "mobile.manualBookingNoCustomers": "No customers have been added yet.",
     "mobile.manualBookingCustomerName": "Customer name *",
     "mobile.manualBookingCustomerEmail": "Customer email",
@@ -2396,7 +2403,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.manualBookingDate": "Date *",
     "mobile.manualBookingTime": "Available time *",
     "mobile.manualBookingNoSlots": "There are no available times on this date.",
-    "mobile.manualBookingDuration": "Duration in minutes *",
+    "mobile.manualBookingDuration": "Booking duration",
     "mobile.manualBookingPrice": "Price, Kč *",
     "mobile.manualBookingNote": "Master note",
     "mobile.manualBookingNotePlaceholder": "For example, client from Instagram",
@@ -2542,7 +2549,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationFailed":
       "Could not prepare translations. Try again.",
     "mobile.serviceTranslationNameRequired": "Enter the service name first.",
-    "mobile.serviceTranslationsShow": "Show translations",
+    "mobile.serviceTranslationsShow": "Enter translations manually",
     "mobile.serviceTranslationsHide": "Hide translations",
     "mobile.serviceSave": "Save service",
     "mobile.serviceCreate": "Create service",
@@ -2766,6 +2773,39 @@ export function formatTime(
   options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" },
 ): string {
   return new Intl.DateTimeFormat(getIntlLocale(locale), options).format(value);
+}
+
+export function formatDuration(
+  minutes: number,
+  locale: SupportedLocale,
+): string {
+  const safeMinutes = Math.max(0, Math.floor(minutes));
+  const hours = Math.floor(safeMinutes / 60);
+  const remainder = safeMinutes % 60;
+  const formatter = new Intl.NumberFormat(getIntlLocale(locale), {
+    style: "unit",
+    unit: "minute",
+    unitDisplay: "long",
+  });
+  const parts = [
+    ...(hours
+      ? [
+          new Intl.NumberFormat(getIntlLocale(locale), {
+            style: "unit",
+            unit: "hour",
+            unitDisplay: "long",
+          }).format(hours),
+        ]
+      : []),
+    ...(remainder ? [formatter.format(remainder)] : []),
+  ];
+  if (!parts.length) return formatter.format(0);
+  return parts.length === 1
+    ? parts[0]
+    : new Intl.ListFormat(getIntlLocale(locale), {
+        style: "long",
+        type: "conjunction",
+      }).format(parts);
 }
 
 export function formatDateTime(

@@ -319,6 +319,19 @@ export function ServiceEditorModal({
             <Text style={styles.categoryHint}>
               {t("mobile.serviceTranslationReviewHint")}
             </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setShowTranslations((current) => !current)}
+              style={styles.translationToggle}
+            >
+              <Text style={styles.categoryOptionText}>
+                {t(
+                  showTranslations
+                    ? "mobile.serviceTranslationsHide"
+                    : "mobile.serviceTranslationsShow",
+                )}
+              </Text>
+            </Pressable>
             <ActionButton
               disabled={isTranslating || isSaving}
               label={t("mobile.serviceTranslateWithAi")}
@@ -338,19 +351,6 @@ export function ServiceEditorModal({
                 {quotaNotice}
               </Text>
             ) : null}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setShowTranslations((current) => !current)}
-              style={styles.translationToggle}
-            >
-              <Text style={styles.categoryOptionText}>
-                {t(
-                  showTranslations
-                    ? "mobile.serviceTranslationsHide"
-                    : "mobile.serviceTranslationsShow",
-                )}
-              </Text>
-            </Pressable>
             {translationError ? (
               <Text accessibilityRole="alert" style={styles.error}>
                 {translationError}

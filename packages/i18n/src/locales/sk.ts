@@ -430,6 +430,8 @@ export const slovakMessages: Messages = {
   "mobile.manualBookingExistingCustomer": "Existujúci klient",
   "mobile.manualBookingNewCustomer": "Nový klient",
   "mobile.manualBookingSearchCustomer": "Vyhľadať klientov",
+  "mobile.manualBookingSearchHint":
+    "Zadajte meno, telefón alebo e-mail klienta. Zobrazíme iba zhody.",
   "mobile.manualBookingNoCustomers": "Zatiaľ neboli pridaní žiadni klienti.",
   "mobile.manualBookingCustomerName": "Meno klienta *",
   "mobile.manualBookingCustomerEmail": "E-mail klienta",
@@ -450,7 +452,7 @@ export const slovakMessages: Messages = {
   "mobile.manualBookingDate": "Dátum *",
   "mobile.manualBookingTime": "Voľný čas *",
   "mobile.manualBookingNoSlots": "V tento deň nie sú voľné termíny.",
-  "mobile.manualBookingDuration": "Trvanie v minútach *",
+  "mobile.manualBookingDuration": "Trvanie rezervácie",
   "mobile.manualBookingPrice": "Cena, Kč *",
   "mobile.manualBookingNote": "Poznámka majstra",
   "mobile.manualBookingNotePlaceholder": "Napríklad klient z Instagramu",
@@ -595,7 +597,7 @@ export const slovakMessages: Messages = {
   "mobile.serviceTranslationFailed":
     "Preklady sa nepodarilo pripraviť. Skúste to znova.",
   "mobile.serviceTranslationNameRequired": "Najprv zadajte názov služby.",
-  "mobile.serviceTranslationsShow": "Zobraziť preklady",
+  "mobile.serviceTranslationsShow": "Zadať preklady ručne",
   "mobile.serviceTranslationsHide": "Skryť preklady",
   "mobile.serviceSave": "Uložiť službu",
   "mobile.serviceCreate": "Vytvoriť službu",

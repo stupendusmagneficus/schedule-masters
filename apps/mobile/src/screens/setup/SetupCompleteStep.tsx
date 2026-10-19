@@ -1,3 +1,4 @@
+import { formatDuration, type SupportedLocale } from "@schedule-app/i18n";
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
 import type {
@@ -11,6 +12,7 @@ import { buildBookingUrl } from "../../utils/bookingUrl";
 type SetupCompleteStepProps = {
   readonly bookingWebUrl: string;
   readonly draft: OnboardingDraft;
+  readonly locale: SupportedLocale;
   readonly onOpenBooking: () => void;
   readonly onOpenDashboard: () => void;
   readonly t: SetupTranslator;
@@ -19,6 +21,7 @@ type SetupCompleteStepProps = {
 export function SetupCompleteStep({
   bookingWebUrl,
   draft,
+  locale,
   onOpenBooking,
   onOpenDashboard,
   t,
@@ -33,7 +36,7 @@ export function SetupCompleteStep({
       <View style={styles.summary}>
         <Text style={styles.summaryTitle}>{draft.serviceName}</Text>
         <Text style={styles.summaryText}>
-          {draft.price} Kč · {draft.duration} min
+          {draft.price} Kč · {formatDuration(Number(draft.duration), locale)}
         </Text>
         <Text style={styles.summaryText}>
           {draft.startTime}–{draft.endTime}
