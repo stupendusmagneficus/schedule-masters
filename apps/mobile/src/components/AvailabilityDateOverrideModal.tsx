@@ -16,6 +16,7 @@ import { FullscreenModal } from "./FullscreenModal";
 
 type AvailabilityDateOverrideModalProps = {
   readonly appointments: readonly MasterAppointment[];
+  readonly canAddBreak: boolean;
   readonly date: string;
   readonly endLocalTime: string;
   readonly error: string | null;
@@ -24,6 +25,7 @@ type AvailabilityDateOverrideModalProps = {
   readonly isSaving: boolean;
   readonly locale: SupportedLocale;
   readonly onClear: () => Promise<void>;
+  readonly onAddBreak: () => void;
   readonly onClose: () => void;
   readonly onSave: (draft: AvailabilityOverrideDraft) => Promise<void>;
   readonly startLocalTime: string;
@@ -34,6 +36,7 @@ type AvailabilityDateOverrideModalProps = {
 
 export function AvailabilityDateOverrideModal({
   appointments,
+  canAddBreak,
   date,
   endLocalTime,
   error,
@@ -42,6 +45,7 @@ export function AvailabilityDateOverrideModal({
   isSaving,
   locale,
   onClear,
+  onAddBreak,
   onClose,
   onSave,
   startLocalTime,
@@ -159,30 +163,39 @@ export function AvailabilityDateOverrideModal({
           />
         </View>
         {kind === "modified" ? (
-          <View style={styles.timeRow}>
-            <View style={styles.timeField}>
-              <DateTimePickerField
-                label={t("mobile.calendarDayStart")}
-                locale={locale}
-                mode="time"
-                onChange={setStartTime}
-                placeholder={t("mobile.personalBlockTimePlaceholder")}
-                t={t}
-                value={startTime}
-              />
+          <>
+            <View style={styles.timeRow}>
+              <View style={styles.timeField}>
+                <DateTimePickerField
+                  label={t("mobile.calendarDayStart")}
+                  locale={locale}
+                  mode="time"
+                  onChange={setStartTime}
+                  placeholder={t("mobile.personalBlockTimePlaceholder")}
+                  t={t}
+                  value={startTime}
+                />
+              </View>
+              <View style={styles.timeField}>
+                <DateTimePickerField
+                  label={t("mobile.calendarDayEnd")}
+                  locale={locale}
+                  mode="time"
+                  onChange={setEndTime}
+                  placeholder={t("mobile.personalBlockTimePlaceholder")}
+                  t={t}
+                  value={endTime}
+                />
+              </View>
             </View>
-            <View style={styles.timeField}>
-              <DateTimePickerField
-                label={t("mobile.calendarDayEnd")}
-                locale={locale}
-                mode="time"
-                onChange={setEndTime}
-                placeholder={t("mobile.personalBlockTimePlaceholder")}
-                t={t}
-                value={endTime}
+            {canAddBreak ? (
+              <ActionButton
+                label={t("mobile.personalBlockAdd")}
+                onPress={onAddBreak}
+                variant="secondary"
               />
-            </View>
-          </View>
+            ) : null}
+          </>
         ) : null}
         {conflicts.length ? (
           <View style={styles.conflictBox}>

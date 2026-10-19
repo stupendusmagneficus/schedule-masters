@@ -255,6 +255,7 @@ export function ManualBookingServicesField({
               contentContainerStyle={styles.categories}
               horizontal
               showsHorizontalScrollIndicator={false}
+              style={styles.categoryScroller}
             >
               <CategoryChip
                 active={category === null}
@@ -418,19 +419,26 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: "700",
   },
-  categories: { gap: 8, paddingVertical: 12 },
+  categories: {
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 12,
+  },
   categoryChip: {
+    alignSelf: "center",
     borderColor: colors.border,
     borderRadius: radii.control,
     borderWidth: 1,
+    flexShrink: 0,
+    height: 44,
     justifyContent: "center",
-    minHeight: 44,
     paddingHorizontal: 14,
   },
   categoryChipActive: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
   },
+  categoryScroller: { flexGrow: 0 },
   categoryHeading: {
     ...typography.caption,
     color: colors.secondaryText,

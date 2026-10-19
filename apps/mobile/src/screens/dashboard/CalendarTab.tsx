@@ -586,6 +586,7 @@ export function CalendarTab({
       </View>
       <AvailabilityDateOverrideModal
         appointments={selectedDayAppointments}
+        canAddBreak={Boolean(client)}
         date={calendar.selectedDate}
         endLocalTime={dayEndTime}
         error={calendar.error}
@@ -601,6 +602,13 @@ export function CalendarTab({
           onFeedback(t("mobile.calendarDayResetDone"));
         }}
         onClose={() => setDaySettingsVisible(false)}
+        onAddBreak={() => {
+          const date = calendar.selectedDate;
+          setDaySettingsVisible(false);
+          setTimeout(() => {
+            openBlockEditor(createDefaultPersonalBlockDraft(date));
+          }, 220);
+        }}
         onSave={async (draft: AvailabilityOverrideDraft) => {
           await calendar.saveDateOverride(draft);
           setDaySettingsVisible(false);

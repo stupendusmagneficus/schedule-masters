@@ -140,6 +140,7 @@ export function ServicePickerField({
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.categoryList}
+              style={styles.categoryScroller}
             >
               <CategoryChip
                 active={category === null}
@@ -244,11 +245,13 @@ function CategoryChip({
 
 const styles = StyleSheet.create({
   categoryChip: {
+    alignSelf: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radii.pill,
     borderWidth: 1,
-    minHeight: 44,
+    flexShrink: 0,
+    height: 44,
     justifyContent: "center",
     paddingHorizontal: 14,
   },
@@ -256,13 +259,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action,
     borderColor: colors.action,
   },
+  categoryScroller: { flexGrow: 0 },
   categoryHeading: {
     ...typography.label,
     color: colors.secondaryText,
     marginBottom: 8,
     marginTop: 6,
   },
-  categoryList: { gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
+  categoryList: {
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   categoryText: { ...typography.label, color: colors.primaryText },
   categoryTextActive: { color: colors.actionText },
   copy: { flex: 1, gap: 3, minWidth: 0 },
