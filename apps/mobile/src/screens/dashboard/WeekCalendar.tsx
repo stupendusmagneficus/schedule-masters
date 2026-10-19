@@ -16,8 +16,11 @@ import { colors, radii } from "../../theme/tokens";
 import { CalendarEventLegend } from "./CalendarEventLegend";
 import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 import { CalendarWorkloadLegend } from "./CalendarWorkloadLegend";
+import {
+  groupWeekCalendarSlots,
+  WEEK_CALENDAR_VISIBLE_SLOT_HEIGHT,
+} from "./weekCalendarTouchTarget";
 
-const compactSlotHeight = 24;
 const calendarTimeGutterWidth = 36;
 
 type WeekCalendarProps = {
@@ -64,6 +67,7 @@ export function WeekCalendar({
     ...(openDays.length ? openDays : days).map((day) => day.endMinute),
   );
   const timeSlots = createCompactSlots(startMinute, endMinute);
+  const timeSlotGroups = groupWeekCalendarSlots(timeSlots);
   const totalEvents = days.reduce((total, day) => total + day.bookingCount, 0);
 
   return (
@@ -217,21 +221,39 @@ export function WeekCalendar({
                 day.isClosed && styles.closedColumn,
               ]}
             >
-              {timeSlots.map((minute) => (
-                <Pressable
-                  accessibilityHint={t("mobile.calendarTapToBook")}
-                  accessibilityLabel={`${formatTimelineTime(minute)}, ${formatDateLabel(day.date, locale, timezone)}`}
-                  accessibilityRole="button"
-                  disabled={
-                    day.isClosed || minute >= day.endMinute || !onPressTime
-                  }
-                  key={minute}
-                  onPress={() => onPressTime?.(day.date, minute)}
-                  style={({ pressed }) => [
-                    styles.gridSlot,
-                    pressed && onPressTime && styles.gridSlotPressed,
+              {timeSlotGroups.map((group) => (
+                <View
+                  key={group.startMinute}
+                  style={[
+                    styles.gridSlotGroup,
+                    { height: group.touchTargetHeight },
                   ]}
-                />
+                >
+                  {group.minutes.length > 1 ? (
+                    <View
+                      pointerEvents="none"
+                      style={[
+                        styles.gridSlotHalfHourDivider,
+                        { top: WEEK_CALENDAR_VISIBLE_SLOT_HEIGHT },
+                      ]}
+                    />
+                  ) : null}
+                  <Pressable
+                    accessibilityHint={t("mobile.calendarTapToBook")}
+                    accessibilityLabel={`${formatTimelineTime(group.startMinute)}–${formatTimelineTime(group.endMinute)}, ${formatDateLabel(day.date, locale, timezone)}`}
+                    accessibilityRole="button"
+                    disabled={
+                      day.isClosed ||
+                      group.startMinute >= day.endMinute ||
+                      !onPressTime
+                    }
+                    onPress={() => onPressTime?.(day.date, group.startMinute)}
+                    style={({ pressed }) => [
+                      styles.gridSlot,
+                      pressed && onPressTime && styles.gridSlotPressed,
+                    ]}
+                  />
+                </View>
               ))}
               {day.events.map((event) => (
                 <WeekCalendarEventCard
@@ -278,11 +300,11 @@ function WeekCalendarEventCard({
     getLocalMinutes(event.endAt, timezone),
   );
   const top = Math.max(
-    ((startMinute - gridStartMinute) / 30) * compactSlotHeight,
+    ((startMinute - gridStartMinute) / 30) * WEEK_CALENDAR_VISIBLE_SLOT_HEIGHT,
     0,
   );
   const height = Math.max(
-    ((endMinute - startMinute) / 30) * compactSlotHeight - 2,
+    ((endMinute - startMinute) / 30) * WEEK_CALENDAR_VISIBLE_SLOT_HEIGHT - 2,
     22,
   );
   const isOnlineAppointment = event.appointment?.source === "public_booking";
@@ -481,11 +503,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   gridSlot: {
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+  },
+  gridSlotGroup: {
     borderBottomColor: colors.borderSubtle,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderLeftColor: colors.borderSubtle,
     borderLeftWidth: StyleSheet.hairlineWidth,
-    height: compactSlotHeight,
+    position: "relative",
+  },
+  gridSlotHalfHourDivider: {
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    left: 0,
+    position: "absolute",
+    right: 0,
   },
   gridSlotPressed: { backgroundColor: colors.accentSoft },
   hint: {
@@ -553,7 +589,7 @@ const styles = StyleSheet.create({
   },
   timeRow: {
     alignItems: "flex-end",
-    height: compactSlotHeight,
+    height: WEEK_CALENDAR_VISIBLE_SLOT_HEIGHT,
     justifyContent: "flex-start",
     paddingRight: 4,
     paddingTop: 2,

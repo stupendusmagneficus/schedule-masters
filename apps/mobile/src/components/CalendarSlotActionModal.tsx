@@ -66,6 +66,7 @@ export function CalendarSlotActionModal({
                 accessibilityLabel={option.label}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: selected }}
+                aria-checked={selected}
                 key={option.startsAt}
                 onPress={() => onSelectTime(option.startsAt)}
                 style={[
