@@ -169,6 +169,7 @@ export type MessageKey =
   | "mobile.freeSlotsShareGraphicTitle"
   | "mobile.freeSlotsShareBookingLink"
   | "mobile.bookingRequests"
+  | "mobile.bookingRequestsHint"
   | "mobile.waitingList"
   | "mobile.waitingListAdd"
   | "mobile.waitingListAddExisting"
@@ -814,6 +815,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsShareGraphicTitle": "Свободное время для записи",
     "mobile.freeSlotsShareBookingLink": "Запись онлайн",
     "mobile.bookingRequests": "Заявки",
+    "mobile.bookingRequestsHint": "Ожидают подтверждения",
     "mobile.waitingList": "Лист ожидания",
     "mobile.waitingListAdd": "Добавить в лист ожидания",
     "mobile.waitingListAddExisting": "Добавить существующего клиента",
@@ -1535,6 +1537,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsShareGraphicTitle": "Volné časy k objednání",
     "mobile.freeSlotsShareBookingLink": "Online rezervace",
     "mobile.bookingRequests": "Žádosti",
+    "mobile.bookingRequestsHint": "Čekají na potvrzení",
     "mobile.waitingList": "Seznam náhradníků",
     "mobile.waitingListAdd": "Přidat do seznamu náhradníků",
     "mobile.waitingListAddExisting": "Přidat stávajícího klienta",
@@ -2257,6 +2260,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.freeSlotsShareGraphicTitle": "Available appointment times",
     "mobile.freeSlotsShareBookingLink": "Book online",
     "mobile.bookingRequests": "Requests",
+    "mobile.bookingRequestsHint": "Awaiting your confirmation",
     "mobile.waitingList": "Waiting list",
     "mobile.waitingListAdd": "Add to waiting list",
     "mobile.waitingListAddExisting": "Add existing client",
