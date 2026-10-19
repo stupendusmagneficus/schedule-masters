@@ -20,7 +20,7 @@ import { typography } from "../../theme/typography";
 import { CalendarWorkloadLegend } from "./CalendarWorkloadLegend";
 import type { DashboardTabProps } from "./types";
 
-const MONTH_ROW_HEIGHT = 336;
+const MONTH_ROW_HEIGHT = 348;
 
 type MonthItem = CalendarMonthEntry & {
   readonly days: readonly MonthCalendarDay[];
@@ -276,11 +276,11 @@ function MonthGrid({
                 selected: selectionMode ? isMultiSelected : day.isSelected,
               }}
               disabled={isDisabled}
-              hitSlop={2}
               key={day.date}
               onPress={() =>
                 selectionMode ? onToggleDate(day.date) : onSelectDate(day.date)
               }
+              testID={`calendar-month-day-${day.date}`}
               style={({ pressed }) => [
                 styles.dayCell,
                 !day.isCurrentMonth && styles.outsideDay,
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     alignItems: "center",
-    height: 42,
+    height: 44,
     justifyContent: "center",
     width: "14.2857%",
   },
@@ -497,7 +497,11 @@ const styles = StyleSheet.create({
   loadingRow: { alignItems: "center", height: 28, justifyContent: "center" },
   loadingBottom: { bottom: 2, left: 0, position: "absolute", right: 0 },
   loadingTop: { left: 0, position: "absolute", right: 0, top: 2 },
-  monthGrid: { flexDirection: "row", flexWrap: "wrap" },
+  monthGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -11,
+  },
   monthHeading: {
     alignItems: "center",
     flexDirection: "row",

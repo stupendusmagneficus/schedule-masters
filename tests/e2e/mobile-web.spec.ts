@@ -185,6 +185,22 @@ test.describe("mobile web smoke", () => {
     await expect(page.getByRole("button", { name: "Zpět" })).toHaveCount(0);
     await page.getByRole("tab", { name: "Dnes" }).click();
     await expect(page.getByRole("heading", { name: "Dnes" })).toBeVisible();
+
+    const navigationLabelSizes = await page
+      .getByRole("tab")
+      .evaluateAll((tabs) =>
+        tabs.map((tab) => {
+          const label = tab.getAttribute("aria-label");
+          const labelNode = Array.from(tab.querySelectorAll("*"))
+            .filter((node) => node.childElementCount === 0)
+            .find((node) => node.textContent?.trim() === label);
+          return labelNode
+            ? Number.parseFloat(getComputedStyle(labelNode).fontSize)
+            : 0;
+        }),
+      );
+    expect(navigationLabelSizes).toHaveLength(5);
+    expect(navigationLabelSizes.every((size) => size >= 11)).toBe(true);
   });
 
   test("gives visible feedback when starting a new booking", async ({
@@ -530,6 +546,24 @@ test.describe("mobile web smoke", () => {
       page.getByText("1. listopadu 2026", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Denní rozvrh", { exact: true })).toBeVisible();
+  });
+
+  test("keeps month date targets at least 44 by 44 on a narrow viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 780 });
+    await page.goto("/?demo=1");
+    await page.getByRole("tab", { name: "Kalendář" }).click();
+    await page.getByRole("tab", { name: "Měsíc" }).click();
+    await expect(page.getByTestId("calendar-month-sheet")).toBeVisible();
+
+    const target = await page
+      .getByTestId("calendar-month-day-2026-10-01")
+      .first()
+      .boundingBox();
+
+    expect(target?.width).toBeGreaterThanOrEqual(44);
+    expect(target?.height).toBeGreaterThanOrEqual(44);
   });
 
   test("keeps week selection in week view", async ({ page }) => {

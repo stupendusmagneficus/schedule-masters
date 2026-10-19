@@ -106,12 +106,7 @@ export function BottomNavigation({
             style={styles.item}
           >
             <MaterialCommunityIcons color={color} name={item.icon} size={21} />
-            <Text
-              adjustsFontSizeToFit
-              minimumFontScale={0.85}
-              numberOfLines={1}
-              style={[styles.label, { color }]}
-            >
+            <Text numberOfLines={2} style={[styles.label, { color }]}>
               {labels[item.id]}
             </Text>
           </Pressable>
@@ -144,12 +139,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
     justifyContent: "center",
-    minHeight: 48,
+    minHeight: 56,
     zIndex: 1,
   },
   label: {
     fontSize: 11,
     fontWeight: "600",
-    lineHeight: 14,
+    lineHeight: 15,
   },
 });

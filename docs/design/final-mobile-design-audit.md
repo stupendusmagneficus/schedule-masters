@@ -94,7 +94,7 @@ Evidence: motion and feedback requirements in `docs/design/DESIGN.md`; shared fe
 
 ## Recommended next design work
 
-1. Run a real device/simulator pass at narrow and wide supported phone sizes, including Czech/Slovak long labels and large accessibility text.
+1. Run a real device/simulator pass at narrow and wide supported phone sizes, including all five locales, large accessibility text, and month/day touch accuracy.
 2. ~~Simplify Today’s top-of-screen order and verify that the next appointment is visible without scrolling on a typical phone.~~ **Implemented:** summary first, then schedule; device visibility still needs visual QA.
 3. ~~Convert customer history from separate cards to compact separated rows.~~ **Implemented:** one history surface, compact rows, and expandable localized notes.
 4. Review modal use screen by screen: keep full-screen for multi-step work, and use native sheets for quick selections and confirmations where the shared component system allows it.
@@ -116,17 +116,17 @@ The week grid now keeps its 24 pt visual half-hour rows but combines each adjace
 
 Evidence: `apps/mobile/src/screens/dashboard/WeekCalendar.tsx`, `apps/mobile/src/screens/dashboard/weekCalendarTouchTarget.ts`, and `tests/e2e/mobile-web.spec.ts`. The targeted Playwright E2E passed at a 375 px viewport; mobile unit tests, typecheck, lint, Biome checks, and Expo web export also passed.
 
-### P2 — Bring Month calendar day targets up to the shared minimum
+### P2 — Bring Month calendar day targets up to the shared minimum — implemented
 
-The month view's day buttons are 42 × 42 pt. This is close to the target but still below the documented 44 pt minimum. Increase the interactive area without changing the visual day marker or making neighboring dates ambiguous.
+The month view now uses 44 pt day press targets while keeping the 42 pt visual marker. The grid extends into the page's horizontal inset so all seven columns retain a 44 pt minimum even on a 320 pt viewport. Month row measurements were updated to account for the taller grid, preserving virtualized scroll positioning.
 
-Evidence: `apps/mobile/src/screens/dashboard/MonthCalendar.tsx:271-289` and `:471-487`.
+Evidence: `apps/mobile/src/screens/dashboard/MonthCalendar.tsx` and the narrow-viewport E2E coverage in `tests/e2e/mobile-web.spec.ts`.
 
-### P2 — Validate the bottom navigation with long labels and larger text
+### P2 — Keep bottom navigation labels legible at narrow widths — implemented
 
-The bottom bar gives five tabs equal width and uses 11 pt labels, which can shrink to 85% to fit. This preserves the layout but can reduce legibility for Czech/Slovak labels and users with larger text preferences. Check all five supported locales at the narrowest supported device width and with the largest practical system text size. If labels become hard to read, prefer a navigation layout adjustment over shrinking the text further.
+The five tabs retain their labels at narrow widths without shrinking text to fit. Labels can wrap to a second line, and the tab touch area grows to accommodate the extra line. Automated web coverage checks the five Czech labels at 320 pt and verifies they remain at the designed 11 pt size. Native system text scaling and all five locales still need a device/simulator pass.
 
-Evidence: `apps/mobile/src/components/BottomNavigation.tsx:99-116` and `:142-154`; locale and accessibility requirements in `docs/design/DESIGN.md`.
+Evidence: `apps/mobile/src/components/BottomNavigation.tsx` and `tests/e2e/mobile-web.spec.ts`; locale and accessibility requirements in `docs/design/DESIGN.md`.
 
 ### Confirmed strengths in this pass
 
