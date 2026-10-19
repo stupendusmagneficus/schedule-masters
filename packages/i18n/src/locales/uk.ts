@@ -190,6 +190,7 @@ export const ukrainianMessages: Messages = {
   "mobile.freeSlotsShareGraphicTitle": "Вільний час для запису",
   "mobile.freeSlotsShareBookingLink": "Запис онлайн",
   "mobile.bookingRequests": "Заявки",
+  "mobile.bookingRequestsHint": "Очікують на підтвердження",
   "mobile.waitingList": "Список очікування",
   "mobile.waitingListAdd": "Додати до списку очікування",
   "mobile.waitingListAddExisting": "Додати наявного клієнта",

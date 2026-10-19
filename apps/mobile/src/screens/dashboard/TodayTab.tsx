@@ -130,7 +130,9 @@ export function TodayTab({
         accessibilityLabel={
           bookingRequestCount === null
             ? t("mobile.bookingRequests")
-            : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
+            : bookingRequestsError
+              ? `${t("mobile.bookingRequests")}: ${t("mobile.bookingRequestsLoadFailed")}`
+              : `${t("mobile.bookingRequests")}: ${bookingRequestCount}`
         }
         description={
           bookingRequestsError ? (
@@ -142,12 +144,14 @@ export function TodayTab({
                 size={20}
               />
               <Text style={styles.requestErrorText}>
-                {waitingListCount === null
-                  ? t("common.error")
-                  : t("mobile.waitingListStale")}
+                {t("mobile.bookingRequestsLoadFailed")}
               </Text>
             </View>
-          ) : undefined
+          ) : (
+            <Text style={styles.bookingRequestsHint}>
+              {t("mobile.bookingRequestsHint")}
+            </Text>
+          )
         }
         onPress={onOpenBookingRequests}
         title={t("mobile.bookingRequests")}
@@ -395,18 +399,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   appointmentsList: { gap: 12 },
+  bookingRequestsHint: { ...typography.caption, color: colors.secondaryText },
   requestCount: {
     alignItems: "center",
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.pendingSoft,
     borderRadius: radii.pill,
     justifyContent: "center",
-    minHeight: 36,
-    minWidth: 36,
+    minHeight: 40,
+    minWidth: 40,
     paddingHorizontal: 10,
   },
   requestCountText: {
     ...typography.label,
-    color: colors.accent,
+    color: colors.pendingText,
     fontWeight: "700",
   },
   requestError: {

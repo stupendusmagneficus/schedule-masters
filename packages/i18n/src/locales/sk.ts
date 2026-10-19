@@ -190,6 +190,7 @@ export const slovakMessages: Messages = {
   "mobile.freeSlotsShareGraphicTitle": "Voľné časy na rezerváciu",
   "mobile.freeSlotsShareBookingLink": "Online rezervácia",
   "mobile.bookingRequests": "Žiadosti",
+  "mobile.bookingRequestsHint": "Čakajú na potvrdenie",
   "mobile.waitingList": "Zoznam náhradníkov",
   "mobile.waitingListAdd": "Pridať do zoznamu náhradníkov",
   "mobile.waitingListAddExisting": "Pridať existujúceho klienta",
