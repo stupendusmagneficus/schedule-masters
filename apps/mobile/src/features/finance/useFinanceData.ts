@@ -8,7 +8,6 @@ import {
   type MasterAppointment,
 } from "../appointments/manualBooking";
 import { formatDateInTimeZone } from "../availability/personalBlocks";
-import { getCalendarDateRange } from "../calendar/calendar";
 import {
   getDayTimelineSlotStart,
   timeToMinutes,
@@ -18,8 +17,9 @@ type UseFinanceDataParams = {
   readonly client: SupabaseClient<Database> | null;
   readonly demoData?: DemoData;
   readonly enabled: boolean;
-  readonly month: string;
+  readonly fromDate: string;
   readonly refreshVersion: number;
+  readonly toDate: string;
   readonly timezone: string;
   readonly workspaceId: string;
 };
@@ -44,8 +44,9 @@ export function useFinanceData({
   client,
   demoData,
   enabled,
-  month,
+  fromDate,
   refreshVersion,
+  toDate,
   timezone,
   workspaceId,
 }: UseFinanceDataParams) {
@@ -55,8 +56,7 @@ export function useFinanceData({
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [loadedRefreshVersion, setLoadedRefreshVersion] = useState(-1);
   const requestId = useRef(0);
-  const range = getCalendarDateRange(month, "month");
-  const queryKey = `${workspaceId}:${range.fromDate}:${range.toDate}`;
+  const queryKey = `${workspaceId}:${fromDate}:${toDate}`;
   const hasCurrentData = loadedKey === queryKey;
 
   const reload = useCallback(async () => {
@@ -64,11 +64,8 @@ export function useFinanceData({
     setError(false);
 
     if (demoData) {
-      const currentMonth = formatDateInTimeZone(new Date(), timezone).slice(
-        0,
-        7,
-      );
-      if (month.slice(0, 7) < currentMonth) {
+      const today = formatDateInTimeZone(new Date(), timezone);
+      if (toDate < today && toDate.slice(0, 7) < today.slice(0, 7)) {
         setAppointments([]);
         setLoadedKey(queryKey);
         setLoadedRefreshVersion(refreshVersion);
@@ -78,9 +75,9 @@ export function useFinanceData({
 
       setAppointments(
         demoData.appointments.map((appointment, index) => {
-          const date = `${month.slice(0, 7)}-${String(index + 2).padStart(2, "0")}`;
+          const date = addDateWithinRange(fromDate, toDate, index + 1);
           const startsAt =
-            month.slice(0, 7) === currentMonth
+            date === today
               ? new Date(Date.now() + (index + 1) * 60 * 60_000).toISOString()
               : getDayTimelineSlotStart(
                   date,
@@ -127,8 +124,8 @@ export function useFinanceData({
       const result = await listMasterAppointments(
         client,
         workspaceId,
-        range.fromDate,
-        range.toDate,
+        fromDate,
+        toDate,
       );
       if (requestId.current === currentRequestId) {
         setAppointments(result);
@@ -149,11 +146,10 @@ export function useFinanceData({
     client,
     demoData,
     hasCurrentData,
-    month,
+    fromDate,
     queryKey,
-    range.fromDate,
-    range.toDate,
     refreshVersion,
+    toDate,
     timezone,
     workspaceId,
   ]);
@@ -192,4 +188,15 @@ export function useFinanceData({
       (isLoading || (enabled && Boolean(client || demoData))),
     reload,
   };
+}
+
+function addDateWithinRange(fromDate: string, toDate: string, offset: number) {
+  const from = new Date(`${fromDate}T12:00:00.000Z`);
+  const to = new Date(`${toDate}T12:00:00.000Z`);
+  const days = Math.max(
+    1,
+    Math.floor((to.getTime() - from.getTime()) / 86_400_000) + 1,
+  );
+  from.setUTCDate(from.getUTCDate() + (offset % days));
+  return from.toISOString().slice(0, 10);
 }

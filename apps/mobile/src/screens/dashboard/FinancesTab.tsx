@@ -16,15 +16,18 @@ import {
   View,
 } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
+import { DateTimePickerField } from "../../components/DateTimePickerField";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { DemoData } from "../../demo/types";
 import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
 import {
+  addCalendarDays,
+  getCalendarDateRange,
   getTodayCalendarDate,
   moveCalendarDate,
 } from "../../features/calendar/calendar";
-import { summarizeFinanceMonth } from "../../features/finance/financeSummary";
+import { summarizeFinanceRange } from "../../features/finance/financeSummary";
 import { useFinanceData } from "../../features/finance/useFinanceData";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -53,21 +56,32 @@ export function FinancesTab({
     const today = getTodayCalendarDate(workspace.timezone);
     return `${today.slice(0, 7)}-01`;
   });
+  const [customRange, setCustomRange] = useState(false);
+  const [customFromDate, setCustomFromDate] = useState(() =>
+    monthBoundary(month, false),
+  );
+  const [customToDate, setCustomToDate] = useState(() =>
+    monthBoundary(month, true),
+  );
+  const fromDate = customRange ? customFromDate : monthBoundary(month, false);
+  const toDate = customRange ? customToDate : monthBoundary(month, true);
   const [showDetails, setShowDetails] = useState(false);
   const financeData = useFinanceData({
     client,
     demoData,
     enabled: visible,
-    month,
+    fromDate,
     refreshVersion,
+    toDate,
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
   const now = new Date();
-  const summary = summarizeFinanceMonth({
+  const summary = summarizeFinanceRange({
     appointments: financeData.appointments,
-    month,
+    fromDate,
     now,
+    toDate,
     timezone: workspace.timezone,
   });
   const monthLabel = formatDate(new Date(`${month}T12:00:00.000Z`), locale, {
@@ -79,14 +93,17 @@ export function FinancesTab({
   const receivedAmounts = formatAmounts(summary.paidByCurrency, locale);
   const weeklyIncome = summarizeWeeklyIncome(
     financeData.appointments,
-    month,
+    fromDate,
+    toDate,
+    locale,
     workspace.timezone,
   );
   const hasAppointments = financeData.appointments.some((appointment) => {
-    return formatDateInTimeZone(
+    const localDate = formatDateInTimeZone(
       new Date(appointment.starts_at),
       workspace.timezone,
-    ).startsWith(month.slice(0, 7));
+    );
+    return localDate >= fromDate && localDate <= toDate;
   });
 
   return (
@@ -96,25 +113,73 @@ export function FinancesTab({
         title={t("mobile.finances")}
       />
 
-      <View style={styles.monthSelector}>
-        <MonthButton
-          accessibilityLabel={t("mobile.financePreviousMonth")}
-          icon="chevron-left"
-          onPress={() =>
-            setMonth((current) => moveCalendarDate(current, "month", -1))
-          }
+      <View style={styles.periodMode}>
+        <PeriodModeButton
+          label={t("mobile.financeMonthlyRange")}
+          onPress={() => setCustomRange(false)}
+          selected={!customRange}
         />
-        <Text accessibilityRole="header" style={styles.monthLabel}>
-          {monthLabel}
-        </Text>
-        <MonthButton
-          accessibilityLabel={t("mobile.financeNextMonth")}
-          icon="chevron-right"
-          onPress={() =>
-            setMonth((current) => moveCalendarDate(current, "month", 1))
-          }
+        <PeriodModeButton
+          label={t("mobile.financeCustomRange")}
+          onPress={() => {
+            if (!customRange) {
+              setCustomFromDate(monthBoundary(month, false));
+              setCustomToDate(monthBoundary(month, true));
+            }
+            setCustomRange(true);
+          }}
+          selected={customRange}
         />
       </View>
+
+      {customRange ? (
+        <View style={styles.rangeFields}>
+          <DateTimePickerField
+            label={t("mobile.financeFromDate")}
+            locale={locale}
+            mode="date"
+            onChange={(value) => {
+              setCustomFromDate(value);
+              if (value > customToDate) setCustomToDate(value);
+            }}
+            placeholder={t("mobile.datePickerChoose")}
+            t={t}
+            value={customFromDate}
+          />
+          <DateTimePickerField
+            label={t("mobile.financeToDate")}
+            locale={locale}
+            mode="date"
+            onChange={(value) => {
+              setCustomToDate(value);
+              if (value < customFromDate) setCustomFromDate(value);
+            }}
+            placeholder={t("mobile.datePickerChoose")}
+            t={t}
+            value={customToDate}
+          />
+        </View>
+      ) : (
+        <View style={styles.monthSelector}>
+          <MonthButton
+            accessibilityLabel={t("mobile.financePreviousMonth")}
+            icon="chevron-left"
+            onPress={() =>
+              setMonth((current) => moveCalendarDate(current, "month", -1))
+            }
+          />
+          <Text accessibilityRole="header" style={styles.monthLabel}>
+            {monthLabel}
+          </Text>
+          <MonthButton
+            accessibilityLabel={t("mobile.financeNextMonth")}
+            icon="chevron-right"
+            onPress={() =>
+              setMonth((current) => moveCalendarDate(current, "month", 1))
+            }
+          />
+        </View>
+      )}
 
       {financeData.isLoading ? (
         <View accessibilityLiveRegion="polite" style={styles.state}>
@@ -269,6 +334,37 @@ function MonthButton({
   );
 }
 
+function PeriodModeButton({
+  label,
+  onPress,
+  selected,
+}: {
+  readonly label: string;
+  readonly onPress: () => void;
+  readonly selected: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[
+        styles.periodModeButton,
+        selected && styles.periodModeButtonSelected,
+      ]}
+    >
+      <Text
+        style={[
+          styles.periodModeLabel,
+          selected && styles.periodModeLabelSelected,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function MetricCard({
   label,
   value,
@@ -370,19 +466,19 @@ function summarizeWeeklyIncome(
     readonly starts_at: string;
     readonly status: string;
   }[],
-  month: string,
+  fromDate: string,
+  toDate: string,
+  locale: SupportedLocale,
   timezone: string,
 ): WeeklyIncome[] {
-  const monthKey = month.slice(0, 7);
-  const firstDay = new Date(`${monthKey}-01T00:00:00.000Z`).getUTCDay();
-  const mondayOffset = (firstDay + 6) % 7;
-  const daysInMonth = new Date(
-    Date.UTC(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)), 0),
-  ).getUTCDate();
-  const weekCount = Math.ceil((mondayOffset + daysInMonth) / 7);
+  const first = new Date(`${fromDate}T12:00:00.000Z`);
+  const last = new Date(`${toDate}T12:00:00.000Z`);
+  const dayCount =
+    Math.floor((last.getTime() - first.getTime()) / 86_400_000) + 1;
+  const weekCount = Math.ceil(dayCount / 7);
   const buckets = Array.from({ length: weekCount }, (_, index) => ({
     amounts: {} as Record<string, number>,
-    label: `${Math.max(1, index * 7 - mondayOffset + 1)}–${Math.min(daysInMonth, (index + 1) * 7 - mondayOffset)}`,
+    label: `${dateLabel(addCalendarDays(fromDate, index * 7), locale)}–${dateLabel(addCalendarDays(fromDate, Math.min(dayCount - 1, index * 7 + 6)), locale)}`,
   }));
 
   for (const appointment of appointments) {
@@ -391,9 +487,12 @@ function summarizeWeeklyIncome(
       new Date(appointment.starts_at),
       timezone,
     );
-    if (!localDate.startsWith(monthKey)) continue;
-    const day = Number(localDate.slice(8, 10));
-    const weekIndex = Math.floor((day - 1 + mondayOffset) / 7);
+    if (localDate < fromDate || localDate > toDate) continue;
+    const day = Math.floor(
+      (new Date(`${localDate}T12:00:00.000Z`).getTime() - first.getTime()) /
+        86_400_000,
+    );
+    const weekIndex = Math.floor(day / 7);
     const currency = appointment.currency.trim().toUpperCase();
     const amount = Number(appointment.paid_amount);
     if (!currency || !Number.isFinite(amount)) continue;
@@ -414,6 +513,19 @@ function formatAmounts(
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([currency, amount]) => formatCurrency(amount, locale, currency))
     .join(" · ");
+}
+
+function monthBoundary(month: string, end: boolean): string {
+  const range = getCalendarDateRange(month, "month");
+  return end ? range.toDate : range.fromDate;
+}
+
+function dateLabel(date: string, locale: SupportedLocale): string {
+  return formatDate(new Date(`${date}T12:00:00.000Z`), locale, {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
 }
 
 const styles = StyleSheet.create({
@@ -472,6 +584,25 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
   monthSelector: { alignItems: "center", flexDirection: "row", gap: 12 },
+  periodMode: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: radii.control,
+    flexDirection: "row",
+    gap: 4,
+    padding: 4,
+  },
+  periodModeButton: {
+    alignItems: "center",
+    borderRadius: radii.control,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 8,
+  },
+  periodModeButtonSelected: { backgroundColor: colors.surface },
+  periodModeLabel: { ...typography.caption, color: colors.secondaryText },
+  periodModeLabelSelected: { color: colors.accent, fontWeight: "700" },
+  rangeFields: { gap: spacing.control },
   receivedSummary: { gap: 2 },
   pressed: { opacity: 0.75 },
   retryButton: { alignSelf: "flex-start", marginLeft: -10, marginTop: 4 },

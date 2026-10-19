@@ -92,6 +92,13 @@ export function ProfileTab({
         ) : null}
       </InfoCard>
 
+      <ServiceCatalogCard
+        controller={serviceCatalog}
+        editable={canManageServices}
+        locale={locale}
+        t={t}
+      />
+
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("mobile.publicBookingLink")}</Text>
         <Text selectable style={styles.bookingUrl}>
@@ -108,13 +115,6 @@ export function ProfileTab({
           variant="secondary"
         />
       </InfoCard>
-
-      <ServiceCatalogCard
-        controller={serviceCatalog}
-        editable={canManageServices}
-        locale={locale}
-        t={t}
-      />
 
       <InfoCard>
         <Text style={styles.sectionTitle}>{t("common.language")}</Text>

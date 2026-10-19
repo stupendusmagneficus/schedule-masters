@@ -445,6 +445,10 @@ export type MessageKey =
   | "mobile.financeAppointments"
   | "mobile.financePreviousMonth"
   | "mobile.financeNextMonth"
+  | "mobile.financeMonthlyRange"
+  | "mobile.financeCustomRange"
+  | "mobile.financeFromDate"
+  | "mobile.financeToDate"
   | "mobile.financeExpected"
   | "mobile.financeExpectedDescription"
   | "mobile.financeCompletedAppointments"
@@ -547,6 +551,7 @@ export type MessageKey =
   | "mobile.serviceTranslationNameRequired"
   | "mobile.serviceTranslationsShow"
   | "mobile.serviceTranslationsHide"
+  | "mobile.serviceTranslationsTitle"
   | "mobile.serviceSave"
   | "mobile.serviceCreate"
   | "mobile.serviceArchiveConfirm"
@@ -1136,7 +1141,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Ожидаемая выручка",
     "mobile.receivedRevenue": "Получено",
     "mobile.finances": "Финансы",
-    "mobile.financeSummaryTitle": "Сводка за месяц",
+    "mobile.financeSummaryTitle": "Финансовая сводка",
+    "mobile.financeMonthlyRange": "Месяц",
+    "mobile.financeCustomRange": "Период",
+    "mobile.financeFromDate": "С",
+    "mobile.financeToDate": "По",
     "mobile.financeIncome": "Сумма по записям",
     "mobile.financeActual": "Получено",
     "mobile.financeActualDescription": "Сумма оплаты, указанная мастером",
@@ -1154,8 +1163,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeUpcomingAppointments": "Предстоящие записи",
     "mobile.financeCanceledAppointments": "Отменённые записи",
     "mobile.financeNoShowAppointments": "Неявки",
-    "mobile.financeEmpty": "За этот месяц записей нет.",
-    "mobile.financeLoadFailed": "Не удалось загрузить сводку за месяц.",
+    "mobile.financeEmpty": "За этот период записей нет.",
+    "mobile.financeLoadFailed": "Не удалось загрузить финансовую сводку.",
     "mobile.financeRetry": "Повторить",
     "mobile.financeNewCustomers": "Новые клиенты",
     "mobile.financeReturningCustomers": "Повторные клиенты",
@@ -1262,6 +1271,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationNameRequired": "Сначала введите название услуги.",
     "mobile.serviceTranslationsShow": "Добавить переводы вручную",
     "mobile.serviceTranslationsHide": "Скрыть переводы",
+    "mobile.serviceTranslationsTitle": "Переводы",
     "mobile.serviceSave": "Сохранить услугу",
     "mobile.serviceCreate": "Создать услугу",
     "mobile.serviceArchiveConfirm":
@@ -1859,7 +1869,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Očekávané tržby",
     "mobile.receivedRevenue": "Přijato",
     "mobile.finances": "Finance",
-    "mobile.financeSummaryTitle": "Měsíční přehled",
+    "mobile.financeSummaryTitle": "Finanční přehled",
+    "mobile.financeMonthlyRange": "Měsíc",
+    "mobile.financeCustomRange": "Období",
+    "mobile.financeFromDate": "Od",
+    "mobile.financeToDate": "Do",
     "mobile.financeIncome": "Částky podle rezervací",
     "mobile.financeActual": "Přijato",
     "mobile.financeActualDescription": "Částka platby zadaná poskytovatelem",
@@ -1877,8 +1891,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeUpcomingAppointments": "Nadcházející rezervace",
     "mobile.financeCanceledAppointments": "Zrušené rezervace",
     "mobile.financeNoShowAppointments": "Nedostavení se",
-    "mobile.financeEmpty": "Pro tento měsíc nejsou žádné rezervace.",
-    "mobile.financeLoadFailed": "Měsíční přehled se nepodařilo načíst.",
+    "mobile.financeEmpty": "V tomto období nejsou žádné rezervace.",
+    "mobile.financeLoadFailed": "Finanční přehled se nepodařilo načíst.",
     "mobile.financeRetry": "Zkusit znovu",
     "mobile.financeNewCustomers": "Noví klienti",
     "mobile.financeReturningCustomers": "Vracející se klienti",
@@ -1983,6 +1997,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationNameRequired": "Nejprve zadejte název služby.",
     "mobile.serviceTranslationsShow": "Zadat překlady ručně",
     "mobile.serviceTranslationsHide": "Skrýt překlady",
+    "mobile.serviceTranslationsTitle": "Překlady",
     "mobile.serviceSave": "Uložit službu",
     "mobile.serviceCreate": "Vytvořit službu",
     "mobile.serviceArchiveConfirm":
@@ -2580,7 +2595,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.expectedRevenue": "Expected revenue",
     "mobile.receivedRevenue": "Received",
     "mobile.finances": "Finances",
-    "mobile.financeSummaryTitle": "Monthly overview",
+    "mobile.financeSummaryTitle": "Financial overview",
+    "mobile.financeMonthlyRange": "Month",
+    "mobile.financeCustomRange": "Date range",
+    "mobile.financeFromDate": "From",
+    "mobile.financeToDate": "To",
     "mobile.financeIncome": "Booking amounts",
     "mobile.financeActual": "Received",
     "mobile.financeActualDescription": "Payment amount entered by the provider",
@@ -2598,8 +2617,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeUpcomingAppointments": "Upcoming bookings",
     "mobile.financeCanceledAppointments": "Canceled bookings",
     "mobile.financeNoShowAppointments": "No-shows",
-    "mobile.financeEmpty": "There are no bookings for this month.",
-    "mobile.financeLoadFailed": "Could not load the monthly overview.",
+    "mobile.financeEmpty": "There are no bookings for this period.",
+    "mobile.financeLoadFailed": "Could not load the financial overview.",
     "mobile.financeRetry": "Retry",
     "mobile.financeNewCustomers": "New customers",
     "mobile.financeReturningCustomers": "Returning customers",
@@ -2707,6 +2726,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceTranslationNameRequired": "Enter the service name first.",
     "mobile.serviceTranslationsShow": "Enter translations manually",
     "mobile.serviceTranslationsHide": "Hide translations",
+    "mobile.serviceTranslationsTitle": "Translations",
     "mobile.serviceSave": "Save service",
     "mobile.serviceCreate": "Create service",
     "mobile.serviceArchiveConfirm":
