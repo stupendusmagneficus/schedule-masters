@@ -31,7 +31,9 @@ export async function loadMasterWorkspace(
 
   const workspaceResult = await client
     .from("workspaces")
-    .select("id, name, slug, timezone, booking_interval_minutes")
+    .select(
+      "id, name, slug, timezone, booking_interval_minutes, public_booking_min_notice_minutes",
+    )
     .eq("id", member.workspace_id)
     .single();
 
@@ -73,6 +75,8 @@ export async function loadMasterWorkspace(
       bookingIntervalMinutes:
         workspaceResult.data.booking_interval_minutes ??
         defaultBookingIntervalMinutes,
+      publicBookingMinNoticeMinutes:
+        workspaceResult.data.public_booking_min_notice_minutes ?? 0,
       availabilityRules: (availabilityResult.data ?? []).map((rule) => ({
         dayOfWeek: rule.day_of_week,
         endLocalTime: rule.end_local_time,

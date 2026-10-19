@@ -60,6 +60,7 @@ describe("loadMasterWorkspace", () => {
     booking_interval_minutes: 15,
     id: "workspace-1",
     name: "Anna Nails",
+    public_booking_min_notice_minutes: 120,
     slug: "anna-nails",
     timezone: "Europe/Prague",
   };
@@ -162,6 +163,7 @@ describe("loadMasterWorkspace", () => {
       workspace: {
         ...workspace,
         bookingIntervalMinutes: 15,
+        publicBookingMinNoticeMinutes: 120,
         availabilityRules: [
           {
             dayOfWeek: 1,

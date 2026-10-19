@@ -5,6 +5,7 @@ import { validateWorkspaceSettings } from "./workspaceSettings";
 
 const validDraft: WorkspaceSettingsDraft = {
   bookingIntervalMinutes: 30,
+  publicBookingMinNoticeMinutes: 0,
   endTime: "18:00",
   name: "Anna Nails",
   slug: "anna-nails",
@@ -33,6 +34,43 @@ describe("workspace settings validation", () => {
         bookingIntervalMinutes: 77,
       }),
     ).toBe("bookingInterval");
+  });
+
+  it("accepts no notice, presets, and custom 15-minute notice values", () => {
+    expect(validateWorkspaceSettings(validDraft)).toBeNull();
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        publicBookingMinNoticeMinutes: 120,
+      }),
+    ).toBeNull();
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        publicBookingMinNoticeMinutes: 10080,
+      }),
+    ).toBeNull();
+  });
+
+  it("rejects notice values outside the supported 15-minute grid", () => {
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        publicBookingMinNoticeMinutes: -15,
+      }),
+    ).toBe("bookingNotice");
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        publicBookingMinNoticeMinutes: 61,
+      }),
+    ).toBe("bookingNotice");
+    expect(
+      validateWorkspaceSettings({
+        ...validDraft,
+        publicBookingMinNoticeMinutes: 10095,
+      }),
+    ).toBe("bookingNotice");
   });
 
   it("rejects an empty or overlong workspace name", () => {

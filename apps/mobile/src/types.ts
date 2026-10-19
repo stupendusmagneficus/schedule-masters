@@ -1,6 +1,7 @@
 export type Workspace = {
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
   readonly bookingIntervalMinutes: number;
+  readonly publicBookingMinNoticeMinutes: number;
   readonly id: string;
   readonly name: string;
   readonly slug: string;

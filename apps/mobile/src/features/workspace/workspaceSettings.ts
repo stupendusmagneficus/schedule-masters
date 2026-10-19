@@ -11,6 +11,7 @@ import {
 export type WorkspaceSettingsDraft = {
   readonly endTime: string;
   readonly bookingIntervalMinutes: BookingIntervalMinutes;
+  readonly publicBookingMinNoticeMinutes: number;
   readonly name: string;
   readonly slug: string;
   readonly startTime: string;
@@ -19,6 +20,7 @@ export type WorkspaceSettingsDraft = {
 
 export type WorkspaceSettingsError =
   | "bookingInterval"
+  | "bookingNotice"
   | "name"
   | "schedule"
   | "slug"
@@ -39,6 +41,7 @@ export function createWorkspaceSettingsDraft(
     endTime: firstRule?.endLocalTime.slice(0, 5) ?? "17:00",
     bookingIntervalMinutes:
       workspace.bookingIntervalMinutes ?? defaultBookingIntervalMinutes,
+    publicBookingMinNoticeMinutes: workspace.publicBookingMinNoticeMinutes ?? 0,
     name: workspace.name,
     slug: workspace.slug,
     startTime: firstRule?.startLocalTime.slice(0, 5) ?? "09:00",
@@ -53,6 +56,14 @@ export function validateWorkspaceSettings(
   if (!name || name.length > 120) return "name";
   if (!isBookingIntervalMinutes(draft.bookingIntervalMinutes)) {
     return "bookingInterval";
+  }
+  if (
+    !Number.isInteger(draft.publicBookingMinNoticeMinutes) ||
+    draft.publicBookingMinNoticeMinutes < 0 ||
+    draft.publicBookingMinNoticeMinutes > 10080 ||
+    draft.publicBookingMinNoticeMinutes % 15 !== 0
+  ) {
+    return "bookingNotice";
   }
 
   const slug = draft.slug.trim();
@@ -83,15 +94,19 @@ export async function saveWorkspaceSettings(
   workspaceId: string,
   draft: WorkspaceSettingsDraft,
 ): Promise<void> {
-  const { error } = await client.rpc("update_master_workspace_settings", {
-    p_end_local_time: draft.endTime,
-    p_booking_interval_minutes: draft.bookingIntervalMinutes,
-    p_name: draft.name.trim(),
-    p_slug: draft.slug.trim(),
-    p_start_local_time: draft.startTime,
-    p_working_days: [...draft.workingDays],
-    p_workspace_id: workspaceId,
-  });
+  const { error } = await client.rpc(
+    "update_master_workspace_settings_with_booking_notice",
+    {
+      p_end_local_time: draft.endTime,
+      p_booking_interval_minutes: draft.bookingIntervalMinutes,
+      p_name: draft.name.trim(),
+      p_notice_minutes: draft.publicBookingMinNoticeMinutes,
+      p_slug: draft.slug.trim(),
+      p_start_local_time: draft.startTime,
+      p_working_days: [...draft.workingDays],
+      p_workspace_id: workspaceId,
+    },
+  );
   if (error) throw new Error(error.message);
 }
 

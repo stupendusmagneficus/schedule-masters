@@ -72,6 +72,22 @@ export const ukrainianMessages: Messages = {
   "workspace.bookingIntervalCustomPlaceholder": "Від 5 до 420 хвилин",
   "workspace.bookingIntervalCustomHelp":
     "Вкажіть значення, кратне 5 хвилинам (від 5 до 420).",
+  "workspace.bookingNoticeLabel": "Коли закривати запис для клієнтів",
+  "workspace.bookingNoticeHelp":
+    "Вкажіть, за скільки до початку клієнт уже не зможе записатися. Це правило діє лише для онлайн-запису.",
+  "workspace.bookingNoticeNoLimit": "Без обмежень",
+  "workspace.bookingNotice1Hour": "1 година",
+  "workspace.bookingNotice2Hours": "2 години",
+  "workspace.bookingNotice4Hours": "4 години",
+  "workspace.bookingNotice12Hours": "12 годин",
+  "workspace.bookingNotice24Hours": "24 години",
+  "workspace.bookingNoticeCustom": "Свій час",
+  "workspace.bookingNoticeCustomLabel": "Хвилин до початку",
+  "workspace.bookingNoticeCustomPlaceholder": "Від 15 до 10080 хвилин",
+  "workspace.bookingNoticeCustomHelp":
+    "Введіть число, кратне 15 хвилинам. Максимум — 7 днів.",
+  "workspace.bookingNoticeInvalid":
+    "Вкажіть від 0 до 10080 хвилин із кроком 15 хвилин.",
   "workspace.startTimeLabel": "Початок робочого дня",
   "workspace.endTimeLabel": "Кінець робочого дня",
   "workspace.workingDaysLabel": "Робочі дні",
@@ -101,7 +117,7 @@ export const ukrainianMessages: Messages = {
   "workspace.setupSave": "Зберегти та продовжити",
   "workspace.settingsTitle": "Налаштування робочого простору",
   "workspace.settingsDescription":
-    "Змініть назву, посилання, робочий час і крок початку запису.",
+    "Змініть назву, посилання, робочий час, крок і час закриття онлайн-запису.",
   "workspace.settingsEdit": "Змінити налаштування",
   "workspace.settingsName": "Назва робочого простору",
   "workspace.settingsSlug": "Посилання для запису",

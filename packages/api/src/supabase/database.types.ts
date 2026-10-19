@@ -1082,6 +1082,7 @@ export type Database = {
           id: string
           locale: string
           name: string
+          public_booking_min_notice_minutes: number
           slug: string
           status: Database["public"]["Enums"]["workspace_status"]
           timezone: string
@@ -1093,6 +1094,7 @@ export type Database = {
           id?: string
           locale?: string
           name: string
+          public_booking_min_notice_minutes?: number
           slug: string
           status?: Database["public"]["Enums"]["workspace_status"]
           timezone?: string
@@ -1104,6 +1106,7 @@ export type Database = {
           id?: string
           locale?: string
           name?: string
+          public_booking_min_notice_minutes?: number
           slug?: string
           status?: Database["public"]["Enums"]["workspace_status"]
           timezone?: string
@@ -1622,6 +1625,10 @@ export type Database = {
         }
         Returns: Json
       }
+      update_master_public_booking_notice: {
+        Args: { p_notice_minutes: number; p_workspace_id: string }
+        Returns: number
+      }
       update_master_waiting_list_entry: {
         Args: {
           p_customer_email?: string
@@ -1643,6 +1650,19 @@ export type Database = {
           p_booking_interval_minutes?: number
           p_end_local_time: string
           p_name: string
+          p_slug: string
+          p_start_local_time: string
+          p_working_days: number[]
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
+      update_master_workspace_settings_with_booking_notice: {
+        Args: {
+          p_booking_interval_minutes: number
+          p_end_local_time: string
+          p_name: string
+          p_notice_minutes: number
           p_slug: string
           p_start_local_time: string
           p_working_days: number[]

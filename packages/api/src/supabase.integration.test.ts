@@ -829,6 +829,12 @@ describe("Supabase public booking contract", () => {
       const outsiderEmail = `availability-outsider-${suffix}@example.test`;
       const workDate = "2030-01-07"; // Monday in the workspace timezone.
       const nextWorkDate = "2030-01-14";
+      const cutoffDate = new Intl.DateTimeFormat("en-CA", {
+        day: "2-digit",
+        month: "2-digit",
+        timeZone: "Europe/Prague",
+        year: "numeric",
+      }).format(new Date(Date.now() + 4 * 24 * 60 * 60 * 1000));
 
       const createdWorkspaces = await admin.from("workspaces").insert([
         {
@@ -956,6 +962,71 @@ describe("Supabase public booking contract", () => {
             ),
           ),
         ).toBe(true);
+
+        const cutoffHours = await owner.client.rpc(
+          "set_master_availability_date_override",
+          {
+            p_date: cutoffDate,
+            p_end_local_time: "12:00",
+            p_kind: "modified",
+            p_start_local_time: "09:00",
+            p_workspace_id: workspaceId,
+          },
+        );
+        expect(cutoffHours.error).toBeNull();
+
+        const cutoffSetting = await owner.client.rpc(
+          "update_master_public_booking_notice",
+          { p_notice_minutes: 10080, p_workspace_id: workspaceId },
+        );
+        expect(cutoffSetting.error).toBeNull();
+        expect(cutoffSetting.data).toBe(10080);
+
+        const masterSlotsBeforeCutoff = await owner.client.rpc(
+          "get_master_available_slots",
+          {
+            p_date: cutoffDate,
+            p_service_id: serviceId,
+            p_workspace_id: workspaceId,
+          },
+        );
+        const publicSlotsBeforeCutoff = await owner.client.rpc(
+          "get_public_available_slots",
+          {
+            p_date: cutoffDate,
+            p_service_id: serviceId,
+            p_slug: `availability-${suffix}`,
+          },
+        );
+        expect(masterSlotsBeforeCutoff.error).toBeNull();
+        expect(masterSlotsBeforeCutoff.data?.length).toBeGreaterThan(0);
+        expect(publicSlotsBeforeCutoff.error).toBeNull();
+        expect(publicSlotsBeforeCutoff.data).toEqual([]);
+
+        const unauthorizedCutoff = await outsider.client.rpc(
+          "update_master_public_booking_notice",
+          { p_notice_minutes: 120, p_workspace_id: workspaceId },
+        );
+        expect(unauthorizedCutoff.error?.message).toContain(
+          "Workspace access denied",
+        );
+
+        const resetCutoff = await owner.client.rpc(
+          "update_master_public_booking_notice",
+          { p_notice_minutes: 0, p_workspace_id: workspaceId },
+        );
+        expect(resetCutoff.error).toBeNull();
+        const publicSlotsAfterReset = await owner.client.rpc(
+          "get_public_available_slots",
+          {
+            p_date: cutoffDate,
+            p_service_id: serviceId,
+            p_slug: `availability-${suffix}`,
+          },
+        );
+        expect(publicSlotsAfterReset.error).toBeNull();
+        expect(publicSlotsAfterReset.data?.length).toBeGreaterThan(0);
+
         expect(
           new Date(masterSlots.data?.[0]?.starts_at ?? "").toISOString(),
         ).toBe("2030-01-07T11:00:00.000Z");
