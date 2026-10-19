@@ -22,6 +22,7 @@ import { typography } from "../theme/typography";
 import type { Workspace } from "../types";
 import { ActionButton } from "./ActionButton";
 import { BookingIntervalField } from "./BookingIntervalField";
+import { BookingNoticeField } from "./BookingNoticeField";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 
@@ -171,6 +172,16 @@ export function WorkspaceSettingsModal({
           t={t}
           value={draft.bookingIntervalMinutes}
         />
+        <BookingNoticeField
+          onChange={(publicBookingMinNoticeMinutes) =>
+            change(
+              "publicBookingMinNoticeMinutes",
+              publicBookingMinNoticeMinutes,
+            )
+          }
+          t={t}
+          value={draft.publicBookingMinNoticeMinutes}
+        />
         <View style={styles.section}>
           <Text style={styles.label}>{t("workspace.workingDaysLabel")}</Text>
           <View style={styles.dayList}>
@@ -262,6 +273,7 @@ function Field({
 function validationMessageKey(error: WorkspaceSettingsError): MessageKey {
   const keys: Record<WorkspaceSettingsError, MessageKey> = {
     bookingInterval: "workspace.bookingIntervalInvalid",
+    bookingNotice: "workspace.bookingNoticeInvalid",
     name: "workspace.settingsNameInvalid",
     schedule: "workspace.scheduleInvalid",
     slug: "workspace.setupInvalidSlug",

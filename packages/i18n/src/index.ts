@@ -75,6 +75,19 @@ export type MessageKey =
   | "workspace.bookingIntervalCustomLabel"
   | "workspace.bookingIntervalCustomPlaceholder"
   | "workspace.bookingIntervalCustomHelp"
+  | "workspace.bookingNoticeLabel"
+  | "workspace.bookingNoticeHelp"
+  | "workspace.bookingNoticeNoLimit"
+  | "workspace.bookingNotice1Hour"
+  | "workspace.bookingNotice2Hours"
+  | "workspace.bookingNotice4Hours"
+  | "workspace.bookingNotice12Hours"
+  | "workspace.bookingNotice24Hours"
+  | "workspace.bookingNoticeCustom"
+  | "workspace.bookingNoticeCustomLabel"
+  | "workspace.bookingNoticeCustomPlaceholder"
+  | "workspace.bookingNoticeCustomHelp"
+  | "workspace.bookingNoticeInvalid"
   | "workspace.startTimeLabel"
   | "workspace.endTimeLabel"
   | "workspace.workingDaysLabel"
@@ -675,6 +688,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.bookingIntervalCustomPlaceholder": "От 5 до 420 минут",
     "workspace.bookingIntervalCustomHelp":
       "Укажите значение, кратное 5 минутам (от 5 до 420).",
+    "workspace.bookingNoticeLabel": "Когда закрывать запись для клиентов",
+    "workspace.bookingNoticeHelp":
+      "Укажите, за сколько до начала клиент уже не сможет записаться. Это правило влияет только на онлайн-запись.",
+    "workspace.bookingNoticeNoLimit": "Без ограничений",
+    "workspace.bookingNotice1Hour": "1 час",
+    "workspace.bookingNotice2Hours": "2 часа",
+    "workspace.bookingNotice4Hours": "4 часа",
+    "workspace.bookingNotice12Hours": "12 часов",
+    "workspace.bookingNotice24Hours": "24 часа",
+    "workspace.bookingNoticeCustom": "Своё время",
+    "workspace.bookingNoticeCustomLabel": "Минимум минут до начала",
+    "workspace.bookingNoticeCustomPlaceholder": "От 15 до 10080 минут",
+    "workspace.bookingNoticeCustomHelp":
+      "Введите число, кратное 15 минутам. Максимум — 7 дней.",
+    "workspace.bookingNoticeInvalid":
+      "Укажите от 0 до 10080 минут с шагом 15 минут.",
     "workspace.startTimeLabel": "Начало рабочего дня",
     "workspace.endTimeLabel": "Конец рабочего дня",
     "workspace.workingDaysLabel": "Рабочие дни",
@@ -704,7 +733,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Сохранить и продолжить",
     "workspace.settingsTitle": "Рабочее пространство",
     "workspace.settingsDescription":
-      "Измените название, ссылку, рабочие часы и шаг начала записи.",
+      "Измените название, ссылку, рабочие часы, шаг и срок закрытия онлайн-записи.",
     "workspace.settingsEdit": "Изменить настройки",
     "workspace.settingsName": "Название рабочего пространства",
     "workspace.settingsSlug": "Ссылка для записи",
@@ -1381,6 +1410,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.bookingIntervalCustomPlaceholder": "Od 5 do 420 minut",
     "workspace.bookingIntervalCustomHelp":
       "Zadejte hodnotu v násobcích 5 minut (od 5 do 420).",
+    "workspace.bookingNoticeLabel": "Kdy uzavřít rezervace pro klienty",
+    "workspace.bookingNoticeHelp":
+      "Určete, jak dlouho před začátkem se už klient nebude moci objednat. Platí pouze pro online rezervace.",
+    "workspace.bookingNoticeNoLimit": "Bez omezení",
+    "workspace.bookingNotice1Hour": "1 hodina",
+    "workspace.bookingNotice2Hours": "2 hodiny",
+    "workspace.bookingNotice4Hours": "4 hodiny",
+    "workspace.bookingNotice12Hours": "12 hodin",
+    "workspace.bookingNotice24Hours": "24 hodin",
+    "workspace.bookingNoticeCustom": "Vlastní čas",
+    "workspace.bookingNoticeCustomLabel": "Minut před začátkem",
+    "workspace.bookingNoticeCustomPlaceholder": "Od 15 do 10080 minut",
+    "workspace.bookingNoticeCustomHelp":
+      "Zadejte násobek 15 minut. Maximum je 7 dní.",
+    "workspace.bookingNoticeInvalid":
+      "Zadejte 0 až 10080 minut v krocích po 15 minutách.",
     "workspace.startTimeLabel": "Začátek pracovní doby",
     "workspace.endTimeLabel": "Konec pracovní doby",
     "workspace.workingDaysLabel": "Pracovní dny",
@@ -1409,7 +1454,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Uložit a pokračovat",
     "workspace.settingsTitle": "Pracovní prostor",
     "workspace.settingsDescription":
-      "Upravte název, odkaz, pracovní dobu a krok začátku rezervace.",
+      "Upravte název, odkaz, pracovní dobu, krok a dobu uzavření online rezervací.",
     "workspace.settingsEdit": "Upravit nastavení",
     "workspace.settingsName": "Název pracovního prostoru",
     "workspace.settingsSlug": "Odkaz pro rezervace",
@@ -2078,6 +2123,22 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.bookingIntervalCustomPlaceholder": "From 5 to 420 minutes",
     "workspace.bookingIntervalCustomHelp":
       "Enter a value in 5-minute increments (from 5 to 420).",
+    "workspace.bookingNoticeLabel": "When to stop accepting bookings",
+    "workspace.bookingNoticeHelp":
+      "Choose how long before a visit clients can no longer book it. This applies to online booking only.",
+    "workspace.bookingNoticeNoLimit": "No limit",
+    "workspace.bookingNotice1Hour": "1 hour",
+    "workspace.bookingNotice2Hours": "2 hours",
+    "workspace.bookingNotice4Hours": "4 hours",
+    "workspace.bookingNotice12Hours": "12 hours",
+    "workspace.bookingNotice24Hours": "24 hours",
+    "workspace.bookingNoticeCustom": "Custom",
+    "workspace.bookingNoticeCustomLabel": "Minutes before start",
+    "workspace.bookingNoticeCustomPlaceholder": "15 to 10080 minutes",
+    "workspace.bookingNoticeCustomHelp":
+      "Enter a multiple of 15 minutes, up to 7 days.",
+    "workspace.bookingNoticeInvalid":
+      "Enter 0 to 10080 minutes in 15-minute increments.",
     "workspace.startTimeLabel": "Workday starts",
     "workspace.endTimeLabel": "Workday ends",
     "workspace.workingDaysLabel": "Working days",
@@ -2107,7 +2168,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Save and continue",
     "workspace.settingsTitle": "Workspace settings",
     "workspace.settingsDescription":
-      "Update the workspace name, booking link, working hours, and booking start interval.",
+      "Update the workspace name, booking link, working hours, booking interval, and online booking notice.",
     "workspace.settingsEdit": "Edit settings",
     "workspace.settingsName": "Workspace name",
     "workspace.settingsSlug": "Booking link",

@@ -72,6 +72,22 @@ export const slovakMessages: Messages = {
   "workspace.bookingIntervalCustomPlaceholder": "Od 5 do 420 minút",
   "workspace.bookingIntervalCustomHelp":
     "Zadajte hodnotu v násobkoch 5 minút (od 5 do 420).",
+  "workspace.bookingNoticeLabel": "Kedy uzavrieť rezervácie pre klientov",
+  "workspace.bookingNoticeHelp":
+    "Určte, ako dlho pred začiatkom sa už klient nebude môcť objednať. Platí iba pre online rezervácie.",
+  "workspace.bookingNoticeNoLimit": "Bez obmedzenia",
+  "workspace.bookingNotice1Hour": "1 hodina",
+  "workspace.bookingNotice2Hours": "2 hodiny",
+  "workspace.bookingNotice4Hours": "4 hodiny",
+  "workspace.bookingNotice12Hours": "12 hodín",
+  "workspace.bookingNotice24Hours": "24 hodín",
+  "workspace.bookingNoticeCustom": "Vlastný čas",
+  "workspace.bookingNoticeCustomLabel": "Minút pred začiatkom",
+  "workspace.bookingNoticeCustomPlaceholder": "Od 15 do 10080 minút",
+  "workspace.bookingNoticeCustomHelp":
+    "Zadajte násobok 15 minút. Maximum je 7 dní.",
+  "workspace.bookingNoticeInvalid":
+    "Zadajte 0 až 10080 minút v krokoch po 15 minútach.",
   "workspace.startTimeLabel": "Začiatok pracovného dňa",
   "workspace.endTimeLabel": "Koniec pracovného dňa",
   "workspace.workingDaysLabel": "Pracovné dni",
@@ -101,7 +117,7 @@ export const slovakMessages: Messages = {
   "workspace.setupSave": "Uložiť a pokračovať",
   "workspace.settingsTitle": "Nastavenia pracovného priestoru",
   "workspace.settingsDescription":
-    "Upravte názov, odkaz, pracovný čas a krok začiatku rezervácie.",
+    "Upravte názov, odkaz, pracovný čas, krok a uzávierku online rezervácií.",
   "workspace.settingsEdit": "Upraviť nastavenia",
   "workspace.settingsName": "Názov pracovného priestoru",
   "workspace.settingsSlug": "Odkaz na rezerváciu",
