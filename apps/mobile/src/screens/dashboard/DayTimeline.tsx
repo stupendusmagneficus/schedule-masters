@@ -1,4 +1,6 @@
 import type { MessageKey } from "@schedule-app/i18n";
+import { formatTime, type SupportedLocale } from "@schedule-app/i18n";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
@@ -21,17 +23,44 @@ type DayTimelineProps = {
   readonly onPressAppointment?: (appointment: MasterAppointment) => void;
   readonly onPressBlock?: (block: PersonalBlock) => void;
   readonly onPressEmptySlot?: (minute: number) => void;
+  readonly locale: SupportedLocale;
+  readonly selectedDate: string;
   readonly t: (key: MessageKey) => string;
   readonly timeline: DayTimelineData;
+  readonly timezone: string;
 };
 
 export function DayTimeline({
   onPressAppointment,
   onPressBlock,
   onPressEmptySlot,
+  locale,
+  selectedDate,
   t,
   timeline,
+  timezone,
 }: DayTimelineProps) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const intervalId = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const zonedNow = getZonedTime(now, timezone);
+  const showCurrentTime =
+    zonedNow.date === selectedDate &&
+    zonedNow.minute >= timeline.startMinute &&
+    zonedNow.minute < timeline.endMinute;
+  const currentTimeTop =
+    ((zonedNow.minute - timeline.startMinute) / timelineSlotMinutes) *
+      timelineSlotHeight -
+    9;
+  const currentTimeLabel = formatTime(now, locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: timezone,
+  });
+
   if (timeline.isClosed) {
     return (
       <View style={styles.closedState}>
@@ -75,11 +104,42 @@ export function DayTimeline({
               timeline={timeline}
             />
           ))}
+          {showCurrentTime ? (
+            <View
+              accessible
+              accessibilityLabel={`${t("mobile.calendarCurrentTime")}: ${currentTimeLabel}`}
+              pointerEvents="none"
+              style={[styles.currentTimeIndicator, { top: currentTimeTop }]}
+            >
+              <Text style={styles.currentTimeLabel}>{currentTimeLabel}</Text>
+              <View style={styles.currentTimeDot} />
+              <View style={styles.currentTimeRule} />
+            </View>
+          ) : null}
         </View>
       </View>
       <CalendarEventLegend t={t} />
     </View>
   );
+}
+
+function getZonedTime(date: Date, timezone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: timezone,
+    year: "numeric",
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts.map(({ type, value }) => [type, value]),
+  );
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    minute: Number(values.hour) * 60 + Number(values.minute),
+  };
 }
 
 function TimelineEvent({
@@ -221,6 +281,43 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   closedTitle: { ...typography.label, color: colors.primaryText },
+  currentTimeDot: {
+    backgroundColor: colors.danger,
+    borderRadius: 4,
+    height: 8,
+    left: 54,
+    position: "absolute",
+    top: 5,
+    width: 8,
+  },
+  currentTimeIndicator: {
+    height: 20,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    zIndex: 2,
+  },
+  currentTimeLabel: {
+    ...typography.caption,
+    backgroundColor: colors.danger,
+    borderRadius: radii.pill,
+    color: colors.inverse,
+    fontWeight: "700",
+    left: 0,
+    overflow: "hidden",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    position: "absolute",
+    top: 0,
+  },
+  currentTimeRule: {
+    backgroundColor: colors.danger,
+    height: 2,
+    left: 58,
+    position: "absolute",
+    right: 0,
+    top: 8,
+  },
   event: {
     borderLeftWidth: 4,
     left: 58,

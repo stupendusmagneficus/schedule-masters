@@ -465,6 +465,9 @@ export function CalendarTab({
                 }
                 t={t}
                 timeline={timeline}
+                selectedDate={calendar.selectedDate}
+                timezone={workspace.timezone}
+                locale={locale}
               />
             )}
             {calendar.isLoading && !demoData ? (
