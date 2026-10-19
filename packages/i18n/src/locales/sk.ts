@@ -318,7 +318,11 @@ export const slovakMessages: Messages = {
   "mobile.calendarSelectedDatesCount": "Vybrané dátumy: {count}",
   "mobile.calendarOpenClosedDays": "Otvoriť voľné dni: {count}",
   "mobile.calendarCloseOpenDays": "Zatvoriť pracovné dni: {count}",
-  "mobile.calendarWeeklyAction": "Opakovať každý týždeň",
+  "mobile.calendarWeeklyAction": "Nastaviť každý týždeň",
+  "mobile.calendarConfigureSelectedDates": "Nastaviť vybrané dátumy",
+  "mobile.calendarConfigureDatesTitle": "Nastaviť vybrané dátumy",
+  "mobile.calendarConfigureDatesDescription":
+    "Rovnaký pracovný čas sa použije iba pre vybrané dátumy. Týždenný rozvrh sa nezmení.",
   "mobile.calendarWeeklyTitle": "Nastaviť týždenný rozvrh",
   "mobile.calendarWeeklyDescription":
     "Zmeny sa od dneška použijú na vybrané dni týždňa. Výnimky pre jednotlivé dátumy zostanú bez zmeny.",

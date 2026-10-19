@@ -275,6 +275,9 @@ export type MessageKey =
   | "mobile.calendarOpenClosedDays"
   | "mobile.calendarCloseOpenDays"
   | "mobile.calendarWeeklyAction"
+  | "mobile.calendarConfigureSelectedDates"
+  | "mobile.calendarConfigureDatesTitle"
+  | "mobile.calendarConfigureDatesDescription"
   | "mobile.calendarWeeklyTitle"
   | "mobile.calendarWeeklyDescription"
   | "mobile.calendarWeeklyOpen"
@@ -916,7 +919,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Выбрано дат: {count}",
     "mobile.calendarOpenClosedDays": "Открыть выходные: {count}",
     "mobile.calendarCloseOpenDays": "Закрыть рабочие: {count}",
-    "mobile.calendarWeeklyAction": "Повторять по неделям",
+    "mobile.calendarWeeklyAction": "Настроить каждую неделю",
+    "mobile.calendarConfigureSelectedDates": "Настроить выбранные даты",
+    "mobile.calendarConfigureDatesTitle": "Настроить выбранные даты",
+    "mobile.calendarConfigureDatesDescription":
+      "Одинаковые часы будут применены только к выбранным датам. Недельное расписание не изменится.",
     "mobile.calendarWeeklyTitle": "Настроить каждую неделю",
     "mobile.calendarWeeklyDescription":
       "Изменения применятся к выбранным дням недели с сегодняшнего дня. Исключения для отдельных дат останутся без изменений.",
@@ -1606,7 +1613,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Vybraná data: {count}",
     "mobile.calendarOpenClosedDays": "Otevřít volné dny: {count}",
     "mobile.calendarCloseOpenDays": "Uzavřít pracovní dny: {count}",
-    "mobile.calendarWeeklyAction": "Opakovat každý týden",
+    "mobile.calendarWeeklyAction": "Nastavit každý týden",
+    "mobile.calendarConfigureSelectedDates": "Nastavit vybraná data",
+    "mobile.calendarConfigureDatesTitle": "Nastavit vybraná data",
+    "mobile.calendarConfigureDatesDescription":
+      "Stejná pracovní doba se použije pouze pro vybraná data. Týdenní rozvrh se nezmění.",
     "mobile.calendarWeeklyTitle": "Nastavit každý týden",
     "mobile.calendarWeeklyDescription":
       "Změny se od dneška použijí na vybrané dny týdne. Výjimky pro jednotlivá data zůstanou beze změny.",
@@ -2295,7 +2306,11 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Dates selected: {count}",
     "mobile.calendarOpenClosedDays": "Open days off: {count}",
     "mobile.calendarCloseOpenDays": "Close working days: {count}",
-    "mobile.calendarWeeklyAction": "Repeat every week",
+    "mobile.calendarWeeklyAction": "Set every week",
+    "mobile.calendarConfigureSelectedDates": "Set selected dates",
+    "mobile.calendarConfigureDatesTitle": "Set selected dates",
+    "mobile.calendarConfigureDatesDescription":
+      "The same hours apply only to the selected dates. Your weekly schedule will not change.",
     "mobile.calendarWeeklyTitle": "Set weekly schedule",
     "mobile.calendarWeeklyDescription":
       "Changes apply to the selected weekdays starting today. One-off date exceptions remain unchanged.",

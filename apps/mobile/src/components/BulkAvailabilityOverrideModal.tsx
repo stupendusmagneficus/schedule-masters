@@ -27,7 +27,7 @@ type BulkAvailabilityOverrideModalProps = {
   readonly error: string | null;
   readonly isSaving: boolean;
   readonly locale: SupportedLocale;
-  readonly mode: "close" | "open";
+  readonly mode: "close" | "configure";
   readonly onApply: (drafts: AvailabilityOverrideDraft[]) => Promise<void>;
   readonly onClose: () => void;
   readonly timezone: string;
@@ -50,14 +50,14 @@ export function BulkAvailabilityOverrideModal({
 }: BulkAvailabilityOverrideModalProps) {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
-  const kind = mode === "open" ? "modified" : "closed";
+  const kind = mode === "configure" ? "modified" : "closed";
   const drafts = useMemo<AvailabilityOverrideDraft[]>(
     () =>
       dates.map((date) => ({
         date,
-        endLocalTime: mode === "open" ? endTime : null,
+        endLocalTime: mode === "configure" ? endTime : null,
         kind,
-        startLocalTime: mode === "open" ? startTime : null,
+        startLocalTime: mode === "configure" ? startTime : null,
       })),
     [dates, endTime, kind, mode, startTime],
   );
@@ -81,12 +81,12 @@ export function BulkAvailabilityOverrideModal({
     .map((date) => formatBulkDate(date, locale))
     .join(", ");
   const titleKey =
-    mode === "open"
-      ? "mobile.calendarBulkOpenTitle"
+    mode === "configure"
+      ? "mobile.calendarConfigureDatesTitle"
       : "mobile.calendarBulkCloseTitle";
   const descriptionKey =
-    mode === "open"
-      ? "mobile.calendarBulkOpenDescription"
+    mode === "configure"
+      ? "mobile.calendarConfigureDatesDescription"
       : "mobile.calendarBulkCloseDescription";
 
   useEffect(() => {
@@ -134,7 +134,7 @@ export function BulkAvailabilityOverrideModal({
             label={t("mobile.calendarBulkApply")}
             loading={isSaving}
             onPress={() => void apply()}
-            variant={mode === "open" ? "primary" : "destructive"}
+            variant={mode === "configure" ? "primary" : "destructive"}
           />
           <ActionButton
             disabled={isSaving}
@@ -160,7 +160,7 @@ export function BulkAvailabilityOverrideModal({
             </Text>
           ))}
         </View>
-        {mode === "open" ? (
+        {mode === "configure" ? (
           <View style={styles.timeFields}>
             <DateTimePickerField
               label={t("mobile.calendarDayStart")}

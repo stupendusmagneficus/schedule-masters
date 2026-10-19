@@ -35,7 +35,6 @@ type MonthCalendarProps = {
   readonly locale: SupportedLocale;
   readonly selectionMode: boolean;
   readonly selectedDates: readonly string[];
-  readonly closedDateCount: number;
   readonly openDateCount: number;
   readonly isBulkSaving: boolean;
   readonly selectionEnabled: boolean;
@@ -44,7 +43,7 @@ type MonthCalendarProps = {
   readonly onToggleDate: (date: string) => void;
   readonly onStartSelection: () => void;
   readonly onCancelSelection: () => void;
-  readonly onOpenClosedDates: () => void;
+  readonly onConfigureSelectedDates: () => void;
   readonly onCloseOpenDates: () => void;
   readonly onRepeatWeekly: () => void;
   readonly t: DashboardTabProps["t"];
@@ -59,7 +58,6 @@ export function MonthCalendar({
   locale,
   selectionMode,
   selectedDates,
-  closedDateCount,
   openDateCount,
   isBulkSaving,
   selectionEnabled,
@@ -68,7 +66,7 @@ export function MonthCalendar({
   onToggleDate,
   onStartSelection,
   onCancelSelection,
-  onOpenClosedDates,
+  onConfigureSelectedDates,
   onCloseOpenDates,
   onRepeatWeekly,
   t,
@@ -177,15 +175,11 @@ export function MonthCalendar({
               )}
             </Text>
           ) : null}
-          {closedDateCount > 0 ? (
+          {selectedDates.length > 0 ? (
             <ActionButton
               disabled={isBulkSaving}
-              label={t("mobile.calendarOpenClosedDays").replace(
-                "{count}",
-                String(closedDateCount),
-              )}
-              loading={isBulkSaving}
-              onPress={onOpenClosedDates}
+              label={t("mobile.calendarConfigureSelectedDates")}
+              onPress={onConfigureSelectedDates}
               variant="primary"
             />
           ) : null}

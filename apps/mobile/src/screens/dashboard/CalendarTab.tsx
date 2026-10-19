@@ -115,7 +115,7 @@ export function CalendarTab({
   const [selectedDateSnapshots, setSelectedDateSnapshots] = useState<
     Record<string, AvailabilityDateSelectionSnapshot>
   >({});
-  const [bulkMode, setBulkMode] = useState<"close" | "open" | null>(null);
+  const [bulkMode, setBulkMode] = useState<"close" | "configure" | null>(null);
   const [isWeeklyAvailabilityVisible, setWeeklyAvailabilityVisible] =
     useState(false);
   const [processedDates, setProcessedDates] = useState<string[]>([]);
@@ -237,11 +237,7 @@ export function CalendarTab({
     [selectedDateSnapshots],
   );
   const bulkActionDates =
-    bulkMode === "open"
-      ? selectionSummary.closedDates
-      : bulkMode === "close"
-        ? selectionSummary.openDates
-        : [];
+    bulkMode === "close" ? selectionSummary.openDates : selectedDates;
   const appointmentsByDate = useMemo(
     () =>
       Object.fromEntries(
@@ -496,7 +492,6 @@ export function CalendarTab({
           visible={calendar.view === "month"}
         >
           <MonthCalendar
-            closedDateCount={selectionSummary.closedDates.length}
             isLoadingNext={monthWindow.isLoadingNext}
             isLoadingPrevious={monthWindow.isLoadingPrevious}
             isBulkSaving={calendar.isSaving}
@@ -506,7 +501,7 @@ export function CalendarTab({
             months={monthItems}
             onCancelSelection={cancelDateSelection}
             onCloseOpenDates={() => setBulkMode("close")}
-            onOpenClosedDates={() => setBulkMode("open")}
+            onConfigureSelectedDates={() => setBulkMode("configure")}
             onRepeatWeekly={() => setWeeklyAvailabilityVisible(true)}
             onSelectDate={(date) => {
               calendar.setSelectedDate(date);
