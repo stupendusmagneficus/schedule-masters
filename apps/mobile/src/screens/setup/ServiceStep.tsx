@@ -1,4 +1,4 @@
-import type { MessageKey } from "@schedule-app/i18n";
+import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { BookingIntervalField } from "../../components/BookingIntervalField";
 import type {
@@ -11,6 +11,7 @@ import { typography } from "../../theme/typography";
 type ServiceStepProps = {
   readonly draft: OnboardingDraft;
   readonly errorKey?: MessageKey;
+  readonly locale: SupportedLocale;
   readonly onChange: (patch: Partial<OnboardingDraft>) => void;
   readonly t: SetupTranslator;
 };
@@ -18,6 +19,7 @@ type ServiceStepProps = {
 export function ServiceStep({
   draft,
   errorKey,
+  locale,
   onChange,
   t,
 }: ServiceStepProps) {
@@ -66,6 +68,7 @@ export function ServiceStep({
       )}
       <BookingIntervalField
         label={t("workspace.bookingIntervalLabel")}
+        locale={locale}
         onChange={(bookingIntervalMinutes) =>
           onChange({ bookingIntervalMinutes })
         }

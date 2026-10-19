@@ -166,6 +166,7 @@ export function WorkspaceSettingsModal({
         />
         <BookingIntervalField
           label={t("workspace.bookingIntervalLabel")}
+          locale={locale}
           onChange={(bookingIntervalMinutes) =>
             change("bookingIntervalMinutes", bookingIntervalMinutes)
           }

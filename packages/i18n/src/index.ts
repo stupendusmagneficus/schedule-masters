@@ -75,6 +75,7 @@ export type MessageKey =
   | "workspace.bookingIntervalCustomLabel"
   | "workspace.bookingIntervalCustomPlaceholder"
   | "workspace.bookingIntervalCustomHelp"
+  | "workspace.bookingIntervalPreview"
   | "workspace.bookingNoticeLabel"
   | "workspace.bookingNoticeHelp"
   | "workspace.bookingNoticeNoLimit"
@@ -675,19 +676,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "Первая услуга",
     "workspace.pricePlaceholder": "Цена в Kč",
     "workspace.durationPlaceholder": "Длительность, минут",
-    "workspace.bookingIntervalLabel": "Шаг начала записи",
+    "workspace.bookingIntervalLabel": "Интервал начала онлайн-записи",
     "workspace.bookingIntervalHelp":
-      "Выберите, как часто показывать варианты времени. Длительность задаётся отдельно у каждой услуги.",
+      "Шаг задаёт интервалы начала для онлайн-записи. В календаре мастер может создать запись с шагом 15 минут. Длительность задаётся отдельно у каждой услуги.",
     "workspace.bookingInterval15": "Каждые 15 мин",
     "workspace.bookingInterval30": "Каждые 30 мин",
     "workspace.bookingInterval45": "Каждые 45 мин",
-    "workspace.bookingInterval60": "Каждые 60 мин",
-    "workspace.bookingInterval90": "Каждые 90 мин",
+    "workspace.bookingInterval60": "Каждый час",
+    "workspace.bookingInterval90": "Каждые 1 ч 30 мин",
     "workspace.bookingIntervalCustom": "Другой шаг",
     "workspace.bookingIntervalCustomLabel": "Шаг записи в минутах",
     "workspace.bookingIntervalCustomPlaceholder": "От 5 до 420 минут",
     "workspace.bookingIntervalCustomHelp":
       "Укажите значение, кратное 5 минутам (от 5 до 420).",
+    "workspace.bookingIntervalPreview":
+      "Варианты для онлайн-записи будут появляться каждые {duration}.",
     "workspace.bookingNoticeLabel": "Когда закрывать запись для клиентов",
     "workspace.bookingNoticeHelp":
       "Укажите, за сколько до начала клиент уже не сможет записаться. Это правило влияет только на онлайн-запись.",
@@ -1155,7 +1158,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeWeeklyIncome": "Доход по неделям",
     "mobile.financeNoReceivedIncome": "Полученных оплат пока нет.",
     "mobile.profileWorkingDays": "Рабочих дней в неделю: {count}",
-    "mobile.profileBookingInterval": "Шаг записи: {minutes} мин",
+    "mobile.profileBookingInterval": "Интервал онлайн-записи: {duration}",
     "mobile.profileOpenBooking": "Открыть страницу записи",
     "mobile.paymentReceived": "Получено за запись",
     "mobile.paymentAmountHint": "Цена услуги",
@@ -1397,19 +1400,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "První služba",
     "workspace.pricePlaceholder": "Cena v Kč",
     "workspace.durationPlaceholder": "Délka, minuty",
-    "workspace.bookingIntervalLabel": "Krok začátku rezervace",
+    "workspace.bookingIntervalLabel": "Rozestup začátků online rezervací",
     "workspace.bookingIntervalHelp":
-      "Určuje, jak často se zobrazí možné časy. Délka se nastavuje zvlášť u každé služby.",
+      "Určuje rozestup začátků online rezervací. V kalendáři může mistr vytvořit rezervaci po 15 minutách. Délka se nastavuje zvlášť u každé služby.",
     "workspace.bookingInterval15": "Každých 15 min",
     "workspace.bookingInterval30": "Každých 30 min",
     "workspace.bookingInterval45": "Každých 45 min",
-    "workspace.bookingInterval60": "Každých 60 min",
-    "workspace.bookingInterval90": "Každých 90 min",
+    "workspace.bookingInterval60": "Každou hodinu",
+    "workspace.bookingInterval90": "Každých 1 h 30 min",
     "workspace.bookingIntervalCustom": "Vlastní krok",
     "workspace.bookingIntervalCustomLabel": "Krok rezervace v minutách",
     "workspace.bookingIntervalCustomPlaceholder": "Od 5 do 420 minut",
     "workspace.bookingIntervalCustomHelp":
       "Zadejte hodnotu v násobcích 5 minut (od 5 do 420).",
+    "workspace.bookingIntervalPreview":
+      "Časy pro online rezervaci se zobrazí každých {duration}.",
     "workspace.bookingNoticeLabel": "Kdy uzavřít rezervace pro klienty",
     "workspace.bookingNoticeHelp":
       "Určete, jak dlouho před začátkem se už klient nebude moci objednat. Platí pouze pro online rezervace.",
@@ -1873,7 +1878,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeWeeklyIncome": "Příjem po týdnech",
     "mobile.financeNoReceivedIncome": "Zatím nebyly přijaty žádné platby.",
     "mobile.profileWorkingDays": "Pracovní dny v týdnu: {count}",
-    "mobile.profileBookingInterval": "Krok rezervace: {minutes} min",
+    "mobile.profileBookingInterval": "Interval online rezervací: {duration}",
     "mobile.profileOpenBooking": "Otevřít rezervační stránku",
     "mobile.paymentReceived": "Přijato za rezervaci",
     "mobile.paymentAmountHint": "Cena služby",
@@ -2110,19 +2115,21 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.servicePlaceholder": "First service",
     "workspace.pricePlaceholder": "Price in CZK",
     "workspace.durationPlaceholder": "Duration in minutes",
-    "workspace.bookingIntervalLabel": "Booking start interval",
+    "workspace.bookingIntervalLabel": "Online booking start interval",
     "workspace.bookingIntervalHelp":
-      "Choose how often start times are offered. Service duration is set separately for each service.",
+      "This sets the spacing between online booking start times. In the calendar, masters can create bookings in 15-minute increments. Service duration is set separately for each service.",
     "workspace.bookingInterval15": "Every 15 min",
     "workspace.bookingInterval30": "Every 30 min",
     "workspace.bookingInterval45": "Every 45 min",
-    "workspace.bookingInterval60": "Every 60 min",
-    "workspace.bookingInterval90": "Every 90 min",
+    "workspace.bookingInterval60": "Every hour",
+    "workspace.bookingInterval90": "Every 1 hr 30 min",
     "workspace.bookingIntervalCustom": "Custom step",
     "workspace.bookingIntervalCustomLabel": "Booking step in minutes",
     "workspace.bookingIntervalCustomPlaceholder": "From 5 to 420 minutes",
     "workspace.bookingIntervalCustomHelp":
       "Enter a value in 5-minute increments (from 5 to 420).",
+    "workspace.bookingIntervalPreview":
+      "Online booking times will appear every {duration}.",
     "workspace.bookingNoticeLabel": "When to stop accepting bookings",
     "workspace.bookingNoticeHelp":
       "Choose how long before a visit clients can no longer book it. This applies to online booking only.",
@@ -2589,7 +2596,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeWeeklyIncome": "Income by week",
     "mobile.financeNoReceivedIncome": "No payments have been received yet.",
     "mobile.profileWorkingDays": "Working days per week: {count}",
-    "mobile.profileBookingInterval": "Booking interval: {minutes} min",
+    "mobile.profileBookingInterval": "Online booking interval: {duration}",
     "mobile.profileOpenBooking": "Open booking page",
     "mobile.paymentReceived": "Received for appointment",
     "mobile.paymentAmountHint": "Service price",

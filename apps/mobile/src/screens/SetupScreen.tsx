@@ -187,6 +187,7 @@ export function SetupScreen({ locale, onComplete, userId }: SetupScreenProps) {
         <ServiceStep
           draft={draft}
           errorKey={messageKey}
+          locale={locale}
           onChange={updateDraft}
           t={t}
         />
