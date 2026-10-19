@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
   formatCurrency,
+  formatDuration,
   type MessageKey,
   type SupportedLocale,
 } from "@schedule-app/i18n";
@@ -377,7 +378,7 @@ function ServiceRow({
           <Text style={styles.helper}>{service.category}</Text>
         ) : null}
         <Text style={styles.helper}>
-          {service.duration_minutes} min ·{" "}
+          {formatDuration(service.duration_minutes, locale)} ·{" "}
           {formatCurrency(
             Number(service.price_amount),
             locale,

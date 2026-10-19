@@ -7,6 +7,7 @@ import {
   formatCompactDateRange,
   formatCurrency,
   formatDate,
+  formatDuration,
   formatTime,
   getIntlLocale,
   localeLabels,
@@ -99,6 +100,14 @@ describe("translations and formatting", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);
     expect(formatCurrency(149, "cz")).toContain("149");
+  });
+
+  it("formats durations as localized hours and minutes without rounding", () => {
+    expect(formatDuration(90, "ru")).toBe("1 час и 30 минут");
+    expect(formatDuration(70, "ru")).toBe("1 час и 10 минут");
+    expect(formatDuration(270, "ru")).toBe("4 часа и 30 минут");
+    expect(formatDuration(60, "en")).toBe("1 hour");
+    expect(formatDuration(0, "cz")).toBe("0 minut");
   });
 
   it("uses Slovak and Ukrainian Intl locales for dates and currency", () => {

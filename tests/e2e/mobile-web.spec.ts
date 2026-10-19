@@ -298,6 +298,13 @@ test.describe("mobile web smoke", () => {
     ]);
     expect(editHeight).toBe(archiveHeight);
 
+    await editAction.click();
+    await page.getByRole("button", { name: "Zadat překlady ručně" }).click();
+    await expect(
+      page.getByLabel("Název služby · English", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Zrušit" }).first().click();
+
     const activeFilter = page.getByRole("tab", { name: "Aktivní" });
     const archivedFilter = page.getByRole("tab", { name: "Archiv" });
     await archivedFilter.click();

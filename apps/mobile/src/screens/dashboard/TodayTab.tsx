@@ -3,6 +3,7 @@ import {
   formatAccessibleDate,
   formatCompactDate,
   formatCurrency,
+  formatDuration,
   formatTime,
   type SupportedLocale,
 } from "@schedule-app/i18n";
@@ -244,6 +245,7 @@ export function TodayTab({
                   appointment={appointment}
                   isNextBooking={index === 0}
                   key={appointment.id}
+                  locale={locale}
                   t={t}
                 />
               ))}
@@ -520,10 +522,12 @@ function formatReceivedRevenue(
 function AppointmentRow({
   appointment,
   isNextBooking = false,
+  locale,
   t,
 }: {
   readonly appointment: DemoAppointment;
   readonly isNextBooking?: boolean;
+  readonly locale: TodayTabProps["locale"];
   readonly t: TodayTabProps["t"];
 }) {
   const statusLabel =
@@ -543,7 +547,7 @@ function AppointmentRow({
         <Text style={styles.serviceName}>{appointment.clientName}</Text>
         <Text style={styles.helper}>
           {appointment.startsAt} · {appointment.serviceName} ·{" "}
-          {appointment.durationMinutes} min
+          {formatDuration(appointment.durationMinutes, locale)}
         </Text>
       </View>
       <AppointmentStatusBadge label={statusLabel} status={appointment.status} />
@@ -591,7 +595,8 @@ function MasterAppointmentRow({
             minute: "2-digit",
             timeZone: timezone,
           })}{" "}
-          · {appointment.service_name} · {appointment.duration_minutes} min
+          · {appointment.service_name} ·{" "}
+          {formatDuration(appointment.duration_minutes, locale)}
         </Text>
       </View>
       <AppointmentStatusBadge label={statusLabel} status={status} />

@@ -427,6 +427,8 @@ export const ukrainianMessages: Messages = {
   "mobile.manualBookingExistingCustomer": "Наявний клієнт",
   "mobile.manualBookingNewCustomer": "Новий клієнт",
   "mobile.manualBookingSearchCustomer": "Пошук клієнтів",
+  "mobile.manualBookingSearchHint":
+    "Введіть ім’я, телефон або електронну пошту клієнта — покажемо збіги.",
   "mobile.manualBookingNoCustomers": "Клієнтів ще не додано.",
   "mobile.manualBookingCustomerName": "Ім’я клієнта *",
   "mobile.manualBookingCustomerEmail": "Електронна пошта клієнта",
@@ -447,7 +449,7 @@ export const ukrainianMessages: Messages = {
   "mobile.manualBookingDate": "Дата *",
   "mobile.manualBookingTime": "Вільний час *",
   "mobile.manualBookingNoSlots": "На цю дату немає вільного часу.",
-  "mobile.manualBookingDuration": "Тривалість у хвилинах *",
+  "mobile.manualBookingDuration": "Тривалість запису",
   "mobile.manualBookingPrice": "Ціна, Kč *",
   "mobile.manualBookingNote": "Примітка майстра",
   "mobile.manualBookingNotePlaceholder": "Наприклад, клієнт з Instagram",
@@ -591,7 +593,7 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceTranslationFailed":
     "Не вдалося підготувати переклади. Спробуйте ще раз.",
   "mobile.serviceTranslationNameRequired": "Спочатку введіть назву послуги.",
-  "mobile.serviceTranslationsShow": "Показати переклади",
+  "mobile.serviceTranslationsShow": "Додати переклади вручну",
   "mobile.serviceTranslationsHide": "Сховати переклади",
   "mobile.serviceSave": "Зберегти послугу",
   "mobile.serviceCreate": "Створити послугу",

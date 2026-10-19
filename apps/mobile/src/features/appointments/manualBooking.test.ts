@@ -10,6 +10,7 @@ import {
   listMasterFutureSeriesAppointments,
   listMasterMonthAvailableSlots,
   type ManualBookingDraft,
+  shouldSearchManualBookingCustomers,
   validateManualBookingDraft,
 } from "./manualBooking";
 import { moveManualBookingService } from "./manualBookingServices";
@@ -133,6 +134,15 @@ describe("manual booking validation", () => {
         phone: "420987654321",
       },
     ]);
+  });
+});
+
+describe("manual booking customer search", () => {
+  it("waits for a useful query instead of loading every customer", () => {
+    expect(shouldSearchManualBookingCustomers("")).toBe(false);
+    expect(shouldSearchManualBookingCustomers("a")).toBe(false);
+    expect(shouldSearchManualBookingCustomers("  ")).toBe(false);
+    expect(shouldSearchManualBookingCustomers("an")).toBe(true);
   });
 });
 

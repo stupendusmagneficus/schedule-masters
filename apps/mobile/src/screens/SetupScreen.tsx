@@ -203,6 +203,7 @@ export function SetupScreen({ locale, onComplete, userId }: SetupScreenProps) {
         <SetupCompleteStep
           bookingWebUrl={mobileEnv.bookingWebUrl}
           draft={draft}
+          locale={locale}
           onOpenBooking={() =>
             void Linking.openURL(
               buildBookingUrl(mobileEnv.bookingWebUrl, draft.slug),

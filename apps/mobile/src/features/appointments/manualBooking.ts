@@ -54,6 +54,7 @@ export type ManualBookingValidationError =
   | "slot";
 
 export const MANUAL_BOOKING_MAX_SERVICES = 20;
+export const MANUAL_BOOKING_CUSTOMER_SEARCH_MIN_LENGTH = 2;
 
 type ManualBookingClient = SupabaseClient<Database>;
 
@@ -86,6 +87,10 @@ export async function listMasterCustomers(
   });
   if (error) throw new Error(error.message);
   return deduplicateManualBookingCustomers(data ?? []);
+}
+
+export function shouldSearchManualBookingCustomers(search: string): boolean {
+  return search.trim().length >= MANUAL_BOOKING_CUSTOMER_SEARCH_MIN_LENGTH;
 }
 
 export function deduplicateManualBookingCustomers(
