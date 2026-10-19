@@ -519,6 +519,7 @@ export function DashboardScreen({
             locale={locale}
             onSelectAppointment={client ? setSelectedAppointment : undefined}
             onFeedback={setFeedback}
+            onWorkspaceSaved={onWorkspaceSaved}
             onSelectTime={(date, startsAt) =>
               client
                 ? openManualBooking(date, startsAt)

@@ -316,6 +316,15 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarSelectedDatesCount": "Вибрано дат: {count}",
   "mobile.calendarOpenClosedDays": "Відкрити вихідні: {count}",
   "mobile.calendarCloseOpenDays": "Закрити робочі дні: {count}",
+  "mobile.calendarWeeklyAction": "Повторювати щотижня",
+  "mobile.calendarWeeklyTitle": "Налаштувати тижневий розклад",
+  "mobile.calendarWeeklyDescription":
+    "Зміни застосуються до вибраних днів тижня з сьогоднішнього дня. Винятки для окремих дат залишаться без змін.",
+  "mobile.calendarWeeklyOpen": "Робочий час",
+  "mobile.calendarWeeklyClosed": "Вихідний",
+  "mobile.calendarWeeklyApply": "Зберегти розклад",
+  "mobile.calendarWeeklySaveFailed":
+    "Не вдалося зберегти тижневий розклад. Перевірте записи у вибрані дні.",
   "mobile.calendarBulkOpenTitle": "Відкрити вибрані дні",
   "mobile.calendarBulkCloseTitle": "Закрити вибрані дні",
   "mobile.calendarBulkOpenDescription":

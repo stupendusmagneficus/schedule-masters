@@ -46,6 +46,7 @@ type MonthCalendarProps = {
   readonly onCancelSelection: () => void;
   readonly onOpenClosedDates: () => void;
   readonly onCloseOpenDates: () => void;
+  readonly onRepeatWeekly: () => void;
   readonly t: DashboardTabProps["t"];
 };
 
@@ -69,6 +70,7 @@ export function MonthCalendar({
   onCancelSelection,
   onOpenClosedDates,
   onCloseOpenDates,
+  onRepeatWeekly,
   t,
 }: MonthCalendarProps) {
   const listRef = useRef<FlatList<MonthItem>>(null);
@@ -196,6 +198,14 @@ export function MonthCalendar({
               )}
               onPress={onCloseOpenDates}
               variant="destructive"
+            />
+          ) : null}
+          {selectedDates.length > 0 ? (
+            <ActionButton
+              disabled={isBulkSaving}
+              label={t("mobile.calendarWeeklyAction")}
+              onPress={onRepeatWeekly}
+              variant="secondary"
             />
           ) : null}
           <ActionButton

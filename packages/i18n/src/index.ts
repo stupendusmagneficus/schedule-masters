@@ -274,6 +274,13 @@ export type MessageKey =
   | "mobile.calendarSelectedDatesCount"
   | "mobile.calendarOpenClosedDays"
   | "mobile.calendarCloseOpenDays"
+  | "mobile.calendarWeeklyAction"
+  | "mobile.calendarWeeklyTitle"
+  | "mobile.calendarWeeklyDescription"
+  | "mobile.calendarWeeklyOpen"
+  | "mobile.calendarWeeklyClosed"
+  | "mobile.calendarWeeklyApply"
+  | "mobile.calendarWeeklySaveFailed"
   | "mobile.calendarBulkOpenTitle"
   | "mobile.calendarBulkCloseTitle"
   | "mobile.calendarBulkOpenDescription"
@@ -909,6 +916,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Выбрано дат: {count}",
     "mobile.calendarOpenClosedDays": "Открыть выходные: {count}",
     "mobile.calendarCloseOpenDays": "Закрыть рабочие: {count}",
+    "mobile.calendarWeeklyAction": "Повторять по неделям",
+    "mobile.calendarWeeklyTitle": "Настроить каждую неделю",
+    "mobile.calendarWeeklyDescription":
+      "Изменения применятся к выбранным дням недели с сегодняшнего дня. Исключения для отдельных дат останутся без изменений.",
+    "mobile.calendarWeeklyOpen": "Рабочие часы",
+    "mobile.calendarWeeklyClosed": "Выходной",
+    "mobile.calendarWeeklyApply": "Сохранить расписание",
+    "mobile.calendarWeeklySaveFailed":
+      "Не удалось сохранить недельное расписание. Проверьте, нет ли записей в выбранные дни.",
     "mobile.calendarBulkOpenTitle": "Открыть выбранные дни",
     "mobile.calendarBulkCloseTitle": "Закрыть выбранные дни",
     "mobile.calendarBulkOpenDescription":
@@ -1590,6 +1606,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Vybraná data: {count}",
     "mobile.calendarOpenClosedDays": "Otevřít volné dny: {count}",
     "mobile.calendarCloseOpenDays": "Uzavřít pracovní dny: {count}",
+    "mobile.calendarWeeklyAction": "Opakovat každý týden",
+    "mobile.calendarWeeklyTitle": "Nastavit každý týden",
+    "mobile.calendarWeeklyDescription":
+      "Změny se od dneška použijí na vybrané dny týdne. Výjimky pro jednotlivá data zůstanou beze změny.",
+    "mobile.calendarWeeklyOpen": "Pracovní doba",
+    "mobile.calendarWeeklyClosed": "Volno",
+    "mobile.calendarWeeklyApply": "Uložit rozvrh",
+    "mobile.calendarWeeklySaveFailed":
+      "Týdenní rozvrh se nepodařilo uložit. Zkontrolujte rezervace ve vybraných dnech.",
     "mobile.calendarBulkOpenTitle": "Otevřít vybrané dny",
     "mobile.calendarBulkCloseTitle": "Uzavřít vybrané dny",
     "mobile.calendarBulkOpenDescription":
@@ -2270,6 +2295,15 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarSelectedDatesCount": "Dates selected: {count}",
     "mobile.calendarOpenClosedDays": "Open days off: {count}",
     "mobile.calendarCloseOpenDays": "Close working days: {count}",
+    "mobile.calendarWeeklyAction": "Repeat every week",
+    "mobile.calendarWeeklyTitle": "Set weekly schedule",
+    "mobile.calendarWeeklyDescription":
+      "Changes apply to the selected weekdays starting today. One-off date exceptions remain unchanged.",
+    "mobile.calendarWeeklyOpen": "Working hours",
+    "mobile.calendarWeeklyClosed": "Day off",
+    "mobile.calendarWeeklyApply": "Save schedule",
+    "mobile.calendarWeeklySaveFailed":
+      "Could not save the weekly schedule. Check for bookings on the selected weekdays.",
     "mobile.calendarBulkOpenTitle": "Open selected days",
     "mobile.calendarBulkCloseTitle": "Close selected days",
     "mobile.calendarBulkOpenDescription":
