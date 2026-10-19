@@ -1594,10 +1594,6 @@ export type Database = {
         Args: { p_overrides: Json; p_workspace_id: string }
         Returns: Json
       }
-      set_master_weekly_availability: {
-        Args: { p_rules: Json; p_workspace_id: string }
-        Returns: Json
-      }
       set_master_waiting_list_entry_status: {
         Args: {
           p_appointment_id?: string
@@ -1606,6 +1602,10 @@ export type Database = {
           p_workspace_id: string
         }
         Returns: undefined
+      }
+      set_master_weekly_availability: {
+        Args: { p_rules: Json; p_workspace_id: string }
+        Returns: Json
       }
       update_customer_appointment: {
         Args: { p_action: string; p_token: string }
