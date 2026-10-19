@@ -64,7 +64,7 @@ export function PublicServicePicker({
       </label>
       {selectedServices.length > 0 && currency && (
         <a
-          aria-label={`${t("booking.selectedServices")}: ${selectedServices.length}, ${summary.durationMinutes} min, ${formatCurrency(summary.priceAmount, locale, currency)}`}
+          aria-label={`${t("booking.selectedServices")}: ${selectedServices.length}, ${formatDuration(summary.durationMinutes, locale)}, ${formatCurrency(summary.priceAmount, locale, currency)}`}
           className="service-selection-quick-summary"
           href="#booking-selected-services"
         >

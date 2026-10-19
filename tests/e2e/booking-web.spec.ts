@@ -339,11 +339,11 @@ test.describe("public booking web", () => {
       .filter({ hasText: "Pedicure" });
     await pedicure.click();
     await expect(page.locator(".selected-services-summary")).toContainText(
-      "120 min",
+      "2 hours",
     );
     await page.getByRole("button", { name: "Remove Pedicure" }).click();
     await expect(page.locator(".selected-services-summary")).toContainText(
-      "60 min",
+      "1 hour",
     );
     await pedicure.click();
     await page.getByLabel("Choose a date").fill("2030-01-03");
