@@ -27,20 +27,21 @@ export type FinanceMonthSummary = {
   readonly upcomingCount: number;
 };
 
-type SummarizeFinanceMonthParams = {
+type SummarizeFinanceRangeParams = {
   readonly appointments: readonly FinanceAppointment[];
-  readonly month: string;
+  readonly fromDate: string;
   readonly now: Date;
+  readonly toDate: string;
   readonly timezone: string;
 };
 
-export function summarizeFinanceMonth({
+export function summarizeFinanceRange({
   appointments,
-  month,
+  fromDate,
   now,
+  toDate,
   timezone,
-}: SummarizeFinanceMonthParams): FinanceMonthSummary {
-  const { fromDate, toDate } = getCalendarDateRange(month, "month");
+}: SummarizeFinanceRangeParams): FinanceMonthSummary {
   const nowTimestamp = now.getTime();
   let completedCount = 0;
   let upcomingCount = 0;
@@ -114,6 +115,27 @@ export function summarizeFinanceMonth({
     returningCustomerCount: returningCustomers.size,
     upcomingCount,
   };
+}
+
+export function summarizeFinanceMonth({
+  appointments,
+  month,
+  now,
+  timezone,
+}: {
+  readonly appointments: readonly FinanceAppointment[];
+  readonly month: string;
+  readonly now: Date;
+  readonly timezone: string;
+}): FinanceMonthSummary {
+  const range = getCalendarDateRange(month, "month");
+  return summarizeFinanceRange({
+    appointments,
+    fromDate: range.fromDate,
+    now,
+    toDate: range.toDate,
+    timezone,
+  });
 }
 
 function addCurrencyAmount(

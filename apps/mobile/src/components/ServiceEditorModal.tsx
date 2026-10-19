@@ -79,14 +79,10 @@ export function ServiceEditorModal({
   }, [locale, service, visible]);
 
   function updateDraft(patch: Partial<ServiceDraft>) {
-    const sourceContentChanged =
-      "name" in patch || "description" in patch || "category" in patch;
     setDraft((current) => ({
       ...current,
       ...patch,
-      ...(sourceContentChanged ? { translations: {} } : {}),
     }));
-    if (sourceContentChanged) setShowTranslations(false);
     setValidationError(null);
   }
 
@@ -281,46 +277,14 @@ export function ServiceEditorModal({
           />
           <View style={styles.translationSection}>
             <Text style={styles.label}>
-              {t("mobile.serviceSourceLanguage")}
+              {t("mobile.serviceTranslationsTitle")}
             </Text>
-            <View style={styles.localeOptions}>
-              {serviceLocales.map((option) => (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{
-                    selected: draft.sourceLocale === option.locale,
-                  }}
-                  key={option.locale}
-                  onPress={() => {
-                    updateDraft({
-                      sourceLocale: option.locale,
-                      translations: {},
-                    });
-                    setShowTranslations(false);
-                  }}
-                  style={[
-                    styles.categoryOption,
-                    draft.sourceLocale === option.locale &&
-                      styles.categoryOptionSelected,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.categoryOptionText,
-                      draft.sourceLocale === option.locale &&
-                        styles.categoryOptionTextSelected,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
             <Text style={styles.categoryHint}>
               {t("mobile.serviceTranslationReviewHint")}
             </Text>
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ expanded: showTranslations }}
               onPress={() => setShowTranslations((current) => !current)}
               style={styles.translationToggle}
             >
@@ -332,6 +296,42 @@ export function ServiceEditorModal({
                 )}
               </Text>
             </Pressable>
+            {showTranslations ? (
+              <>
+                <Text style={styles.categoryHint}>
+                  {t("mobile.serviceSourceLanguage")}
+                </Text>
+                <View style={styles.localeOptions}>
+                  {serviceLocales.map((option) => (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{
+                        selected: draft.sourceLocale === option.locale,
+                      }}
+                      key={option.locale}
+                      onPress={() =>
+                        updateDraft({ sourceLocale: option.locale })
+                      }
+                      style={[
+                        styles.categoryOption,
+                        draft.sourceLocale === option.locale &&
+                          styles.categoryOptionSelected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.categoryOptionText,
+                          draft.sourceLocale === option.locale &&
+                            styles.categoryOptionTextSelected,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : null}
             <ActionButton
               disabled={isTranslating || isSaving}
               label={t("mobile.serviceTranslateWithAi")}
