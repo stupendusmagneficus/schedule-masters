@@ -731,12 +731,12 @@ const styles = StyleSheet.create({
   noteInput: {
     ...typography.body,
     borderColor: colors.border,
-    borderRadius: radii.control,
+    borderRadius: radii.surface,
     borderWidth: 1,
     color: colors.primaryText,
     marginBottom: 12,
     minHeight: 112,
-    padding: 12,
+    padding: 14,
   },
   sectionTitle: {
     ...typography.section,

@@ -280,6 +280,7 @@ export type MessageKey =
   | "mobile.todayLoadFailed"
   | "mobile.todayRetry"
   | "mobile.calendar"
+  | "mobile.calendarCurrentTime"
   | "mobile.calendarSelectDate"
   | "mobile.calendarSelectDays"
   | "mobile.calendarSelectionHint"
@@ -563,6 +564,7 @@ export type MessageKey =
   | "booking.unavailable"
   | "booking.availabilityFailed"
   | "booking.submitFailed"
+  | "booking.bookingWith"
   | "booking.chooseService"
   | "booking.searchServices"
   | "booking.selectedServices"
@@ -945,6 +947,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Не удалось загрузить расписание.",
     "mobile.todayRetry": "Повторить",
     "mobile.calendar": "Календарь",
+    "mobile.calendarCurrentTime": "Текущее время",
     "mobile.calendarSelectDate": "Выберите дату",
     "mobile.calendarSelectDays": "Выбрать даты",
     "mobile.calendarSelectionHint":
@@ -1280,6 +1283,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availabilityFailed": "Не удалось проверить свободное время.",
     "booking.submitFailed":
       "Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.",
+    "booking.bookingWith": "Вы записываетесь к",
     "booking.chooseService": "Выберите услугу",
     "booking.searchServices": "Поиск по названию или категории",
     "booking.selectedServices": "Выбранные услуги",
@@ -1662,6 +1666,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "Nepodařilo se načíst rozvrh.",
     "mobile.todayRetry": "Zkusit znovu",
     "mobile.calendar": "Kalendář",
+    "mobile.calendarCurrentTime": "Aktuální čas",
     "mobile.calendarSelectDate": "Vyberte datum",
     "mobile.calendarSelectDays": "Vybrat dny",
     "mobile.calendarSelectionHint":
@@ -1994,6 +1999,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availabilityFailed": "Volné termíny se nepodařilo ověřit.",
     "booking.submitFailed":
       "Rezervaci se nepodařilo odeslat. Zkontrolujte připojení a zkuste to znovu.",
+    "booking.bookingWith": "Objednáváte se k",
     "booking.chooseService": "Vyberte službu",
     "booking.searchServices": "Hľadať podľa názvu alebo kategórie",
     "booking.selectedServices": "Vybrané služby",
@@ -2380,6 +2386,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.todayLoadFailed": "The schedule could not be loaded.",
     "mobile.todayRetry": "Try again",
     "mobile.calendar": "Calendar",
+    "mobile.calendarCurrentTime": "Current time",
     "mobile.calendarSelectDate": "Choose a date",
     "mobile.calendarSelectDays": "Select dates",
     "mobile.calendarSelectionHint":
@@ -2716,6 +2723,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.availabilityFailed": "We couldn't check available times.",
     "booking.submitFailed":
       "We couldn't send your request. Check your connection and try again.",
+    "booking.bookingWith": "Booking with",
     "booking.chooseService": "Choose a service",
     "booking.searchServices": "Search by service or category",
     "booking.selectedServices": "Selected services",

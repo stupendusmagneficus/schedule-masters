@@ -492,6 +492,7 @@ export default function HomePage() {
         <div className="booking-header">
           <div>
             <p className="eyebrow">{t("common.appName")}</p>
+            <p className="booking-with-label">{t("booking.bookingWith")}</p>
             <h1>{context.workspace.name}</h1>
             <p className="muted-copy">{t("booking.description")}</p>
           </div>

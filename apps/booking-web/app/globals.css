@@ -91,6 +91,13 @@ button:focus-visible {
   text-transform: uppercase;
 }
 
+.booking-with-label {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
 h1,
 h2,
 p {
@@ -134,10 +141,15 @@ h2 {
   border-bottom: 1px solid var(--line-subtle);
 }
 
+.booking-section > h2,
+.booking-section > label > h2 {
+  margin-bottom: 16px;
+}
+
 .service-list,
 .slot-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .service-search-label {
@@ -207,6 +219,18 @@ h2 {
 
 .selected-services-summary li {
   min-height: 44px;
+  padding: 6px 0;
+}
+
+.selected-service-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.selected-service-copy small {
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .selected-services-summary dl {
@@ -265,10 +289,54 @@ h2 {
 }
 
 .service-option {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+}
+
+.service-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.service-copy strong {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.service-copy small {
+  line-height: 1.4;
+}
+
+.service-copy .service-meta {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.service-selection-mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--surface);
+}
+
+.service-selection-mark::after {
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  content: "";
+  opacity: 0;
+  transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .service-option:hover,
@@ -284,15 +352,19 @@ h2 {
   background: var(--action-soft);
 }
 
+.service-option.selected .service-selection-mark {
+  background: var(--action);
+  border-color: var(--action);
+}
+
+.service-option.selected .service-selection-mark::after {
+  opacity: 1;
+}
+
 .service-option small {
   display: block;
   color: var(--muted);
   margin-top: 4px;
-}
-
-.service-price {
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .date-input,
@@ -350,6 +422,8 @@ button:focus-visible {
 
 textarea {
   min-height: 88px;
+  border-radius: var(--radius-surface);
+  padding: 12px 14px;
   resize: vertical;
 }
 

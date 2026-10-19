@@ -714,7 +714,12 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 14,
   },
-  note: { minHeight: 84, paddingVertical: 10, textAlignVertical: "top" },
+  note: {
+    borderRadius: radii.surface,
+    minHeight: 84,
+    paddingTop: 12,
+    textAlignVertical: "top",
+  },
   body: { ...typography.body, color: colors.primaryText, fontWeight: "600" },
   secondary: { ...typography.caption, color: colors.secondaryText },
   error: { ...typography.label, color: colors.danger },

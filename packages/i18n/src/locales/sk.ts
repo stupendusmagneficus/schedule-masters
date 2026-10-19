@@ -326,6 +326,7 @@ export const slovakMessages: Messages = {
   "mobile.todayLoadFailed": "Rozvrh sa nepodarilo načítať.",
   "mobile.todayRetry": "Skúsiť znova",
   "mobile.calendar": "Kalendár",
+  "mobile.calendarCurrentTime": "Aktuálny čas",
   "mobile.calendarSelectDate": "Vyberte dátum",
   "mobile.calendarSelectDays": "Vybrať dátumy",
   "mobile.calendarSelectionHint":
@@ -660,6 +661,7 @@ export const slovakMessages: Messages = {
   "booking.availabilityFailed": "Voľné termíny sa nepodarilo overiť.",
   "booking.submitFailed":
     "Žiadosť sa nepodarilo odoslať. Skontrolujte pripojenie a skúste to znova.",
+  "booking.bookingWith": "Objednávate sa k",
   "booking.chooseService": "Vyberte službu",
   "booking.searchServices": "Hľadať podľa názvu alebo kategórie",
   "booking.selectedServices": "Vybrané služby",

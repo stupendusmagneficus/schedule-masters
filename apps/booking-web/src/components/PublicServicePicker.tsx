@@ -1,6 +1,6 @@
 import type { PublicBookingService } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
-import { formatCurrency } from "@schedule-app/i18n";
+import { formatCurrency, formatDuration } from "@schedule-app/i18n";
 import { useMemo, useState } from "react";
 import {
   getLocalizedServiceContent,
@@ -64,14 +64,14 @@ export function PublicServicePicker({
       </label>
       {selectedServices.length > 0 && currency && (
         <a
-          aria-label={`${t("booking.selectedServices")}: ${selectedServices.length}, ${summary.durationMinutes} min, ${formatCurrency(summary.priceAmount, locale, currency)}`}
+          aria-label={`${t("booking.selectedServices")}: ${selectedServices.length}, ${formatDuration(summary.durationMinutes, locale)}, ${formatCurrency(summary.priceAmount, locale, currency)}`}
           className="service-selection-quick-summary"
           href="#booking-selected-services"
         >
           <span>
             {t("booking.selectedServices")}: {selectedServices.length}
           </span>
-          <span>{summary.durationMinutes} min</span>
+          <span>{formatDuration(summary.durationMinutes, locale)}</span>
           <strong>
             {formatCurrency(summary.priceAmount, locale, currency)}
           </strong>
@@ -106,20 +106,25 @@ export function PublicServicePicker({
                       onClick={() => onToggleService(service.id)}
                       type="button"
                     >
-                      <span>
+                      <span className="service-copy">
                         <strong>{content.name}</strong>
                         {content.description ? (
                           <small>{content.description}</small>
                         ) : null}
-                        <small>{service.durationMinutes} min</small>
+                        <small className="service-meta">
+                          {formatDuration(service.durationMinutes, locale)}
+                          <span aria-hidden="true"> · </span>
+                          {formatCurrency(
+                            service.priceAmount,
+                            locale,
+                            service.currency,
+                          )}
+                        </small>
                       </span>
-                      <span className="service-price">
-                        {formatCurrency(
-                          service.priceAmount,
-                          locale,
-                          service.currency,
-                        )}
-                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="service-selection-mark"
+                      />
                     </button>
                   );
                 })}
@@ -138,7 +143,20 @@ export function PublicServicePicker({
           <ol>
             {selectedServices.map((service) => (
               <li key={service.id}>
-                <span>{getLocalizedServiceContent(service, locale).name}</span>
+                <span className="selected-service-copy">
+                  <strong>
+                    {getLocalizedServiceContent(service, locale).name}
+                  </strong>
+                  <small>
+                    {formatDuration(service.durationMinutes, locale)}
+                    <span aria-hidden="true"> · </span>
+                    {formatCurrency(
+                      service.priceAmount,
+                      locale,
+                      service.currency,
+                    )}
+                  </small>
+                </span>
                 <button
                   aria-label={t("booking.removeService").replace(
                     "{name}",
@@ -156,7 +174,7 @@ export function PublicServicePicker({
           <dl>
             <div>
               <dt>{t("booking.totalDuration")}</dt>
-              <dd>{summary.durationMinutes} min</dd>
+              <dd>{formatDuration(summary.durationMinutes, locale)}</dd>
             </div>
             {currency && (
               <div>

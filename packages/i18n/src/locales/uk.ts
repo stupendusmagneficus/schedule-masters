@@ -324,6 +324,7 @@ export const ukrainianMessages: Messages = {
   "mobile.todayLoadFailed": "Не вдалося завантажити розклад.",
   "mobile.todayRetry": "Спробувати ще раз",
   "mobile.calendar": "Календар",
+  "mobile.calendarCurrentTime": "Поточний час",
   "mobile.calendarSelectDate": "Виберіть дату",
   "mobile.calendarSelectDays": "Вибрати дати",
   "mobile.calendarSelectionHint":
@@ -657,6 +658,7 @@ export const ukrainianMessages: Messages = {
   "booking.availabilityFailed": "Не вдалося перевірити вільний час.",
   "booking.submitFailed":
     "Не вдалося надіслати заявку. Перевірте з’єднання та спробуйте ще раз.",
+  "booking.bookingWith": "Ви записуєтесь до",
   "booking.chooseService": "Виберіть послугу",
   "booking.searchServices": "Пошук за назвою або категорією",
   "booking.selectedServices": "Вибрані послуги",
