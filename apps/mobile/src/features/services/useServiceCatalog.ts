@@ -1,6 +1,6 @@
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Service } from "../../types";
 import {
@@ -30,21 +30,24 @@ export function useServiceCatalog({
   const [isLoading, setLoading] = useState(Boolean(client));
   const [isSaving, setSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const loadGeneration = useRef(0);
 
   const load = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     if (!client) {
-      setLoading(false);
+      if (generation === loadGeneration.current) setLoading(false);
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      setServices(await listServices(client, workspaceId));
+      const nextServices = await listServices(client, workspaceId);
+      if (generation === loadGeneration.current) setServices(nextServices);
     } catch (nextError) {
-      setError(toError(nextError));
+      if (generation === loadGeneration.current) setError(toError(nextError));
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current) setLoading(false);
     }
   }, [client, workspaceId]);
 

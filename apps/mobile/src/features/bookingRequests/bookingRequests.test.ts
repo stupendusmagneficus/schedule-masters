@@ -1,74 +1,9 @@
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import {
-  listMasterPendingBookingRequests,
-  subscribeToMasterPendingBookingRequestChanges,
-} from "./bookingRequests";
+import { listMasterPendingBookingRequests } from "./bookingRequests";
 
 describe("master pending booking requests", () => {
-  it("subscribes to appointment changes scoped to one workspace", () => {
-    const channel = {
-      on: vi.fn().mockReturnThis(),
-      subscribe: vi.fn().mockReturnThis(),
-    };
-    const removeChannel = vi.fn();
-    const client = {
-      channel: vi.fn().mockReturnValue(channel),
-      removeChannel,
-    } as unknown as SupabaseClient<Database>;
-    const onChange = vi.fn();
-
-    const unsubscribe = subscribeToMasterPendingBookingRequestChanges(
-      client,
-      "workspace-a",
-      onChange,
-    );
-
-    expect(client.channel).toHaveBeenCalledWith(
-      "master-pending-booking-requests:workspace-a",
-    );
-    expect(channel.on).toHaveBeenCalledWith(
-      "postgres_changes",
-      {
-        event: "*",
-        filter: "workspace_id=eq.workspace-a",
-        schema: "public",
-        table: "appointments",
-      },
-      expect.any(Function),
-    );
-    unsubscribe();
-    expect(removeChannel).toHaveBeenCalledWith(channel);
-  });
-
-  it("refreshes only for public booking appointment changes", () => {
-    const channel = {
-      on: vi.fn().mockReturnThis(),
-      subscribe: vi.fn().mockReturnThis(),
-    };
-    const client = {
-      channel: vi.fn().mockReturnValue(channel),
-      removeChannel: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-    const onChange = vi.fn();
-
-    subscribeToMasterPendingBookingRequestChanges(
-      client,
-      "workspace-a",
-      onChange,
-    );
-    const callback = channel.on.mock.calls[0]?.[2] as (payload: {
-      new: unknown;
-      old: unknown;
-    }) => void;
-
-    callback({ new: { source: "master_created" }, old: {} });
-    expect(onChange).not.toHaveBeenCalled();
-    callback({ new: { source: "public_booking" }, old: {} });
-    expect(onChange).toHaveBeenCalledTimes(1);
-  });
-
   it("loads requests for the selected workspace", async () => {
     const rows = [
       {

@@ -52,6 +52,7 @@ type FreeSlotsModalProps = {
   readonly locale: SupportedLocale;
   readonly onBook: (serviceId: string, date: string, startsAt: string) => void;
   readonly onClose: () => void;
+  readonly refreshVersion: number;
   readonly services: readonly Service[];
   readonly t: (key: MessageKey) => string;
   readonly visible: boolean;
@@ -66,6 +67,7 @@ export function FreeSlotsModal({
   locale,
   onBook,
   onClose,
+  refreshVersion,
   services,
   t,
   visible,
@@ -89,6 +91,8 @@ export function FreeSlotsModal({
     "idle" | "opened" | "downloaded" | "failed"
   >("idle");
   const shareCardRef = useRef<ViewShotRef | null>(null);
+  const refreshVersionRef = useRef(refreshVersion);
+  refreshVersionRef.current = refreshVersion;
   const shareStartDate = getTodayCalendarDate(workspace.timezone);
   const shareEndDate = addCalendarDays(shareStartDate, 13);
 
@@ -120,7 +124,9 @@ export function FreeSlotsModal({
             shareStartDate,
             shareEndDate,
           ).then((result) => {
-            if (active) setShareSlots(result);
+            if (active && refreshVersionRef.current === refreshVersion) {
+              setShareSlots(result);
+            }
           })
         : serviceId
           ? listMasterMonthAvailableSlots(
@@ -129,15 +135,21 @@ export function FreeSlotsModal({
               serviceId,
               monthDate,
             ).then((result) => {
-              if (active) setSlots(result);
+              if (active && refreshVersionRef.current === refreshVersion) {
+                setSlots(result);
+              }
             })
           : Promise.resolve();
     void request
       .catch(() => {
-        if (active) setHasError(true);
+        if (active && refreshVersionRef.current === refreshVersion) {
+          setHasError(true);
+        }
       })
       .finally(() => {
-        if (active) setIsLoading(false);
+        if (active && refreshVersionRef.current === refreshVersion) {
+          setIsLoading(false);
+        }
       });
     return () => {
       active = false;
@@ -147,6 +159,7 @@ export function FreeSlotsModal({
     client,
     demoData,
     monthDate,
+    refreshVersion,
     shareEndDate,
     shareStartDate,
     serviceId,
