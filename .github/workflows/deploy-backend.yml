@@ -1,0 +1,110 @@
+name: Deploy backend
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected GitHub environment
+        required: true
+        type: choice
+        options: [pilot, production]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: deploy-backend-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    env:
+      RELEASE_ENVIRONMENT: ${{ inputs.environment }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_DEMO_MODE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Require successful CI for this exact revision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              head_sha: context.sha,
+              event: 'push',
+              per_page: 1,
+            });
+            if (data.workflow_runs[0]?.conclusion !== 'success') {
+              core.setFailed('The latest main CI run for this revision must succeed before deployment.');
+            }
+      - name: Validate target and client configuration
+        run: node scripts/deployment/check-config.mjs
+      - name: Require deployment credentials
+        shell: bash
+        run: |
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_SERVICE_ROLE_KEY; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing environment secret: $name" >&2
+              exit 1
+            fi
+          done
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.117.0
+      - name: Link selected database
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Review pending migrations
+        run: supabase db push --linked --dry-run
+      - name: Apply migrations without seed data
+        run: supabase db push --linked --yes
+      - name: Deploy booking email worker
+        run: supabase functions deploy send-booking-decision-emails --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Deploy translation function
+        run: supabase functions deploy translate-service-content --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Verify both functions are active and require JWTs
+        run: |
+          supabase functions list --project-ref "$SUPABASE_PROJECT_REF" --output json > /tmp/release-functions.json
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          const functions = JSON.parse(readFileSync("/tmp/release-functions.json", "utf8"));
+          for (const name of ["send-booking-decision-emails", "translate-service-content"]) {
+            const deployed = functions.find((entry) => entry.slug === name);
+            if (deployed?.status !== "ACTIVE" || deployed.verify_jwt !== true) {
+              throw new Error(`Function ${name} must be ACTIVE with JWT verification enabled`);
+            }
+          }
+          NODE
+      - name: Verify PostgREST contract and function authentication
+        run: node scripts/deployment/check-api.mjs
+      - name: Record applied database and function versions
+        run: |
+          mkdir -p artifacts/backend-release
+          supabase migration list --linked > artifacts/backend-release/migrations.txt
+          supabase functions list --project-ref "$SUPABASE_PROJECT_REF" --output json > artifacts/backend-release/functions.json
+          git rev-parse HEAD > artifacts/backend-release/revision.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-release-${{ inputs.environment }}-${{ github.sha }}
+          path: artifacts/backend-release/
+          retention-days: 30
+      - name: Release handoff
+        run: |
+          echo 'Backend contract verified. Release client builds from this revision using the same environment configuration.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Auth, Cron, provider secrets, delivery and real-slug acceptance remain separate checks; see docs/operations/backend-release.md.' >> "$GITHUB_STEP_SUMMARY"
