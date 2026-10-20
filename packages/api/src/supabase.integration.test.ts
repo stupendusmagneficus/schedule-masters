@@ -1726,6 +1726,24 @@ describe("Supabase public booking contract", () => {
       });
       expect(block.error).toBeNull();
 
+      const appointmentDuringBlock = await admin.from("appointments").insert({
+        currency_snapshot: "CZK",
+        customer_id: customerId,
+        duration_minutes_snapshot: 60,
+        ends_at: "2030-03-28T15:15:00.000Z",
+        occupied_range: "[2030-03-28T14:15:00.000Z,2030-03-28T15:15:00.000Z)",
+        price_amount_snapshot: 700,
+        service_id: serviceId,
+        service_name_snapshot: "Availability service",
+        source: "master_created",
+        starts_at: "2030-03-28T14:15:00.000Z",
+        status: "confirmed",
+        workspace_id: workspaceId,
+      });
+      expect(appointmentDuringBlock.error?.message).toContain(
+        "Selected time overlaps a personal availability block",
+      );
+
       const masterSlots = await user.client.rpc("get_master_available_slots", {
         p_date: "2030-03-28",
         p_service_id: serviceId,
