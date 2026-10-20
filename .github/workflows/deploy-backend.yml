@@ -78,13 +78,15 @@ jobs:
         run: supabase functions deploy send-booking-decision-emails --project-ref "$SUPABASE_PROJECT_REF"
       - name: Deploy translation function
         run: supabase functions deploy translate-service-content --project-ref "$SUPABASE_PROJECT_REF"
-      - name: Verify both functions are active and require JWTs
+      - name: Deploy platform budget alert worker
+        run: supabase functions deploy send-platform-budget-alerts --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Verify functions are active and require JWTs
         run: |
           supabase functions list --project-ref "$SUPABASE_PROJECT_REF" --output json > /tmp/release-functions.json
           node --input-type=module <<'NODE'
           import { readFileSync } from "node:fs";
           const functions = JSON.parse(readFileSync("/tmp/release-functions.json", "utf8"));
-          for (const name of ["send-booking-decision-emails", "translate-service-content"]) {
+          for (const name of ["send-booking-decision-emails", "translate-service-content", "send-platform-budget-alerts"]) {
             const deployed = functions.find((entry) => entry.slug === name);
             if (deployed?.status !== "ACTIVE" || deployed.verify_jwt !== true) {
               throw new Error(`Function ${name} must be ACTIVE with JWT verification enabled`);

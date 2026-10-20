@@ -1,3 +1,9 @@
+import {
+  calculateOpenAiCostUsd,
+  parseBudgetReservation,
+  triggerPlatformBudgetAlerts,
+} from "../_shared/platformBudget.ts";
+
 const locales = ["en", "cz", "sk", "ru", "uk"] as const;
 type Locale = (typeof locales)[number];
 
@@ -318,6 +324,91 @@ export function createHandler({
       return jsonResponse({ error: "translation_quota_exceeded", quota }, 429);
     }
 
+    const maxRequestCost = Number(env.get("OPENAI_MAX_REQUEST_COST_USD"));
+    if (!Number.isFinite(maxRequestCost) || maxRequestCost <= 0) {
+      return jsonResponse({ error: "translation_budget_not_configured" }, 503);
+    }
+    let budgetReservationResponse: Response;
+    try {
+      budgetReservationResponse = await fetchWithTimeout(
+        fetcher,
+        `${supabaseUrl}/rest/v1/rpc/reserve_platform_integration_usage`,
+        {
+          body: JSON.stringify({
+            p_amount: maxRequestCost,
+            p_provider: "openai_translation",
+          }),
+          headers: {
+            apikey: serviceRoleKey,
+            authorization: `Bearer ${serviceRoleKey}`,
+            "content-type": "application/json",
+          },
+          method: "POST",
+        },
+        supabaseTimeoutMs,
+      );
+    } catch {
+      return jsonResponse({ error: "translation_budget_check_failed" }, 503);
+    }
+    if (!budgetReservationResponse.ok) {
+      return jsonResponse({ error: "translation_budget_check_failed" }, 503);
+    }
+    let budgetReservationPayload: unknown;
+    try {
+      budgetReservationPayload = await budgetReservationResponse.json();
+    } catch {
+      return jsonResponse({ error: "translation_budget_check_failed" }, 503);
+    }
+    const reservation = parseBudgetReservation(budgetReservationPayload);
+    if (!reservation) {
+      return jsonResponse({ error: "translation_budget_check_failed" }, 503);
+    }
+    if (!reservation.allowed || !reservation.reservationId) {
+      return jsonResponse(
+        {
+          error:
+            reservation.reason === "limit_reached"
+              ? "translation_global_budget_exceeded"
+              : "translation_budget_not_configured",
+        },
+        reservation.reason === "limit_reached" ? 429 : 503,
+      );
+    }
+
+    const settleBudget = async (actualAmount: number | null) => {
+      try {
+        const response = await fetchWithTimeout(
+          fetcher,
+          `${supabaseUrl}/rest/v1/rpc/settle_platform_integration_usage`,
+          {
+            body: JSON.stringify({
+              p_actual_amount: actualAmount,
+              p_reservation_id: reservation.reservationId,
+            }),
+            headers: {
+              apikey: serviceRoleKey,
+              authorization: `Bearer ${serviceRoleKey}`,
+              "content-type": "application/json",
+            },
+            method: "POST",
+          },
+          supabaseTimeoutMs,
+        );
+        if (response.ok) {
+          const result = (await response.json()) as { alertsPending?: unknown };
+          if (result.alertsPending === true) {
+            await triggerPlatformBudgetAlerts(
+              fetcher,
+              supabaseUrl,
+              serviceRoleKey,
+            );
+          }
+        }
+      } catch {
+        // The reservation continues to count against the budget if settlement fails.
+      }
+    };
+
     const targetLocales = locales.filter((locale) => locale !== sourceLocale);
     const model = env.get("OPENAI_TRANSLATION_MODEL") ?? "gpt-4o-mini";
     let translationResponse: Response;
@@ -357,9 +448,11 @@ export function createHandler({
         openAiTimeoutMs,
       );
     } catch {
+      await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
     if (!translationResponse.ok) {
+      await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
 
@@ -367,8 +460,17 @@ export function createHandler({
     try {
       providerResult = await translationResponse.json();
     } catch {
+      await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
+    const inputRate = Number(env.get("OPENAI_INPUT_USD_PER_MILLION_TOKENS"));
+    const outputRate = Number(env.get("OPENAI_OUTPUT_USD_PER_MILLION_TOKENS"));
+    const actualCost = calculateOpenAiCostUsd(
+      providerResult,
+      inputRate,
+      outputRate,
+    );
+    await settleBudget(actualCost);
     const providerContent = parseProviderContent(providerResult);
     if (!providerContent)
       return jsonResponse({ error: "translation_provider_failed" }, 502);

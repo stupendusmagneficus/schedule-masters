@@ -162,7 +162,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Test Edge Function contracts without calling external providers
-        run: deno test supabase/functions/send-booking-decision-emails supabase/functions/translate-service-content
+        run: deno test supabase/functions/_shared supabase/functions/send-booking-decision-emails supabase/functions/send-platform-budget-alerts supabase/functions/translate-service-content
 
   e2e:
     name: E2E tests

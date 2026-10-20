@@ -1,4 +1,8 @@
 import {
+  parseBudgetReservation,
+  triggerPlatformBudgetAlerts,
+} from "../_shared/platformBudget.ts";
+import {
   type BookingDecisionEmail,
   createBookingDecisionEmail,
 } from "./emailContent.ts";
@@ -111,8 +115,41 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
     let accepted = 0;
     let failed = 0;
     let retrying = 0;
+    let budgetDeferred = false;
 
-    for (const job of jobs) {
+    for (const [jobIndex, job] of jobs.entries()) {
+      const reservationResponse = await callRpc(
+        fetcher,
+        supabaseUrl,
+        serviceRoleKey,
+        "reserve_platform_integration_usage",
+        { p_amount: 1, p_provider: "resend_email" },
+      );
+      let reservation: ReturnType<typeof parseBudgetReservation> = null;
+      if (reservationResponse.ok) {
+        try {
+          reservation = parseBudgetReservation(
+            await reservationResponse.json(),
+          );
+        } catch {
+          reservation = null;
+        }
+      }
+      if (!reservation?.allowed || !reservation.reservationId) {
+        for (const deferredJob of jobs.slice(jobIndex)) {
+          const deferResponse = await callRpc(
+            fetcher,
+            supabaseUrl,
+            serviceRoleKey,
+            "defer_booking_decision_email_for_budget",
+            { p_id: deferredJob.id },
+          );
+          if (!deferResponse.ok) failed += 1;
+        }
+        budgetDeferred = true;
+        break;
+      }
+
       const message = createBookingDecisionEmail({
         decision: job.decision,
         locale: job.locale,
@@ -167,6 +204,30 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
         errorCode = "provider_unavailable";
       }
 
+      const settlement = await callRpc(
+        fetcher,
+        supabaseUrl,
+        serviceRoleKey,
+        "settle_platform_integration_usage",
+        { p_actual_amount: 1, p_reservation_id: reservation.reservationId },
+      );
+      if (settlement.ok) {
+        try {
+          const result = (await settlement.json()) as {
+            alertsPending?: unknown;
+          };
+          if (result.alertsPending === true) {
+            await triggerPlatformBudgetAlerts(
+              fetcher,
+              supabaseUrl,
+              serviceRoleKey,
+            );
+          }
+        } catch {
+          // The reservation continues to count against the budget if settlement parsing fails.
+        }
+      }
+
       const finishResponse = await callRpc(
         fetcher,
         supabaseUrl,
@@ -189,7 +250,13 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
       else failed += 1;
     }
 
-    return jsonResponse({ accepted, failed, processed: jobs.length, retrying });
+    return jsonResponse({
+      accepted,
+      budgetDeferred,
+      failed,
+      processed: jobs.length,
+      retrying,
+    });
   };
 }
 
