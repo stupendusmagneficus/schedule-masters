@@ -10,33 +10,24 @@ import {
 const draft: WorkspaceSettingsDraft = {
   bookingIntervalMinutes: 15,
   publicBookingMinNoticeMinutes: 120,
-  endTime: "18:00",
   name: "Anna Nails",
   slug: "anna-nails",
-  startTime: "09:00",
-  workingDays: [1, 2, 3, 4, 5],
 };
 
 describe("saveWorkspaceSettings", () => {
-  it("sends workspace, schedule, and booking notice in one atomic RPC request", async () => {
+  it("saves profile and booking preferences without sending any schedule fields", async () => {
     const rpc = vi.fn().mockResolvedValue({ error: null });
     const client = { rpc } as unknown as SupabaseClient<Database>;
 
     await saveWorkspaceSettings(client, "workspace-1", draft);
 
-    expect(rpc).toHaveBeenCalledWith(
-      "update_master_workspace_settings_with_booking_notice",
-      {
-        p_end_local_time: "18:00",
-        p_booking_interval_minutes: 15,
-        p_name: "Anna Nails",
-        p_notice_minutes: 120,
-        p_slug: "anna-nails",
-        p_start_local_time: "09:00",
-        p_working_days: [1, 2, 3, 4, 5],
-        p_workspace_id: "workspace-1",
-      },
-    );
+    expect(rpc).toHaveBeenCalledWith("update_master_workspace_preferences", {
+      p_booking_interval_minutes: 15,
+      p_name: "Anna Nails",
+      p_notice_minutes: 120,
+      p_slug: "anna-nails",
+      p_workspace_id: "workspace-1",
+    });
   });
 
   it("preserves the server error so the screen can show an inline failure", async () => {

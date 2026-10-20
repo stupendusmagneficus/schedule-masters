@@ -119,7 +119,9 @@ export const slovakMessages: Messages = {
   "workspace.setupSave": "Uložiť a pokračovať",
   "workspace.settingsTitle": "Nastavenia pracovného priestoru",
   "workspace.settingsDescription":
-    "Upravte názov, odkaz, pracovný čas, krok a uzávierku online rezervácií.",
+    "Upravte názov, odkaz, krok a uzávierku online rezervácií. Pracovné dni a prestávky nastavíte v kalendári.",
+  "workspace.settingsSlugHint":
+    "Po zmene odkazu prestane pôvodný odkaz na rezervácie fungovať. Odkazy na správu existujúcich rezervácií zostanú platné.",
   "workspace.settingsEdit": "Upraviť nastavenia",
   "workspace.settingsName": "Názov pracovného priestoru",
   "workspace.settingsSlug": "Odkaz na rezerváciu",

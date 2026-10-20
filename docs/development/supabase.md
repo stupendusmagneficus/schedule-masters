@@ -60,3 +60,20 @@ The first authenticated setup creates the master workspace, booking link, first 
 ## Backend releases
 
 Run `yarn deployment:check` to check the local mobile and booking-web project configuration. Hosted migrations and Edge Functions are released through the manual **Deploy backend** workflow after successful main CI. See [backend release and environment inventory](../operations/backend-release.md) for environment secrets, production gates, verification, and rollback.
+
+## Profile preferences and availability
+
+`update_master_workspace_preferences` atomically saves the owner's workspace name,
+public booking slug, booking interval and online booking notice. It reuses the
+owner/notice validation in `update_master_public_booking_notice` and never writes
+availability rules, date overrides, breaks or personal blocks. Calendar commands
+remain responsible for those changes; onboarding can still establish an initial
+weekly schedule. The legacy combined RPC remains for older clients.
+
+Changing the slug updates the existing workspace and booking-link rows in one
+transaction. The old public booking URL stops resolving; share the new URL with
+clients. Appointment management tokens continue to work because they identify an
+appointment rather than a public slug. The form explains this when the slug changes.
+Deploy migration `20261028000300_independent_workspace_preferences.sql` before the
+updated client. Roll back a client using the previous reviewed build; correct a
+schema issue with a forward migration rather than dropping a live RPC.

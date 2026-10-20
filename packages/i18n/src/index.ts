@@ -114,6 +114,7 @@ export type MessageKey =
   | "workspace.settingsDescription"
   | "workspace.settingsEdit"
   | "workspace.settingsName"
+  | "workspace.settingsSlugHint"
   | "workspace.settingsSlug"
   | "workspace.settingsSave"
   | "workspace.settingsSaving"
@@ -744,7 +745,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Сохранить и продолжить",
     "workspace.settingsTitle": "Рабочее пространство",
     "workspace.settingsDescription":
-      "Измените название, ссылку, рабочие часы, шаг и срок закрытия онлайн-записи.",
+      "Измените название, ссылку, шаг и срок закрытия онлайн-записи. Рабочие дни и паузы настраиваются в календаре.",
+    "workspace.settingsSlugHint":
+      "Смена ссылки отключит старую ссылку для записи. Ссылки управления существующими записями продолжат работать.",
     "workspace.settingsEdit": "Изменить настройки",
     "workspace.settingsName": "Название рабочего пространства",
     "workspace.settingsSlug": "Ссылка для записи",
@@ -1475,7 +1478,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Uložit a pokračovat",
     "workspace.settingsTitle": "Pracovní prostor",
     "workspace.settingsDescription":
-      "Upravte název, odkaz, pracovní dobu, krok a dobu uzavření online rezervací.",
+      "Upravte název, odkaz, krok a dobu uzavření online rezervací. Pracovní dny a přestávky nastavíte v kalendáři.",
+    "workspace.settingsSlugHint":
+      "Po změně odkazu přestane původní odkaz pro rezervace fungovat. Odkazy pro správu existujících rezervací zůstanou platné.",
     "workspace.settingsEdit": "Upravit nastavení",
     "workspace.settingsName": "Název pracovního prostoru",
     "workspace.settingsSlug": "Odkaz pro rezervace",
@@ -2199,7 +2204,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "workspace.setupSave": "Save and continue",
     "workspace.settingsTitle": "Workspace settings",
     "workspace.settingsDescription":
-      "Update the workspace name, booking link, working hours, booking interval, and online booking notice.",
+      "Update the name, booking link, booking interval, and online booking notice. Configure working days and breaks in the calendar.",
+    "workspace.settingsSlugHint":
+      "Changing the booking link disables the old booking link. Management links for existing appointments will still work.",
     "workspace.settingsEdit": "Edit settings",
     "workspace.settingsName": "Workspace name",
     "workspace.settingsSlug": "Booking link",

@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import type { WorkspaceSettingsDraft } from "./workspaceSettings";
-import { validateWorkspaceSettings } from "./workspaceSettings";
+import {
+  createWorkspaceSettingsDraft,
+  validateWorkspaceSettings,
+} from "./workspaceSettings";
 
 const validDraft: WorkspaceSettingsDraft = {
   bookingIntervalMinutes: 30,
   publicBookingMinNoticeMinutes: 0,
-  endTime: "18:00",
   name: "Anna Nails",
   slug: "anna-nails",
-  startTime: "09:00",
-  workingDays: [1, 2, 3, 4, 5],
 };
 
 describe("workspace settings validation", () => {
-  it("accepts valid workspace details and a weekly schedule", () => {
+  it("accepts valid workspace details", () => {
     expect(validateWorkspaceSettings(validDraft)).toBeNull();
   });
 
@@ -88,21 +88,19 @@ describe("workspace settings validation", () => {
     ).toBe("slug");
   });
 
-  it("requires at least one working day and an increasing valid time range", () => {
-    expect(validateWorkspaceSettings({ ...validDraft, workingDays: [] })).toBe(
-      "workingDays",
-    );
-    expect(
-      validateWorkspaceSettings({ ...validDraft, workingDays: [1, 1] }),
-    ).toBe("workingDays");
-    expect(validateWorkspaceSettings({ ...validDraft, workingDays: [8] })).toBe(
-      "workingDays",
-    );
-    expect(validateWorkspaceSettings({ ...validDraft, endTime: "09:00" })).toBe(
-      "schedule",
-    );
-    expect(validateWorkspaceSettings({ ...validDraft, startTime: "9am" })).toBe(
-      "schedule",
-    );
+  it("allows profile settings when all days are closed", () => {
+    const draft = createWorkspaceSettingsDraft({
+      id: "workspace-1",
+      name: "Studio",
+      slug: "studio",
+      timezone: "Europe/Prague",
+      bookingIntervalMinutes: 30,
+      publicBookingMinNoticeMinutes: 120,
+      availabilityRules: [],
+    });
+    expect(validateWorkspaceSettings(draft)).toBeNull();
+    expect(draft).not.toHaveProperty("workingDays");
+    expect(draft).not.toHaveProperty("startTime");
+    expect(draft).not.toHaveProperty("endTime");
   });
 });
