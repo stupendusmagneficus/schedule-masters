@@ -2,14 +2,7 @@ import type { Database } from "@schedule-app/api";
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import {
   createWorkspaceSettingsDraft,
   saveWorkspaceSettings,
@@ -23,7 +16,6 @@ import type { Workspace } from "../types";
 import { ActionButton } from "./ActionButton";
 import { BookingIntervalField } from "./BookingIntervalField";
 import { BookingNoticeField } from "./BookingNoticeField";
-import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 
 type WorkspaceSettingsModalProps = {
@@ -36,19 +28,6 @@ type WorkspaceSettingsModalProps = {
   readonly visible: boolean;
   readonly workspace: Workspace;
 };
-
-const dayOptions: ReadonlyArray<{
-  readonly key: MessageKey;
-  readonly value: number;
-}> = [
-  { key: "workspace.dayMonday", value: 1 },
-  { key: "workspace.dayTuesday", value: 2 },
-  { key: "workspace.dayWednesday", value: 3 },
-  { key: "workspace.dayThursday", value: 4 },
-  { key: "workspace.dayFriday", value: 5 },
-  { key: "workspace.daySaturday", value: 6 },
-  { key: "workspace.daySunday", value: 7 },
-];
 
 export function WorkspaceSettingsModal({
   client,
@@ -91,9 +70,7 @@ export function WorkspaceSettingsModal({
       setServerError(
         message.includes("slug is already taken")
           ? "workspace.settingsSlugTaken"
-          : message.includes("Advanced schedule")
-            ? "workspace.settingsAdvancedSchedule"
-            : "workspace.settingsSaveFailed",
+          : "workspace.settingsSaveFailed",
       );
     } finally {
       setSaving(false);
@@ -164,6 +141,11 @@ export function WorkspaceSettingsModal({
           }
           value={draft.slug}
         />
+        {draft.slug.trim() !== workspace.slug ? (
+          <Text style={styles.description}>
+            {t("workspace.settingsSlugHint")}
+          </Text>
+        ) : null}
         <BookingIntervalField
           label={t("workspace.bookingIntervalLabel")}
           locale={locale}
@@ -183,61 +165,6 @@ export function WorkspaceSettingsModal({
           t={t}
           value={draft.publicBookingMinNoticeMinutes}
         />
-        <View style={styles.section}>
-          <Text style={styles.label}>{t("workspace.workingDaysLabel")}</Text>
-          <View style={styles.dayList}>
-            {dayOptions.map((day) => {
-              const selected = draft.workingDays.includes(day.value);
-              return (
-                <Pressable
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: selected }}
-                  key={day.value}
-                  onPress={() => {
-                    const workingDays = selected
-                      ? draft.workingDays.filter((value) => value !== day.value)
-                      : [...draft.workingDays, day.value].sort((a, b) => a - b);
-                    change("workingDays", workingDays);
-                  }}
-                  style={[
-                    styles.dayButton,
-                    selected && styles.dayButtonSelected,
-                  ]}
-                >
-                  <Text
-                    style={[styles.dayText, selected && styles.dayTextSelected]}
-                  >
-                    {t(day.key)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-        <View style={styles.timeRow}>
-          <View style={styles.timeField}>
-            <DateTimePickerField
-              label={t("workspace.startTimeLabel")}
-              locale={locale}
-              mode="time"
-              onChange={(startTime) => change("startTime", startTime)}
-              placeholder="09:00"
-              t={t}
-              value={draft.startTime}
-            />
-          </View>
-          <View style={styles.timeField}>
-            <DateTimePickerField
-              label={t("workspace.endTimeLabel")}
-              locale={locale}
-              mode="time"
-              onChange={(endTime) => change("endTime", endTime)}
-              placeholder="17:00"
-              t={t}
-              value={draft.endTime}
-            />
-          </View>
-        </View>
       </ScrollView>
     </FullscreenModal>
   );
@@ -276,32 +203,13 @@ function validationMessageKey(error: WorkspaceSettingsError): MessageKey {
     bookingInterval: "workspace.bookingIntervalInvalid",
     bookingNotice: "workspace.bookingNoticeInvalid",
     name: "workspace.settingsNameInvalid",
-    schedule: "workspace.scheduleInvalid",
     slug: "workspace.setupInvalidSlug",
-    workingDays: "workspace.workingDaysInvalid",
   };
   return keys[error];
 }
 
 const styles = StyleSheet.create({
   content: { gap: 20, padding: 20, paddingBottom: 32 },
-  dayButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: 1,
-    minHeight: 44,
-    minWidth: 44,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  dayButtonSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  dayList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  dayText: { ...typography.label, color: colors.primaryText },
-  dayTextSelected: { color: colors.inverse },
   description: { ...typography.body, color: colors.secondaryText },
   error: { ...typography.caption, color: colors.danger },
   field: { gap: 8 },
@@ -318,7 +226,4 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
   },
   label: { ...typography.label, color: colors.primaryText },
-  section: { gap: 10 },
-  timeField: { flex: 1, minWidth: 140 },
-  timeRow: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 });

@@ -1645,6 +1645,16 @@ export type Database = {
         }
         Returns: string
       }
+      update_master_workspace_preferences: {
+        Args: {
+          p_booking_interval_minutes: number
+          p_name: string
+          p_notice_minutes: number
+          p_slug: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       update_master_workspace_settings: {
         Args: {
           p_booking_interval_minutes?: number
