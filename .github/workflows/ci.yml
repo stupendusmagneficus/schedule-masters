@@ -33,6 +33,8 @@ jobs:
         run: yarn format:check
       - name: Lint
         run: yarn lint
+      - name: Deployment tooling tests
+        run: yarn deployment:test
       - name: Test
         run: yarn test
       - name: Verify Archify installation

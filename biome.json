@@ -46,5 +46,17 @@
         "useSemanticElements": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["scripts/deployment/*.mjs"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUndeclaredEnvVars": "off"
+          }
+        }
+      }
+    }
+  ]
 }

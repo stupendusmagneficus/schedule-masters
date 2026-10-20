@@ -16,3 +16,6 @@ content_path = "./supabase/templates/confirmation.html"
 
 [functions.translate-service-content]
 verify_jwt = true
+
+[functions.send-booking-decision-emails]
+verify_jwt = true

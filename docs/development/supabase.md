@@ -56,3 +56,7 @@ The mobile and web clients may use only the public project URL and anon/publisha
 Copy `apps/mobile/.env.example` to `apps/mobile/.env` and set the public Supabase URL and publishable key. The mobile app uses Supabase Auth with persistent Keychain-backed SecureStore sessions. Never put the secret/service-role key in the mobile app.
 
 The first authenticated setup creates the master workspace, booking link, first service, and Monday–Sunday availability from 08:00 to 21:00 through the `bootstrap_master_workspace` RPC. The RPC is authenticated and protected by `SECURITY DEFINER`; direct anonymous table access remains disabled.
+
+## Backend releases
+
+Run `yarn deployment:check` to check the local mobile and booking-web project configuration. Hosted migrations and Edge Functions are released through the manual **Deploy backend** workflow after successful main CI. See [backend release and environment inventory](../operations/backend-release.md) for environment secrets, production gates, verification, and rollback.

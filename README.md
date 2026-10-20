@@ -14,7 +14,7 @@ apps/
 packages/
   domain/                  # pure business contracts
   validation/              # Zod validation boundary
-  i18n/                    # RU/CZ/EN locale foundation
+  i18n/                    # EN/CZ/SK/RU/UK translations
   api/                     # typed data-access boundary
   types/                   # shared technical types
   config/                  # shared tooling configuration
@@ -108,7 +108,7 @@ Product decisions remain in Linear. GitHub contains the implementation documenta
 
 ## Current scope
 
-This repository contains the technical scaffold and the initial Supabase schema foundation. Authentication flows, public booking functions, booking availability, notifications, Stripe, production deployment, and the final UI library are implemented in later tasks.
+The master app includes calendar and availability configuration, customer management, services and translations, booking requests, recurring visits, and finance summaries. The public booking web uses the same Supabase backend. Email and AI adapters exist; deployment, provider configuration, and end-to-end acceptance are tracked in the Infrastructure epic. See [the backend release runbook](docs/operations/backend-release.md) for verified environment inventory, release checks, and remaining external setup.
 
 ## Contributing
 
