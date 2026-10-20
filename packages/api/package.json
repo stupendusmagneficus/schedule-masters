@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:integration": "vitest run src/supabase.integration.test.ts --passWithNoTests"
+    "test:integration": "vitest run src/*.integration.test.ts --passWithNoTests"
   },
   "dependencies": {
     "@schedule-app/domain": "workspace:*",

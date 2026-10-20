@@ -1,10 +1,13 @@
-import { createBookingDecisionEmail } from "./emailContent.ts";
+import {
+  type BookingDecisionEmail,
+  createBookingDecisionEmail,
+} from "./emailContent.ts";
 
 type ClaimedEmail = {
   readonly attempts: number;
   readonly decision: "accepted" | "declined";
   readonly id: string;
-  readonly locale: "ru" | "cz" | "en";
+  readonly locale: BookingDecisionEmail["locale"];
   readonly recipient: string;
   readonly service_name: string;
   readonly duration_minutes?: number;

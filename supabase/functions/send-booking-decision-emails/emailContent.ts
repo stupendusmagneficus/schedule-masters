@@ -1,6 +1,6 @@
 export type BookingDecisionEmail = {
   readonly decision: "accepted" | "declined";
-  readonly locale: "ru" | "cz" | "en";
+  readonly locale: "en" | "cz" | "sk" | "ru" | "uk";
   readonly recipient: string;
   readonly serviceName: string;
   readonly durationMinutes?: number;
@@ -53,6 +53,34 @@ const copy = {
     time: "Time",
     footer:
       "This is an informational message about your booking request. No reply is needed.",
+  },
+  sk: {
+    accepted: "Vaša rezervácia je potvrdená",
+    declined: "Rezervácia nebola potvrdená",
+    greeting: "Dobrý deň,",
+    acceptedBody: "Vaša rezervácia bola potvrdená.",
+    declinedBody: "Túto rezerváciu sa nepodarilo potvrdiť.",
+    service: "Služba",
+    duration: "Trvanie",
+    price: "Cena",
+    date: "Dátum",
+    time: "Čas",
+    footer:
+      "Toto je informačná správa o vašej žiadosti. Na správu nemusíte odpovedať.",
+  },
+  uk: {
+    accepted: "Ваш запис підтверджено",
+    declined: "Запис не підтверджено",
+    greeting: "Вітаємо!",
+    acceptedBody: "Майстер підтвердив ваш запис.",
+    declinedBody: "Цей запис не вдалося підтвердити.",
+    service: "Послуга",
+    duration: "Тривалість",
+    price: "Вартість",
+    date: "Дата",
+    time: "Час",
+    footer:
+      "Це інформаційне повідомлення щодо вашої заявки. Відповідати на нього не потрібно.",
   },
 } as const;
 
