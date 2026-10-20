@@ -55,3 +55,35 @@ Deno.test("Russian content is translated and interpolated data is escaped", () =
   assert.match(email.text, /Услуга: Маникюр <script>/);
   assert.equal(email.html.includes("<script>"), false);
 });
+
+for (const [locale, accepted, declined, service] of [
+  [
+    "sk",
+    "Vaša rezervácia je potvrdená",
+    "Rezervácia nebola potvrdená",
+    "Služba",
+  ],
+  ["uk", "Ваш запис підтверджено", "Запис не підтверджено", "Послуга"],
+] as const) {
+  Deno.test(`${locale}: both decisions use the customer's language`, () => {
+    const input = {
+      locale,
+      recipient: "client@example.test",
+      serviceName: "Manicure <script>",
+      startsAt: "2030-01-03T09:00:00Z",
+      timezone: "Europe/Prague",
+      workspaceName: "Studio",
+    };
+    const confirmed = createBookingDecisionEmail({
+      ...input,
+      decision: "accepted",
+    });
+    assert.equal(confirmed.subject, accepted);
+    assert.ok(confirmed.text.includes(`${service}: Manicure <script>`));
+    assert.equal(confirmed.html.includes("<script>"), false);
+    assert.equal(
+      createBookingDecisionEmail({ ...input, decision: "declined" }).subject,
+      declined,
+    );
+  });
+}

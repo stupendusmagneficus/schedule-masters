@@ -11,7 +11,7 @@
 - Manual appointments and later cancellations of already confirmed bookings do
   not create a booking-decision email.
 - Email content is localized to the language selected on the public booking
-  page. Declined messages do not claim another time is available.
+  page (EN, CZ, SK, RU, UK). Declined messages do not claim another time is available.
 - The Edge Function `send-booking-decision-emails` uses Resend behind an
   explicit feature flag. It is safe to deploy before provider setup: it leaves
   notifications in `not_configured` and does not call a mail provider.
@@ -56,3 +56,13 @@ Supabase integration tests check required email validation and transactional,
 idempotent queue creation for both decisions. Deno tests use a fake fetcher to
 check authentication, the disabled-delivery path, provider idempotency, and
 transient-error retry handling. They never send real email.
+
+## Locale expansion rollout (SCH-141)
+
+Deploy the worker version supporting all five languages before enabling delivery
+of SK/UK jobs. Apply `20261028000100_public_booking_five_locales.sql`, then verify
+single/multiple-service requests and decisions before publishing clients. Keep
+delivery disabled during the initial rollout if the worker is not deployed.
+The migration expands constraints without changing existing locale values, RPC
+signatures or grants. Generated types remain strings because these fields are
+PostgreSQL text columns with CHECK constraints.
