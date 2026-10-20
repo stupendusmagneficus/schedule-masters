@@ -2,8 +2,8 @@ import type { Database } from "@schedule-app/api";
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Linking, ScrollView, Share, StyleSheet } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppState, Linking, ScrollView, Share, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ActionFeedback } from "../components/ActionFeedback";
 import { AppointmentDetailsModal } from "../components/AppointmentDetailsModal";
@@ -40,6 +40,10 @@ import {
   createCustomerAppointmentLink,
   recordCustomerLinkShare,
 } from "../features/notifications/customerAppointmentLink";
+import {
+  subscribeToWorkspaceDataChanges,
+  type WorkspaceDataResource,
+} from "../features/realtime/workspaceChanges";
 import { useServiceCatalog } from "../features/services/useServiceCatalog";
 import { useWaitingList } from "../features/waitingList/useWaitingList";
 import {
@@ -95,6 +99,9 @@ export function DashboardScreen({
   const [financeRefreshVersion, setFinanceRefreshVersion] = useState(0);
   const [customerHistoryRefreshVersion, setCustomerHistoryRefreshVersion] =
     useState(0);
+  const [customerDirectoryRefreshVersion, setCustomerDirectoryRefreshVersion] =
+    useState(0);
+  const [freeSlotsRefreshVersion, setFreeSlotsRefreshVersion] = useState(0);
   const [isNewBookingNoticeVisible, setNewBookingNoticeVisible] =
     useState(false);
   const [isFreeSlotsVisible, setFreeSlotsVisible] = useState(false);
@@ -183,6 +190,58 @@ export function DashboardScreen({
       demoData ? [demoData.primaryService] : serviceCatalog.activeServices,
     [demoData, serviceCatalog.activeServices],
   );
+  const realtimeReloadRef = useRef<
+    (resources: readonly WorkspaceDataResource[]) => void
+  >(() => {});
+  realtimeReloadRef.current = (resources) => {
+    if (resources.includes("calendar")) {
+      void calendar.reload();
+    }
+    if (resources.includes("bookingRequests")) {
+      void bookingRequests.reload();
+    }
+    if (resources.includes("finance")) {
+      setFinanceRefreshVersion((version) => version + 1);
+    }
+    if (resources.includes("customerDirectory")) {
+      setCustomerDirectoryRefreshVersion((version) => version + 1);
+    }
+    if (resources.includes("customerHistory")) {
+      setCustomerHistoryRefreshVersion((version) => version + 1);
+    }
+    if (resources.includes("freeSlots")) {
+      setFreeSlotsRefreshVersion((version) => version + 1);
+    }
+    if (resources.includes("services")) {
+      void serviceCatalog.load();
+    }
+  };
+
+  useEffect(() => {
+    if (!client || demoData) return;
+    return subscribeToWorkspaceDataChanges(client, workspace.id, (resources) =>
+      realtimeReloadRef.current(resources),
+    );
+  }, [client, demoData, workspace.id]);
+
+  useEffect(() => {
+    if (!client || demoData) return;
+    let wasActive = AppState.currentState === "active";
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      const resumed = nextState === "active" && !wasActive;
+      wasActive = nextState === "active";
+      if (!resumed) return;
+
+      const resources: WorkspaceDataResource[] = [];
+      if (activeTab === "finances") resources.push("finance");
+      if (activeTab === "customers") {
+        resources.push("customerDirectory", "customerHistory");
+      }
+      if (activeTab === "profile") resources.push("services");
+      realtimeReloadRef.current(resources);
+    });
+    return () => subscription.remove();
+  }, [activeTab, client, demoData]);
   const navigationLabels = {
     calendar: t("mobile.calendar"),
     customers: t("mobile.customers"),
@@ -540,6 +599,7 @@ export function DashboardScreen({
         />
         <CustomersTab
           client={client}
+          directoryRefreshVersion={customerDirectoryRefreshVersion}
           historyRefreshVersion={customerHistoryRefreshVersion}
           locale={locale}
           onCreateBooking={(customer) => {
@@ -595,6 +655,7 @@ export function DashboardScreen({
         bookingUrl={bookingUrl}
         client={client}
         demoData={demoData}
+        refreshVersion={freeSlotsRefreshVersion}
         initialDate={calendar.selectedDate}
         locale={locale}
         onBook={(serviceId, date, startsAt) => {

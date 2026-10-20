@@ -6,7 +6,6 @@ import { createWorkspaceRequestGuard } from "../workspace/workspaceRequestGuard"
 import {
   listMasterPendingBookingRequests,
   type MasterPendingBookingRequest,
-  subscribeToMasterPendingBookingRequestChanges,
 } from "./bookingRequests";
 
 type UseBookingRequestsParams = {
@@ -69,15 +68,6 @@ export function useBookingRequests({
   useEffect(() => {
     reloadRef.current = reload;
   }, [reload]);
-
-  useEffect(() => {
-    if (!client) return;
-    return subscribeToMasterPendingBookingRequestChanges(
-      client,
-      workspaceId,
-      () => void reloadRef.current(),
-    );
-  }, [client, workspaceId]);
 
   useEffect(() => {
     if (!client) return;

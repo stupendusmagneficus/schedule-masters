@@ -205,26 +205,6 @@ export function useCalendarData({
 
   useEffect(() => {
     if (!client) return;
-    const channel = client
-      .channel(`master-calendar-data:${workspaceId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          filter: `workspace_id=eq.${workspaceId}`,
-          schema: "public",
-          table: "appointments",
-        },
-        () => invokeLatestReload(reloadRef),
-      )
-      .subscribe();
-    return () => {
-      void client.removeChannel(channel);
-    };
-  }, [client, workspaceId]);
-
-  useEffect(() => {
-    if (!client) return;
     let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
     const { data: authSubscription } = client.auth.onAuthStateChange(
       (event) => {

@@ -10,6 +10,7 @@ import {
 
 type UseCustomerDirectoryProps = {
   readonly client: SupabaseClient<Database> | null;
+  readonly directoryRefreshVersion: number;
   readonly workspaceId: string;
   readonly search: string;
   readonly historyRefreshVersion: number;
@@ -17,6 +18,7 @@ type UseCustomerDirectoryProps = {
 
 export function useCustomerDirectory({
   client,
+  directoryRefreshVersion,
   workspaceId,
   search,
   historyRefreshVersion,
@@ -36,6 +38,7 @@ export function useCustomerDirectory({
   const loadedWorkspace = useRef(workspaceId);
   const loadedClient = useRef(client);
   const previousHistoryRefreshVersion = useRef(historyRefreshVersion);
+  const previousDirectoryRefreshVersion = useRef(directoryRefreshVersion);
 
   const reloadHistory = useCallback(async () => {
     if (!client || !selectedCustomer) {
@@ -120,6 +123,13 @@ export function useCustomerDirectory({
     }
     void reloadHistory();
   }, [client, reloadHistory, selectedCustomer]);
+
+  useEffect(() => {
+    if (previousDirectoryRefreshVersion.current === directoryRefreshVersion)
+      return;
+    previousDirectoryRefreshVersion.current = directoryRefreshVersion;
+    void reload();
+  }, [directoryRefreshVersion, reload]);
 
   useEffect(() => {
     if (previousHistoryRefreshVersion.current === historyRefreshVersion) return;
