@@ -76,8 +76,14 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
           },
         ]);
       }
+      if (url.includes("reserve_platform_integration_usage")) {
+        return Response.json({ allowed: true, reservationId: "budget-1" });
+      }
       if (url === "https://api.resend.com/emails") {
         return Response.json({ id: "provider-message-1" });
+      }
+      if (url.includes("settle_platform_integration_usage")) {
+        return Response.json({ alertsPending: false });
       }
       if (url.includes("finish_booking_decision_email")) {
         return new Response('"accepted_by_provider"');
@@ -93,6 +99,7 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
 
   assert.deepEqual(await response.json(), {
     accepted: 1,
+    budgetDeferred: false,
     failed: 0,
     processed: 1,
     retrying: 0,
@@ -108,7 +115,59 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
     p_batch_size: 20,
     p_recipient_allowlist: ["owner@example.test"],
   });
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 5);
+});
+
+Deno.test("defers queued emails without provider calls when the global cap is reached", async () => {
+  const calls: string[] = [];
+  const handler = createHandler({
+    env: environment(baseEnvironment),
+    fetcher: async (input) => {
+      const url = String(input);
+      calls.push(url);
+      if (url.includes("claim_booking_decision_emails")) {
+        return Response.json([
+          {
+            decision: "accepted",
+            id: "outbox-job-budget",
+            locale: "en",
+            recipient: "client@example.test",
+            service_name: "Manicure",
+            starts_at: "2030-01-03T09:00:00.000Z",
+            timezone: "Europe/Prague",
+            workspace_name: "Test Studio",
+          },
+        ]);
+      }
+      if (url.includes("reserve_platform_integration_usage")) {
+        return Response.json({ allowed: false, reason: "limit_reached" });
+      }
+      if (url.includes("defer_booking_decision_email_for_budget")) {
+        return Response.json(true);
+      }
+      return new Response("unexpected request", { status: 500 });
+    },
+  });
+
+  const response = await handler(authorizedRequest());
+
+  assert.deepEqual(await response.json(), {
+    accepted: 0,
+    budgetDeferred: true,
+    failed: 0,
+    processed: 1,
+    retrying: 0,
+  });
+  assert.equal(
+    calls.some((url) => url === "https://api.resend.com/emails"),
+    false,
+  );
+  assert.equal(
+    calls.some((url) =>
+      url.includes("defer_booking_decision_email_for_budget"),
+    ),
+    true,
+  );
 });
 
 Deno.test("rejects an invalid smoke-test allowlist without claiming jobs", async () => {
@@ -153,8 +212,14 @@ Deno.test("retries transient provider errors and records only a safe error code"
           },
         ]);
       }
+      if (url.includes("reserve_platform_integration_usage")) {
+        return Response.json({ allowed: true, reservationId: "budget-2" });
+      }
       if (url === "https://api.resend.com/emails") {
         return new Response("provider internal detail", { status: 503 });
+      }
+      if (url.includes("settle_platform_integration_usage")) {
+        return Response.json({ alertsPending: false });
       }
       if (url.includes("finish_booking_decision_email")) {
         finishBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
@@ -168,6 +233,7 @@ Deno.test("retries transient provider errors and records only a safe error code"
 
   assert.deepEqual(await response.json(), {
     accepted: 0,
+    budgetDeferred: false,
     failed: 0,
     processed: 1,
     retrying: 1,
@@ -200,10 +266,16 @@ Deno.test("does not retry permanent provider errors", async () => {
           },
         ]);
       }
+      if (url.includes("reserve_platform_integration_usage")) {
+        return Response.json({ allowed: true, reservationId: "budget-3" });
+      }
       if (url === "https://api.resend.com/emails") {
         return new Response("provider response with private data", {
           status: 400,
         });
+      }
+      if (url.includes("settle_platform_integration_usage")) {
+        return Response.json({ alertsPending: false });
       }
       if (url.includes("finish_booking_decision_email")) {
         finishBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
@@ -217,6 +289,7 @@ Deno.test("does not retry permanent provider errors", async () => {
 
   assert.deepEqual(await response.json(), {
     accepted: 0,
+    budgetDeferred: false,
     failed: 1,
     processed: 1,
     retrying: 0,

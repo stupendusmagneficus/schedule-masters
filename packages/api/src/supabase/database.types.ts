@@ -775,6 +775,124 @@ export type Database = {
           },
         ]
       }
+      platform_integration_budget_alerts: {
+        Row: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          id: string
+          limit_amount: number
+          period_start: string
+          period_type: string
+          provider: string
+          sent_at: string | null
+          status: string
+          threshold: number
+          used_amount: number
+        }
+        Insert: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          limit_amount: number
+          period_start: string
+          period_type: string
+          provider: string
+          sent_at?: string | null
+          status?: string
+          threshold: number
+          used_amount: number
+        }
+        Update: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          limit_amount?: number
+          period_start?: string
+          period_type?: string
+          provider?: string
+          sent_at?: string | null
+          status?: string
+          threshold?: number
+          used_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_integration_budget_alerts_provider_fkey"
+            columns: ["provider"]
+            isOneToOne: false
+            referencedRelation: "platform_integration_budgets"
+            referencedColumns: ["provider"]
+          },
+        ]
+      }
+      platform_integration_budgets: {
+        Row: {
+          daily_limit: number | null
+          enabled: boolean
+          kill_switch: boolean
+          monthly_limit: number | null
+          provider: string
+          updated_at: string
+          usage_unit: string
+        }
+        Insert: {
+          daily_limit?: number | null
+          enabled?: boolean
+          kill_switch?: boolean
+          monthly_limit?: number | null
+          provider: string
+          updated_at?: string
+          usage_unit: string
+        }
+        Update: {
+          daily_limit?: number | null
+          enabled?: boolean
+          kill_switch?: boolean
+          monthly_limit?: number | null
+          provider?: string
+          updated_at?: string
+          usage_unit?: string
+        }
+        Relationships: []
+      }
+      platform_integration_usage: {
+        Row: {
+          actual_amount: number | null
+          created_at: string
+          id: string
+          provider: string
+          reserved_amount: number
+          settled_at: string | null
+        }
+        Insert: {
+          actual_amount?: number | null
+          created_at?: string
+          id?: string
+          provider: string
+          reserved_amount: number
+          settled_at?: string | null
+        }
+        Update: {
+          actual_amount?: number | null
+          created_at?: string
+          id?: string
+          provider?: string
+          reserved_amount?: number
+          settled_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_integration_usage_provider_fkey"
+            columns: ["provider"]
+            isOneToOne: false
+            referencedRelation: "platform_integration_budgets"
+            referencedColumns: ["provider"]
+          },
+        ]
+      }
       public_booking_requests: {
         Row: {
           created_at: string
@@ -1174,6 +1292,29 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      claim_platform_integration_budget_alerts: {
+        Args: { p_batch_size?: number }
+        Returns: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          id: string
+          limit_amount: number
+          period_start: string
+          period_type: string
+          provider: string
+          sent_at: string | null
+          status: string
+          threshold: number
+          used_amount: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "platform_integration_budget_alerts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_service_translation_request: {
         Args: { p_user_id: string; p_workspace_id: string }
         Returns: Json
@@ -1303,6 +1444,10 @@ export type Database = {
         }
         Returns: Json
       }
+      defer_booking_decision_email_for_budget: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       delete_master_availability_block: {
         Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
@@ -1319,6 +1464,10 @@ export type Database = {
           p_success: boolean
         }
         Returns: string
+      }
+      finish_platform_integration_budget_alert: {
+        Args: { p_alert_id: string; p_sent: boolean }
+        Returns: undefined
       }
       get_customer_appointment: { Args: { p_token: string }; Returns: Json }
       get_master_available_slots: {
@@ -1563,6 +1712,10 @@ export type Database = {
         Args: { p_appointment_id: string; p_starts_at: string }
         Returns: Json
       }
+      reserve_platform_integration_usage: {
+        Args: { p_amount: number; p_provider: string }
+        Returns: Json
+      }
       set_appointment_status: {
         Args: {
           p_appointment_id: string
@@ -1608,6 +1761,10 @@ export type Database = {
       }
       set_master_weekly_availability: {
         Args: { p_rules: Json; p_workspace_id: string }
+        Returns: Json
+      }
+      settle_platform_integration_usage: {
+        Args: { p_actual_amount?: number; p_reservation_id: string }
         Returns: Json
       }
       update_customer_appointment: {

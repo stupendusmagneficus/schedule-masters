@@ -19,3 +19,6 @@ verify_jwt = true
 
 [functions.send-booking-decision-emails]
 verify_jwt = true
+
+[functions.send-platform-budget-alerts]
+verify_jwt = true

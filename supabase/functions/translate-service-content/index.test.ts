@@ -3,8 +3,11 @@ import { createHandler } from "./index.ts";
 
 const serviceRoleKey = "test-service-role-key";
 const workspaceId = "4786fac7-f8f7-4782-a107-ec6a77aab23a";
-const envValues = {
+const envValues: Record<string, string | undefined> = {
   OPENAI_API_KEY: "test-openai-key",
+  OPENAI_MAX_REQUEST_COST_USD: "0.05",
+  OPENAI_INPUT_USD_PER_MILLION_TOKENS: "0.15",
+  OPENAI_OUTPUT_USD_PER_MILLION_TOKENS: "0.6",
   SUPABASE_ANON_KEY: "test-publishable-key",
   SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey,
   SUPABASE_URL: "https://supabase.example.test",
@@ -51,11 +54,13 @@ function quotaResponse(allowed = true) {
 function providerResponse(content: unknown = translations) {
   return Response.json({
     choices: [{ message: { content: JSON.stringify(content) } }],
+    usage: { completion_tokens: 100, prompt_tokens: 100 },
   });
 }
 
 function successfulFetcher(
   options: {
+    readonly budgetResponse?: Response;
     readonly providerResponse?: Response;
     readonly quotaResponse?: Response;
     readonly calls?: string[];
@@ -71,6 +76,15 @@ function successfulFetcher(
     }
     if (url.includes("claim_service_translation_request")) {
       return options.quotaResponse ?? quotaResponse();
+    }
+    if (url.includes("reserve_platform_integration_usage")) {
+      return (
+        options.budgetResponse ??
+        Response.json({ allowed: true, reservationId: "budget-1" })
+      );
+    }
+    if (url.includes("settle_platform_integration_usage")) {
+      return Response.json({ alertsPending: false });
     }
     if (url === "https://api.openai.com/v1/chat/completions") {
       return options.providerResponse ?? providerResponse();
@@ -102,7 +116,9 @@ Deno.test("translates all four target locales after owner authorization and quot
       "/auth/v1/user",
       "/rest/v1/workspace_members",
       "/rest/v1/rpc/claim_service_translation_request",
+      "/rest/v1/rpc/reserve_platform_integration_usage",
       "/v1/chat/completions",
+      "/rest/v1/rpc/settle_platform_integration_usage",
     ],
   );
 });
@@ -153,6 +169,41 @@ Deno.test("returns a quota error without invoking OpenAI when the monthly limit 
   assert.equal((await response.json()).error, "translation_quota_exceeded");
   assert.equal(
     calls.some((url) => url.includes("api.openai.com")),
+    false,
+  );
+});
+
+Deno.test("does not call OpenAI when the global budget is exhausted", async () => {
+  const { calls, fetcher } = successfulFetcher({
+    budgetResponse: Response.json({ allowed: false, reason: "limit_reached" }),
+  });
+  const response = await createHandler({ env: environment(), fetcher })(
+    request(),
+  );
+
+  assert.equal(response.status, 429);
+  assert.deepEqual(await response.json(), {
+    error: "translation_global_budget_exceeded",
+  });
+  assert.equal(
+    calls.some((url) => url.includes("api.openai.com")),
+    false,
+  );
+});
+
+Deno.test("fails closed before reservation when the request ceiling is missing", async () => {
+  const { calls, fetcher } = successfulFetcher();
+  const response = await createHandler({
+    env: environment({ ...envValues, OPENAI_MAX_REQUEST_COST_USD: undefined }),
+    fetcher,
+  })(request());
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    error: "translation_budget_not_configured",
+  });
+  assert.equal(
+    calls.some((url) => url.includes("reserve_platform_integration_usage")),
     false,
   );
 });
