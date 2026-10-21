@@ -40,6 +40,13 @@ Edge Function Secrets, configure `RESEND_API_KEY`, `BOOKING_EMAIL_FROM`, and
 service-role key to Edge Functions; never put either in app configuration,
 GitHub logs, or a client bundle.
 
+When the monitored product support mailbox is approved, set
+`BOOKING_EMAIL_REPLY_TO` to its plain address. This controls both reply routing
+and the support link shown to customers. Leave it unset until the mailbox is
+real and monitored. Use the same approved sender identity in hosted Auth SMTP;
+its templates/subject must be copied separately as described in
+[`AUTH_CONFIRMATION.md`](../../supabase/AUTH_CONFIRMATION.md).
+
 For the database scheduler, store the worker URL and service-role bearer token
 in Supabase Vault. Do not put a literal token in a migration or `cron.job`
 command. Give only the database owner/scheduler the ability to read the

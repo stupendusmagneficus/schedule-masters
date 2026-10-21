@@ -10,8 +10,16 @@ additional_redirect_urls = [
   "http://localhost:3000/**",
 ]
 
+[auth.email]
+# Local Auth must exercise the same confirmation path as the deployed app.
+enable_confirmations = true
+
+[auth.rate_limit]
+# Local mail is captured by Mailpit; allow the five-language CI smoke test.
+email_sent = 30
+
 [auth.email.template.confirmation]
-subject = "Schedule Masters — potvrďte svůj e-mail"
+subject = "{{ if eq (printf \"%v\" .Data.locale) \"cz\" }}Schedule Masters — Potvrďte svůj e-mail{{ else if eq (printf \"%v\" .Data.locale) \"sk\" }}Schedule Masters — Potvrďte svoj e-mail{{ else if eq (printf \"%v\" .Data.locale) \"ru\" }}Schedule Masters — Подтвердите email{{ else if eq (printf \"%v\" .Data.locale) \"uk\" }}Schedule Masters — Підтвердьте email{{ else }}Schedule Masters — Confirm your email{{ end }}"
 content_path = "./supabase/templates/confirmation.html"
 
 [functions.translate-service-content]

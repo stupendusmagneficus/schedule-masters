@@ -35,6 +35,15 @@ jobs:
         run: yarn lint
       - name: Deployment tooling tests
         run: yarn deployment:test
+      - name: Verify generated Auth email templates
+        run: yarn email:check
+      - name: Build email previews
+        run: yarn email:preview
+      - uses: actions/upload-artifact@v4
+        with:
+          name: email-previews
+          path: artifacts/emails/
+          retention-days: 14
       - name: Test
         run: yarn test
       - name: Verify Archify installation
@@ -139,6 +148,11 @@ jobs:
           SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" yarn test:integration
       - name: Regenerate database types
         run: yarn supabase:types
+      - name: Verify localized Auth templates through local mail capture
+        shell: bash
+        run: |
+          eval "$(npx supabase@2.117.0 status -o env)"
+          SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" AUTH_EMAIL_CAPTURE_URL="http://127.0.0.1:54324" node --experimental-strip-types scripts/email/check-auth-capture.mjs
       - name: Verify generated types are committed
         run: git diff --exit-code -- packages/api/src/supabase/database.types.ts
       - name: Stop local Supabase

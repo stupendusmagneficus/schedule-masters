@@ -94,6 +94,7 @@ export function AuthScreen({
       mode,
       { email, password },
       redirectTo,
+      locale,
     );
     setBusy(false);
 
