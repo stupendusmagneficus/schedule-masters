@@ -1295,6 +1295,12 @@ export type Database = {
       claim_platform_integration_budget_alerts: {
         Args: { p_batch_size?: number }
         Returns: Database["public"]["Tables"]["platform_integration_budget_alerts"]["Row"][]
+        SetofOptions: {
+          from: "*"
+          to: "platform_integration_budget_alerts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_service_translation_request: {
         Args: { p_user_id: string; p_workspace_id: string }
@@ -1732,7 +1738,7 @@ export type Database = {
         Returns: Json
       }
       settle_platform_integration_usage: {
-        Args: { p_actual_amount?: number | null; p_reservation_id: string }
+        Args: { p_actual_amount?: number; p_reservation_id: string }
         Returns: Json
       }
       set_master_waiting_list_entry_status: {
