@@ -1294,7 +1294,20 @@ export type Database = {
       }
       claim_platform_integration_budget_alerts: {
         Args: { p_batch_size?: number }
-        Returns: Database["public"]["Tables"]["platform_integration_budget_alerts"]["Row"][]
+        Returns: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          id: string
+          limit_amount: number
+          period_start: string
+          period_type: string
+          provider: string
+          sent_at: string | null
+          status: string
+          threshold: number
+          used_amount: number
+        }[]
         SetofOptions: {
           from: "*"
           to: "platform_integration_budget_alerts"
@@ -1737,10 +1750,6 @@ export type Database = {
         Args: { p_overrides: Json; p_workspace_id: string }
         Returns: Json
       }
-      settle_platform_integration_usage: {
-        Args: { p_actual_amount?: number; p_reservation_id: string }
-        Returns: Json
-      }
       set_master_waiting_list_entry_status: {
         Args: {
           p_appointment_id?: string
@@ -1752,6 +1761,10 @@ export type Database = {
       }
       set_master_weekly_availability: {
         Args: { p_rules: Json; p_workspace_id: string }
+        Returns: Json
+      }
+      settle_platform_integration_usage: {
+        Args: { p_actual_amount?: number; p_reservation_id: string }
         Returns: Json
       }
       update_customer_appointment: {
