@@ -54,6 +54,22 @@ export type MessageKey =
   | "auth.confirmationEmailLabel"
   | "auth.confirmationBackToSignIn"
   | "auth.emailNotConfirmed"
+  | "auth.forgotPassword"
+  | "auth.recoveryTitle"
+  | "auth.recoveryDescription"
+  | "auth.sendRecovery"
+  | "auth.resendConfirmation"
+  | "auth.resendWait"
+  | "auth.seconds"
+  | "auth.emailRequestSent"
+  | "auth.newPasswordTitle"
+  | "auth.newPasswordDescription"
+  | "auth.confirmPassword"
+  | "auth.savePassword"
+  | "auth.passwordMismatch"
+  | "auth.samePassword"
+  | "auth.passwordUpdateFailed"
+  | "auth.passwordSaved"
   | "workspace.loadFailedTitle"
   | "workspace.loadFailedDescription"
   | "workspace.setupEyebrow"
@@ -666,11 +682,32 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Не удалось выйти из аккаунта. Повторите попытку.",
     "auth.confirmationTitle": "Подтвердите ваш email",
     "auth.confirmationCallbackFailed":
-      "Не удалось подтвердить email. Ссылка могла устареть или уже быть использована. Запросите новое письмо и попробуйте ещё раз.",
+      "Не удалось открыть ссылку. Она могла устареть, уже быть использована или открыта на другом устройстве. Запросите новое письмо в приложении, которым пользуетесь сейчас.",
     "auth.confirmationDescription":
       "Мы отправили ссылку для подтверждения. Откройте письмо, подтвердите аккаунт и вернитесь в приложение.",
     "auth.confirmationEmailLabel": "Письмо отправлено на",
     "auth.confirmationBackToSignIn": "Перейти ко входу",
+    "auth.forgotPassword": "Забыли пароль?",
+    "auth.recoveryTitle": "Восстановление пароля",
+    "auth.recoveryDescription":
+      "Введите email. Если аккаунт может получить это письмо, мы отправим ссылку. Откройте её на том же устройстве и в том же браузере, где запросили восстановление.",
+    "auth.sendRecovery": "Отправить ссылку",
+    "auth.resendConfirmation": "Отправить подтверждение повторно",
+    "auth.resendWait": "Повторить через",
+    "auth.seconds": "с",
+    "auth.emailRequestSent":
+      "Если на этот адрес можно отправить письмо, ссылка уже в пути. Проверьте почту и папку «Спам».",
+    "auth.newPasswordTitle": "Новый пароль",
+    "auth.newPasswordDescription":
+      "Задайте новый пароль, чтобы восстановить доступ к аккаунту.",
+    "auth.confirmPassword": "Повторите новый пароль",
+    "auth.savePassword": "Сохранить пароль",
+    "auth.passwordMismatch": "Пароли не совпадают.",
+    "auth.samePassword": "Новый пароль должен отличаться от текущего.",
+    "auth.passwordUpdateFailed":
+      "Не удалось сохранить пароль. Попробуйте ещё раз или запросите новую ссылку.",
+    "auth.passwordSaved":
+      "Пароль сохранён. Можно продолжить работу в приложении.",
     "auth.emailNotConfirmed":
       "Email ещё не подтверждён. Откройте ссылку из письма и попробуйте войти снова.",
     "workspace.loadFailedTitle": "Не удалось загрузить рабочее пространство",
@@ -1400,11 +1437,31 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Z účtu se nepodařilo odhlásit. Zkuste to znovu.",
     "auth.confirmationTitle": "Potvrďte svůj e-mail",
     "auth.confirmationCallbackFailed":
-      "E-mail se nepodařilo potvrdit. Odkaz mohl vypršet nebo už byl použit. Vyžádejte si nový e-mail a zkuste to znovu.",
+      "Odkaz se nepodařilo otevřít. Mohl vypršet, být už použitý nebo otevřený na jiném zařízení. Vyžádejte si nový e-mail v aplikaci, kterou právě používáte.",
     "auth.confirmationDescription":
       "Odeslali jsme vám potvrzovací odkaz. Otevřete e-mail, potvrďte účet a vraťte se do aplikace.",
     "auth.confirmationEmailLabel": "E-mail byl odeslán na",
     "auth.confirmationBackToSignIn": "Přejít k přihlášení",
+    "auth.forgotPassword": "Zapomněli jste heslo?",
+    "auth.recoveryTitle": "Obnovit heslo",
+    "auth.recoveryDescription":
+      "Zadejte e-mail. Pokud na něj lze zprávu doručit, pošleme odkaz. Otevřete jej na stejném zařízení a ve stejném prohlížeči, kde jste o něj požádali.",
+    "auth.sendRecovery": "Odeslat odkaz pro obnovu",
+    "auth.resendConfirmation": "Znovu odeslat potvrzení",
+    "auth.resendWait": "Zkusit znovu za",
+    "auth.seconds": "s",
+    "auth.emailRequestSent":
+      "Pokud na tuto adresu lze zprávu odeslat, odkaz je na cestě. Zkontrolujte poštu i spam.",
+    "auth.newPasswordTitle": "Nové heslo",
+    "auth.newPasswordDescription":
+      "Zvolte nové heslo pro obnovení přístupu k účtu.",
+    "auth.confirmPassword": "Zopakujte nové heslo",
+    "auth.savePassword": "Uložit heslo",
+    "auth.passwordMismatch": "Hesla se neshodují.",
+    "auth.samePassword": "Zvolte jiné heslo než to současné.",
+    "auth.passwordUpdateFailed":
+      "Heslo se nepodařilo uložit. Zkuste to znovu nebo požádejte o nový odkaz.",
+    "auth.passwordSaved": "Heslo je uložené. Můžete pokračovat do aplikace.",
     "auth.emailNotConfirmed":
       "E-mail ještě není potvrzený. Otevřete odkaz z e-mailu a zkuste se přihlásit znovu.",
     "workspace.loadFailedTitle": "Pracovní prostor se nepodařilo načíst",
@@ -2125,11 +2182,31 @@ const messages: Record<SupportedLocale, Messages> = {
     "auth.signOutFailed": "Could not sign out. Try again.",
     "auth.confirmationTitle": "Confirm your email",
     "auth.confirmationCallbackFailed":
-      "We could not confirm your email. The link may have expired or already been used. Request a new email and try again.",
+      "We could not open this link. It may have expired, already been used, or been opened on another device. Request a new email in the app you are using now.",
     "auth.confirmationDescription":
       "We sent you a confirmation link. Open the email, confirm your account, then return to the app.",
     "auth.confirmationEmailLabel": "Confirmation email sent to",
     "auth.confirmationBackToSignIn": "Go to sign in",
+    "auth.forgotPassword": "Forgot password?",
+    "auth.recoveryTitle": "Reset your password",
+    "auth.recoveryDescription":
+      "Enter your email. If the account can receive this message, we will send a link. Open it on the device and browser where you requested it.",
+    "auth.sendRecovery": "Send reset link",
+    "auth.resendConfirmation": "Resend confirmation",
+    "auth.resendWait": "Try again in",
+    "auth.seconds": "s",
+    "auth.emailRequestSent":
+      "If this address can receive the message, a link is on its way. Check your inbox and spam folder.",
+    "auth.newPasswordTitle": "Set a new password",
+    "auth.newPasswordDescription":
+      "Choose a new password to restore access to your account.",
+    "auth.confirmPassword": "Confirm new password",
+    "auth.savePassword": "Save password",
+    "auth.passwordMismatch": "Passwords do not match.",
+    "auth.samePassword": "Choose a password different from your current one.",
+    "auth.passwordUpdateFailed":
+      "Could not save the password. Try again or request a new reset link.",
+    "auth.passwordSaved": "Password saved. You can now continue to the app.",
     "auth.emailNotConfirmed":
       "Your email is not confirmed yet. Open the link in the email and try signing in again.",
     "workspace.loadFailedTitle": "We could not load your workspace",

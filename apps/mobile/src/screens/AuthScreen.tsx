@@ -1,15 +1,20 @@
 import { createTranslator, type SupportedLocale } from "@schedule-app/i18n";
 import type { Session } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text } from "react-native";
 
 import { AuthForm } from "../components/AuthForm";
+import { AuthPage } from "../components/AuthPage";
 import { EmailConfirmationScreen } from "../components/EmailConfirmationScreen";
-import { LocalePicker } from "../components/LocalePicker";
 import { mobileEnv } from "../config/env";
+import { AuthEmailAction } from "../features/auth/AuthEmailAction";
 import { getAuthErrorMessageKey } from "../features/auth/authErrorMessage";
 import { type AuthMode, authenticate } from "../features/auth/authentication";
 import type { AuthNotice } from "../features/auth/authNotice";
+import {
+  authEmailCooldownMs,
+  authEmailDeadlineKey,
+} from "../features/auth/authRecoveryStorage";
 import {
   getCurrentWebOrigin,
   getEmailRedirectTo,
@@ -20,7 +25,9 @@ import {
   type AuthFieldTouchState,
   getVisibleAuthFieldErrors,
 } from "../features/auth/fieldValidation";
+import { PasswordResetRequest } from "../features/auth/PasswordResetRequest";
 import { analytics, analyticsEvents } from "../lib/analytics";
+import { platformStorage } from "../lib/platformStorage";
 import { supabase } from "../lib/supabase";
 import { colors } from "../theme/tokens";
 import { typography } from "../theme/typography";
@@ -52,6 +59,7 @@ export function AuthScreen({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [recovering, setRecovering] = useState(false);
   const [busy, setBusy] = useState(false);
   const [touchedFields, setTouchedFields] = useState<AuthFieldTouchState>({
     email: false,
@@ -78,17 +86,18 @@ export function AuthScreen({
     setTouchedFields((current) => ({ ...current, [field]: true }));
   }
 
+  const redirectTo = getEmailRedirectTo(
+    Platform.OS === "web" ? "web" : "native",
+    Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
+    mobileEnv.authRedirectUrl,
+  );
+
   async function submit() {
     if (!supabase) return;
 
     setBusy(true);
     setTouchedFields({ email: true, password: true });
     setNotice(null);
-    const redirectTo = getEmailRedirectTo(
-      Platform.OS === "web" ? "web" : "native",
-      Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
-      mobileEnv.authRedirectUrl,
-    );
     const result = await authenticate(
       supabase,
       mode,
@@ -96,6 +105,16 @@ export function AuthScreen({
       redirectTo,
       locale,
     );
+    if (result.kind === "confirmationRequired") {
+      try {
+        await platformStorage.setItem(
+          authEmailDeadlineKey,
+          String(Date.now() + authEmailCooldownMs),
+        );
+      } catch {
+        // Auth still enforces server-side limits if local preferences cannot be saved.
+      }
+    }
     setBusy(false);
 
     if (result.kind === "validationError") {
@@ -142,12 +161,19 @@ export function AuthScreen({
   const title = t(mode === "signUp" ? "auth.signUpTitle" : "auth.signInTitle");
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.languagePicker}>
-        <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
-      </View>
-      <Text style={styles.eyebrow}>{t("common.appName")}</Text>
-      {confirmation ? (
+    <AuthPage locale={locale} onLocaleChange={onLocaleChange}>
+      {recovering && supabase ? (
+        <PasswordResetRequest
+          client={supabase}
+          initialEmail={email}
+          redirectTo={redirectTo}
+          t={t}
+          onBack={() => {
+            setRecovering(false);
+            changeMode("signIn");
+          }}
+        />
+      ) : confirmation ? (
         <EmailConfirmationScreen
           descriptionKey={confirmation.descriptionKey}
           email={confirmation.email}
@@ -158,10 +184,23 @@ export function AuthScreen({
             setTouchedFields({ email: false, password: false });
           }}
           t={t}
+          resendAction={
+            supabase && (
+              <AuthEmailAction
+                client={supabase}
+                kind="confirmation"
+                email={confirmation.email}
+                redirectTo={redirectTo}
+                t={t}
+              />
+            )
+          }
         />
       ) : (
         <>
-          <Text style={styles.title}>{title}</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            {title}
+          </Text>
           <Text style={styles.description}>{t("mobile.description")}</Text>
           {sessionRestoreFailed && (
             <Text accessibilityRole="alert" style={styles.restoreError}>
@@ -175,6 +214,7 @@ export function AuthScreen({
           )}
           <AuthForm
             busy={busy}
+            onForgotPassword={() => setRecovering(true)}
             email={email}
             errors={errors}
             mode={mode}
@@ -190,25 +230,16 @@ export function AuthScreen({
           />
         </>
       )}
-    </ScrollView>
+    </AuthPage>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.canvas,
-    gap: 16,
-    justifyContent: "center",
-    minHeight: "100%",
-    padding: 16,
-  },
   description: {
     ...typography.body,
     color: colors.secondaryText,
     marginBottom: 8,
   },
-  eyebrow: { ...typography.eyebrow, color: colors.accent },
-  languagePicker: { alignItems: "flex-end" },
   restoreError: { ...typography.body, color: colors.danger },
   title: { ...typography.heading, color: colors.primaryText },
 });

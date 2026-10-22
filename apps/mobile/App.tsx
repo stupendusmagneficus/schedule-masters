@@ -6,8 +6,8 @@ import {
   defaultLocale,
   type SupportedLocale,
 } from "@schedule-app/i18n";
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { Linking, Platform } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import {
@@ -19,15 +19,10 @@ import { mobileEnv } from "./src/config/env";
 import { demoData, demoWorkspace } from "./src/demo/mockData";
 import { isDemoMode } from "./src/demo/mode";
 import {
-  initialAuthFlowState,
-  reduceAuthFlow,
-} from "./src/features/auth/authFlow";
-import {
-  cleanWebCallbackUrl,
-  completeAuthCallback,
   getCurrentWebOrigin,
   getEmailRedirectTo,
 } from "./src/features/auth/authRedirect";
+import { useAuthSession } from "./src/features/auth/useAuthSession";
 import {
   loadLocalePreference,
   saveLocalePreference,
@@ -37,6 +32,7 @@ import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
+import { PasswordRecoveryScreen } from "./src/screens/PasswordRecoveryScreen";
 import { SetupScreen } from "./src/screens/SetupScreen";
 
 export default function App() {
@@ -51,21 +47,27 @@ function AppContent() {
   const demoMode = isDemoMode();
   const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
   const localeWasChanged = useRef(false);
-  const [authState, dispatchAuth] = useReducer(
-    reduceAuthFlow,
-    initialAuthFlowState,
+  const auth = useAuthSession(
+    supabase,
+    demoMode,
+    getEmailRedirectTo(
+      Platform.OS === "web" ? "web" : "native",
+      Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
+      mobileEnv.authRedirectUrl,
+    ),
   );
-  const { authMode, session, sessionRestoreFailed } = authState;
-  const [isRestoringSession, setIsRestoringSession] = useState(
-    Boolean(supabase),
-  );
-  const [authCallbackFailed, setAuthCallbackFailed] = useState(false);
+  const { authMode, session, sessionRestoreFailed, isPasswordRecovery } =
+    auth.state;
+  const dispatchAuth = auth.dispatch;
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { reload: reloadWorkspace, state: workspaceState } = useMasterWorkspace(
     {
       client: supabase,
-      userId: session?.user.id ?? null,
+      userId:
+        !auth.restoring && !isPasswordRecovery
+          ? (session?.user.id ?? null)
+          : null,
     },
   );
   const t = useMemo(() => createTranslator(locale), [locale]);
@@ -99,77 +101,6 @@ function AppContent() {
     if (demoMode) return;
     void analytics.init();
     analytics.track(analyticsEvents.appOpened);
-  }, [demoMode]);
-
-  useEffect(() => {
-    if (demoMode) return;
-    if (!supabase) return;
-    const client = supabase;
-    let active = true;
-    const handledAuthUrls = new Set<string>();
-    const callbackRedirect = getEmailRedirectTo(
-      Platform.OS === "web" ? "web" : "native",
-      Platform.OS === "web" ? getCurrentWebOrigin() : undefined,
-      mobileEnv.authRedirectUrl,
-    );
-    async function handleAuthUrl(url: string) {
-      if (handledAuthUrls.has(url)) return;
-      if (handledAuthUrls.size >= 16) handledAuthUrls.clear();
-      handledAuthUrls.add(url);
-      const result = await completeAuthCallback(client, url, callbackRedirect);
-      if (Platform.OS === "web") cleanWebCallbackUrl(url, callbackRedirect);
-      if (!active || result === "ignored") return;
-      setAuthCallbackFailed(result === "failed");
-      if (result === "completed") {
-        try {
-          const { data, error } = await client.auth.getSession();
-          if (!active) return;
-          if (error || !data.session) {
-            setAuthCallbackFailed(true);
-            return;
-          }
-          dispatchAuth({ session: data.session, type: "authenticated" });
-        } catch {
-          if (active) setAuthCallbackFailed(true);
-        }
-      }
-    }
-    const linkSubscription = Linking.addEventListener("url", ({ url }) => {
-      void handleAuthUrl(url);
-    });
-    async function restoreSession() {
-      try {
-        const initialUrl = await Linking.getInitialURL();
-        if (initialUrl) await handleAuthUrl(initialUrl);
-        if (!active) return;
-        const { data, error } = await client.auth.getSession();
-        if (!active) return;
-        dispatchAuth({
-          error: Boolean(error),
-          session: data.session,
-          type: "sessionRestored",
-        });
-      } catch {
-        if (!active) return;
-        dispatchAuth({ type: "sessionRestoreFailed" });
-      } finally {
-        if (active) setIsRestoringSession(false);
-      }
-    }
-    void restoreSession();
-    const { data } = client.auth.onAuthStateChange((event, nextSession) => {
-      if (!active) return;
-      dispatchAuth({
-        event,
-        session: nextSession,
-        type: "authStateChanged",
-      });
-    });
-    return () => {
-      active = false;
-      linkSubscription.remove();
-      data.subscription.unsubscribe();
-    };
   }, [demoMode]);
 
   async function signOut() {
@@ -210,11 +141,23 @@ function AppContent() {
       />
     );
   if (!supabase) return <ConfigurationState />;
-  if (isRestoringSession) return <LoadingState />;
+  if (auth.restoring) return <LoadingState />;
+  if (session && isPasswordRecovery)
+    return (
+      <PasswordRecoveryScreen
+        client={supabase}
+        locale={locale}
+        onLocaleChange={handleLocaleChange}
+        onComplete={auth.finishRecovery}
+        onCancel={() => void signOut()}
+        signingOut={signingOut}
+        signOutFailed={signOutFailed}
+      />
+    );
   if (!session)
     return (
       <AuthScreen
-        authCallbackFailed={authCallbackFailed}
+        authCallbackFailed={auth.callbackFailed}
         initialMode={authMode}
         locale={locale}
         onAuthenticated={(nextSession) => {

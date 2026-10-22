@@ -16,11 +16,15 @@ enable_confirmations = true
 
 [auth.rate_limit]
 # Local mail is captured by Mailpit; allow the five-language CI smoke test.
-email_sent = 30
+email_sent = 60
 
 [auth.email.template.confirmation]
 subject = "{{ if eq (printf \"%v\" .Data.locale) \"cz\" }}Schedule Masters — Potvrďte svůj e-mail{{ else if eq (printf \"%v\" .Data.locale) \"sk\" }}Schedule Masters — Potvrďte svoj e-mail{{ else if eq (printf \"%v\" .Data.locale) \"ru\" }}Schedule Masters — Подтвердите email{{ else if eq (printf \"%v\" .Data.locale) \"uk\" }}Schedule Masters — Підтвердьте email{{ else }}Schedule Masters — Confirm your email{{ end }}"
 content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "{{ if eq (printf \"%v\" .Data.locale) \"cz\" }}Schedule Masters — Obnovit heslo{{ else if eq (printf \"%v\" .Data.locale) \"sk\" }}Schedule Masters — Obnoviť heslo{{ else if eq (printf \"%v\" .Data.locale) \"ru\" }}Schedule Masters — Восстановление пароля{{ else if eq (printf \"%v\" .Data.locale) \"uk\" }}Schedule Masters — Відновлення пароля{{ else }}Schedule Masters — Reset your password{{ end }}"
+content_path = "./supabase/templates/recovery.html"
 
 [functions.translate-service-content]
 verify_jwt = true

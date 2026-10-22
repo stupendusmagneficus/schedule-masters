@@ -40,11 +40,31 @@ export const slovakMessages: Messages = {
   "auth.signOutFailed": "Nepodarilo sa odhlásiť. Skúste to znova.",
   "auth.confirmationTitle": "Potvrďte svoj e-mail",
   "auth.confirmationCallbackFailed":
-    "E-mail sa nepodarilo potvrdiť. Odkaz mohol vypršať alebo už bol použitý. Požiadajte o nový e-mail a skúste to znova.",
+    "Odkaz sa nepodarilo otvoriť. Mohol vypršať, byť už použitý alebo otvorený na inom zariadení. Vyžiadajte si nový e-mail v aplikácii, ktorú práve používate.",
   "auth.confirmationDescription":
     "Poslali sme vám potvrdzovací odkaz. Otvorte e-mail, potvrďte účet a vráťte sa do aplikácie.",
   "auth.confirmationEmailLabel": "Potvrdzovací e-mail bol odoslaný na",
   "auth.confirmationBackToSignIn": "Prejsť na prihlásenie",
+  "auth.forgotPassword": "Zabudli ste heslo?",
+  "auth.recoveryTitle": "Obnoviť heslo",
+  "auth.recoveryDescription":
+    "Zadajte e-mail. Ak naň možno správu doručiť, pošleme odkaz. Otvorte ho na rovnakom zariadení a v rovnakom prehliadači, kde ste oň požiadali.",
+  "auth.sendRecovery": "Odoslať odkaz na obnovu",
+  "auth.resendConfirmation": "Znova odoslať potvrdenie",
+  "auth.resendWait": "Skúsiť znova o",
+  "auth.seconds": "s",
+  "auth.emailRequestSent":
+    "Ak na túto adresu možno správu odoslať, odkaz je na ceste. Skontrolujte poštu aj spam.",
+  "auth.newPasswordTitle": "Nové heslo",
+  "auth.newPasswordDescription":
+    "Zvoľte nové heslo na obnovenie prístupu k účtu.",
+  "auth.confirmPassword": "Zopakujte nové heslo",
+  "auth.savePassword": "Uložiť heslo",
+  "auth.passwordMismatch": "Heslá sa nezhodujú.",
+  "auth.samePassword": "Zvoľte iné heslo než to súčasné.",
+  "auth.passwordUpdateFailed":
+    "Heslo sa nepodarilo uložiť. Skúste to znova alebo požiadajte o nový odkaz.",
+  "auth.passwordSaved": "Heslo je uložené. Môžete pokračovať do aplikácie.",
   "auth.emailNotConfirmed":
     "E-mail ešte nie je potvrdený. Otvorte odkaz v e-maile a skúste sa znova prihlásiť.",
   "workspace.loadFailedTitle": "Pracovný priestor sa nepodarilo načítať",

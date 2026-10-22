@@ -13,6 +13,7 @@ supabase/.temp/
 dist/
 coverage/
 playwright-report/
+playwright-auth-report/
 artifacts/
 test-results/
 *.tsbuildinfo

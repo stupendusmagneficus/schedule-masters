@@ -5,7 +5,11 @@ export type AuthCallbackClient = {
   readonly auth: {
     readonly exchangeCodeForSession: (
       code: string,
-    ) => Promise<{ readonly error: { readonly message: string } | null }>;
+      options?: { flowId: string },
+    ) => Promise<{
+      readonly error: { readonly message: string } | null;
+      readonly data?: unknown;
+    }>;
   };
 };
 
@@ -29,7 +33,7 @@ export async function completeAuthCallback(
   client: AuthCallbackClient,
   callbackUrl: string,
   redirectTo: string,
-): Promise<"ignored" | "completed" | "failed"> {
+): Promise<"ignored" | "completed" | "recovery" | "failed"> {
   let callback: URL;
   let expected: URL;
   try {
@@ -40,6 +44,8 @@ export async function completeAuthCallback(
   }
 
   if (
+    callback.username ||
+    callback.password ||
     callback.protocol !== expected.protocol ||
     callback.host !== expected.host ||
     callback.pathname !== expected.pathname
@@ -51,11 +57,27 @@ export async function completeAuthCallback(
   const hashParams = new URLSearchParams(callback.hash.replace(/^#/, ""));
   if (params.has("error") || hashParams.has("error")) return "failed";
   const code = params.get("code");
-  if (!code) return "failed";
+  if (
+    !code ||
+    params.getAll("code").length !== 1 ||
+    params.getAll("sb_flow_id").length > 1 ||
+    (params.has("sb_flow_id") && !params.get("sb_flow_id"))
+  )
+    return "failed";
 
   try {
-    const { error } = await client.auth.exchangeCodeForSession(code);
-    return error ? "failed" : "completed";
+    const flowId = params.get("sb_flow_id");
+    const { data, error } = flowId
+      ? await client.auth.exchangeCodeForSession(code, { flowId })
+      : await client.auth.exchangeCodeForSession(code);
+    return error
+      ? "failed"
+      : data &&
+          typeof data === "object" &&
+          "redirectType" in data &&
+          data.redirectType === "recovery"
+        ? "recovery"
+        : "completed";
   } catch {
     return "failed";
   }

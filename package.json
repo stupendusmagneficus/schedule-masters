@@ -13,7 +13,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:integration": "yarn workspace @schedule-app/api test:integration",
-    "test:e2e": "playwright test && playwright test --config=playwright.mobile.config.ts",
+    "test:e2e": "playwright test && playwright test --config=playwright.mobile.config.ts && playwright test --config=playwright.auth.config.ts",
     "format": "biome format --write .",
     "format:check": "biome ci .",
     "biome:lint": "biome lint .",
