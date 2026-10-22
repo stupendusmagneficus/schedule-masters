@@ -1,7 +1,11 @@
 import { renderEmailLayout } from "../_shared/emailLayout.ts";
+import { type LifecycleEvent, lifecycleCopy } from "./lifecycleCopy.ts";
 
 export type BookingDecisionEmail = {
-  readonly decision: "accepted" | "declined";
+  readonly decision: "accepted" | "declined" | LifecycleEvent;
+  readonly manageUrl?: string;
+  readonly customerName?: string;
+  readonly occurrenceStarts?: readonly string[];
   readonly locale: "en" | "cz" | "sk" | "ru" | "uk";
   readonly recipient: string;
   readonly serviceName: string;
@@ -127,18 +131,30 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
     hourCycle: "h23",
     timeZone: input.timezone,
   }).format(new Date(input.startsAt));
+  const lifecycle = lifecycleCopy[input.locale];
+  const event =
+    input.decision === "accepted" || input.decision === "declined"
+      ? null
+      : lifecycle.events[input.decision];
   const subject =
-    input.decision === "accepted" ? messages.accepted : messages.declined;
+    event?.[0] ??
+    (input.decision === "accepted" ? messages.accepted : messages.declined);
   const body =
-    input.decision === "accepted"
+    event?.[1] ??
+    (input.decision === "accepted"
       ? messages.acceptedBody
-      : messages.declinedBody;
+      : messages.declinedBody);
   const preheader = `${subject} · ${input.workspaceName}`;
+  const isCancellation = input.decision.includes("cancelled");
+  const isSeries = (input.occurrenceStarts?.length ?? 0) > 1;
   const details =
-    input.decision === "accepted"
+    input.decision !== "declined"
       ? [
+          ...(input.customerName
+            ? [{ label: lifecycle.customer, value: input.customerName }]
+            : []),
           { label: messages.service, value: input.serviceName },
-          ...(input.durationMinutes === undefined
+          ...(isCancellation || input.durationMinutes === undefined
             ? []
             : [
                 {
@@ -146,7 +162,9 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
                   value: formatDuration(input.durationMinutes, locale),
                 },
               ]),
-          ...(input.priceAmount === undefined || !input.currency
+          ...(isCancellation ||
+          input.priceAmount === undefined ||
+          !input.currency
             ? []
             : [
                 {
@@ -157,11 +175,31 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
                   }).format(input.priceAmount),
                 },
               ]),
-          { label: messages.date, value: date },
-          { label: messages.time, value: time },
+          ...(!isSeries
+            ? [
+                { label: messages.date, value: date },
+                { label: messages.time, value: time },
+              ]
+            : []),
           { label: messages.timezone, value: input.timezone },
         ]
       : [];
+  if (input.occurrenceStarts && input.occurrenceStarts.length > 1) {
+    details.push(
+      ...input.occurrenceStarts.map((startsAt) => ({
+        label: lifecycle.occurrences,
+        value: new Intl.DateTimeFormat(locale, {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23",
+          timeZone: input.timezone,
+        }).format(new Date(startsAt)),
+      })),
+    );
+  }
   return {
     subject,
     preheader,
@@ -172,7 +210,16 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
       workspaceName: input.workspaceName,
       paragraphs: [messages.greeting, body],
       details,
-      footer: messages.footer,
+      footer: event ? lifecycle.footer : messages.footer,
+      ...(input.manageUrl
+        ? {
+            action: {
+              label: lifecycle.manage,
+              url: input.manageUrl,
+              fallbackLabel: lifecycle.fallback,
+            },
+          }
+        : {}),
       ...(input.supportEmail
         ? { support: { label: messages.support, email: input.supportEmail } }
         : {}),

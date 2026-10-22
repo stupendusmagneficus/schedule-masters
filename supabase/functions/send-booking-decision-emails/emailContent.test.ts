@@ -120,3 +120,50 @@ for (const [locale, accepted, declined, service] of [
     );
   });
 }
+
+Deno.test("request, cancellation and master events have distinct localized meanings", () => {
+  for (const locale of ["en", "cz", "sk", "ru", "uk"] as const) {
+    const base = {
+      locale,
+      recipient: "client@example.test",
+      serviceName: "Service",
+      startsAt: "2030-01-03T09:00:00Z",
+      timezone: "Europe/Prague",
+      workspaceName: "Studio",
+      customerName: "<Client>",
+    };
+    const received = createBookingDecisionEmail({
+      ...base,
+      decision: "request_received",
+    });
+    const cancelled = createBookingDecisionEmail({
+      ...base,
+      decision: "cancelled_by_master",
+      occurrenceStarts: [base.startsAt, "2030-01-10T09:00:00Z"],
+    });
+    const master = createBookingDecisionEmail({
+      ...base,
+      decision: "master_request_received",
+    });
+    assert.notEqual(received.subject, cancelled.subject);
+    assert.notEqual(master.subject, received.subject);
+    assert.match(master.html, /&lt;Client&gt;/);
+    assert.ok(cancelled.text.includes("2030"));
+    assert.ok(!received.html.includes("href="));
+  }
+});
+Deno.test("confirmed email includes a safe management action and fragment link in plain text", () => {
+  const url = `https://book.example.test/#token=${"a".repeat(128)}`;
+  const email = createBookingDecisionEmail({
+    decision: "accepted",
+    locale: "en",
+    recipient: "client@example.test",
+    serviceName: "Service",
+    startsAt: "2030-01-03T09:00:00Z",
+    timezone: "Europe/Prague",
+    workspaceName: "Studio",
+    manageUrl: url,
+  });
+  assert.ok(email.html.includes(url));
+  assert.ok(email.text.includes(url));
+});

@@ -35,7 +35,8 @@ from this repository into DNS.
 Apply the database migration before deploying the new Edge Function; the
 delivery worker uses the new `claim_booking_decision_emails_for_delivery` RPC.
 Deploy `send-booking-decision-emails` after SCH-100 is reviewed. In Supabase
-Edge Function Secrets, configure `RESEND_API_KEY`, `BOOKING_EMAIL_FROM`, and
+Edge Function Secrets, configure `BOOKING_EMAIL_BOOKING_URL` (approved HTTPS
+public booking base, no query/fragment), `RESEND_API_KEY`, `BOOKING_EMAIL_FROM`, and
 `BOOKING_EMAIL_DELIVERY_ENABLED=false`. Supabase provides its project URL and
 service-role key to Edge Functions; never put either in app configuration,
 GitHub logs, or a client bundle.
@@ -161,3 +162,8 @@ window. Resend's provider-side logs have a separate 30-day retention period.
 Sources: [Supabase Cron](https://supabase.com/docs/guides/cron),
 [Supabase Vault](https://supabase.com/docs/guides/database/vault), and
 [Resend domain setup](https://resend.com/docs/dashboard/domains/introduction).
+
+Lifecycle rollout order, recipients, series summaries and private management-link
+handling are specified in [appointment-email-events.md](./appointment-email-events.md).
+Disable and drain the old worker before applying the lifecycle migration; deploy
+the matching worker before enabling delivery.
