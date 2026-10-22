@@ -26,7 +26,10 @@
     "supabase:types": "npx supabase@2.117.0 gen types typescript --local --schema public | sed '${/^$/d;}' | sed -E '/      list_master_customer_directory:/,/      list_master_customer_history:/ s/(email|last_completed_visit_at|notes|phone): string$/\\1: string | null/' | sed -E '/      list_master_pending_booking_requests:/,/      record_customer_link_share:/ s/(customer_email|customer_phone): string$/\\1: string | null/' | sed -E '/      list_master_appointment_services:/,/      list_master_appointments:/ s/(service_id): string$/\\1: string | null/' | sed -E '/      services:/,/      waiting_list_entries:/ s/(source_locale[?]?): string$/\\1: \"en\" | \"cz\" | \"sk\" | \"ru\" | \"uk\"/' > packages/api/src/supabase/database.types.ts",
     "deployment:check": "node scripts/deployment/check-config.mjs --local",
     "deployment:test": "node --test scripts/deployment/*.test.mjs",
-    "deployment:api": "node scripts/deployment/check-api.mjs"
+    "deployment:api": "node scripts/deployment/check-api.mjs",
+    "email:generate": "node --experimental-strip-types scripts/email/generate-auth-template.mjs",
+    "email:check": "node --experimental-strip-types scripts/email/generate-auth-template.mjs --check",
+    "email:preview": "node --experimental-strip-types scripts/email/preview.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",

@@ -61,10 +61,31 @@ describe("authenticate", () => {
     );
     expect(client.auth.signUp).toHaveBeenCalledWith({
       email: "master@example.com",
-      options: { emailRedirectTo: "schedulemasters://auth/callback" },
+      options: {
+        data: { locale: "en" },
+        emailRedirectTo: "schedulemasters://auth/callback",
+      },
       password: "secure-password",
     });
   });
+  it.each(["en", "cz", "sk", "ru", "uk"] as const)(
+    "preserves %s as the signup email language without a redirect override",
+    async (locale) => {
+      const client = createClient();
+      await authenticate(
+        client,
+        "signUp",
+        { email: "master@example.com", password: "secure-password" },
+        undefined,
+        locale,
+      );
+      expect(client.auth.signUp).toHaveBeenCalledWith({
+        email: "master@example.com",
+        password: "secure-password",
+        options: { data: { locale } },
+      });
+    },
+  );
   it("requires confirmation when sign up creates no session", async () => {
     const client = createClient();
 

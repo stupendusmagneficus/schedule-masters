@@ -17,11 +17,44 @@ Deno.test("accepted email contains the confirmed slot in the request locale", ()
 
   assert.equal(email.subject, "Vaše rezervace je potvrzena");
   assert.match(email.text, /Služba: Manikúra/);
-  assert.match(email.text, /Délka: 120 min/);
+  assert.match(email.text, /Délka: 2 hodiny/);
   assert.match(email.text, /Cena: 1\u00a0300,00 Kč/);
   assert.match(email.text, /Datum:/);
   assert.match(email.html, /Studio &lt;Yahor&gt;/);
+  assert.match(email.html, /<html lang="cs">/);
+  assert.match(email.html, /name="viewport"/);
+  assert.match(email.html, /SCHEDULE MASTERS/);
+  assert.match(email.text, /Europe\/Prague/);
+  assert.ok(email.preheader.includes("Studio <Yahor>"));
+  assert.equal(email.html.includes("client@example.test"), false);
 });
+
+for (const [locale, duration] of [
+  ["en", "1 hour 30 minutes"],
+  ["cz", "1 hodina 30 minut"],
+  ["sk", "1 hodina 30 minút"],
+  ["ru", "1 час 30 минут"],
+  ["uk", "1 година 30 хвилин"],
+] as const) {
+  Deno.test(`${locale}: preview, text and HTML agree on appointment details`, () => {
+    const email = createBookingDecisionEmail({
+      decision: "accepted",
+      locale,
+      recipient: "client@example.test",
+      serviceName: "Manicure & pedicure",
+      durationMinutes: 90,
+      startsAt: "2030-01-03T23:30:00Z",
+      timezone: "Europe/Prague",
+      workspaceName: "Studio",
+    });
+    assert.ok(email.text.includes(duration));
+    assert.ok(email.html.includes(duration));
+    assert.ok(email.html.includes(email.preheader));
+    assert.match(email.html, /Manicure &amp; pedicure/);
+    assert.equal(email.html.includes("<img"), false);
+    assert.equal(email.html.includes("href="), false);
+  });
+}
 
 Deno.test("declined email does not imply that another slot is available", () => {
   const email = createBookingDecisionEmail({

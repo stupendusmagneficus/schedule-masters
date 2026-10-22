@@ -1,3 +1,5 @@
+import { renderEmailLayout } from "../_shared/emailLayout.ts";
+
 export type BookingDecisionEmail = {
   readonly decision: "accepted" | "declined";
   readonly locale: "en" | "cz" | "sk" | "ru" | "uk";
@@ -9,6 +11,7 @@ export type BookingDecisionEmail = {
   readonly startsAt: string;
   readonly timezone: string;
   readonly workspaceName: string;
+  readonly supportEmail?: string;
 };
 
 const copy = {
@@ -23,6 +26,8 @@ const copy = {
     price: "Стоимость",
     date: "Дата",
     time: "Время",
+    timezone: "Часовой пояс",
+    support: "Вопросы о приложении",
     footer:
       "Это информационное сообщение о вашей заявке. На него не нужно отвечать.",
   },
@@ -37,6 +42,8 @@ const copy = {
     price: "Cena",
     date: "Datum",
     time: "Čas",
+    timezone: "Časové pásmo",
+    support: "Dotazy k aplikaci",
     footer:
       "Toto je informační zpráva o vaší žádosti. Na zprávu nemusíte odpovídat.",
   },
@@ -51,6 +58,8 @@ const copy = {
     price: "Price",
     date: "Date",
     time: "Time",
+    timezone: "Time zone",
+    support: "Questions about the app",
     footer:
       "This is an informational message about your booking request. No reply is needed.",
   },
@@ -65,6 +74,8 @@ const copy = {
     price: "Cena",
     date: "Dátum",
     time: "Čas",
+    timezone: "Časové pásmo",
+    support: "Otázky k aplikácii",
     footer:
       "Toto je informačná správa o vašej žiadosti. Na správu nemusíte odpovedať.",
   },
@@ -79,26 +90,26 @@ const copy = {
     price: "Вартість",
     date: "Дата",
     time: "Час",
+    timezone: "Часовий пояс",
+    support: "Запитання про застосунок",
     footer:
       "Це інформаційне повідомлення щодо вашої заявки. Відповідати на нього не потрібно.",
   },
 } as const;
 
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (character) => {
-    switch (character) {
-      case "&":
-        return "&amp;";
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case '"':
-        return "&quot;";
-      default:
-        return "&#39;";
-    }
-  });
+function formatDuration(minutes: number, locale: string): string {
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  const format = (amount: number, unit: "hour" | "minute") =>
+    new Intl.NumberFormat(locale, {
+      style: "unit",
+      unit,
+      unitDisplay: "long",
+    }).format(amount);
+  return [
+    ...(hours ? [format(hours, "hour")] : []),
+    ...(remainder || !hours ? [format(remainder, "minute")] : []),
+  ].join(" ");
 }
 
 export function createBookingDecisionEmail(input: BookingDecisionEmail) {
@@ -113,6 +124,7 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
   const time = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
     timeZone: input.timezone,
   }).format(new Date(input.startsAt));
   const subject =
@@ -121,44 +133,49 @@ export function createBookingDecisionEmail(input: BookingDecisionEmail) {
     input.decision === "accepted"
       ? messages.acceptedBody
       : messages.declinedBody;
+  const preheader = `${subject} · ${input.workspaceName}`;
   const details =
     input.decision === "accepted"
       ? [
-          `${messages.service}: ${input.serviceName}`,
+          { label: messages.service, value: input.serviceName },
           ...(input.durationMinutes === undefined
             ? []
-            : [`${messages.duration}: ${input.durationMinutes} min`]),
+            : [
+                {
+                  label: messages.duration,
+                  value: formatDuration(input.durationMinutes, locale),
+                },
+              ]),
           ...(input.priceAmount === undefined || !input.currency
             ? []
             : [
-                `${messages.price}: ${new Intl.NumberFormat(locale, {
-                  style: "currency",
-                  currency: input.currency,
-                }).format(input.priceAmount)}`,
+                {
+                  label: messages.price,
+                  value: new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency: input.currency,
+                  }).format(input.priceAmount),
+                },
               ]),
-          `${messages.date}: ${date}`,
-          `${messages.time}: ${time}`,
+          { label: messages.date, value: date },
+          { label: messages.time, value: time },
+          { label: messages.timezone, value: input.timezone },
         ]
       : [];
-  const text = [
-    messages.greeting,
-    "",
-    body,
-    ...(details.length ? ["", ...details] : []),
-    "",
-    input.workspaceName,
-    messages.footer,
-  ].join("\n");
-  const htmlDetails = details
-    .map((detail) => `<li>${escapeHtml(detail)}</li>`)
-    .join("");
-  const html = [
-    `<p>${escapeHtml(messages.greeting)}</p>`,
-    `<p>${escapeHtml(body)}</p>`,
-    htmlDetails ? `<ul>${htmlDetails}</ul>` : "",
-    `<p><strong>${escapeHtml(input.workspaceName)}</strong></p>`,
-    `<p>${escapeHtml(messages.footer)}</p>`,
-  ].join("");
-
-  return { html, subject, text };
+  return {
+    subject,
+    preheader,
+    ...renderEmailLayout({
+      htmlLanguage: input.locale === "cz" ? "cs" : input.locale,
+      title: subject,
+      preheader,
+      workspaceName: input.workspaceName,
+      paragraphs: [messages.greeting, body],
+      details,
+      footer: messages.footer,
+      ...(input.supportEmail
+        ? { support: { label: messages.support, email: input.supportEmail } }
+        : {}),
+    }),
+  };
 }

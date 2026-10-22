@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "@schedule-app/i18n";
 import {
   type MasterAuthCredentials,
   masterAuthCredentialsSchema,
@@ -23,7 +24,10 @@ export type AuthenticationClient = {
     ) => Promise<AuthResponse>;
     readonly signUp: (
       credentials: MasterAuthCredentials & {
-        readonly options?: { readonly emailRedirectTo: string };
+        readonly options: {
+          readonly data: { readonly locale: SupportedLocale };
+          readonly emailRedirectTo?: string;
+        };
       },
     ) => Promise<AuthResponse>;
   };
@@ -43,6 +47,7 @@ export async function authenticate(
   mode: AuthMode,
   input: MasterAuthCredentials,
   emailRedirectTo?: string,
+  locale: SupportedLocale = "en",
 ): Promise<AuthenticationResult> {
   const parsed = masterAuthCredentialsSchema.safeParse(input);
   if (!parsed.success) {
@@ -60,7 +65,10 @@ export async function authenticate(
       mode === "signUp"
         ? await client.auth.signUp({
             ...parsed.data,
-            ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
+            options: {
+              data: { locale },
+              ...(emailRedirectTo ? { emailRedirectTo } : {}),
+            },
           })
         : await client.auth.signInWithPassword(parsed.data);
   } catch {

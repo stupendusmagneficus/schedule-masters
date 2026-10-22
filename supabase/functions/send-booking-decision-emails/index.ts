@@ -77,6 +77,14 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
 
     const emailApiKey = env.get("RESEND_API_KEY");
     const from = env.get("BOOKING_EMAIL_FROM");
+    const replyTo = env.get("BOOKING_EMAIL_REPLY_TO")?.trim();
+    if (
+      replyTo !== undefined &&
+      (replyTo.length > 254 ||
+        !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$/.test(replyTo))
+    ) {
+      return jsonResponse({ error: "invalid_reply_to" }, 503);
+    }
     const enabled = env.get("BOOKING_EMAIL_DELIVERY_ENABLED") === "true";
     let testRecipientAllowlist: string[] | null;
     try {
@@ -161,6 +169,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
         startsAt: job.starts_at,
         timezone: job.timezone,
         workspaceName: job.workspace_name,
+        supportEmail: replyTo,
       });
 
       let success = false;
@@ -172,6 +181,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
           {
             body: JSON.stringify({
               from,
+              ...(replyTo ? { reply_to: replyTo } : {}),
               html: message.html,
               subject: message.subject,
               to: [job.recipient],

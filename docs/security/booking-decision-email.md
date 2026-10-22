@@ -38,6 +38,11 @@ role bearer token. It reads `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 `BOOKING_EMAIL_DELIVERY_ENABLED`, `RESEND_API_KEY`, and `BOOKING_EMAIL_FROM`.
 During the controlled production smoke test only, it may also read
 `BOOKING_EMAIL_TEST_RECIPIENTS` as a comma-separated allowlist.
+Optional `BOOKING_EMAIL_REPLY_TO` is one approved, monitored support address
+(plain address, no display name). If configured, it is used as Resend's reply-to
+and as a localized support link in HTML/plain text. A malformed configured value
+returns `invalid_reply_to` before claiming jobs; when absent, no support address
+is invented. Use the product support mailbox, not an unverified master contact.
 Keep the feature flag false and do not set provider secrets until the sending
 domain and production smoke test are ready. Never put secrets in app clients or
 logs.
@@ -66,3 +71,19 @@ delivery disabled during the initial rollout if the worker is not deployed.
 The migration expands constraints without changing existing locale values, RPC
 signatures or grants. Generated types remain strings because these fields are
 PostgreSQL text columns with CHECK constraints.
+
+## Branded content (SCH-144)
+
+Decision and Auth emails share `_shared/emailLayout.ts`, an email adapter of the
+approved design tokens. Confirmed decisions show the real workspace name in the
+header, localized date/time and explicit workspace timezone, hours/minutes, and
+the stored multi-service total. User-provided names are HTML-escaped. Both
+decisions include a localized subject/preheader and a plain-text alternative.
+Declines retain their existing wording without promising another available slot.
+
+The decision outbox currently contains no safe customer-management URL. The
+template therefore exposes no guessed or expired management CTA; the event/link
+contract is tracked in SCH-145. This change does not enable extra lifecycle
+messages or production delivery. The sender remains `BOOKING_EMAIL_FROM`, which
+must use the verified sending domain. Configure hosted Auth with the same
+approved brand/sender/support policy; see `supabase/AUTH_CONFIRMATION.md`.

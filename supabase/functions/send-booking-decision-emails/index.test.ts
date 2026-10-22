@@ -58,6 +58,7 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
     env: environment({
       ...baseEnvironment,
       BOOKING_EMAIL_TEST_RECIPIENTS: " Owner@Example.Test, owner@example.test ",
+      BOOKING_EMAIL_REPLY_TO: "support@example.test",
     }),
     fetcher: async (input, init) => {
       const url = String(input);
@@ -116,6 +117,28 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
     p_recipient_allowlist: ["owner@example.test"],
   });
   assert.equal(calls.length, 5);
+  const providerBody = JSON.parse(String(providerCall?.init?.body));
+  assert.equal(providerBody.reply_to, "support@example.test");
+  assert.match(providerBody.html, /mailto:support@example.test/);
+  assert.match(providerBody.text, /support@example.test/);
+});
+
+Deno.test("rejects malformed reply-to before claiming or sending emails", async () => {
+  let calls = 0;
+  const handler = createHandler({
+    env: environment({
+      ...baseEnvironment,
+      BOOKING_EMAIL_REPLY_TO: "support@example.test\r\nBcc: other@example.test",
+    }),
+    fetcher: async () => {
+      calls += 1;
+      return Response.json([]);
+    },
+  });
+  const response = await handler(authorizedRequest());
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: "invalid_reply_to" });
+  assert.equal(calls, 0);
 });
 
 Deno.test("defers queued emails without provider calls when the global cap is reached", async () => {

@@ -15,10 +15,12 @@
       "!**/test-results",
       "!**/playwright-report",
       "!artifacts/archify",
+      "!artifacts/emails",
       "!**/.agents/skills/archify",
       "!**/supabase/.branches",
       "!**/supabase/.temp",
       "!packages/api/src/supabase/database.types.ts",
+      "!supabase/templates/confirmation.html",
       "!**/*.snap"
     ]
   },
@@ -49,7 +51,7 @@
   },
   "overrides": [
     {
-      "includes": ["scripts/deployment/*.mjs"],
+      "includes": ["scripts/deployment/*.mjs", "scripts/email/*.mjs"],
       "linter": {
         "rules": {
           "suspicious": {
