@@ -25,7 +25,8 @@ this app's production scheme.
 Hosted project settings are not changed by `supabase/config.toml`. In
 Authentication → URL Configuration:
 
-1. Set Site URL to the production public booking web origin once confirmed.
+1. Set Site URL to the approved production master-app origin that handles Auth
+   callbacks. Do not use the separate public booking site as the Auth fallback.
 2. Add the exact production booking-web URL(s) needed by the product.
 3. Add the exact callback `schedulemasters://auth/callback`.
 4. Add the local callback URLs only for development:
