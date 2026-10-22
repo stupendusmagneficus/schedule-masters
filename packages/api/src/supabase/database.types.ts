@@ -254,6 +254,7 @@ export type Database = {
           customer_note: string | null
           customer_notification_consent_at: string | null
           duration_minutes_snapshot: number
+          email_revision: number
           ends_at: string
           id: string
           master_note: string | null
@@ -283,6 +284,7 @@ export type Database = {
           customer_note?: string | null
           customer_notification_consent_at?: string | null
           duration_minutes_snapshot: number
+          email_revision?: number
           ends_at: string
           id?: string
           master_note?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           customer_note?: string | null
           customer_notification_consent_at?: string | null
           duration_minutes_snapshot?: number
+          email_revision?: number
           ends_at?: string
           id?: string
           master_note?: string | null
@@ -534,12 +537,17 @@ export type Database = {
           appointment_id: string
           attempts: number
           created_at: string
+          customer_name: string | null
           decision: string
+          event_key: string | null
+          event_revision: number
           finalized_at: string | null
+          first_prepared_at: string | null
           id: string
           last_error: string | null
           locale: string
           next_attempt_at: string
+          occurrences: Json
           processing_at: string | null
           provider_accepted_at: string | null
           recipient: string
@@ -554,12 +562,17 @@ export type Database = {
           appointment_id: string
           attempts?: number
           created_at?: string
+          customer_name?: string | null
           decision: string
+          event_key?: string | null
+          event_revision?: number
           finalized_at?: string | null
+          first_prepared_at?: string | null
           id?: string
           last_error?: string | null
           locale: string
           next_attempt_at?: string
+          occurrences?: Json
           processing_at?: string | null
           provider_accepted_at?: string | null
           recipient: string
@@ -574,12 +587,17 @@ export type Database = {
           appointment_id?: string
           attempts?: number
           created_at?: string
+          customer_name?: string | null
           decision?: string
+          event_key?: string | null
+          event_revision?: number
           finalized_at?: string | null
+          first_prepared_at?: string | null
           id?: string
           last_error?: string | null
           locale?: string
           next_attempt_at?: string
+          occurrences?: Json
           processing_at?: string | null
           provider_accepted_at?: string | null
           recipient?: string
@@ -1680,6 +1698,10 @@ export type Database = {
       move_booking_request_to_waiting_list: {
         Args: { p_appointment_id: string; p_workspace_id: string }
         Returns: string
+      }
+      prepare_booking_email_delivery: {
+        Args: { p_attempt?: number; p_id: string }
+        Returns: Json
       }
       preview_master_recurring_bookings: {
         Args: {

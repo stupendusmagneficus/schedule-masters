@@ -3,24 +3,12 @@ import {
   triggerPlatformBudgetAlerts,
 } from "../_shared/platformBudget.ts";
 import {
-  type BookingDecisionEmail,
-  createBookingDecisionEmail,
-} from "./emailContent.ts";
+  parsePreparedDelivery,
+  validateBookingBaseUrl,
+} from "./deliveryContract.ts";
+import { createBookingDecisionEmail } from "./emailContent.ts";
 
-type ClaimedEmail = {
-  readonly attempts: number;
-  readonly decision: "accepted" | "declined";
-  readonly id: string;
-  readonly locale: BookingDecisionEmail["locale"];
-  readonly recipient: string;
-  readonly service_name: string;
-  readonly duration_minutes?: number;
-  readonly price_amount?: number;
-  readonly currency?: string;
-  readonly starts_at: string;
-  readonly timezone: string;
-  readonly workspace_name: string;
-};
+type ClaimedEmail = { readonly attempts: number; readonly id: string };
 
 type Environment = { get(name: string): string | undefined };
 
@@ -106,6 +94,11 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
       return jsonResponse({ configured: false, processed: 0 });
     }
 
+    const bookingUrl = validateBookingBaseUrl(
+      env.get("BOOKING_EMAIL_BOOKING_URL"),
+    );
+    if (!bookingUrl) return jsonResponse({ error: "invalid_booking_url" }, 503);
+
     const claimResponse = await callRpc(
       fetcher,
       supabaseUrl,
@@ -124,6 +117,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
     let failed = 0;
     let retrying = 0;
     let budgetDeferred = false;
+    let superseded = 0;
 
     for (const [jobIndex, job] of jobs.entries()) {
       const reservationResponse = await callRpc(
@@ -158,17 +152,53 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
         break;
       }
 
+      const prepareResponse = await callRpc(
+        fetcher,
+        supabaseUrl,
+        serviceRoleKey,
+        "prepare_booking_email_delivery",
+        { p_id: job.id, p_attempt: job.attempts ?? 1 },
+      );
+      let prepared: ReturnType<typeof parsePreparedDelivery> = null;
+      if (prepareResponse.ok) {
+        try {
+          prepared = parsePreparedDelivery(
+            await prepareResponse.json(),
+            bookingUrl,
+          );
+        } catch {
+          prepared = null;
+        }
+      }
+      if (!prepared?.deliver) {
+        await callRpc(
+          fetcher,
+          supabaseUrl,
+          serviceRoleKey,
+          "settle_platform_integration_usage",
+          { p_actual_amount: 0, p_reservation_id: reservation.reservationId },
+        );
+        if (prepared && !prepared.deliver) superseded++;
+        else {
+          const finish = await callRpc(
+            fetcher,
+            supabaseUrl,
+            serviceRoleKey,
+            "finish_booking_decision_email",
+            {
+              p_id: job.id,
+              p_success: false,
+              p_retryable: true,
+              p_error: "invalid_response",
+            },
+          );
+          if (finish.ok) retrying++;
+          else failed++;
+        }
+        continue;
+      }
       const message = createBookingDecisionEmail({
-        decision: job.decision,
-        locale: job.locale,
-        recipient: job.recipient,
-        serviceName: job.service_name,
-        durationMinutes: job.duration_minutes,
-        priceAmount: job.price_amount,
-        currency: job.currency,
-        startsAt: job.starts_at,
-        timezone: job.timezone,
-        workspaceName: job.workspace_name,
+        ...prepared.message,
         supportEmail: replyTo,
       });
 
@@ -184,7 +214,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
               ...(replyTo ? { reply_to: replyTo } : {}),
               html: message.html,
               subject: message.subject,
-              to: [job.recipient],
+              to: [prepared.message.recipient],
               text: message.text,
             }),
             headers: {
@@ -266,6 +296,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
       failed,
       processed: jobs.length,
       retrying,
+      superseded,
     });
   };
 }
@@ -277,15 +308,19 @@ async function callRpc(
   name: string,
   body: Record<string, unknown>,
 ) {
-  return await fetcher(`${supabaseUrl}/rest/v1/rpc/${name}`, {
-    body: JSON.stringify(body),
-    headers: {
-      apikey: serviceRoleKey,
-      authorization: `Bearer ${serviceRoleKey}`,
-      "content-type": "application/json",
-    },
-    method: "POST",
-  });
+  try {
+    return await fetcher(`${supabaseUrl}/rest/v1/rpc/${name}`, {
+      body: JSON.stringify(body),
+      headers: {
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${serviceRoleKey}`,
+        "content-type": "application/json",
+      },
+      method: "POST",
+    });
+  } catch {
+    return new Response(null, { status: 503 });
+  }
 }
 
 if (import.meta.main) {

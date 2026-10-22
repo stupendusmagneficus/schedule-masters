@@ -144,7 +144,8 @@ describe("public booking preserves all supported customer locales", () => {
           const outbox = await admin
             .from("booking_decision_email_outbox")
             .select("appointment_id, decision, locale")
-            .eq("workspace_id", workspaceId);
+            .eq("workspace_id", workspaceId)
+            .in("decision", ["accepted", "declined"]);
           expect(outbox.error).toBeNull();
           expect(outbox.data).toEqual(
             expect.arrayContaining([

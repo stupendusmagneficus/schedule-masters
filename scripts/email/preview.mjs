@@ -13,7 +13,19 @@ const directory = fileURLToPath(
 mkdirSync(directory, { recursive: true });
 const links = [];
 for (const locale of emailLocales) {
-  for (const kind of ["accepted", "declined", "confirmation", "recovery"]) {
+  for (const kind of [
+    "accepted",
+    "declined",
+    "confirmation",
+    "recovery",
+    "request_received",
+    "master_request_received",
+    "customer_confirmed",
+    "master_customer_confirmed",
+    "cancelled_by_master",
+    "cancelled_by_customer",
+    "master_customer_cancelled",
+  ]) {
     const email =
       kind === "recovery"
         ? createRecoveryEmail(locale, "https://example.test/reset")
@@ -31,6 +43,19 @@ for (const locale of emailLocales) {
               timezone: "Europe/Prague",
               workspaceName: "Studio Kateřina · Prague",
               supportEmail: "support@example.test",
+              customerName: kind.startsWith("master_") ? "Anna K." : undefined,
+              occurrenceStarts:
+                kind === "cancelled_by_master"
+                  ? [
+                      "2030-01-03T09:00:00Z",
+                      "2030-01-10T09:00:00Z",
+                      "2030-01-17T09:00:00Z",
+                    ]
+                  : undefined,
+              manageUrl:
+                kind === "accepted" || kind === "customer_confirmed"
+                  ? "https://example.test/#token=fixture-preview"
+                  : undefined,
             });
     const name = `${locale}-${kind}`;
     writeFileSync(`${directory}${name}.html`, email.html);

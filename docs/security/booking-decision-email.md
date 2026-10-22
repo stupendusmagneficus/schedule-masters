@@ -8,8 +8,9 @@
 - A master's customer profile can still omit email.
 - Accepting or declining a pending public booking creates one durable outbox
   row in the same database transaction as the status change.
-- Manual appointments and later cancellations of already confirmed bookings do
-  not create a booking-decision email.
+- Lifecycle messages now cover public request receipts, consented manual
+  bookings, later cancellations and customer actions. See the complete
+  [event/recipient contract](../operations/appointment-email-events.md).
 - Email content is localized to the language selected on the public booking
   page (EN, CZ, SK, RU, UK). Declined messages do not claim another time is available.
 - The Edge Function `send-booking-decision-emails` uses Resend behind an
@@ -31,6 +32,7 @@
 | `pending` | The job can be retried by the worker. |
 | `processing` | A worker has claimed the job; stale claims become eligible after ten minutes. |
 | `accepted_by_provider` | Resend accepted the request and returned a message ID. This is not inbox delivery confirmation. |
+| `superseded` | The event, recipient, consent or link is no longer current; no send occurs. |
 | `failed` | A permanent provider error occurred or five attempts were exhausted. |
 
 The worker is invoked by an authenticated scheduler with the Supabase service
@@ -81,9 +83,8 @@ the stored multi-service total. User-provided names are HTML-escaped. Both
 decisions include a localized subject/preheader and a plain-text alternative.
 Declines retain their existing wording without promising another available slot.
 
-The decision outbox currently contains no safe customer-management URL. The
-template therefore exposes no guessed or expired management CTA; the event/link
-contract is tracked in SCH-145. This change does not enable extra lifecycle
-messages or production delivery. The sender remains `BOOKING_EMAIL_FROM`, which
-must use the verified sending domain. Configure hosted Auth with the same
-approved brand/sender/support policy; see `supabase/AUTH_CONFIRMATION.md`.
+Lifecycle messages use the same layout and the service-only prepare contract for
+current status/consent checks and safe, expiring customer management links.
+See [SCH-145 event/link security](../operations/appointment-email-events.md).
+Real delivery remains behind the configured sender, provider, allowlist and
+feature flag; no rollout is implied by merging templates or migrations.
