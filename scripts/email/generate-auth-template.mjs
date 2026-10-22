@@ -2,38 +2,47 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { buildConfirmationTemplate } from "../../supabase/functions/_shared/confirmationEmail.ts";
+import { buildRecoveryTemplate } from "../../supabase/functions/_shared/recoveryEmail.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const { html, subject } = buildConfirmationTemplate();
-// Format the HTML with Biome; the preceding Go assignments are not HTML.
-const documentStart = html.indexOf("<!doctype html>");
-const formatted =
-  html.slice(0, documentStart) +
-  execFileSync(
-    "yarn",
-    [
-      "biome",
-      "format",
-      "--write",
-      "--html-formatter-enabled=true",
-      "--stdin-file-path=email-preview.html",
-    ],
-    { cwd: root, input: html.slice(documentStart), encoding: "utf8" },
-  );
 const configPath = `${root}supabase/config.toml`;
-const config = readFileSync(configPath, "utf8");
-if (!/\[auth\.email\.template\.confirmation\]\nsubject = /.test(config)) {
-  throw new Error("Missing Auth confirmation subject in supabase/config.toml");
+let updatedConfig = readFileSync(configPath, "utf8");
+const files = [];
+for (const [kind, template] of [
+  ["confirmation", buildConfirmationTemplate],
+  ["recovery", buildRecoveryTemplate],
+]) {
+  const { html, subject } = template();
+  // Format the HTML with Biome; the preceding Go assignments are not HTML.
+  const documentStart = html.indexOf("<!doctype html>");
+  const formatted =
+    html.slice(0, documentStart) +
+    execFileSync(
+      "yarn",
+      [
+        "biome",
+        "format",
+        "--write",
+        "--html-formatter-enabled=true",
+        "--stdin-file-path=email-preview.html",
+      ],
+      { cwd: root, input: html.slice(documentStart), encoding: "utf8" },
+    );
+  const pattern = new RegExp(
+    `(\\[auth\\.email\\.template\\.${kind}\\]\n)subject = [^\n]*`,
+  );
+  if (!pattern.test(updatedConfig))
+    throw new Error(`Missing Auth ${kind} configuration`);
+  updatedConfig = updatedConfig.replace(
+    pattern,
+    `$1subject = ${JSON.stringify(subject)}`,
+  );
+  files.push(
+    [`${root}supabase/templates/${kind}.html`, formatted],
+    [`${root}supabase/templates/${kind}.subject.txt`, `${subject}\n`],
+  );
 }
-const updatedConfig = config.replace(
-  /(\[auth\.email\.template\.confirmation\]\n)subject = [^\n]*/,
-  `$1subject = ${JSON.stringify(subject)}`,
-);
-const files = [
-  [`${root}supabase/templates/confirmation.html`, formatted],
-  [`${root}supabase/templates/confirmation.subject.txt`, `${subject}\n`],
-  [configPath, updatedConfig],
-];
+files.push([configPath, updatedConfig]);
 if (process.argv.includes("--check")) {
   for (const [path, expected] of files) {
     if (readFileSync(path, "utf8") !== expected) {

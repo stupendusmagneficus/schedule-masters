@@ -4,6 +4,7 @@ import type { AuthMode } from "./authentication";
 
 export type AuthFlowState = {
   readonly authMode: AuthMode;
+  readonly isPasswordRecovery: boolean;
   readonly session: Session | null;
   readonly sessionRestoreFailed: boolean;
 };
@@ -21,10 +22,13 @@ export type AuthFlowAction =
       readonly type: "authStateChanged";
     }
   | { readonly session: Session; readonly type: "authenticated" }
-  | { readonly type: "signedOut" };
+  | { readonly type: "signedOut" }
+  | { readonly type: "recoveryCompleted" }
+  | { readonly type: "callbackRejected" };
 
 export const initialAuthFlowState: AuthFlowState = {
   authMode: "signUp",
+  isPasswordRecovery: false,
   session: null,
   sessionRestoreFailed: false,
 };
@@ -45,12 +49,18 @@ export function reduceAuthFlow(
       return {
         ...state,
         authMode: "signIn",
+        isPasswordRecovery: false,
         session: null,
         sessionRestoreFailed: true,
       };
     case "authStateChanged":
       return {
         ...state,
+        isPasswordRecovery:
+          action.session !== null &&
+          (action.event === "PASSWORD_RECOVERY" ||
+            (state.isPasswordRecovery &&
+              state.session?.user.id === action.session.user.id)),
         session: action.session,
         sessionRestoreFailed: false,
         ...(action.event === "SIGNED_OUT"
@@ -63,10 +73,15 @@ export function reduceAuthFlow(
         session: action.session,
         sessionRestoreFailed: false,
       };
+    case "callbackRejected":
+      return { ...state, authMode: "signIn" };
+    case "recoveryCompleted":
+      return { ...state, isPasswordRecovery: false };
     case "signedOut":
       return {
         ...state,
         authMode: "signIn",
+        isPasswordRecovery: false,
         session: null,
         sessionRestoreFailed: false,
       };

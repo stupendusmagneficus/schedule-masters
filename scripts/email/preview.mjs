@@ -4,6 +4,7 @@ import {
   createConfirmationEmail,
   emailLocales,
 } from "../../supabase/functions/_shared/confirmationEmail.ts";
+import { createRecoveryEmail } from "../../supabase/functions/_shared/recoveryEmail.ts";
 import { createBookingDecisionEmail } from "../../supabase/functions/send-booking-decision-emails/emailContent.ts";
 
 const directory = fileURLToPath(
@@ -12,23 +13,25 @@ const directory = fileURLToPath(
 mkdirSync(directory, { recursive: true });
 const links = [];
 for (const locale of emailLocales) {
-  for (const kind of ["accepted", "declined", "confirmation"]) {
+  for (const kind of ["accepted", "declined", "confirmation", "recovery"]) {
     const email =
-      kind === "confirmation"
-        ? createConfirmationEmail(locale, "https://example.test/confirm")
-        : createBookingDecisionEmail({
-            decision: kind,
-            locale,
-            recipient: "preview@example.test",
-            serviceName: "Manikúra + pedikúra / Маникюр + педикюр",
-            durationMinutes: 150,
-            priceAmount: 2600,
-            currency: "CZK",
-            startsAt: "2030-01-03T09:00:00Z",
-            timezone: "Europe/Prague",
-            workspaceName: "Studio Kateřina · Prague",
-            supportEmail: "support@example.test",
-          });
+      kind === "recovery"
+        ? createRecoveryEmail(locale, "https://example.test/reset")
+        : kind === "confirmation"
+          ? createConfirmationEmail(locale, "https://example.test/confirm")
+          : createBookingDecisionEmail({
+              decision: kind,
+              locale,
+              recipient: "preview@example.test",
+              serviceName: "Manikúra + pedikúra / Маникюр + педикюр",
+              durationMinutes: 150,
+              priceAmount: 2600,
+              currency: "CZK",
+              startsAt: "2030-01-03T09:00:00Z",
+              timezone: "Europe/Prague",
+              workspaceName: "Studio Kateřina · Prague",
+              supportEmail: "support@example.test",
+            });
     const name = `${locale}-${kind}`;
     writeFileSync(`${directory}${name}.html`, email.html);
     writeFileSync(

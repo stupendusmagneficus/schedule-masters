@@ -25,6 +25,7 @@ describe("reduceAuthFlow", () => {
       }),
     ).toEqual({
       authMode: "signIn",
+      isPasswordRecovery: false,
       session: null,
       sessionRestoreFailed: true,
     });
@@ -44,8 +45,54 @@ describe("reduceAuthFlow", () => {
       }),
     ).toEqual({
       authMode: "signIn",
+      isPasswordRecovery: false,
       session: null,
       sessionRestoreFailed: false,
     });
   });
+});
+
+describe("password recovery session gating", () => {
+  it("keeps recovery active across session restoration and refresh", () => {
+    const recovery = reduceAuthFlow(initialAuthFlowState, {
+      type: "authStateChanged",
+      event: "PASSWORD_RECOVERY",
+      session,
+    });
+    expect(recovery.isPasswordRecovery).toBe(true);
+    expect(
+      reduceAuthFlow(recovery, {
+        type: "sessionRestored",
+        session,
+        error: false,
+      }).isPasswordRecovery,
+    ).toBe(true);
+    expect(
+      reduceAuthFlow(recovery, {
+        type: "authStateChanged",
+        event: "TOKEN_REFRESHED",
+        session,
+      }).isPasswordRecovery,
+    ).toBe(true);
+    expect(
+      reduceAuthFlow(recovery, { type: "recoveryCompleted" })
+        .isPasswordRecovery,
+    ).toBe(false);
+    expect(
+      reduceAuthFlow(recovery, { type: "signedOut" }).isPasswordRecovery,
+    ).toBe(false);
+  });
+});
+
+it("opens sign-in with a direct reset action after a rejected email link", () => {
+  const failed = reduceAuthFlow(initialAuthFlowState, {
+    type: "callbackRejected",
+  });
+  expect(
+    reduceAuthFlow(failed, {
+      type: "sessionRestored",
+      error: false,
+      session: null,
+    }).authMode,
+  ).toBe("signIn");
 });

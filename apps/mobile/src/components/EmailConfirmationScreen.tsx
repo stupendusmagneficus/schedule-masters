@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import type { MessageKey } from "@schedule-app/i18n";
+import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { colors, radii, shadows } from "../theme/tokens";
@@ -11,6 +12,7 @@ type EmailConfirmationScreenProps = {
     | "auth.confirmationDescription"
     | "auth.emailNotConfirmed";
   readonly email: string;
+  readonly resendAction: ReactNode;
   readonly onBackToSignIn: () => void;
   readonly t: (key: MessageKey) => string;
 };
@@ -18,12 +20,15 @@ type EmailConfirmationScreenProps = {
 export function EmailConfirmationScreen({
   descriptionKey,
   email,
+  resendAction,
   onBackToSignIn,
   t,
 }: EmailConfirmationScreenProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t("auth.confirmationTitle")}</Text>
+      <Text accessibilityRole="header" style={styles.title}>
+        {t("auth.confirmationTitle")}
+      </Text>
       <Text style={styles.description}>{t(descriptionKey)}</Text>
       <View style={styles.card}>
         <View style={styles.iconWrapper}>
@@ -36,6 +41,7 @@ export function EmailConfirmationScreen({
         <Text style={styles.label}>{t("auth.confirmationEmailLabel")}</Text>
         <Text style={styles.email}>{email}</Text>
       </View>
+      {resendAction}
       <ActionButton
         label={t("auth.confirmationBackToSignIn")}
         onPress={onBackToSignIn}

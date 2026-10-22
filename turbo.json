@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalPassThroughEnv": ["MOBILE_E2E_PORT"],
+  "globalPassThroughEnv": ["MOBILE_E2E_PORT", "AUTH_E2E_PORT"],
   "tasks": {
     "dev": {
       "cache": false,

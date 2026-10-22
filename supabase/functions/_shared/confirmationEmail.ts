@@ -1,4 +1,9 @@
-import { renderEmailLayout } from "./emailLayout.ts";
+import {
+  buildAuthEmailTemplate,
+  createAuthEmail,
+} from "./authEmailTemplate.ts";
+
+export { emailLocales } from "./authEmailTemplate.ts";
 
 const copy = {
   en: {
@@ -50,76 +55,12 @@ const copy = {
   },
 } as const;
 
-export const emailLocales = ["en", "cz", "sk", "ru", "uk"] as const;
-type EmailLocale = (typeof emailLocales)[number];
-
-function getFields(locale: EmailLocale) {
-  return { ...copy[locale], htmlLanguage: locale === "cz" ? "cs" : locale };
-}
-
 export function createConfirmationEmail(
   locale: unknown,
   confirmationUrl: string,
 ) {
-  if (!emailLocales.includes(locale as EmailLocale)) locale = "en";
-  const fields = getFields(locale as EmailLocale);
-  return {
-    subject: `Schedule Masters — ${fields.title}`,
-    preheader: fields.preheader,
-    ...renderConfirmationLayout(fields, confirmationUrl),
-  };
+  return createAuthEmail(copy, locale, confirmationUrl);
 }
-
-function renderConfirmationLayout(
-  fields: Record<keyof ReturnType<typeof getFields>, string>,
-  confirmationUrl: string,
-) {
-  return renderEmailLayout({
-    htmlLanguage: fields.htmlLanguage,
-    title: fields.title,
-    preheader: fields.preheader,
-    paragraphs: [fields.intro],
-    footer: fields.footer,
-    action: {
-      label: fields.action,
-      url: confirmationUrl,
-      fallbackLabel: fields.fallback,
-    },
-  });
-}
-
-// Supabase Auth renders Go templates with user_metadata in .Data. All output
-// strings and language codes below come from our catalog, never from metadata.
 export function buildConfirmationTemplate() {
-  const defaults = getFields("en");
-  const assignments = (locale: EmailLocale, operator: ":=" | "=") =>
-    Object.entries(getFields(locale))
-      .map(
-        ([key, value]) => `{{ $${key} ${operator} ${JSON.stringify(value)} }}`,
-      )
-      .join("\n");
-  const branches = emailLocales.filter((locale) => locale !== "en");
-  const prelude = [
-    assignments("en", ":="),
-    ...branches.map(
-      (locale, index) =>
-        `{{ ${index ? "else if" : "if"} eq (printf "%v" .Data.locale) "${locale}" }}\n${assignments(locale, "=")}`,
-    ),
-    "{{ end }}",
-  ].join("\n");
-  const placeholders = Object.fromEntries(
-    Object.keys(defaults).map((key) => [key, `{{ $${key} }}`]),
-  ) as Record<keyof typeof defaults, string>;
-  const { html } = renderConfirmationLayout(
-    placeholders,
-    "{{ .ConfirmationURL }}",
-  );
-  const subject = [
-    ...branches.map(
-      (locale, index) =>
-        `{{ ${index ? "else if" : "if"} eq (printf "%v" .Data.locale) "${locale}" }}Schedule Masters — ${copy[locale].title}`,
-    ),
-    `{{ else }}Schedule Masters — ${copy.en.title}{{ end }}`,
-  ].join("");
-  return { html: `${prelude}\n${html}\n`, subject };
+  return buildAuthEmailTemplate(copy);
 }

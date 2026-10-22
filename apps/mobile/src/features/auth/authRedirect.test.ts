@@ -92,3 +92,47 @@ describe("email confirmation redirect", () => {
     );
   });
 });
+
+describe("recovery callback", () => {
+  it("uses the verified SDK recovery type and forwards PKCE flow id on native", async () => {
+    const exchange = vi
+      .fn()
+      .mockResolvedValue({ error: null, data: { redirectType: "recovery" } });
+    await expect(
+      completeAuthCallback(
+        client(exchange),
+        "schedulemasters://auth/callback?code=one-time&sb_flow_id=valid-flow-id",
+        getEmailRedirectTo("native"),
+      ),
+    ).resolves.toBe("recovery");
+    expect(exchange).toHaveBeenCalledWith("one-time", {
+      flowId: "valid-flow-id",
+    });
+  });
+  it("rejects callback credentials and duplicate codes before exchange", async () => {
+    const api = client();
+    const redirect = "https://app.test/auth/callback";
+    for (const url of [
+      "https://attacker@app.test/auth/callback?code=x",
+      `${redirect}?code=a&code=b`,
+      `${redirect}?code=a&sb_flow_id=`,
+    ]) {
+      expect(await completeAuthCallback(api, url, redirect)).not.toBe(
+        "completed",
+      );
+    }
+    expect(api.auth.exchangeCodeForSession).not.toHaveBeenCalled();
+  });
+  it("fails closed for expired/reused codes", async () => {
+    const api = client(
+      vi.fn().mockResolvedValue({ error: { message: "expired" } }),
+    );
+    expect(
+      await completeAuthCallback(
+        api,
+        "schedulemasters://auth/callback?code=expired",
+        getEmailRedirectTo("native"),
+      ),
+    ).toBe("failed");
+  });
+});
