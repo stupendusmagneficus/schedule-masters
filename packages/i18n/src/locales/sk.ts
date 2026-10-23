@@ -273,6 +273,30 @@ export const slovakMessages: Messages = {
   "mobile.bookingRequestActionFailed":
     "Žiadosť sa nepodarilo aktualizovať. Jej stav sa mohol zmeniť. Obnovte zoznam.",
   "mobile.bookingRequestUpdated": "Vaše rozhodnutie bolo uložené.",
+  "mobile.emailState.pending": "Vo fronte",
+  "mobile.emailState.not_configured": "Odosielanie nie je nastavené",
+  "mobile.emailState.processing": "Odosiela sa",
+  "mobile.emailState.accepted_by_provider": "Prijaté e-mailovou službou",
+  "mobile.emailState.superseded": "Oznámenie už nie je aktuálne",
+  "mobile.emailState.failed": "Odoslanie zlyhalo",
+  "mobile.emailState.sent": "Doručuje sa",
+  "mobile.emailState.delayed": "Doručenie sa oneskorilo",
+  "mobile.emailState.delivered": "Doručené na poštový server",
+  "mobile.emailState.bounced": "Poštový server správu odmietol",
+  "mobile.emailState.complained": "Označené ako spam",
+  "mobile.emailState.suppressed": "Doručenie zablokované",
+  "mobile.emailDeliveryRefresh": "Obnoviť stav",
+  "mobile.emailDeliveryTitle": "E-mail klientovi",
+  "mobile.emailDeliveryLoadFailed":
+    "Stav e-mailu sa nepodarilo obnoviť. Skúste to znova.",
+  "mobile.emailDeliveryRecovery":
+    "Kontaktujte klienta priamo. Počet opakovaných odoslaní je obmedzený.",
+  "mobile.emailDeliveryHint":
+    "Doručené znamená prijatie poštovým serverom, nie prečítanie klientom.",
+  "mobile.emailEventRequest": "Žiadosť o rezerváciu",
+  "mobile.emailEventConfirmation": "Potvrdenie",
+  "mobile.emailEventCancellation": "Zrušenie",
+  "mobile.emailEventDecline": "Žiadosť odmietnutá",
   "mobile.bookingRequestEmailNotConfigured":
     "Vaše rozhodnutie bolo uložené, ale doručovanie e-mailov ešte nie je nastavené. Klient nedostane upozornenie, kým túto funkciu nezapnete.",
   "mobile.minutes": "min",
@@ -342,7 +366,7 @@ export const slovakMessages: Messages = {
   "mobile.shareConsent": "Klient súhlasil so správami o tejto rezervácii.",
   "mobile.shareConsentRequired": "Potvrďte súhlas klienta.",
   "mobile.shareManualDelivery":
-    "Automatické odosielanie nie je nastavené. Zdieľajte odkaz sami a overte jeho doručenie.",
+    "Zdieľajte odkaz cez ponuku zariadenia a overte, že ho klient dostal.",
   "mobile.shareSheetOpened":
     "Otvorila sa ponuka zdieľania. Doručenie nie je potvrdené; skontrolujte aplikáciu na zdieľanie.",
   "mobile.shareSheetFailed":

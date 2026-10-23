@@ -11,6 +11,164 @@ const user = {
 };
 const token = `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url")}.${Buffer.from(JSON.stringify({ sub: user.id, aud: "authenticated", role: "authenticated", exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })).toString("base64url")}.fixture`;
 
+test("shows actual email delivery evidence and refreshes without resending", async ({
+  page,
+}, testInfo) => {
+  const workspaceId = "14700000-0000-4000-8000-000000000001",
+    appointmentId = "14700000-0000-4000-8000-000000000002";
+  const date = new Date().toISOString().slice(0, 10);
+  let reads = 0;
+  let writes = 0;
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.addInitScript(() =>
+    localStorage.setItem("schedule-masters.locale", "en"),
+  );
+  await page.route("**/auth/v1/**", (route) =>
+    route.fulfill({
+      json: route.request().url().includes("/token")
+        ? {
+            access_token: token,
+            refresh_token: "fixture-refresh",
+            token_type: "bearer",
+            expires_in: 3600,
+            user,
+          }
+        : user,
+    }),
+  );
+  await page.route("**/rest/v1/**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/workspace_members"))
+      return route.fulfill({
+        json: { role: "owner", workspace_id: workspaceId },
+      });
+    if (path.endsWith("/workspaces"))
+      return route.fulfill({
+        json: {
+          id: workspaceId,
+          name: "Fixture studio",
+          slug: "fixture",
+          timezone: "Europe/Prague",
+          booking_interval_minutes: 30,
+          public_booking_min_notice_minutes: 0,
+        },
+      });
+    if (path.endsWith("/services")) return route.fulfill({ json: [] });
+    if (path.endsWith("/customers"))
+      return route.fulfill({ json: { phone: "+420777123456" } });
+    if (path.endsWith("/list_master_appointments"))
+      return route.fulfill({
+        json: [
+          {
+            id: appointmentId,
+            customer_id: "14700000-0000-4000-8000-000000000003",
+            customer_name: "Delivery fixture client",
+            service_name: "Fixture service",
+            starts_at: `${date}T09:00:00Z`,
+            ends_at: `${date}T10:00:00Z`,
+            duration_minutes: 60,
+            price_amount: 100,
+            currency: "CZK",
+            paid_amount: 0,
+            status: "confirmed",
+            source: "master_created",
+            master_note: null,
+            appointment_series_id: null,
+          },
+        ],
+      });
+    if (path.endsWith("/list_master_appointment_emails")) {
+      reads++;
+      if (reads === 4)
+        return route.fulfill({
+          status: 503,
+          json: { message: "fixture storage failure" },
+        });
+      return route.fulfill({
+        json: [
+          {
+            id: "fixture-job",
+            event_type: "accepted",
+            state:
+              reads === 1
+                ? "accepted_by_provider"
+                : reads === 2
+                  ? "delivered"
+                  : "bounced",
+            created_at: `${date}T08:00:00Z`,
+          },
+        ],
+      });
+    }
+    if (/\/(set_|finish_|create_)/.test(path)) writes++;
+    return route.fulfill({ json: [] });
+  });
+  await page.goto("/");
+  await page
+    .getByRole("button", {
+      name: "Already have an account? Sign in",
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill(user.email);
+  await page
+    .getByRole("textbox", { name: "Password", exact: true })
+    .fill("fixture-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page
+    .getByRole("button", { name: /Delivery fixture client/ })
+    .first()
+    .click();
+  await expect(
+    page.getByText("Accepted by email provider", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Delivered to mail server", { exact: true }),
+  ).toHaveCount(0);
+  const refresh = page.getByRole("button", {
+    name: "Refresh status",
+    exact: true,
+  });
+  await refresh.click();
+  await expect(
+    page.getByText("Delivered to mail server", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Automatic sending is not configured.", { exact: false }),
+  ).toHaveCount(0);
+  await testInfo.attach("email-delivered-320", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+  await page.setViewportSize({ width: 430, height: 900 });
+  await refresh.click();
+  await expect(
+    page.getByText("Rejected by mail server", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Contact the customer directly.", { exact: false }),
+  ).toBeVisible();
+  await testInfo.attach("email-bounced-430", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+  await refresh.click();
+  await expect(
+    page.getByText("Could not refresh email status. Try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await refresh.click();
+  await expect(
+    page.getByText("Could not refresh email status. Try again.", {
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  expect(writes).toBe(0);
+});
+
 test("recovers a password, keeps the form after reload, and signs out", async ({
   page,
 }, testInfo) => {

@@ -184,9 +184,11 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
             fetcher,
             supabaseUrl,
             serviceRoleKey,
-            "finish_booking_decision_email",
+            "finish_booking_email_delivery",
             {
               p_id: job.id,
+              p_attempt: job.attempts ?? 1,
+              p_provider_message_id: null,
               p_success: false,
               p_retryable: true,
               p_error: "invalid_response",
@@ -203,6 +205,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
       });
 
       let success = false;
+      let providerMessageId: string | null = null;
       let retryable = false;
       let errorCode: string | null = null;
       try {
@@ -216,6 +219,7 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
               subject: message.subject,
               to: [prepared.message.recipient],
               text: message.text,
+              tags: [{ name: "outbox_id", value: job.id }],
             }),
             headers: {
               authorization: `Bearer ${emailApiKey}`,
@@ -229,7 +233,12 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
           const providerResult = (await providerResponse.json()) as {
             readonly id?: unknown;
           };
-          success = typeof providerResult.id === "string";
+          success =
+            typeof providerResult.id === "string" &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+              providerResult.id,
+            );
+          if (success) providerMessageId = providerResult.id as string;
           if (!success) {
             retryable = true;
             errorCode = "invalid_response";
@@ -272,10 +281,12 @@ export function createHandler({ env, fetcher = fetch }: Dependencies) {
         fetcher,
         supabaseUrl,
         serviceRoleKey,
-        "finish_booking_decision_email",
+        "finish_booking_email_delivery",
         {
           p_error: errorCode,
           p_id: job.id,
+          p_attempt: job.attempts ?? 1,
+          p_provider_message_id: providerMessageId,
           p_retryable: retryable,
           p_success: success,
         },

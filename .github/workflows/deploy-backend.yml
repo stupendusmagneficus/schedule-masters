@@ -76,11 +76,13 @@ jobs:
         run: supabase db push --linked --yes
       - name: Deploy booking email worker
         run: supabase functions deploy send-booking-decision-emails --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Deploy signed email webhook
+        run: supabase functions deploy booking-email-webhook --project-ref "$SUPABASE_PROJECT_REF"
       - name: Deploy translation function
         run: supabase functions deploy translate-service-content --project-ref "$SUPABASE_PROJECT_REF"
       - name: Deploy platform budget alert worker
         run: supabase functions deploy send-platform-budget-alerts --project-ref "$SUPABASE_PROJECT_REF"
-      - name: Verify functions are active and require JWTs
+      - name: Verify function status and gateway authentication modes
         run: |
           supabase functions list --project-ref "$SUPABASE_PROJECT_REF" --output json > /tmp/release-functions.json
           node --input-type=module <<'NODE'
@@ -91,6 +93,10 @@ jobs:
             if (deployed?.status !== "ACTIVE" || deployed.verify_jwt !== true) {
               throw new Error(`Function ${name} must be ACTIVE with JWT verification enabled`);
             }
+          }
+          const webhook = functions.find((entry) => entry.slug === "booking-email-webhook");
+          if (webhook?.status !== "ACTIVE" || webhook.verify_jwt !== false) {
+            throw new Error("Email webhook must be ACTIVE; authentication is its Svix signature");
           }
           NODE
       - name: Verify PostgREST contract and function authentication

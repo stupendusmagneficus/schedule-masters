@@ -233,6 +233,27 @@ export type MessageKey =
   | "mobile.bookingRequestMovedToWaitingList"
   | "mobile.bookingRequestActionFailed"
   | "mobile.bookingRequestUpdated"
+  | "mobile.emailState.pending"
+  | "mobile.emailState.not_configured"
+  | "mobile.emailState.processing"
+  | "mobile.emailState.accepted_by_provider"
+  | "mobile.emailState.superseded"
+  | "mobile.emailState.failed"
+  | "mobile.emailState.sent"
+  | "mobile.emailState.delayed"
+  | "mobile.emailState.delivered"
+  | "mobile.emailState.bounced"
+  | "mobile.emailState.complained"
+  | "mobile.emailState.suppressed"
+  | "mobile.emailDeliveryRefresh"
+  | "mobile.emailDeliveryTitle"
+  | "mobile.emailDeliveryLoadFailed"
+  | "mobile.emailDeliveryRecovery"
+  | "mobile.emailDeliveryHint"
+  | "mobile.emailEventRequest"
+  | "mobile.emailEventConfirmation"
+  | "mobile.emailEventCancellation"
+  | "mobile.emailEventDecline"
   | "mobile.bookingRequestEmailNotConfigured"
   | "mobile.minutes"
   | "mobile.available"
@@ -919,6 +940,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Не удалось обновить заявку. Возможно, её статус уже изменился. Обновите список.",
     "mobile.bookingRequestUpdated": "Решение по заявке сохранено.",
+    "mobile.emailState.pending": "В очереди",
+    "mobile.emailState.not_configured": "Отправка не настроена",
+    "mobile.emailState.processing": "Отправляется",
+    "mobile.emailState.accepted_by_provider": "Принято почтовым сервисом",
+    "mobile.emailState.superseded": "Уведомление устарело",
+    "mobile.emailState.failed": "Не удалось отправить",
+    "mobile.emailState.sent": "Доставляется",
+    "mobile.emailState.delayed": "Доставка задерживается",
+    "mobile.emailState.delivered": "Доставлено на почтовый сервер",
+    "mobile.emailState.bounced": "Отклонено почтовым сервером",
+    "mobile.emailState.complained": "Помечено как спам",
+    "mobile.emailState.suppressed": "Доставка заблокирована",
+    "mobile.emailDeliveryRefresh": "Обновить статус",
+    "mobile.emailDeliveryTitle": "Письмо клиенту",
+    "mobile.emailDeliveryLoadFailed":
+      "Не удалось обновить статус письма. Повторите попытку.",
+    "mobile.emailDeliveryRecovery":
+      "Свяжитесь с клиентом напрямую. Число повторных отправок ограничено.",
+    "mobile.emailDeliveryHint":
+      "Доставлено означает приём почтовым сервером, а не прочтение письма клиентом.",
+    "mobile.emailEventRequest": "Заявка на запись",
+    "mobile.emailEventConfirmation": "Подтверждение",
+    "mobile.emailEventCancellation": "Отмена",
+    "mobile.emailEventDecline": "Заявка отклонена",
     "mobile.bookingRequestEmailNotConfigured":
       "Решение сохранено, но email-доставка пока не настроена. Клиент не получит уведомление, пока ее не включат.",
     "mobile.minutes": "мин",
@@ -988,7 +1033,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Клиент согласился получать сообщения об этой записи.",
     "mobile.shareConsentRequired": "Подтвердите согласие клиента.",
     "mobile.shareManualDelivery":
-      "Автоматическая отправка не настроена. Отправьте ссылку клиенту сами и проверьте результат.",
+      "Отправьте ссылку через меню устройства и проверьте, что клиент её получил.",
     "mobile.shareSheetOpened":
       "Окно отправки открыто. Доставка не подтверждена — проверьте приложение обмена.",
     "mobile.shareSheetFailed":
@@ -1668,6 +1713,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Žádost se nepodařilo aktualizovat. Její stav se možná změnil. Obnovte seznam.",
     "mobile.bookingRequestUpdated": "Rozhodnutí o žádosti bylo uloženo.",
+    "mobile.emailState.pending": "Ve frontě",
+    "mobile.emailState.not_configured": "Odesílání není nastaveno",
+    "mobile.emailState.processing": "Odesílá se",
+    "mobile.emailState.accepted_by_provider": "Přijato e-mailovou službou",
+    "mobile.emailState.superseded": "Oznámení již není aktuální",
+    "mobile.emailState.failed": "Odeslání selhalo",
+    "mobile.emailState.sent": "Doručuje se",
+    "mobile.emailState.delayed": "Doručení se zpozdilo",
+    "mobile.emailState.delivered": "Doručeno na poštovní server",
+    "mobile.emailState.bounced": "Poštovní server odmítl zprávu",
+    "mobile.emailState.complained": "Označeno jako spam",
+    "mobile.emailState.suppressed": "Doručení zablokováno",
+    "mobile.emailDeliveryRefresh": "Obnovit stav",
+    "mobile.emailDeliveryTitle": "E-mail klientovi",
+    "mobile.emailDeliveryLoadFailed":
+      "Stav e-mailu se nepodařilo obnovit. Zkuste to znovu.",
+    "mobile.emailDeliveryRecovery":
+      "Kontaktujte klienta přímo. Počet opakovaných odeslání je omezen.",
+    "mobile.emailDeliveryHint":
+      "Doručeno znamená přijetí poštovním serverem, nikoli přečtení klientem.",
+    "mobile.emailEventRequest": "Žádost o rezervaci",
+    "mobile.emailEventConfirmation": "Potvrzení",
+    "mobile.emailEventCancellation": "Zrušení",
+    "mobile.emailEventDecline": "Žádost odmítnuta",
     "mobile.bookingRequestEmailNotConfigured":
       "Rozhodnutí bylo uloženo, ale e-mailové doručování zatím není nastaveno. Klient oznámení nedostane, dokud nebude zapnuto.",
     "mobile.minutes": "min",
@@ -1737,7 +1806,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.shareConsent": "Klient souhlasil se zprávami o této rezervaci.",
     "mobile.shareConsentRequired": "Potvrďte souhlas klienta.",
     "mobile.shareManualDelivery":
-      "Automatické odesílání není nastavené. Odkaz odešlete sami a ověřte výsledek.",
+      "Sdílejte odkaz přes nabídku zařízení a ověřte, že ho klient obdržel.",
     "mobile.shareSheetOpened":
       "Nabídka sdílení byla otevřena. Doručení není potvrzeno; zkontrolujte aplikaci.",
     "mobile.shareSheetFailed":
@@ -2417,6 +2486,30 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.bookingRequestActionFailed":
       "Couldn't update the request. Its status may have changed. Refresh the list.",
     "mobile.bookingRequestUpdated": "Your decision was saved.",
+    "mobile.emailState.pending": "Queued",
+    "mobile.emailState.not_configured": "Sending is not configured",
+    "mobile.emailState.processing": "Sending",
+    "mobile.emailState.accepted_by_provider": "Accepted by email provider",
+    "mobile.emailState.superseded": "No longer current",
+    "mobile.emailState.failed": "Sending failed",
+    "mobile.emailState.sent": "Delivery in progress",
+    "mobile.emailState.delayed": "Delivery delayed",
+    "mobile.emailState.delivered": "Delivered to mail server",
+    "mobile.emailState.bounced": "Rejected by mail server",
+    "mobile.emailState.complained": "Marked as spam",
+    "mobile.emailState.suppressed": "Delivery blocked",
+    "mobile.emailDeliveryRefresh": "Refresh status",
+    "mobile.emailDeliveryTitle": "Customer email",
+    "mobile.emailDeliveryLoadFailed":
+      "Could not refresh email status. Try again.",
+    "mobile.emailDeliveryRecovery":
+      "Contact the customer directly. Failed messages are not resent indefinitely.",
+    "mobile.emailDeliveryHint":
+      "Delivered means accepted by the mail server; it does not confirm that the customer read the email.",
+    "mobile.emailEventRequest": "Booking request",
+    "mobile.emailEventConfirmation": "Confirmation",
+    "mobile.emailEventCancellation": "Cancellation",
+    "mobile.emailEventDecline": "Request declined",
     "mobile.bookingRequestEmailNotConfigured":
       "Your decision was saved, but email delivery is not configured yet. The client will not receive a notification until it is enabled.",
     "mobile.minutes": "min",
@@ -2487,7 +2580,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "The customer agreed to receive messages about this appointment.",
     "mobile.shareConsentRequired": "Confirm the customer's consent.",
     "mobile.shareManualDelivery":
-      "Automatic sending is not configured. Share the link yourself and verify delivery.",
+      "Share the link using your device, then check that the customer received it.",
     "mobile.shareSheetOpened":
       "The share sheet opened. Delivery is not confirmed; check the sharing app.",
     "mobile.shareSheetFailed":

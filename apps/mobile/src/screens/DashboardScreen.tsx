@@ -36,6 +36,7 @@ import { useCalendarMonthWindow } from "../features/calendar/useCalendarMonthWin
 import { buildCustomerPhoneUrl } from "../features/customers/customerContact";
 import type { CustomerProfile } from "../features/customers/customerDirectory";
 import { useCustomerPhone } from "../features/customers/useCustomerPhone";
+import { AppointmentEmailStatusPanel } from "../features/notifications/AppointmentEmailStatusPanel";
 import {
   createCustomerAppointmentLink,
   recordCustomerLinkShare,
@@ -723,6 +724,17 @@ export function DashboardScreen({
         />
       ) : null}
       <AppointmentDetailsModal
+        emailStatus={
+          client && selectedAppointment ? (
+            <AppointmentEmailStatusPanel
+              key={`${selectedAppointment.id}:${selectedAppointment.status}`}
+              client={client}
+              workspaceId={workspace.id}
+              appointmentId={selectedAppointment.id}
+              t={t}
+            />
+          ) : undefined
+        }
         key={selectedAppointment?.id ?? "closed"}
         appointment={selectedAppointment}
         error={appointmentActionError ? t("mobile.statusUpdateFailed") : null}

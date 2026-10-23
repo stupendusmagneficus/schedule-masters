@@ -539,6 +539,8 @@ export type Database = {
           created_at: string
           customer_name: string | null
           decision: string
+          delivery_occurred_at: string | null
+          delivery_status: string | null
           event_key: string | null
           event_revision: number
           finalized_at: string | null
@@ -550,6 +552,7 @@ export type Database = {
           occurrences: Json
           processing_at: string | null
           provider_accepted_at: string | null
+          provider_message_id: string | null
           recipient: string
           service_name: string
           starts_at: string
@@ -564,6 +567,8 @@ export type Database = {
           created_at?: string
           customer_name?: string | null
           decision: string
+          delivery_occurred_at?: string | null
+          delivery_status?: string | null
           event_key?: string | null
           event_revision?: number
           finalized_at?: string | null
@@ -575,6 +580,7 @@ export type Database = {
           occurrences?: Json
           processing_at?: string | null
           provider_accepted_at?: string | null
+          provider_message_id?: string | null
           recipient: string
           service_name: string
           starts_at: string
@@ -589,6 +595,8 @@ export type Database = {
           created_at?: string
           customer_name?: string | null
           decision?: string
+          delivery_occurred_at?: string | null
+          delivery_status?: string | null
           event_key?: string | null
           event_revision?: number
           finalized_at?: string | null
@@ -600,6 +608,7 @@ export type Database = {
           occurrences?: Json
           processing_at?: string | null
           provider_accepted_at?: string | null
+          provider_message_id?: string | null
           recipient?: string
           service_name?: string
           starts_at?: string
@@ -1483,6 +1492,17 @@ export type Database = {
         }
         Returns: string
       }
+      finish_booking_email_delivery: {
+        Args: {
+          p_attempt: number
+          p_error?: string
+          p_id: string
+          p_provider_message_id?: string
+          p_retryable?: boolean
+          p_success: boolean
+        }
+        Returns: string
+      }
       finish_platform_integration_budget_alert: {
         Args: { p_alert_id: string; p_sent: boolean }
         Returns: undefined
@@ -1536,6 +1556,15 @@ export type Database = {
       is_workspace_member: {
         Args: { target_workspace_id: string }
         Returns: boolean
+      }
+      list_master_appointment_emails: {
+        Args: { p_appointment_id: string; p_workspace_id: string }
+        Returns: {
+          created_at: string
+          event_type: string
+          id: string
+          state: string
+        }[]
       }
       list_master_appointment_series_future: {
         Args: { p_appointment_id: string; p_workspace_id: string }
@@ -1718,6 +1747,16 @@ export type Database = {
         }[]
       }
       purge_expired_booking_decision_emails: { Args: never; Returns: number }
+      record_booking_email_webhook: {
+        Args: {
+          p_event_id: string
+          p_event_type: string
+          p_message_id: string
+          p_occurred_at: string
+          p_outbox_id?: string
+        }
+        Returns: string
+      }
       record_customer_link_share: {
         Args: {
           p_appointment_id: string
