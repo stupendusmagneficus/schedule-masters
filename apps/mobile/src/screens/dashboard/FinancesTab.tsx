@@ -20,14 +20,13 @@ import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { DateTimePickerField } from "../../components/DateTimePickerField";
 import { InfoCard } from "../../components/InfoCard";
 import type { DemoData } from "../../demo/types";
-import { formatDateInTimeZone } from "../../features/availability/personalBlocks";
 import {
   addCalendarDays,
   getCalendarDateRange,
   getTodayCalendarDate,
   moveCalendarDate,
 } from "../../features/calendar/calendar";
-import { summarizeFinanceRange } from "../../features/finance/financeSummary";
+import type { WeeklyPaidAmount } from "../../features/finance/financeReport";
 import { useFinanceData } from "../../features/finance/useFinanceData";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -76,35 +75,24 @@ export function FinancesTab({
     timezone: workspace.timezone,
     workspaceId: workspace.id,
   });
-  const now = new Date();
-  const summary = summarizeFinanceRange({
-    appointments: financeData.appointments,
-    fromDate,
-    now,
-    toDate,
-    timezone: workspace.timezone,
-  });
+  const report = financeData.report;
   const monthLabel = formatDate(new Date(`${month}T12:00:00.000Z`), locale, {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
   });
-  const expectedAmounts = formatAmounts(summary.expectedByCurrency, locale);
-  const receivedAmounts = formatAmounts(summary.paidByCurrency, locale);
+  const expectedAmounts = formatAmounts(
+    report?.expectedByCurrency ?? {},
+    locale,
+  );
+  const receivedAmounts = formatAmounts(report?.paidByCurrency ?? {}, locale);
   const weeklyIncome = summarizeWeeklyIncome(
-    financeData.appointments,
+    report?.weeklyPaid ?? [],
     fromDate,
     toDate,
     locale,
-    workspace.timezone,
   );
-  const hasAppointments = financeData.appointments.some((appointment) => {
-    const localDate = formatDateInTimeZone(
-      new Date(appointment.starts_at),
-      workspace.timezone,
-    );
-    return localDate >= fromDate && localDate <= toDate;
-  });
+  const hasAppointments = (report?.appointmentCount ?? 0) > 0;
 
   return (
     <View style={[styles.content, !visible && styles.hidden]}>
@@ -202,7 +190,7 @@ export function FinancesTab({
       ) : null}
 
       {!financeData.isLoading && !financeData.error ? (
-        !hasAppointments ? (
+        !hasAppointments || !report ? (
           <InfoCard>
             <Text style={styles.helper}>{t("mobile.financeEmpty")}</Text>
           </InfoCard>
@@ -237,7 +225,7 @@ export function FinancesTab({
                   {t("mobile.financeCompletedAppointments")}
                 </Text>
                 <Text style={styles.secondaryAmount}>
-                  {summary.completedCount}
+                  {report.completedCount}
                 </Text>
               </InfoCard>
             </View>
@@ -275,28 +263,28 @@ export function FinancesTab({
                 <View style={styles.metricsGrid}>
                   <MetricCard
                     label={t("mobile.financeUpcomingAppointments")}
-                    value={String(summary.upcomingCount)}
+                    value={String(report.upcomingCount)}
                   />
                   <MetricCard
                     label={t("mobile.financeCanceledAppointments")}
-                    value={String(summary.canceledCount)}
+                    value={String(report.canceledCount)}
                   />
                   <MetricCard
                     label={t("mobile.financeNoShowAppointments")}
-                    value={String(summary.noShowCount)}
+                    value={String(report.noShowCount)}
                   />
                   <MetricCard
                     label={t("mobile.financeNewCustomers")}
-                    value={String(summary.newCustomerCount)}
+                    value={String(report.newCustomerCount)}
                   />
                   <MetricCard
                     label={t("mobile.financeReturningCustomers")}
-                    value={String(summary.returningCustomerCount)}
+                    value={String(report.returningCustomerCount)}
                   />
                   <MetricCard
                     label={t("mobile.financeBookedHours")}
                     value={String(
-                      Math.round((summary.bookedMinutes / 60) * 10) / 10,
+                      Math.round((report.bookedMinutes / 60) * 10) / 10,
                     )}
                   />
                 </View>
@@ -460,16 +448,10 @@ type WeeklyIncome = {
 };
 
 function summarizeWeeklyIncome(
-  appointments: readonly {
-    readonly currency: string;
-    readonly paid_amount: number | string;
-    readonly starts_at: string;
-    readonly status: string;
-  }[],
+  weeklyPaid: readonly WeeklyPaidAmount[],
   fromDate: string,
   toDate: string,
   locale: SupportedLocale,
-  timezone: string,
 ): WeeklyIncome[] {
   const first = new Date(`${fromDate}T12:00:00.000Z`);
   const last = new Date(`${toDate}T12:00:00.000Z`);
@@ -480,26 +462,10 @@ function summarizeWeeklyIncome(
     amounts: {} as Record<string, number>,
     label: `${dateLabel(addCalendarDays(fromDate, index * 7), locale)}–${dateLabel(addCalendarDays(fromDate, Math.min(dayCount - 1, index * 7 + 6)), locale)}`,
   }));
-
-  for (const appointment of appointments) {
-    if (appointment.status !== "completed") continue;
-    const localDate = formatDateInTimeZone(
-      new Date(appointment.starts_at),
-      timezone,
-    );
-    if (localDate < fromDate || localDate > toDate) continue;
-    const day = Math.floor(
-      (new Date(`${localDate}T12:00:00.000Z`).getTime() - first.getTime()) /
-        86_400_000,
-    );
-    const weekIndex = Math.floor(day / 7);
-    const currency = appointment.currency.trim().toUpperCase();
-    const amount = Number(appointment.paid_amount);
-    if (!currency || !Number.isFinite(amount)) continue;
-    buckets[weekIndex].amounts[currency] =
-      (buckets[weekIndex].amounts[currency] ?? 0) + amount;
+  for (const entry of weeklyPaid) {
+    const bucket = buckets[entry.weekIndex];
+    if (bucket) bucket.amounts[entry.currency] = entry.amount;
   }
-
   return buckets;
 }
 

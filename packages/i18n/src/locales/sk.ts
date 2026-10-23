@@ -566,7 +566,8 @@ export const slovakMessages: Messages = {
   "mobile.financeToDate": "Do",
   "mobile.financeIncome": "Suma rezervácií",
   "mobile.financeActual": "Prijaté",
-  "mobile.financeActualDescription": "Suma platby zadaná poskytovateľom služby",
+  "mobile.financeActualDescription":
+    "Platby za dokončené návštevy podľa dátumu návštevy; bez výdavkov.",
   "mobile.financeProfitUnavailable":
     "Toto nie je zisk: výdavky nie sú zahrnuté.",
   "mobile.financeShowDetails": "Zobraziť podrobnosti",
