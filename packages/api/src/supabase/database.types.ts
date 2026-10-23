@@ -1526,6 +1526,15 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_finance_report: {
+        Args: {
+          p_as_of?: string
+          p_from_date: string
+          p_to_date: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       get_master_month_available_slots: {
         Args: {
           p_month_start: string

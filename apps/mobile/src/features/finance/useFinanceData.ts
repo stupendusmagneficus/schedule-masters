@@ -3,15 +3,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { DemoData } from "../../demo/types";
-import {
-  listMasterAppointments,
-  type MasterAppointment,
-} from "../appointments/manualBooking";
+import type { MasterAppointment } from "../appointments/manualBooking";
 import { formatDateInTimeZone } from "../availability/personalBlocks";
 import {
   getDayTimelineSlotStart,
   timeToMinutes,
 } from "../calendar/dayTimeline";
+import {
+  type FinanceReport,
+  loadMasterFinanceReport,
+  summarizeDemoFinanceReport,
+} from "./financeReport";
 
 type UseFinanceDataParams = {
   readonly client: SupabaseClient<Database> | null;
@@ -50,7 +52,7 @@ export function useFinanceData({
   timezone,
   workspaceId,
 }: UseFinanceDataParams) {
-  const [appointments, setAppointments] = useState<MasterAppointment[]>([]);
+  const [report, setReport] = useState<FinanceReport | null>(null);
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(client));
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
@@ -66,15 +68,23 @@ export function useFinanceData({
     if (demoData) {
       const today = formatDateInTimeZone(new Date(), timezone);
       if (toDate < today && toDate.slice(0, 7) < today.slice(0, 7)) {
-        setAppointments([]);
+        setReport(
+          summarizeDemoFinanceReport({
+            appointments: [],
+            fromDate,
+            now: new Date(),
+            toDate,
+            timezone,
+          }),
+        );
         setLoadedKey(queryKey);
         setLoadedRefreshVersion(refreshVersion);
         setIsLoading(false);
         return;
       }
 
-      setAppointments(
-        demoData.appointments.map((appointment, index) => {
+      const appointments: MasterAppointment[] = demoData.appointments.map(
+        (appointment, index) => {
           const date = addDateWithinRange(fromDate, toDate, index + 1);
           const startsAt =
             date === today
@@ -103,6 +113,15 @@ export function useFinanceData({
             starts_at: startsAt,
             status: appointment.status,
           };
+        },
+      );
+      setReport(
+        summarizeDemoFinanceReport({
+          appointments,
+          fromDate,
+          now: new Date(),
+          toDate,
+          timezone,
         }),
       );
       setLoadedKey(queryKey);
@@ -112,7 +131,7 @@ export function useFinanceData({
     }
 
     if (!client) {
-      setAppointments([]);
+      setReport(null);
       setLoadedKey(null);
       setLoadedRefreshVersion(refreshVersion);
       setIsLoading(false);
@@ -121,14 +140,14 @@ export function useFinanceData({
 
     if (!hasCurrentData) setIsLoading(true);
     try {
-      const result = await listMasterAppointments(
+      const next = await loadMasterFinanceReport(
         client,
         workspaceId,
         fromDate,
         toDate,
       );
       if (requestId.current === currentRequestId) {
-        setAppointments(result);
+        setReport(next);
         setLoadedKey(queryKey);
       }
     } catch {
@@ -181,7 +200,7 @@ export function useFinanceData({
   ]);
 
   return {
-    appointments: hasCurrentData ? appointments : [],
+    report: hasCurrentData ? report : null,
     error: hasCurrentData ? error : false,
     isLoading:
       !hasCurrentData &&

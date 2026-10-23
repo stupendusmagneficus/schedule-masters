@@ -1233,7 +1233,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeToDate": "По",
     "mobile.financeIncome": "Сумма по записям",
     "mobile.financeActual": "Получено",
-    "mobile.financeActualDescription": "Сумма оплаты, указанная мастером",
+    "mobile.financeActualDescription":
+      "Оплата завершённых визитов по дате визита; расходы не учтены.",
     "mobile.financeProfitUnavailable":
       "Это не прибыль: расходы здесь не учитываются.",
     "mobile.financeShowDetails": "Показать подробности",
@@ -2007,7 +2008,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeToDate": "Do",
     "mobile.financeIncome": "Částky podle rezervací",
     "mobile.financeActual": "Přijato",
-    "mobile.financeActualDescription": "Částka platby zadaná poskytovatelem",
+    "mobile.financeActualDescription":
+      "Platby za dokončené návštěvy podle data návštěvy; bez výdajů.",
     "mobile.financeProfitUnavailable":
       "Nejde o zisk: výdaje se zde nezohledňují.",
     "mobile.financeShowDetails": "Zobrazit podrobnosti",
@@ -2779,7 +2781,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.financeToDate": "To",
     "mobile.financeIncome": "Booking amounts",
     "mobile.financeActual": "Received",
-    "mobile.financeActualDescription": "Payment amount entered by the provider",
+    "mobile.financeActualDescription":
+      "Recorded payments for completed visits by visit date; expenses excluded.",
     "mobile.financeProfitUnavailable":
       "This is not profit: expenses are not included.",
     "mobile.financeShowDetails": "Show details",

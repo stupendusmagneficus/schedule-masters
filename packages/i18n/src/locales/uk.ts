@@ -566,7 +566,8 @@ export const ukrainianMessages: Messages = {
   "mobile.financeToDate": "По",
   "mobile.financeIncome": "Суми записів",
   "mobile.financeActual": "Отримано",
-  "mobile.financeActualDescription": "Сума оплати, зазначена майстром",
+  "mobile.financeActualDescription":
+    "Оплата завершених візитів за датою візиту; витрати не враховано.",
   "mobile.financeProfitUnavailable": "Це не прибуток: витрати не враховано.",
   "mobile.financeShowDetails": "Показати подробиці",
   "mobile.financeHideDetails": "Приховати подробиці",
