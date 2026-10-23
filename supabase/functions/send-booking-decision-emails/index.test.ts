@@ -84,12 +84,12 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
         return Response.json({ allowed: true, reservationId: "budget-1" });
       }
       if (url === "https://api.resend.com/emails") {
-        return Response.json({ id: "provider-message-1" });
+        return Response.json({ id: "11111111-1111-4111-8111-111111111111" });
       }
       if (url.includes("settle_platform_integration_usage")) {
         return Response.json({ alertsPending: false });
       }
-      if (url.includes("finish_booking_decision_email")) {
+      if (url.includes("finish_booking_email_delivery")) {
         return new Response('"accepted_by_provider"');
       }
       return new Response("unexpected", { status: 500 });
@@ -121,7 +121,19 @@ Deno.test("sends through the provider with a stable idempotency key", async () =
     p_recipient_allowlist: ["owner@example.test"],
   });
   assert.equal(calls.length, 6);
+  assert.equal(
+    JSON.parse(
+      String(
+        calls.find((c) => c.url.includes("finish_booking_email_delivery"))?.init
+          ?.body,
+      ),
+    ).p_provider_message_id,
+    "11111111-1111-4111-8111-111111111111",
+  );
   const providerBody = JSON.parse(String(providerCall?.init?.body));
+  assert.deepEqual(providerBody.tags, [
+    { name: "outbox_id", value: "outbox-job-1" },
+  ]);
   assert.equal(providerBody.reply_to, "support@example.test");
   assert.match(providerBody.html, /mailto:support@example.test/);
   assert.match(providerBody.text, /support@example.test/);
@@ -253,7 +265,7 @@ Deno.test("retries transient provider errors and records only a safe error code"
       if (url.includes("settle_platform_integration_usage")) {
         return Response.json({ alertsPending: false });
       }
-      if (url.includes("finish_booking_decision_email")) {
+      if (url.includes("finish_booking_email_delivery")) {
         finishBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
         return new Response('"pending"');
       }
@@ -274,6 +286,8 @@ Deno.test("retries transient provider errors and records only a safe error code"
   assert.deepEqual(finishBody, {
     p_error: "provider_unavailable",
     p_id: "outbox-job-2",
+    p_attempt: 1,
+    p_provider_message_id: null,
     p_retryable: true,
     p_success: false,
   });
@@ -312,7 +326,7 @@ Deno.test("does not retry permanent provider errors", async () => {
       if (url.includes("settle_platform_integration_usage")) {
         return Response.json({ alertsPending: false });
       }
-      if (url.includes("finish_booking_decision_email")) {
+      if (url.includes("finish_booking_email_delivery")) {
         finishBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
         return new Response('"failed"');
       }
@@ -333,6 +347,8 @@ Deno.test("does not retry permanent provider errors", async () => {
   assert.deepEqual(finishBody, {
     p_error: "provider_rejected",
     p_id: "outbox-job-3",
+    p_attempt: 1,
+    p_provider_message_id: null,
     p_retryable: false,
     p_success: false,
   });
@@ -434,7 +450,7 @@ Deno.test("fails closed on malformed prepared payload and never sends its privat
         });
       if (url.includes("settle_platform_integration_usage"))
         return Response.json({ alertsPending: false });
-      if (url.includes("finish_booking_decision_email")) {
+      if (url.includes("finish_booking_email_delivery")) {
         finished = JSON.parse(String(init?.body));
         return new Response('"pending"');
       }
@@ -447,6 +463,8 @@ Deno.test("fails closed on malformed prepared payload and never sends its privat
   assert.ok(!(await result.text()).includes("private-diagnostic"));
   assert.deepEqual(finished, {
     p_id: "invalid-ready",
+    p_attempt: 1,
+    p_provider_message_id: null,
     p_success: false,
     p_retryable: true,
     p_error: "invalid_response",

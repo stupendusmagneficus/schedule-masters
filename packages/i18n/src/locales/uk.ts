@@ -273,6 +273,30 @@ export const ukrainianMessages: Messages = {
   "mobile.bookingRequestActionFailed":
     "Не вдалося оновити заявку. Її стан міг змінитися. Оновіть список.",
   "mobile.bookingRequestUpdated": "Ваше рішення збережено.",
+  "mobile.emailState.pending": "У черзі",
+  "mobile.emailState.not_configured": "Надсилання не налаштовано",
+  "mobile.emailState.processing": "Надсилається",
+  "mobile.emailState.accepted_by_provider": "Прийнято поштовим сервісом",
+  "mobile.emailState.superseded": "Сповіщення вже не актуальне",
+  "mobile.emailState.failed": "Не вдалося надіслати",
+  "mobile.emailState.sent": "Доставляється",
+  "mobile.emailState.delayed": "Доставка затримується",
+  "mobile.emailState.delivered": "Доставлено на поштовий сервер",
+  "mobile.emailState.bounced": "Відхилено поштовим сервером",
+  "mobile.emailState.complained": "Позначено як спам",
+  "mobile.emailState.suppressed": "Доставку заблоковано",
+  "mobile.emailDeliveryRefresh": "Оновити статус",
+  "mobile.emailDeliveryTitle": "Лист клієнту",
+  "mobile.emailDeliveryLoadFailed":
+    "Не вдалося оновити статус листа. Спробуйте ще раз.",
+  "mobile.emailDeliveryRecovery":
+    "Зв’яжіться з клієнтом напряму. Кількість повторних надсилань обмежена.",
+  "mobile.emailDeliveryHint":
+    "Доставлено означає прийняття поштовим сервером, а не прочитання клієнтом.",
+  "mobile.emailEventRequest": "Заявка на запис",
+  "mobile.emailEventConfirmation": "Підтвердження",
+  "mobile.emailEventCancellation": "Скасування",
+  "mobile.emailEventDecline": "Заявку відхилено",
   "mobile.bookingRequestEmailNotConfigured":
     "Ваше рішення збережено, але надсилання електронних листів ще не налаштовано. Клієнт не отримає сповіщення, доки цю функцію не буде ввімкнено.",
   "mobile.minutes": "хв",
@@ -341,7 +365,7 @@ export const ukrainianMessages: Messages = {
     "Клієнт погодився отримувати повідомлення про цей запис.",
   "mobile.shareConsentRequired": "Підтвердьте згоду клієнта.",
   "mobile.shareManualDelivery":
-    "Автоматичне надсилання не налаштовано. Поділіться посиланням самостійно та перевірте його доставку.",
+    "Надішліть посилання через меню пристрою та перевірте, що клієнт його отримав.",
   "mobile.shareSheetOpened":
     "Відкрито меню поширення. Доставку не підтверджено — перевірте застосунок для поширення.",
   "mobile.shareSheetFailed":

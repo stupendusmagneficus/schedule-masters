@@ -6,7 +6,7 @@ import {
   formatDuration,
   formatTime,
 } from "@schedule-app/i18n";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -34,6 +34,7 @@ import { FullscreenModal } from "./FullscreenModal";
 import { InfoCard } from "./InfoCard";
 
 type AppointmentDetailsModalProps = {
+  readonly emailStatus?: ReactNode;
   readonly appointment: MasterAppointment | null;
   readonly error: string | null;
   readonly isSaving: boolean;
@@ -65,6 +66,7 @@ type StatusConfirmation = {
 };
 
 export function AppointmentDetailsModal({
+  emailStatus,
   appointment,
   error,
   isSaving,
@@ -559,6 +561,7 @@ export function AppointmentDetailsModal({
               </View>
             ) : null}
 
+            {emailStatus}
             {onShare && actions.length ? (
               <InfoCard>
                 <Text style={styles.sectionTitle}>

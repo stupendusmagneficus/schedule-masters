@@ -34,3 +34,7 @@ verify_jwt = true
 
 [functions.send-platform-budget-alerts]
 verify_jwt = true
+
+# Resend authenticates this public callback with Svix HMAC, never a client JWT.
+[functions.booking-email-webhook]
+verify_jwt = false
