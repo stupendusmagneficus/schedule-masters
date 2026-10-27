@@ -35,6 +35,8 @@ jobs:
         run: yarn lint
       - name: Deployment tooling tests
         run: yarn deployment:test
+      - name: Operations tooling tests
+        run: yarn operations:test
       - name: Verify generated Auth email templates
         run: yarn email:check
       - name: Build email previews
