@@ -1508,6 +1508,7 @@ export type Database = {
         Returns: undefined
       }
       get_customer_appointment: { Args: { p_token: string }; Returns: Json }
+      get_email_queue_health: { Args: never; Returns: Json }
       get_master_available_slots: {
         Args: { p_date: string; p_service_id: string; p_workspace_id: string }
         Returns: {
