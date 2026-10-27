@@ -17,6 +17,7 @@ const RESOURCE_DEPENDENCIES: Record<string, readonly WorkspaceDataResource[]> =
       "appointments",
       "bookingRequests",
       "calendar",
+      "customerDirectory",
       "customerHistory",
       "finance",
       "freeSlots",

@@ -12,6 +12,7 @@ describe("workspace realtime invalidation dependencies", () => {
       "appointments",
       "bookingRequests",
       "calendar",
+      "customerDirectory",
       "customerHistory",
       "finance",
       "freeSlots",
