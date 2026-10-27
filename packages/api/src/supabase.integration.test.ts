@@ -3764,3 +3764,155 @@ describe("master waiting list RPC", () => {
     },
   );
 });
+
+describe("email retention", () => {
+  rlsIntegrationTest(
+    "preserves all processing claims while removing expired finished and queued jobs",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey)
+        throw new Error("Integration configuration required");
+      const admin = createSupabaseAdminTestClient({
+        url: supabaseUrl,
+        serviceRoleKey: supabaseServiceRoleKey,
+      });
+      const owner = await createAuthenticatedTestUser({
+        admin,
+        url: supabaseUrl,
+        publishableKey: supabasePublishableKey,
+        email: `retention-${randomUUID()}@example.test`,
+        password: `Test-${randomUUID()}!`,
+      });
+      const workspaceId = randomUUID(),
+        customerId = randomUUID(),
+        appointmentId = randomUUID();
+      const old = new Date(Date.now() - 91 * 86400_000).toISOString();
+      const recent = new Date().toISOString();
+      const stale = new Date(Date.now() - 11 * 60_000).toISOString();
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert({
+              id: workspaceId,
+              name: "Retention fixture",
+              slug: `retention-${randomUUID()}`,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("workspace_members").insert({
+              workspace_id: workspaceId,
+              user_id: owner.user.id,
+              role: "owner",
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("customers").insert({
+              id: customerId,
+              workspace_id: workspaceId,
+              name: "Fixture",
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("appointments").insert({
+              id: appointmentId,
+              workspace_id: workspaceId,
+              customer_id: customerId,
+              service_name_snapshot: "Fixture",
+              duration_minutes_snapshot: 60,
+              price_amount_snapshot: 100,
+              paid_amount: 50,
+              currency_snapshot: "CZK",
+              starts_at: "2030-01-07T09:00:00Z",
+              ends_at: "2030-01-07T10:00:00Z",
+              occupied_range: "empty",
+              status: "completed",
+              source: "master_created",
+            })
+          ).error,
+        ).toBeNull();
+        const base = {
+          workspace_id: workspaceId,
+          appointment_id: appointmentId,
+          recipient: "fixture@example.test",
+          locale: "en",
+          workspace_name: "Fixture",
+          service_name: "Fixture",
+          starts_at: "2030-01-07T09:00:00Z",
+          timezone: "UTC",
+          created_at: old,
+          next_attempt_at: old,
+          processing_at: null,
+          finalized_at: null,
+        };
+        expect(
+          (
+            await admin.from("booking_decision_email_outbox").insert([
+              {
+                ...base,
+                decision: "accepted",
+                status: "processing",
+                processing_at: recent,
+              },
+              {
+                ...base,
+                decision: "declined",
+                status: "processing",
+                processing_at: stale,
+              },
+              { ...base, decision: "request_received", status: "pending" },
+              {
+                ...base,
+                decision: "master_request_received",
+                status: "accepted_by_provider",
+                finalized_at: old,
+              },
+              {
+                ...base,
+                decision: "customer_confirmed",
+                status: "pending",
+                created_at: recent,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (await owner.client.rpc("purge_expired_booking_decision_emails"))
+            .error,
+        ).not.toBeNull();
+        const result = await admin.rpc("purge_expired_booking_decision_emails");
+        expect(result.error).toBeNull();
+        const rows = await admin
+          .from("booking_decision_email_outbox")
+          .select("decision,status")
+          .eq("workspace_id", workspaceId);
+        expect(rows.error).toBeNull();
+        expect(rows.data).toEqual(
+          expect.arrayContaining([
+            { decision: "accepted", status: "processing" },
+            { decision: "declined", status: "processing" },
+            { decision: "customer_confirmed", status: "pending" },
+          ]),
+        );
+        expect(rows.data).toHaveLength(3);
+        const appointment = await admin
+          .from("appointments")
+          .select("status,paid_amount")
+          .eq("id", appointmentId)
+          .single();
+        expect(appointment.data).toMatchObject({
+          status: "completed",
+          paid_amount: 50,
+        });
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+        await admin.auth.admin.deleteUser(owner.user.id);
+      }
+    },
+    30000,
+  );
+});

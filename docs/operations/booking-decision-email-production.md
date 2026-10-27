@@ -136,8 +136,10 @@ remain in the outbox:
 - Delete `accepted_by_provider` and terminal `failed` rows 30 days after their
   final status (`finalized_at`).
 - Delete `not_configured` and retryable `pending` rows 90 days after creation.
-- Delete a `processing` row only after it is at least 90 days old and its claim
-  has been stale for more than 10 minutes.
+- Never purge a `processing` row based on age alone. Investigate stale claims
+  and let the worker finalize them or resolve them through a reviewed recovery
+  procedure before their terminal retention period begins. The purge skips rows
+  locked by another transaction; a later run can process them.
 - Run `purge_expired_booking_decision_emails()` daily using Supabase Cron. The
   function removes outbox data only; appointments and customer records remain.
 
