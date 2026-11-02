@@ -63,4 +63,73 @@ describe("analytics client", () => {
 
     expect(fetcher).not.toHaveBeenCalled();
   });
+
+  it("drops personal data and rejects arbitrary values even under permitted property names", async () => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: true });
+    const analytics = createAnalytics({
+      apiKey: "test-key",
+      fetcher,
+      platform: "web",
+      storage: createMemoryStorage(),
+    });
+    analytics.track(analyticsEvents.publicBookingFailed, {
+      locale: "person@example.com",
+      reason: "private details: person@example.com",
+      email: "person@example.com",
+      phone: "+420123456789",
+      note: "private text",
+      platform: "spoofed",
+    });
+    await analytics.init();
+    await vi.waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
+    const payload = JSON.parse(fetcher.mock.calls[0]?.[1]?.body ?? "{}");
+    expect(payload.properties).toEqual({ platform: "web" });
+    expect(JSON.stringify(payload)).not.toContain("person@example.com");
+    expect(JSON.stringify(payload)).not.toContain("private text");
+  });
+
+  it("keeps the known booking funnel dimensions", async () => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: true });
+    const analytics = createAnalytics({
+      apiKey: "key",
+      fetcher,
+      platform: "web",
+      storage: createMemoryStorage(),
+    });
+    analytics.track(analyticsEvents.publicBookingFailed, {
+      locale: "sk",
+      reason: "request_failed",
+      source: "master_created",
+    });
+    await analytics.init();
+    await vi.waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
+    const payload = JSON.parse(fetcher.mock.calls[0]?.[1]?.body ?? "{}");
+    expect(payload.properties).toEqual({
+      locale: "sk",
+      reason: "request_failed",
+      platform: "web",
+    });
+  });
+
+  it.each([
+    [analyticsEvents.publicBookingSucceeded, { locale: "cz", mode: "demo" }],
+    [analyticsEvents.appointmentCreated, { source: "master_created" }],
+    [analyticsEvents.workspaceSetupCompleted, { locale: "uk" }],
+  ])(
+    "preserves explicitly allowed properties for %s",
+    async (event, properties) => {
+      const fetcher = vi.fn().mockResolvedValue({ ok: true });
+      const analytics = createAnalytics({
+        apiKey: "key",
+        fetcher,
+        platform: "mobile",
+        storage: createMemoryStorage(),
+      });
+      analytics.track(event, properties);
+      await analytics.init();
+      await vi.waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
+      const payload = JSON.parse(fetcher.mock.calls[0]?.[1]?.body ?? "{}");
+      expect(payload.properties).toEqual({ ...properties, platform: "mobile" });
+    },
+  );
 });

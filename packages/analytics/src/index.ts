@@ -62,6 +62,45 @@ export type CreateAnalyticsOptions = {
 const defaultHost = "https://eu.i.posthog.com";
 const defaultDistinctIdKey = "schedule-masters-analytics-id";
 
+const localizedEvents = new Set<AnalyticsEventName>([
+  analyticsEvents.bookingPageViewed,
+  analyticsEvents.bookingSlotSelected,
+  analyticsEvents.publicBookingSubmitted,
+  analyticsEvents.publicBookingSucceeded,
+  analyticsEvents.publicBookingFailed,
+  analyticsEvents.workspaceSetupCompleted,
+]);
+
+function safeEventProperties(
+  event: AnalyticsEventName,
+  properties: AnalyticsProperties,
+): AnalyticsProperties {
+  const safe: AnalyticsProperties = {};
+  if (
+    localizedEvents.has(event) &&
+    typeof properties.locale === "string" &&
+    ["en", "cz", "sk", "ru", "uk"].includes(properties.locale)
+  ) {
+    safe.locale = properties.locale;
+  }
+  if (
+    event === analyticsEvents.publicBookingSucceeded &&
+    properties.mode === "demo"
+  )
+    safe.mode = "demo";
+  if (
+    event === analyticsEvents.publicBookingFailed &&
+    properties.reason === "request_failed"
+  )
+    safe.reason = "request_failed";
+  if (
+    event === analyticsEvents.appointmentCreated &&
+    properties.source === "master_created"
+  )
+    safe.source = "master_created";
+  return safe;
+}
+
 function createDistinctId(): string {
   const cryptoApi = globalThis as typeof globalThis & {
     crypto?: { randomUUID?: () => string };
@@ -114,7 +153,7 @@ export function createAnalytics({
           api_key: apiKey,
           distinct_id: distinctId,
           event,
-          properties: { ...properties, platform },
+          properties: { ...safeEventProperties(event, properties), platform },
           timestamp: new Date().toISOString(),
         };
         void fetcher(`${host.replace(/\/$/, "")}/capture/`, {
