@@ -85,15 +85,29 @@ test("public booking reaches the master and releasing it restores the slot", asy
     await expect(page.locator(".selected-services-summary")).toContainText(
       "1 hour",
     );
+    const slotsResponse = page.waitForResponse((response) => {
+      if (
+        !response.url().includes("/rpc/get_public_available_slots_for_services")
+      )
+        return false;
+      const body = response.request().postDataJSON() as { p_date?: string };
+      return body.p_date === "2030-01-07";
+    });
     await page.getByLabel("Choose a date").fill("2030-01-07");
+    expect((await slotsResponse).status()).toBe(200);
     const slot = page.locator(".slot-option").first();
     await expect(slot).toBeVisible();
     await slot.click();
+    await expect(slot).toHaveAttribute("aria-pressed", "true");
     await page.getByLabel("Name").fill("Test customer");
     await page
       .getByRole("textbox", { name: /Email/ })
       .fill(`${slug}-customer@example.test`);
+    const bookingResponse = page.waitForResponse((response) =>
+      response.url().includes("/rpc/create_public_booking_with_services"),
+    );
     await page.getByRole("button", { name: "Confirm booking" }).click();
+    expect((await bookingResponse).status()).toBe(200);
     await expect(
       page.getByText("Booking request sent", { exact: true }),
     ).toBeVisible();

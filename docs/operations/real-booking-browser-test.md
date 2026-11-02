@@ -18,7 +18,9 @@ REAL_BACKEND_E2E=1 SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" 
 ```
 
 Install the Playwright Chromium browser first if needed. The CI migrations job
-executes this scenario after the integration tests on its disposable database.
+resets its disposable local database between the integration tests and this
+scenario. This keeps earlier tests from exhausting the per-IP booking limit;
+the browser test still exercises the normal rate-limited endpoint.
 
 The owner action is an authenticated API call, not the mobile interface. This
 does not verify mobile UI, deployed infrastructure, provider delivery, email
