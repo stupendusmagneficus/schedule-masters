@@ -89,6 +89,21 @@ describe("public booking preserves all supported customer locales", () => {
             p_phone: "+420777123456",
             p_locale: locale,
           };
+          const readMultiSlots = () =>
+            anonymous.rpc("get_public_available_slots_for_services", {
+              p_slug: slug,
+              p_service_ids: ids,
+              p_date: "2030-01-07",
+            });
+          const hasMultiSlot = (slots: { starts_at: string }[] | null) =>
+            slots?.some(
+              (slot) =>
+                new Date(slot.starts_at).toISOString() ===
+                "2030-01-07T11:00:00.000Z",
+            );
+          const initiallyAvailable = await readMultiSlots();
+          expect(initiallyAvailable.error).toBeNull();
+          expect(hasMultiSlot(initiallyAvailable.data)).toBe(true);
           const single = await anonymous.rpc("create_public_booking", {
             ...common,
             p_service_id: ids[0],
@@ -106,6 +121,9 @@ describe("public booking preserves all supported customer locales", () => {
             },
           );
           expect(multiple.error, JSON.stringify(multiple.error)).toBeNull();
+          const whilePending = await readMultiSlots();
+          expect(whilePending.error).toBeNull();
+          expect(hasMultiSlot(whilePending.data)).toBe(false);
           const singleId = (single.data as { id: string }).id;
           const multiId = (multiple.data as { id: string }).id;
           const pending = await user.client.rpc(
@@ -141,6 +159,9 @@ describe("public booking preserves all supported customer locales", () => {
               })
             ).error,
           ).toBeNull();
+          const afterDecline = await readMultiSlots();
+          expect(afterDecline.error).toBeNull();
+          expect(hasMultiSlot(afterDecline.data)).toBe(true);
           const outbox = await admin
             .from("booking_decision_email_outbox")
             .select("appointment_id, decision, locale")
