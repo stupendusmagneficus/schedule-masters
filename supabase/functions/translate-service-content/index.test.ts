@@ -94,6 +94,70 @@ function successfulFetcher(
   return { calls, fetcher };
 }
 
+Deno.test("records safe provider success and rate-limit diagnostics", async () => {
+  for (const scenario of ["success", "rate_limited"] as const) {
+    const events: Record<string, unknown>[] = [];
+    const { fetcher } = successfulFetcher({
+      providerResponse:
+        scenario === "rate_limited"
+          ? new Response("private provider detail", { status: 429 })
+          : providerResponse(),
+    });
+    const response = await createHandler({
+      env: environment(),
+      fetcher,
+      logDiagnostic: (event) => events.push(event),
+    })(request());
+    assert.equal(response.status, scenario === "success" ? 200 : 502);
+    assert.equal(events.length, 1);
+    assert.equal(events[0].outcome, scenario);
+    assert.equal(events[0].event, "translation_provider_request");
+    assert.equal(typeof events[0].duration_ms, "number");
+    assert.ok(typeof events[0].request_id === "string");
+    const serialized = JSON.stringify(events);
+    for (const forbidden of [
+      "Manikúra",
+      "private provider detail",
+      "test-openai-key",
+      workspaceId,
+      "user-access-token",
+    ]) {
+      assert.equal(serialized.includes(forbidden), false);
+    }
+  }
+});
+
+Deno.test("diagnostic logging failure does not interrupt a translation", async () => {
+  const { fetcher } = successfulFetcher();
+  const response = await createHandler({
+    env: environment(),
+    fetcher,
+    logDiagnostic: () => {
+      throw new Error("logging unavailable");
+    },
+  })(request());
+  assert.equal(response.status, 200);
+});
+
+Deno.test("classifies provider timeouts without recording request contents", async () => {
+  const events: Record<string, unknown>[] = [];
+  const upstream = successfulFetcher().fetcher;
+  const fetcher: typeof fetch = (input, init) =>
+    String(input).includes("api.openai.com")
+      ? new Promise(() => {})
+      : upstream(input, init);
+  const response = await createHandler({
+    env: environment(),
+    fetcher,
+    timeouts: { openAiMs: 5 },
+    logDiagnostic: (event) => events.push(event),
+  })(request());
+  assert.equal(response.status, 502);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].outcome, "timeout");
+  assert.equal(JSON.stringify(events).includes("Manikúra"), false);
+});
+
 Deno.test("translates all four target locales after owner authorization and quota claim", async () => {
   const { calls, fetcher } = successfulFetcher();
   const response = await createHandler({ env: environment(), fetcher })(
