@@ -115,6 +115,13 @@ export function CustomersTab({
           />
           <Text style={styles.backText}>{t("mobile.customers")}</Text>
         </Pressable>
+        {directory.profileError ? (
+          <ErrorState
+            message={t("mobile.customerLoadFailed")}
+            onRetry={() => void directory.reloadProfile()}
+            retryLabel={t("mobile.customerRetry")}
+          />
+        ) : null}
         <View style={styles.customerHeading}>
           <View style={styles.header}>
             <Text style={styles.eyebrow}>{t("mobile.customers")}</Text>
