@@ -12,6 +12,19 @@ type Dependencies = {
   env: Environment;
   fetcher?: typeof fetch;
   timeouts?: Partial<{ supabaseMs: number; openAiMs: number }>;
+  logDiagnostic?: (event: ProviderDiagnostic) => void;
+};
+type ProviderDiagnostic = {
+  event: "translation_provider_request";
+  request_id: string;
+  outcome:
+    | "success"
+    | "rate_limited"
+    | "timeout"
+    | "network_error"
+    | "provider_error"
+    | "invalid_response";
+  duration_ms: number;
 };
 type ServiceContent = {
   readonly category: string | null;
@@ -144,6 +157,7 @@ export function createHandler({
   env,
   fetcher = fetch,
   timeouts = {},
+  logDiagnostic = (event) => console.log(JSON.stringify(event)),
 }: Dependencies) {
   const supabaseTimeoutMs = timeouts.supabaseMs ?? defaultTimeouts.supabaseMs;
   const openAiTimeoutMs = timeouts.openAiMs ?? defaultTimeouts.openAiMs;
@@ -411,6 +425,26 @@ export function createHandler({
 
     const targetLocales = locales.filter((locale) => locale !== sourceLocale);
     const model = env.get("OPENAI_TRANSLATION_MODEL") ?? "gpt-4o-mini";
+    const providerStartedAt = performance.now();
+    let providerFinishedAt: number | null = null;
+    const requestId = crypto.randomUUID();
+    const recordProviderOutcome = (outcome: ProviderDiagnostic["outcome"]) => {
+      try {
+        logDiagnostic({
+          event: "translation_provider_request",
+          request_id: requestId,
+          outcome,
+          duration_ms: Math.max(
+            0,
+            Math.round(
+              (providerFinishedAt ?? performance.now()) - providerStartedAt,
+            ),
+          ),
+        });
+      } catch {
+        // Diagnostics must not change the result of a translation.
+      }
+    };
     let translationResponse: Response;
     try {
       translationResponse = await fetchWithTimeout(
@@ -447,11 +481,18 @@ export function createHandler({
         },
         openAiTimeoutMs,
       );
-    } catch {
+      providerFinishedAt = performance.now();
+    } catch (error) {
+      recordProviderOutcome(
+        error instanceof UpstreamTimeoutError ? "timeout" : "network_error",
+      );
       await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
     if (!translationResponse.ok) {
+      recordProviderOutcome(
+        translationResponse.status === 429 ? "rate_limited" : "provider_error",
+      );
       await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
@@ -460,6 +501,7 @@ export function createHandler({
     try {
       providerResult = await translationResponse.json();
     } catch {
+      recordProviderOutcome("invalid_response");
       await settleBudget(null);
       return jsonResponse({ error: "translation_provider_failed" }, 502);
     }
@@ -472,8 +514,10 @@ export function createHandler({
     );
     await settleBudget(actualCost);
     const providerContent = parseProviderContent(providerResult);
-    if (!providerContent)
+    if (!providerContent) {
+      recordProviderOutcome("invalid_response");
       return jsonResponse({ error: "translation_provider_failed" }, 502);
+    }
 
     let translations: Record<Locale, ServiceContent> | null = null;
     try {
@@ -484,8 +528,11 @@ export function createHandler({
     } catch {
       // Treat malformed model output as an upstream provider failure.
     }
-    if (!translations)
+    if (!translations) {
+      recordProviderOutcome("invalid_response");
       return jsonResponse({ error: "translation_provider_failed" }, 502);
+    }
+    recordProviderOutcome("success");
     return jsonResponse({ translations, quota });
   };
 }

@@ -38,3 +38,17 @@ localized retry message.
 For local Supabase, add the key to a private environment file and serve the
 function with that file. Do not commit the key or expose it through an
 `EXPO_PUBLIC_*` variable.
+
+## Provider diagnostics
+
+Each attempted OpenAI request emits one structured `translation_provider_request`
+event with a randomly generated `request_id`, `duration_ms` for the provider
+request and response body, and an `outcome` of `success`, `rate_limited`,
+`timeout`, `network_error`, `provider_error`, or `invalid_response`. Events do
+not contain service text, translations, prompts, customer or workspace IDs,
+provider response bodies, or credentials. Requests blocked before contacting
+OpenAI do not create a provider event.
+
+These logs support later aggregation by outcome and latency but do not themselves
+provide dashboards, retention policy, heartbeat, or automatic alerts. Configure
+and verify a separate monitoring channel before relying on them operationally.
