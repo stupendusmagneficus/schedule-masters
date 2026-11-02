@@ -7,6 +7,7 @@ import {
   createMasterBooking,
   deduplicateManualBookingCustomers,
   listMasterAvailableSlots,
+  listMasterCustomers,
   listMasterFutureSeriesAppointments,
   listMasterMonthAvailableSlots,
   type ManualBookingDraft,
@@ -27,6 +28,31 @@ const validDraft: ManualBookingDraft = {
 };
 
 describe("manual booking validation", () => {
+  it("loads matching customers past the first page for booking", async () => {
+    const customers = Array.from({ length: 105 }, (_, index) => ({
+      id: `customer-${index}`,
+      name: `Anna ${index}`,
+      email: null,
+      phone: null,
+    }));
+    const range = vi.fn(async (from: number, to: number) => ({
+      data: customers.slice(from, to + 1),
+      error: null,
+    }));
+    const rpc = vi.fn().mockReturnValue({ range });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+
+    expect(await listMasterCustomers(client, "workspace-a", " Anna ")).toEqual(
+      customers,
+    );
+    expect(rpc).toHaveBeenCalledWith("list_master_customers", {
+      p_search: "Anna",
+      p_workspace_id: "workspace-a",
+    });
+    expect(range).toHaveBeenNthCalledWith(1, 0, 99);
+    expect(range).toHaveBeenNthCalledWith(2, 100, 199);
+  });
+
   it("accepts a new customer without email or phone", () => {
     expect(validateManualBookingDraft(validDraft)).toBeNull();
   });

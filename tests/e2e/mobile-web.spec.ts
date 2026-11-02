@@ -715,7 +715,7 @@ test.describe("mobile web smoke", () => {
     ).toBeVisible();
     await expect(page.getByText("Dostupné dny", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: selectedDate }),
+      page.getByRole("button", { name: selectedDate, exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
     await expect(
       page.getByText("Gel manicure", { exact: true }).first(),

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type CustomerProfile,
   type CustomerVisit,
+  getCustomerProfile,
   listCustomerDirectory,
   listCustomerHistory,
 } from "./customerDirectory";
@@ -32,6 +33,8 @@ export function useCustomerDirectory({
   const [history, setHistory] = useState<CustomerVisit[]>([]);
   const [isHistoryLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(false);
+  const [profileError, setProfileError] = useState(false);
+  const profileRequest = useRef(0);
   const historyRequest = useRef(0);
   const directoryRequest = useRef(0);
   const hasLoaded = useRef(false);
@@ -80,11 +83,6 @@ export function useCustomerDirectory({
       const rows = await listCustomerDirectory(client, workspaceId, search);
       if (directoryRequest.current === request) {
         setCustomers(rows);
-        setSelectedCustomer((current) =>
-          current
-            ? (rows.find((row) => row.id === current.id) ?? current)
-            : null,
-        );
         loadedSearch.current = search;
       }
     } catch {
@@ -102,6 +100,8 @@ export function useCustomerDirectory({
       loadedWorkspace.current = workspaceId;
       loadedClient.current = client;
       directoryRequest.current += 1;
+      profileRequest.current += 1;
+      setSelectedCustomer(null);
       hasLoaded.current = false;
       loadedSearch.current = null;
       setCustomers([]);
@@ -124,6 +124,35 @@ export function useCustomerDirectory({
     return () => clearTimeout(timeout);
   }, [client, reload, search, workspaceId]);
 
+  const reloadProfile = useCallback(async () => {
+    const request = ++profileRequest.current;
+    if (!client || !selectedCustomerId) {
+      setProfileError(false);
+      return;
+    }
+    setProfileError(false);
+    try {
+      const profile = await getCustomerProfile(
+        client,
+        workspaceId,
+        selectedCustomerId,
+      );
+      if (profileRequest.current !== request) return;
+      setSelectedCustomer((current) =>
+        current?.id === selectedCustomerId ? profile : current,
+      );
+    } catch {
+      if (profileRequest.current === request) setProfileError(true);
+    }
+  }, [client, selectedCustomerId, workspaceId]);
+
+  useEffect(() => {
+    void reloadProfile();
+    return () => {
+      profileRequest.current += 1;
+    };
+  }, [reloadProfile]);
+
   useEffect(() => {
     if (!client || !selectedCustomerId) {
       historyRequest.current += 1;
@@ -141,7 +170,8 @@ export function useCustomerDirectory({
       return;
     previousDirectoryRefreshVersion.current = directoryRefreshVersion;
     void reload();
-  }, [directoryRefreshVersion, reload]);
+    void reloadProfile();
+  }, [directoryRefreshVersion, reload, reloadProfile]);
 
   useEffect(() => {
     if (previousHistoryRefreshVersion.current === historyRefreshVersion) return;
@@ -156,7 +186,9 @@ export function useCustomerDirectory({
     historyError,
     isHistoryLoading,
     isLoading,
+    profileError,
     reload,
+    reloadProfile,
     reloadHistory,
     selectedCustomer,
     selectCustomer: setSelectedCustomer,

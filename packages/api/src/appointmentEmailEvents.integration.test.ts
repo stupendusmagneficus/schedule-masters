@@ -513,3 +513,60 @@ contract(
   },
   30000,
 );
+
+contract(
+  "removes a claimed email and revokes prepared links on customer anonymization",
+  async () => {
+    const f = await fixture();
+    try {
+      const id = await f.manualBooking();
+      await f.consent(id);
+      const [job] = await f.claim();
+      const prepared = await f.admin.rpc("prepare_booking_email_delivery", {
+        p_id: job.id,
+        p_attempt: job.attempts,
+      });
+      expect(prepared.error).toBeNull();
+      const token = (prepared.data as { manageToken: string }).manageToken;
+      expect(token).toBeTruthy();
+      const appointment = await f.admin
+        .from("appointments")
+        .select("customer_id")
+        .eq("id", id)
+        .single();
+      expect(appointment.error).toBeNull();
+      if (!appointment.data) throw new Error("Appointment not found");
+      const erased = await f.owner.client.rpc("anonymize_master_customer", {
+        p_workspace_id: f.workspaceId,
+        p_customer_id: appointment.data.customer_id,
+      });
+      expect(erased.error).toBeNull();
+      expect((await f.rows()).some((row) => row.id === job.id)).toBe(false);
+      expect(
+        (
+          await f.admin.rpc("prepare_booking_email_delivery", {
+            p_id: job.id,
+            p_attempt: job.attempts,
+          })
+        ).data,
+      ).toMatchObject({ deliver: false });
+      expect(
+        (
+          await f.admin.rpc("finish_booking_email_delivery", {
+            p_id: job.id,
+            p_attempt: job.attempts,
+            p_success: false,
+          })
+        ).data,
+      ).toBe("stale_claim");
+      expect(
+        (await f.anonymous.rpc("get_customer_appointment", { p_token: token }))
+          .data,
+      ).toBeNull();
+      expect((await f.rows()).some((row) => row.id === job.id)).toBe(false);
+    } finally {
+      await f.cleanup();
+    }
+  },
+  30000,
+);

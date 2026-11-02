@@ -1,5 +1,6 @@
 import type { Database } from "@schedule-app/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { collectCustomerPages } from "../customers/customerPagination";
 
 export type ManualBookingCustomer =
   Database["public"]["Functions"]["list_master_customers"]["Returns"][number];
@@ -81,12 +82,15 @@ export async function listMasterCustomers(
   workspaceId: string,
   search = "",
 ): Promise<ManualBookingCustomer[]> {
-  const { data, error } = await client.rpc("list_master_customers", {
-    p_search: search.trim() || undefined,
-    p_workspace_id: workspaceId,
-  });
-  if (error) throw new Error(error.message);
-  return deduplicateManualBookingCustomers(data ?? []);
+  const rows = await collectCustomerPages((from, to) =>
+    client
+      .rpc("list_master_customers", {
+        p_search: search.trim() || undefined,
+        p_workspace_id: workspaceId,
+      })
+      .range(from, to),
+  );
+  return deduplicateManualBookingCustomers(rows);
 }
 
 export function shouldSearchManualBookingCustomers(search: string): boolean {

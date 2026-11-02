@@ -3,11 +3,25 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
   anonymizeCustomer,
+  getCustomerProfile,
   listCustomerDirectory,
   listCustomerHistory,
 } from "./customerDirectory";
 
 describe("customer directory data access", () => {
+  it("refreshes the selected profile by workspace and customer ID", async () => {
+    const row = { id: "customer-a", name: "Anna" };
+    const rpc = vi.fn().mockResolvedValue({ data: [row], error: null });
+    const client = { rpc } as unknown as SupabaseClient<Database>;
+    await expect(
+      getCustomerProfile(client, "workspace-a", "customer-a"),
+    ).resolves.toEqual(row);
+    expect(rpc).toHaveBeenCalledWith("get_master_customer_profile", {
+      p_workspace_id: "workspace-a",
+      p_customer_id: "customer-a",
+    });
+  });
+
   it("searches only within the requested workspace", async () => {
     const rows = [
       {
@@ -29,7 +43,9 @@ describe("customer directory data access", () => {
         last_completed_visit_at: null,
       },
     ];
-    const rpc = vi.fn().mockResolvedValue({ data: rows, error: null });
+    const rpc = vi.fn().mockReturnValue({
+      range: vi.fn().mockResolvedValue({ data: rows, error: null }),
+    });
     const client = { rpc } as unknown as SupabaseClient<Database>;
 
     await expect(
@@ -44,7 +60,9 @@ describe("customer directory data access", () => {
   it.each(["Anna", "+420 123 456 789", "anna@example.com"])(
     "passes name, phone, and email searches to the server filter (%s)",
     async (search) => {
-      const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
+      const rpc = vi.fn().mockReturnValue({
+        range: vi.fn().mockResolvedValue({ data: [], error: null }),
+      });
       const client = { rpc } as unknown as SupabaseClient<Database>;
 
       await listCustomerDirectory(client, "workspace-a", search);
@@ -69,9 +87,11 @@ describe("customer directory data access", () => {
   });
 
   it("does not turn server failures into an empty directory", async () => {
-    const rpc = vi.fn().mockResolvedValue({
-      data: null,
-      error: { message: "Workspace access denied" },
+    const rpc = vi.fn().mockReturnValue({
+      range: vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: "Workspace access denied" },
+      }),
     });
     const client = { rpc } as unknown as SupabaseClient<Database>;
 

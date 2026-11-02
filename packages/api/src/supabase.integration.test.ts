@@ -2770,6 +2770,23 @@ describe("customer directory RPC", () => {
           notes: "Prefers mornings",
           phone: "+420111222333",
         });
+        const profile = await user.client.rpc("get_master_customer_profile", {
+          p_workspace_id: workspaceId,
+          p_customer_id: customerId,
+        });
+        expect(profile.error).toBeNull();
+        expect(profile.data?.[0]).toMatchObject({
+          id: customerId,
+          completed_visits: 1,
+        });
+        const forbiddenProfile = await user.client.rpc(
+          "get_master_customer_profile",
+          {
+            p_workspace_id: otherWorkspaceId,
+            p_customer_id: otherCustomerId,
+          },
+        );
+        expect(forbiddenProfile.error?.code).toBe("42501");
 
         const contact = await user.client
           .from("customers")
@@ -2871,6 +2888,45 @@ describe("customer directory RPC", () => {
         );
         expect(anonymizedDirectory.error).toBeNull();
         expect(anonymizedDirectory.data).toEqual([]);
+        const anonymizedBookingSearch = await user.client.rpc(
+          "list_master_customers",
+          { p_workspace_id: workspaceId, p_search: "Anonymized customer" },
+        );
+        expect(anonymizedBookingSearch.error).toBeNull();
+        expect(anonymizedBookingSearch.data).toEqual([]);
+        const erasedProfile = await user.client.rpc(
+          "get_master_customer_profile",
+          {
+            p_workspace_id: workspaceId,
+            p_customer_id: customerId,
+          },
+        );
+        expect(erasedProfile.error).toBeNull();
+        expect(erasedProfile.data).toEqual([]);
+        expect(
+          (
+            await admin.from("customers").insert(
+              Array.from({ length: 105 }, (_, index) => ({
+                workspace_id: workspaceId,
+                name: `Searchfixture ${index}`,
+              })),
+            )
+          ).error,
+        ).toBeNull();
+        const manyCustomers = await user.client.rpc("list_master_customers", {
+          p_workspace_id: workspaceId,
+          p_search: "Searchfixture",
+        });
+        expect(manyCustomers.error).toBeNull();
+        expect(manyCustomers.data).toHaveLength(105);
+        const secondPage = await user.client
+          .rpc("list_master_customers", {
+            p_workspace_id: workspaceId,
+            p_search: "Searchfixture",
+          })
+          .range(100, 199);
+        expect(secondPage.error).toBeNull();
+        expect(secondPage.data).toHaveLength(5);
         const anonymizedCustomerHistory = await user.client.rpc(
           "list_master_customer_history",
           { p_customer_id: customerId, p_workspace_id: workspaceId },

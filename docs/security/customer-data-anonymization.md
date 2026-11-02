@@ -26,8 +26,8 @@ For related records, it:
   reason text;
 - deletes waiting-list entries, which are no longer actionable without contact
   details;
-- deletes queued notification jobs and booking-decision email outbox rows so
-  they cannot disclose or send the erased address;
+- deletes queued notification jobs and booking-decision email outbox rows,
+  preventing a claimed job from being prepared again after anonymization;
 - revokes customer appointment-management tokens;
 - retains appointment IDs, service snapshots, dates, statuses, and financial
   amounts for the workspace's operational history.
@@ -35,6 +35,11 @@ For related records, it:
 Pending public booking requests remain visible to the master so they can still
 be resolved. They show `Anonymized customer` and no phone or email. The customer
 directory and customer-history profile no longer return the anonymized customer.
+
+An email already handed to a delivery provider, or already being sent by a
+worker when anonymization occurs, cannot be recalled by this operation. Any
+appointment-management link in such an email is revoked. Provider-side
+retention and in-flight delivery require separate operational treatment.
 
 ## Verification
 

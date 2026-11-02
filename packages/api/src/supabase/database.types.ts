@@ -1527,6 +1527,18 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_customer_profile: {
+        Args: { p_customer_id: string; p_workspace_id: string }
+        Returns: {
+          completed_visits: number
+          email: string | null
+          id: string
+          last_completed_visit_at: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+        }[]
+      }
       get_master_finance_report: {
         Args: {
           p_as_of?: string
