@@ -19,6 +19,14 @@ backup, production data, external provider, or real customer data was used.
   disposable server's `supabase_admin` role. The demo workspace, service and
   customer were present, and the two sampled access checks matched the source
   (the profile function remained denied; the function count was 205).
+- A synthetic owner, customer, appointment and management token were added to
+  a fresh disposable source database. The management token worked before the
+  customer was anonymized through `anonymize_master_customer`. A snapshot taken
+  after anonymization was restored into a separate database with owners and ACLs
+  preserved. The restored customer remained anonymized, the contact and notes
+  were absent, the appointment amount remained 700 CZK, the token remained
+  revoked and the anonymous management RPC returned no appointment. Anonymous
+  execution of the customer-profile RPC remained denied.
 
 ## Boundaries and follow-up
 
@@ -33,5 +41,7 @@ later revoked. Before restoring actual data, define and test how to reapply
 deletions and revoke links created before the restore; restoring a snapshot
 alone does not preserve later privacy operations. Validate access controls,
 RLS, authentication, booking and financial records in a separately isolated
-environment before routing traffic. Complete a synthetic-data restore drill and
-a hosted-plan recovery test under SCH-155 before marking the task complete.
+environment before routing traffic. The synthetic probe does not verify a
+snapshot taken before anonymization, restoration to a clean server, or recovery
+after later deletion. Complete these checks and a hosted-plan recovery test
+under SCH-155 before marking the task complete.
