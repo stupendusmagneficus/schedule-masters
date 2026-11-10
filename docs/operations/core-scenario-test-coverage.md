@@ -32,7 +32,7 @@ additional evidence, not a replacement for automated regression coverage.
 | Availability, overrides and breaks | `apps/mobile/src/features/availability/*.test.ts`; booking interval and one-off override tests in `supabase.integration.test.ts` | Review UI → real backend coverage for bulk changes and break editing; no native device proof. |
 | Public multi-service request | `tests/e2e/real-booking.spec.ts`; multi-service and boundary tests in `supabase.integration.test.ts`; `bookingLocales.integration.test.ts` | Real-backend browser test uses one locale; it does not test hosted deployment or the native master UI. |
 | Manual multi-service appointment | `apps/mobile/src/features/appointments/manualBooking*.test.ts`; manual multi-service RPC in `supabase.integration.test.ts` | No identified complete mobile UI → real backend → calendar journey. |
-| Decision, cancellation and released slot | `tests/e2e/real-booking.spec.ts`; status lifecycle in `supabase.integration.test.ts` | Browser test confirms through mobile web UI but cancels via authenticated API; customer-facing email delivery is not exercised. |
+| Decision, cancellation and released slot | `tests/e2e/real-booking.spec.ts`; status lifecycle in `supabase.integration.test.ts` | Confirmation and cancellation use mobile web UI against local Supabase; customer-facing email delivery and native device are not exercised. |
 | Recurring visits | Series cancellation/history test in `supabase.integration.test.ts` | Review creation, conflict and cancellation paths end-to-end through mobile UI and real backend. |
 | Client directory, history and privacy | `apps/mobile/src/features/customers/*.test.ts`; customer directory/history and management-link RPCs in `supabase.integration.test.ts`; `docs/operations/local-restore-drill.md` | Restore probe uses synthetic data and the same local server; old snapshots, hosted recovery and end-to-end UI remain separate acceptance work. |
 | Finance for a selected period | `apps/mobile/src/features/finance/*.test.ts`; `packages/api/src/financeReport.integration.test.ts` | Review selected range and payment updates through mobile UI against real backend. |
@@ -42,15 +42,12 @@ additional evidence, not a replacement for automated regression coverage.
 
 ## Prioritized follow-up
 
-1. Extend the real local-backend browser journey to cover cancellation through
-   the master UI and check slot occupancy and release. Use isolated fixtures,
-   explicit cleanup, and no provider calls.
-2. Add a real local-backend journey for manually creating a multi-service
+1. Add a real local-backend journey for manually creating a multi-service
    appointment and observing the calendar. Review availability changes and
    client history in the same coverage pass.
-3. Audit signup/setup, service translation saving, recurring visits and finance
+2. Audit signup/setup, service translation saving, recurring visits and finance
    paths against behavior-focused tests; add targeted coverage for actual gaps.
-4. Run the supported CI layers without cached results and record the exact
+3. Run the supported CI layers without cached results and record the exact
    revision. Real provider/inbox and native-device acceptance stay in SCH-157,
    SCH-146 and SCH-148; do not point destructive local fixtures at hosted data.
 
