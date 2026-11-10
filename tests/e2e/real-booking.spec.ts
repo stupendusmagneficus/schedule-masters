@@ -434,9 +434,81 @@ test("master manages bookings and a working day with a real backend", async ({
         (item) => localTime(item.starts_at) === "14:00",
       ),
     ).toBe(true);
+    await masterPage
+      .getByRole("button", { name: /10:00, Tap to create a booking/ })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "New booking", exact: true })
+      .last()
+      .click();
+    await masterPage
+      .getByRole("button", { name: "10:00 AM", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "Continue", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "New customer", exact: true })
+      .click();
+    await masterPage
+      .getByLabel("Customer name *", { exact: true })
+      .fill("Series customer");
+    await masterPage
+      .getByRole("button", { name: "Continue", exact: true })
+      .click();
+    await masterPage
+      .getByRole("checkbox", { name: "Repeat appointment" })
+      .click();
+    await masterPage
+      .getByLabel("Total visits (2–24)", { exact: true })
+      .fill("2");
+    const seriesResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/create_master_recurring_bookings"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Create booking", exact: true })
+      .click();
+    const createdSeries = await seriesResponse;
+    expect(createdSeries.status()).toBe(200);
+    const series = (await createdSeries.json()) as {
+      appointments: { id: string }[];
+    };
+    expect(series.appointments).toHaveLength(2);
+    const seriesVisits = await admin
+      .from("appointments")
+      .select("appointment_series_id, starts_at, status")
+      .in(
+        "id",
+        series.appointments.map(({ id }) => id),
+      )
+      .order("starts_at");
+    expect(seriesVisits.error).toBeNull();
+    expect(seriesVisits.data).toHaveLength(2);
+    expect(seriesVisits.data?.[0]?.appointment_series_id).toBeTruthy();
+    expect(seriesVisits.data?.[1]?.appointment_series_id).toBe(
+      seriesVisits.data?.[0]?.appointment_series_id,
+    );
+    expect(seriesVisits.data?.map(({ status }) => status)).toEqual([
+      "confirmed",
+      "confirmed",
+    ]);
+    expect(
+      seriesVisits.data?.map(({ starts_at }) => localTime(starts_at)),
+    ).toEqual(["10:00", "10:00"]);
+    await expect(
+      masterPage.getByRole("button", { name: /Series customer/ }),
+    ).toBeVisible();
     const followingWeek = new Date(tomorrow);
     followingWeek.setUTCDate(followingWeek.getUTCDate() + 7);
     const secondDate = followingWeek.toISOString().slice(0, 10);
+    const seriesDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Prague",
+    });
+    expect(
+      seriesVisits.data?.map(({ starts_at }) =>
+        seriesDate.format(new Date(starts_at)),
+      ),
+    ).toEqual([bookingDate, secondDate]);
     const controlDay = new Date(tomorrow);
     controlDay.setUTCDate(controlDay.getUTCDate() + 14);
     const controlDate = controlDay.toISOString().slice(0, 10);
