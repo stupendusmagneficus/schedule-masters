@@ -5,7 +5,10 @@ instance. It creates an isolated test workspace and owner, submits a public
 multi-service request, signs in through the mobile web interface and confirms it
 as the owner. It checks that the slot is occupied, then cancels the appointment
 through the master's calendar and checks that the slot becomes available again.
-Requests are not mocked. No email worker or AI provider is called.
+It also creates a manual appointment for a new customer through the master UI,
+checks the ordered services, total duration and price, and verifies that its
+time is no longer offered publicly. Requests are not mocked. No email worker or
+AI provider is called.
 
 Run against a disposable local project after applying migrations. The command
 requires explicit opt-in and rejects non-loopback Supabase URLs; it creates and
