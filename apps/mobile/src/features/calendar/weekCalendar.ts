@@ -114,6 +114,11 @@ export function buildWeekCalendar({
   const daysByDate = new Map(days.map((day) => [day.date, day]));
 
   for (const appointment of appointments) {
+    if (
+      appointment.status === "cancelled_by_master" ||
+      appointment.status === "cancelled_by_customer"
+    )
+      continue;
     const date = formatDateInTimeZone(
       new Date(appointment.starts_at),
       timezone,

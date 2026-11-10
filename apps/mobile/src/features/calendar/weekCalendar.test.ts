@@ -30,6 +30,30 @@ const block = {
 } as PersonalBlock;
 
 describe("week calendar", () => {
+  it("omits cancelled appointments while preserving overlapping active events", () => {
+    const week = buildWeekCalendar({
+      appointments: [
+        appointment,
+        {
+          ...appointment,
+          id: "cancelled-master",
+          status: "cancelled_by_master",
+        },
+        {
+          ...appointment,
+          id: "cancelled-customer",
+          status: "cancelled_by_customer",
+        },
+      ],
+      availabilityRules: [
+        { dayOfWeek: 3, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      selectedDate: "2030-01-09",
+      timezone: "Europe/Prague",
+    });
+    expect(week[2]?.events.map((event) => event.id)).toEqual(["appointment-1"]);
+  });
   it("creates seven Monday-to-Sunday days with events grouped by local date", () => {
     const pending = {
       ...appointment,

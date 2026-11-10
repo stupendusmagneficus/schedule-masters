@@ -30,6 +30,30 @@ const block = {
 } as PersonalBlock;
 
 describe("day timeline", () => {
+  it("omits cancelled appointments while preserving overlapping active events", () => {
+    const timeline = buildDayTimeline({
+      appointments: [
+        appointment,
+        {
+          ...appointment,
+          id: "cancelled-master",
+          status: "cancelled_by_master",
+        },
+        {
+          ...appointment,
+          id: "cancelled-customer",
+          status: "cancelled_by_customer",
+        },
+      ],
+      availabilityRules: [
+        { dayOfWeek: 1, endLocalTime: "18:00", startLocalTime: "09:00" },
+      ],
+      blocks: [],
+      selectedDate: "2026-09-28",
+      timezone: "Europe/Prague",
+    });
+    expect(timeline.events.map((event) => event.id)).toEqual(["appointment-1"]);
+  });
   it("creates a 30-minute grid from the configured working hours", () => {
     const timeline = buildDayTimeline({
       appointments: [],
