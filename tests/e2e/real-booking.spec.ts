@@ -353,6 +353,61 @@ test("master manages bookings and a working day with a real backend", async ({
         (item) => Date.parse(item.starts_at) === Date.parse(manual.startsAt),
       ),
     ).toBe(false);
+    const localTime = (date: string) =>
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Prague",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }).format(new Date(date));
+    expect(
+      reopenedSlots.data?.some((item) => localTime(item.starts_at) === "12:00"),
+    ).toBe(true);
+    await masterPage
+      .getByRole("button", { name: "Configure day", exact: true })
+      .click();
+    await masterPage
+      .getByRole("dialog")
+      .getByRole("button", { name: "Add break", exact: true })
+      .click();
+    await masterPage
+      .getByLabel("Name or reason", { exact: true })
+      .fill("Lunch test");
+    const createBlock = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/create_master_availability_block"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Block time", exact: true })
+      .click();
+    expect((await createBlock).status()).toBe(200);
+    const blockSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
+    );
+    expect(blockSlots.error).toBeNull();
+    expect(
+      blockSlots.data?.some((item) => localTime(item.starts_at) === "12:00"),
+    ).toBe(false);
+    await masterPage
+      .getByRole("button", { name: "Delete Lunch test", exact: true })
+      .click();
+    const deleteBlock = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/delete_master_availability_block"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+    expect((await deleteBlock).status()).toBe(200);
+    const restoredBlockSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
+    );
+    expect(restoredBlockSlots.error).toBeNull();
+    expect(
+      restoredBlockSlots.data?.some(
+        (item) => localTime(item.starts_at) === "12:00",
+      ),
+    ).toBe(true);
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {

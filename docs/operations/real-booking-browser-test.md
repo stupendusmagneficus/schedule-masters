@@ -13,6 +13,8 @@ AI provider is called.
 The master then closes the day and restores its weekly schedule through the UI.
 The test checks that public slots disappear and return, and that the existing
 confirmed appointment remains intact and continues to reserve its time.
+It creates and deletes a break through the master UI and verifies its effect on
+public availability before and after deletion.
 
 Run against a disposable local project after applying migrations. The command
 requires explicit opt-in and rejects non-loopback Supabase URLs; it creates and
