@@ -434,6 +434,50 @@ test("master manages bookings and a working day with a real backend", async ({
         (item) => localTime(item.starts_at) === "14:00",
       ),
     ).toBe(true);
+    const followingWeek = new Date(tomorrow);
+    followingWeek.setUTCDate(followingWeek.getUTCDate() + 7);
+    const secondDate = followingWeek.toISOString().slice(0, 10);
+    const controlDay = new Date(tomorrow);
+    controlDay.setUTCDate(controlDay.getUTCDate() + 14);
+    const controlDate = controlDay.toISOString().slice(0, 10);
+    async function slotsForDate(date: string) {
+      const result = await anonymous.rpc(
+        "get_public_available_slots_for_services",
+        {
+          p_slug: slug,
+          p_service_ids: ids,
+          p_date: date,
+        },
+      );
+      expect(result.error).toBeNull();
+      return result.data;
+    }
+    expect((await slotsForDate(secondDate))?.length).toBeGreaterThan(0);
+    const controlSlots = await slotsForDate(controlDate);
+    expect(controlSlots?.length).toBeGreaterThan(0);
+    await masterPage.getByRole("tab", { name: "Month", exact: true }).click();
+    await masterPage
+      .getByRole("button", { name: "Select dates", exact: true })
+      .click();
+    for (const date of [bookingDate, secondDate]) {
+      await masterPage
+        .getByTestId(`calendar-month-day-${date}`)
+        .first()
+        .click();
+    }
+    await masterPage
+      .getByRole("button", { name: "Close working days: 2", exact: true })
+      .click();
+    const bulkResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/set_master_availability_date_overrides"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Apply changes", exact: true })
+      .click();
+    expect((await bulkResponse).status()).toBe(200);
+    expect(await slotsForDate(bookingDate)).toEqual([]);
+    expect(await slotsForDate(secondDate)).toEqual([]);
+    expect(await slotsForDate(controlDate)).toEqual(controlSlots);
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {
