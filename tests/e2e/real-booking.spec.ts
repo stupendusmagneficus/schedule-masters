@@ -524,7 +524,48 @@ test("master manages bookings and a working day with a real backend", async ({
       expect(result.error).toBeNull();
       return result.data;
     }
-    expect((await slotsForDate(secondDate))?.length).toBeGreaterThan(0);
+    for (const date of [bookingDate, secondDate]) {
+      expect(
+        (await slotsForDate(date))?.map(({ starts_at }) =>
+          localTime(starts_at),
+        ),
+      ).not.toContain("10:00");
+    }
+    await masterPage.getByRole("button", { name: /Series customer/ }).click();
+    await masterPage
+      .getByRole("button", { name: "Cancel future appointments in series" })
+      .click();
+    await expect(
+      masterPage.getByText("Appointments to be cancelled:"),
+    ).toBeVisible();
+    const cancelSeriesResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/cancel_master_appointment_series_future"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Cancel future appointments", exact: true })
+      .click();
+    const cancelledSeries = await cancelSeriesResponse;
+    expect(cancelledSeries.status()).toBe(200);
+    expect(await cancelledSeries.json()).toMatchObject({ cancelledCount: 2 });
+    const cancelledVisits = await admin
+      .from("appointments")
+      .select("status")
+      .in(
+        "id",
+        series.appointments.map(({ id }) => id),
+      );
+    expect(cancelledVisits.error).toBeNull();
+    expect(cancelledVisits.data?.map(({ status }) => status)).toEqual([
+      "cancelled_by_master",
+      "cancelled_by_master",
+    ]);
+    for (const date of [bookingDate, secondDate]) {
+      expect(
+        (await slotsForDate(date))?.map(({ starts_at }) =>
+          localTime(starts_at),
+        ),
+      ).toContain("10:00");
+    }
     const controlSlots = await slotsForDate(controlDate);
     expect(controlSlots?.length).toBeGreaterThan(0);
     await masterPage.getByRole("tab", { name: "Month", exact: true }).click();
