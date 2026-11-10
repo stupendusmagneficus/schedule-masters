@@ -2,9 +2,10 @@
 
 This test exercises booking-web in a browser against a real local Supabase
 instance. It creates an isolated test workspace and owner, submits a public
-multi-service request, confirms and cancels it as the owner, and checks that the
-slot becomes available again. Requests are not mocked. No email worker or AI
-provider is called.
+multi-service request, signs in through the mobile web interface and confirms it
+as the owner. It then cancels the appointment through the authenticated API and
+checks that the slot becomes available again. Requests are not mocked. No email
+worker or AI provider is called.
 
 Run against a disposable local project after applying migrations. The command
 requires explicit opt-in and rejects non-loopback Supabase URLs; it creates and
@@ -22,7 +23,7 @@ resets its disposable local database between the integration tests and this
 scenario. This keeps earlier tests from exhausting the per-IP booking limit;
 the browser test still exercises the normal rate-limited endpoint.
 
-The owner action is an authenticated API call, not the mobile interface. This
-does not verify mobile UI, deployed infrastructure, provider delivery, email
-inbox, device behavior, or all five locales. These remain separate acceptance
-work for SCH-157.
+Only confirmation uses the mobile interface; cancellation uses an authenticated
+API call. This test does not verify a native iPhone, deployed infrastructure,
+provider delivery, email inbox, device behavior, or all five locales. These
+remain separate acceptance work for SCH-157.

@@ -31,17 +31,32 @@ export default defineConfig({
   testMatch: "**/real-booking.spec.ts",
   workers: 1,
   use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3102" },
-  webServer: {
-    command: "node node_modules/next/dist/bin/next dev --port 3102",
-    cwd: "./apps/booking-web",
-    url: "http://127.0.0.1:3102",
-    reuseExistingServer: false,
-    timeout: 120_000,
-    env: {
-      NEXT_PUBLIC_SUPABASE_URL: apiUrl,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
-      NEXT_PUBLIC_ANALYTICS_API_KEY: "",
-      SUPABASE_SERVICE_ROLE_KEY: "",
+  webServer: [
+    {
+      command: "node node_modules/next/dist/bin/next dev --port 3102",
+      cwd: "./apps/booking-web",
+      url: "http://127.0.0.1:3102",
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: {
+        NEXT_PUBLIC_SUPABASE_URL: apiUrl,
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
+        NEXT_PUBLIC_ANALYTICS_API_KEY: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+      },
     },
-  },
+    {
+      command:
+        "EXPO_NO_DOTENV=1 corepack yarn turbo dev --filter=@schedule-app/mobile -- --web --port 19057",
+      url: "http://127.0.0.1:19057",
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: {
+        EXPO_PUBLIC_DEMO_MODE: "false",
+        EXPO_PUBLIC_SUPABASE_URL: apiUrl,
+        EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
+        SUPABASE_SERVICE_ROLE_KEY: "",
+      },
+    },
+  ],
 });

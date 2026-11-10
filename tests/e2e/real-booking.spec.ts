@@ -120,14 +120,46 @@ test("public booking reaches the master and releasing it restores the slot", asy
     expect(pending.data).toHaveLength(1);
     const appointment = pending.data?.[0];
     if (!appointment) throw new Error("Booking not visible to master");
-    expect(
-      (
-        await owner.client.rpc("set_appointment_status", {
-          p_appointment_id: appointment.id,
-          p_status: "confirmed",
-        })
-      ).error,
-    ).toBeNull();
+    const masterPage = await page.context().newPage();
+    await masterPage.addInitScript(() =>
+      localStorage.setItem("schedule-masters.locale", "en"),
+    );
+    await masterPage.goto("http://127.0.0.1:19057/");
+    await masterPage
+      .getByRole("button", {
+        name: "Already have an account? Sign in",
+        exact: true,
+      })
+      .click();
+    await masterPage
+      .getByRole("textbox", { name: "Email", exact: true })
+      .fill(`${slug}@example.test`);
+    await masterPage
+      .getByRole("textbox", { name: "Password", exact: true })
+      .fill(`Test-${slug}!`);
+    await masterPage
+      .getByRole("button", { name: "Sign in", exact: true })
+      .click();
+    await masterPage.getByRole("button", { name: /Requests/ }).click();
+    await expect(masterPage.getByText("Test customer").last()).toBeVisible();
+    const decisionResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/set_appointment_status"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Confirm", exact: true })
+      .click();
+    expect((await decisionResponse).status()).toBe(200);
+    await expect(
+      masterPage.getByText("There are no new requests yet."),
+    ).toBeVisible();
+    const confirmed = await admin
+      .from("appointments")
+      .select("status")
+      .eq("id", appointment.id)
+      .single();
+    expect(confirmed.error).toBeNull();
+    expect(confirmed.data?.status).toBe("confirmed");
+    await masterPage.close();
     expect(
       (
         await owner.client.rpc("set_appointment_status", {
