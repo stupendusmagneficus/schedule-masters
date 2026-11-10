@@ -388,6 +388,32 @@ test("master manages bookings and a working day with a real backend", async ({
     expect(
       blockSlots.data?.some((item) => localTime(item.starts_at) === "12:00"),
     ).toBe(false);
+    expect(
+      blockSlots.data?.some((item) => localTime(item.starts_at) === "14:00"),
+    ).toBe(true);
+    await masterPage
+      .getByRole("button", { name: "Lunch test, Edit break", exact: true })
+      .click();
+    const editBreak = masterPage.getByRole("dialog");
+    await editBreak.getByLabel("End", { exact: true }).fill("15:00");
+    await editBreak.getByLabel("Start", { exact: true }).fill("14:00");
+    const updateBlock = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/update_master_availability_block"),
+    );
+    await editBreak
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    expect((await updateBlock).status()).toBe(200);
+    const movedSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
+    );
+    expect(movedSlots.error).toBeNull();
+    const movedTimes = movedSlots.data?.map((item) =>
+      localTime(item.starts_at),
+    );
+    expect(movedTimes).toContain("12:00");
+    expect(movedTimes).not.toContain("14:00");
     await masterPage
       .getByRole("button", { name: "Delete Lunch test", exact: true })
       .click();
@@ -405,7 +431,7 @@ test("master manages bookings and a working day with a real backend", async ({
     expect(restoredBlockSlots.error).toBeNull();
     expect(
       restoredBlockSlots.data?.some(
-        (item) => localTime(item.starts_at) === "12:00",
+        (item) => localTime(item.starts_at) === "14:00",
       ),
     ).toBe(true);
     await masterPage.close();
