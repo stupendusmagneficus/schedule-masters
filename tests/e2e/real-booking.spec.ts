@@ -635,6 +635,59 @@ test("master manages bookings and a working day with a real backend", async ({
       .single();
     expect(savedVisit.error).toBeNull();
     expect(savedVisit.data?.master_note).toBe(visitNote);
+    await masterPage
+      .getByRole("tab", { name: "Finances", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "Date range", exact: true })
+      .click();
+    const dateLabel = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "long",
+      timeZone: "UTC",
+    }).format(tomorrow);
+    const financeResponse = masterPage.waitForResponse((response) => {
+      if (!response.url().includes("/rpc/get_master_finance_report"))
+        return false;
+      const body = response.request().postDataJSON();
+      return body.p_from_date === bookingDate && body.p_to_date === bookingDate;
+    });
+    for (const field of ["From", "To"]) {
+      await masterPage
+        .getByRole("button", { name: field, exact: true })
+        .click();
+      await expect(
+        masterPage.getByRole("heading", { name: "Choose a date" }),
+      ).toBeVisible();
+      const day = masterPage.getByRole("button", {
+        name: dateLabel,
+        exact: true,
+      });
+      if (!(await day.isVisible())) {
+        await masterPage
+          .getByRole("button", { name: "Next month", exact: true })
+          .click();
+      }
+      await day.click();
+      await masterPage.getByText("Done", { exact: true }).click();
+    }
+    const finance = await financeResponse;
+    expect(finance.status()).toBe(200);
+    expect(await finance.json()).toMatchObject({
+      completedCount: 0,
+      expectedByCurrency: { CZK: 500 },
+    });
+    const expectedAmount = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "CZK",
+    }).format(500);
+    await expect(
+      masterPage.getByText("Expected", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      masterPage
+        .getByText(expectedAmount, { exact: true })
+        .filter({ visible: true }),
+    ).toBeVisible();
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {
