@@ -80,6 +80,11 @@ export function buildDayTimeline({
 
   const events = [
     ...appointments.flatMap((appointment) => {
+      if (
+        appointment.status === "cancelled_by_master" ||
+        appointment.status === "cancelled_by_customer"
+      )
+        return [];
       const start = getLocalTime(appointment.starts_at, timezone);
       const end = getLocalTime(appointment.ends_at, timezone);
       if (

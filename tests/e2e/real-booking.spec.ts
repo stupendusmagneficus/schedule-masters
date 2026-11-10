@@ -231,7 +231,7 @@ test("master manages a public request and creates a manual multi-service booking
       .getByRole("button", { name: "Close", exact: true })
       .click();
     await masterPage
-      .getByRole("button", { name: /10:00, Tap to create a booking/ })
+      .getByRole("button", { name: /08:00, Tap to create a booking/ })
       .click();
     await masterPage
       .getByRole("button", { name: "New booking", exact: true })
@@ -244,7 +244,7 @@ test("master manages a public request and creates a manual multi-service booking
       .click();
     await masterPage.getByRole("button", { name: "Done", exact: true }).click();
     await masterPage
-      .getByRole("button", { name: "10:00 AM", exact: true })
+      .getByRole("button", { name: "08:00 AM", exact: true })
       .click();
     await masterPage
       .getByRole("button", { name: "Continue", exact: true })
