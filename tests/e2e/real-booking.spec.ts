@@ -7,9 +7,10 @@ import {
   createSupabaseAdminTestClient,
 } from "../../packages/api/src/supabase.integration.helpers";
 
-test("public booking reaches the master and releasing it restores the slot", async ({
+test("master manages a public request and creates a manual multi-service booking", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   const url = process.env.SUPABASE_URL as string;
   const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY as string;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
@@ -211,7 +212,6 @@ test("public booking reaches the master and releasing it restores the slot", asy
         return result.data?.status;
       })
       .toBe("cancelled_by_master");
-    await masterPage.close();
     const slots = await anonymous.rpc(
       "get_public_available_slots_for_services",
       { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
@@ -223,6 +223,82 @@ test("public booking reaches the master and releasing it restores the slot", asy
           Date.parse(item.starts_at) === Date.parse(appointment.starts_at),
       ),
     ).toBe(true);
+
+    await expect(
+      masterPage.getByText("No clients match this time."),
+    ).toBeVisible();
+    await masterPage
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: /10:00, Tap to create a booking/ })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "New booking", exact: true })
+      .last()
+      .click();
+    await masterPage.getByRole("button", { name: /Add service/ }).click();
+    await masterPage
+      .getByRole("button", { name: /Pedicure/ })
+      .last()
+      .click();
+    await masterPage.getByRole("button", { name: "Done", exact: true }).click();
+    await masterPage
+      .getByRole("button", { name: "10:00 AM", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "Continue", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "New customer", exact: true })
+      .click();
+    await masterPage
+      .getByLabel("Customer name *", { exact: true })
+      .fill("Manual customer");
+    await masterPage
+      .getByRole("button", { name: "Continue", exact: true })
+      .click();
+    const manualResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/create_master_booking_with_services"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Create booking", exact: true })
+      .click();
+    const createdResponse = await manualResponse;
+    expect(createdResponse.status()).toBe(200);
+    const manual = (await createdResponse.json()) as {
+      id: string;
+      startsAt: string;
+    };
+    expect(manual).toMatchObject({
+      durationMinutes: 60,
+      priceAmount: 500,
+      serviceName: "Manicure + Pedicure",
+    });
+    const manualServices = await admin
+      .from("appointment_services")
+      .select("position, service_name_snapshot")
+      .eq("appointment_id", manual.id)
+      .order("position");
+    expect(manualServices.error).toBeNull();
+    expect(manualServices.data).toEqual([
+      { position: 1, service_name_snapshot: "Manicure" },
+      { position: 2, service_name_snapshot: "Pedicure" },
+    ]);
+    const afterManualBooking = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
+    );
+    expect(afterManualBooking.error).toBeNull();
+    expect(
+      afterManualBooking.data?.some(
+        (item) => Date.parse(item.starts_at) === Date.parse(manual.startsAt),
+      ),
+    ).toBe(false);
+    await expect(
+      masterPage.getByRole("button", { name: /Manual customer/ }),
+    ).toBeVisible();
+    await masterPage.close();
     await owner.client.auth.signOut();
   } finally {
     await admin.from("workspaces").delete().eq("id", workspaceId);
