@@ -17,6 +17,15 @@ test("public booking reaches the master and releasing it restores the slot", asy
   const anonymous = createSupabaseClient({ url, publishableKey });
   const workspaceId = randomUUID();
   const slug = `browser-${randomUUID()}`;
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Prague",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const tomorrow = new Date(`${today}T12:00:00Z`);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const bookingDate = tomorrow.toISOString().slice(0, 10);
   let userId: string | undefined;
   try {
     const createdWorkspace = await admin.from("workspaces").insert({
@@ -66,10 +75,10 @@ test("public booking reaches the master and releasing it restores the slot", asy
       (
         await admin.from("availability_rules").insert({
           workspace_id: workspaceId,
-          day_of_week: 1,
+          day_of_week: tomorrow.getUTCDay(),
           start_local_time: "08:00",
           end_local_time: "20:00",
-          valid_from: "2030-01-07",
+          valid_from: bookingDate,
         })
       ).error,
     ).toBeNull();
@@ -85,15 +94,16 @@ test("public booking reaches the master and releasing it restores the slot", asy
     await expect(page.locator(".selected-services-summary")).toContainText(
       "1 hour",
     );
+    await page.getByLabel("Choose a date").fill(today);
     const slotsResponse = page.waitForResponse((response) => {
       if (
         !response.url().includes("/rpc/get_public_available_slots_for_services")
       )
         return false;
       const body = response.request().postDataJSON() as { p_date?: string };
-      return body.p_date === "2030-01-07";
+      return body.p_date === bookingDate;
     });
-    await page.getByLabel("Choose a date").fill("2030-01-07");
+    await page.getByLabel("Choose a date").fill(bookingDate);
     expect((await slotsResponse).status()).toBe(200);
     const slot = page.locator(".slot-option").first();
     await expect(slot).toBeVisible();
@@ -159,18 +169,52 @@ test("public booking reaches the master and releasing it restores the slot", asy
       .single();
     expect(confirmed.error).toBeNull();
     expect(confirmed.data?.status).toBe("confirmed");
-    await masterPage.close();
+    const occupiedSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
+    );
+    expect(occupiedSlots.error).toBeNull();
     expect(
-      (
-        await owner.client.rpc("set_appointment_status", {
-          p_appointment_id: appointment.id,
-          p_status: "cancelled_by_master",
-        })
-      ).error,
-    ).toBeNull();
+      occupiedSlots.data?.some(
+        (item) =>
+          Date.parse(item.starts_at) === Date.parse(appointment.starts_at),
+      ),
+    ).toBe(false);
+    await masterPage
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await masterPage
+      .getByRole("tab", { name: "Calendar", exact: true })
+      .click();
+    await masterPage
+      .getByRole("button", { name: "Next date", exact: true })
+      .click();
+    await masterPage.getByRole("button", { name: /Test customer/ }).click();
+    await masterPage
+      .getByRole("button", { name: "Cancel booking", exact: true })
+      .click();
+    const cancelResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/set_appointment_status"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Cancel booking", exact: true })
+      .last()
+      .click();
+    expect((await cancelResponse).status()).toBe(200);
+    await expect
+      .poll(async () => {
+        const result = await admin
+          .from("appointments")
+          .select("status")
+          .eq("id", appointment.id)
+          .single();
+        return result.data?.status;
+      })
+      .toBe("cancelled_by_master");
+    await masterPage.close();
     const slots = await anonymous.rpc(
       "get_public_available_slots_for_services",
-      { p_slug: slug, p_service_ids: ids, p_date: "2030-01-07" },
+      { p_slug: slug, p_service_ids: ids, p_date: bookingDate },
     );
     expect(slots.error).toBeNull();
     expect(
