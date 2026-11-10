@@ -499,6 +499,29 @@ test("master manages bookings and a working day with a real backend", async ({
     });
     await expect(visit).toBeVisible();
     await expect(visit.getByText("Confirmed", { exact: true })).toBeVisible();
+    await visit.click();
+    const details = masterPage.getByRole("dialog");
+    const visitNote = "Use the same polish next time.";
+    await details
+      .getByRole("textbox", { name: "Visit note", exact: true })
+      .fill(visitNote);
+    await details
+      .getByRole("button", { name: "Save note", exact: true })
+      .click();
+    await expect(
+      details.getByText("Note saved", { exact: true }),
+    ).toBeVisible();
+    await details.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(
+      masterPage.getByText(visitNote, { exact: true }),
+    ).toBeVisible();
+    const savedVisit = await admin
+      .from("appointments")
+      .select("master_note")
+      .eq("id", manual.id)
+      .single();
+    expect(savedVisit.error).toBeNull();
+    expect(savedVisit.data?.master_note).toBe(visitNote);
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {
