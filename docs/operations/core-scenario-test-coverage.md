@@ -29,7 +29,7 @@ additional evidence, not a replacement for automated regression coverage.
 | Sign-in and recovery | `tests/e2e/auth-web.spec.ts`; `apps/mobile/src/features/auth/*.test.ts`; `scripts/email/check-auth-capture.mjs` and `check-auth-recovery.mjs` | Hosted Auth redirects, real inbox and native iPhone deep links are not established by these tests. |
 | Workspace setup and settings | `apps/mobile/src/features/workspace/*.test.ts`; `packages/api/src/workspacePreferences.integration.test.ts`; settings RPC in `supabase.integration.test.ts` | No identified complete signup → setup UI → real local backend journey. |
 | Services and translations | `apps/mobile/src/features/services/serviceCatalog.test.ts`; service permissions in `supabase.integration.test.ts`; `supabase/functions/translate-service-content/index.test.ts` | No identified end-to-end edit/save across locales in the mobile UI with a real backend, or live OpenAI acceptance. |
-| Availability, overrides and breaks | `apps/mobile/src/features/availability/*.test.ts`; booking interval and one-off override tests in `supabase.integration.test.ts` | Review UI → real backend coverage for bulk changes and break editing; no native device proof. |
+| Availability, overrides and breaks | `tests/e2e/real-booking.spec.ts`; `apps/mobile/src/features/availability/*.test.ts`; booking interval and one-off override tests in `supabase.integration.test.ts` | Browser test closes and restores one day with a confirmed appointment; bulk changes, break editing and native device remain separate acceptance gaps. |
 | Public multi-service request | `tests/e2e/real-booking.spec.ts`; multi-service and boundary tests in `supabase.integration.test.ts`; `bookingLocales.integration.test.ts` | Real-backend browser test uses one locale; it does not test hosted deployment or the native master UI. |
 | Manual multi-service appointment | `tests/e2e/real-booking.spec.ts`; `apps/mobile/src/features/appointments/manualBooking*.test.ts`; manual multi-service RPC in `supabase.integration.test.ts` | Browser journey creates a new customer and checks the ordered services, totals, calendar and public availability; native iPhone is not covered. |
 | Decision, cancellation and released slot | `tests/e2e/real-booking.spec.ts`; status lifecycle in `supabase.integration.test.ts` | Confirmation and cancellation use mobile web UI against local Supabase; customer-facing email delivery and native device are not exercised. |
@@ -42,9 +42,9 @@ additional evidence, not a replacement for automated regression coverage.
 
 ## Prioritized follow-up
 
-1. Review availability changes and client history through the mobile UI with a
-   real backend; verify that cancelled events do not obstruct released times
-   (SCH-161).
+1. Review bulk availability changes, break editing and client history through
+   the mobile UI with a real backend. The day-view released-time interaction is
+   covered by the real-backend E2E after SCH-161; week view has unit coverage.
 2. Audit signup/setup, service translation saving, recurring visits and finance
    paths against behavior-focused tests; add targeted coverage for actual gaps.
 3. Run the supported CI layers without cached results and record the exact

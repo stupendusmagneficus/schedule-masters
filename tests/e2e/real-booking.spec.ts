@@ -7,7 +7,7 @@ import {
   createSupabaseAdminTestClient,
 } from "../../packages/api/src/supabase.integration.helpers";
 
-test("master manages a public request and creates a manual multi-service booking", async ({
+test("master manages bookings and a working day with a real backend", async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -298,6 +298,61 @@ test("master manages a public request and creates a manual multi-service booking
     await expect(
       masterPage.getByRole("button", { name: /Manual customer/ }),
     ).toBeVisible();
+    expect(afterManualBooking.data?.length).toBeGreaterThan(0);
+    await masterPage
+      .getByRole("button", { name: "Configure day", exact: true })
+      .click();
+    await masterPage
+      .getByRole("radio", { name: "Day off", exact: true })
+      .click();
+    await expect(masterPage.getByText("Conflicting bookings: 1")).toBeVisible();
+    const closeDayResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/set_master_availability_date_override"),
+    );
+    await masterPage.getByRole("button", { name: "Save", exact: true }).click();
+    expect((await closeDayResponse).status()).toBe(200);
+    const closedSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      {
+        p_slug: slug,
+        p_service_ids: ids,
+        p_date: bookingDate,
+      },
+    );
+    expect(closedSlots.error).toBeNull();
+    expect(closedSlots.data).toEqual([]);
+    const preserved = await admin
+      .from("appointments")
+      .select("status")
+      .eq("id", manual.id)
+      .single();
+    expect(preserved.error).toBeNull();
+    expect(preserved.data?.status).toBe("confirmed");
+    await masterPage
+      .getByRole("button", { name: "Configure day", exact: true })
+      .click();
+    const restoreResponse = masterPage.waitForResponse((response) =>
+      response.url().includes("/rpc/clear_master_availability_date_override"),
+    );
+    await masterPage
+      .getByRole("button", { name: "Restore weekly schedule", exact: true })
+      .click();
+    expect((await restoreResponse).status()).toBe(200);
+    const reopenedSlots = await anonymous.rpc(
+      "get_public_available_slots_for_services",
+      {
+        p_slug: slug,
+        p_service_ids: ids,
+        p_date: bookingDate,
+      },
+    );
+    expect(reopenedSlots.error).toBeNull();
+    expect(reopenedSlots.data?.length).toBeGreaterThan(0);
+    expect(
+      reopenedSlots.data?.some(
+        (item) => Date.parse(item.starts_at) === Date.parse(manual.startsAt),
+      ),
+    ).toBe(false);
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {

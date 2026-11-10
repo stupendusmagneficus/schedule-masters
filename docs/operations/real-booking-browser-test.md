@@ -10,6 +10,10 @@ checks the ordered services, total duration and price, and verifies that its
 time is no longer offered publicly. Requests are not mocked. No email worker or
 AI provider is called.
 
+The master then closes the day and restores its weekly schedule through the UI.
+The test checks that public slots disappear and return, and that the existing
+confirmed appointment remains intact and continues to reserve its time.
+
 Run against a disposable local project after applying migrations. The command
 requires explicit opt-in and rejects non-loopback Supabase URLs; it creates and
 deletes test data. The service role key is used only in the test process and is
