@@ -478,6 +478,27 @@ test("master manages bookings and a working day with a real backend", async ({
     expect(await slotsForDate(bookingDate)).toEqual([]);
     expect(await slotsForDate(secondDate)).toEqual([]);
     expect(await slotsForDate(controlDate)).toEqual(controlSlots);
+    await masterPage
+      .getByRole("dialog")
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await masterPage
+      .getByRole("tab", { name: "Customers", exact: true })
+      .click();
+    await masterPage
+      .getByRole("textbox", { name: "Name, phone, or email" })
+      .fill("Manual customer");
+    await masterPage
+      .getByRole("button", { name: "Manual customer", exact: true })
+      .click();
+    await expect(
+      masterPage.getByText("Booking history", { exact: true }),
+    ).toBeVisible();
+    const visit = masterPage.getByRole("button", {
+      name: /Manicure \+ Pedicure/,
+    });
+    await expect(visit).toBeVisible();
+    await expect(visit.getByText("Confirmed", { exact: true })).toBeVisible();
     await masterPage.close();
     await owner.client.auth.signOut();
   } finally {
