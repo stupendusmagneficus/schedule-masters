@@ -23,18 +23,21 @@ export type SetupTranslator = (key: MessageKey) => string;
 export const onboardingDraftStorageKey = (userId: string) =>
   `schedule-masters:onboarding-draft:${userId}`;
 
+const defaultServiceNames: Record<SupportedLocale, string> = {
+  en: "Gel manicure",
+  cz: "Manikúra",
+  sk: "Manikúra",
+  ru: "Маникюр",
+  uk: "Манікюр",
+};
+
 export function createDefaultOnboardingDraft(
   locale: SupportedLocale,
 ): OnboardingDraft {
   return {
     name: "",
     slug: "",
-    serviceName:
-      locale === "cz"
-        ? "Manikúra"
-        : locale === "ru"
-          ? "Маникюр"
-          : "Gel manicure",
+    serviceName: defaultServiceNames[locale],
     price: "700",
     duration: "60",
     bookingIntervalMinutes: defaultBookingIntervalMinutes,

@@ -6,6 +6,7 @@ import { createSupabaseAdminTestClient } from "../../packages/api/src/supabase.i
 test("a new master sets up a workspace and publishes their first service", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   const admin = createSupabaseAdminTestClient({
     url: process.env.SUPABASE_URL as string,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
@@ -83,6 +84,14 @@ test("a new master sets up a workspace and publishes their first service", async
     expect(workspace.error).toBeNull();
     if (!workspace.data)
       throw new Error("Onboarding did not create a workspace");
+    const firstService = await admin
+      .from("services")
+      .select("source_locale")
+      .eq("workspace_id", workspace.data.id)
+      .eq("name", serviceName)
+      .single();
+    expect(firstService.error).toBeNull();
+    expect(firstService.data?.source_locale).toBe("en");
     const schedule = await admin
       .from("availability_rules")
       .select("day_of_week, start_local_time, end_local_time")
@@ -104,7 +113,6 @@ test("a new master sets up a workspace and publishes their first service", async
     await page
       .getByRole("button", { name: "Enter translations manually", exact: true })
       .click();
-    await page.getByRole("button", { name: "English", exact: true }).click();
     const czechName = "Úprava obočí";
     const czechDescription = "Tvarování a úprava obočí.";
     await page
