@@ -98,12 +98,50 @@ test("a new master sets up a workspace and publishes their first service", async
       })),
     );
 
+    await page.getByRole("tab", { name: "Profile", exact: true }).click();
+    await page.getByRole("button", { name: /^Services:/ }).click();
+    await page.getByRole("button", { name: "Edit", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Enter translations manually", exact: true })
+      .click();
+    await page.getByRole("button", { name: "English", exact: true }).click();
+    const czechName = "Úprava obočí";
+    const czechDescription = "Tvarování a úprava obočí.";
+    await page
+      .getByRole("textbox", { name: "Service name · Čeština", exact: true })
+      .fill(czechName);
+    await page
+      .getByRole("textbox", { name: "Description · Čeština", exact: true })
+      .fill(czechDescription);
+    const saveTranslation = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/rest/v1/services" &&
+        response.request().method() === "PATCH",
+    );
+    await page
+      .getByRole("button", { name: "Save service", exact: true })
+      .click();
+    expect((await saveTranslation).ok()).toBe(true);
+
     await page.goto(`/?slug=${slug}`);
     await expect(
       page.getByText(workspaceName, { exact: true }).first(),
     ).toBeVisible();
     await expect(
       page.getByText(serviceName, { exact: true }).first(),
+    ).toBeVisible();
+    await page.getByRole("radio", { name: "CZ", exact: true }).click();
+    const localizedService = page.getByRole("button", {
+      name: new RegExp(`^${czechName}`),
+    });
+    await expect(localizedService).toBeVisible();
+    await expect(localizedService).toContainText(czechDescription);
+    await page.reload();
+    await page.getByRole("radio", { name: "CZ", exact: true }).click();
+    await expect(localizedService).toBeVisible();
+    await page.getByRole("radio", { name: "EN", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: new RegExp(`^${serviceName}`) }),
     ).toBeVisible();
   } finally {
     await admin.from("workspaces").delete().eq("slug", slug);
