@@ -665,7 +665,7 @@ export type Messages = Record<MessageKey, string>;
 
 const messages: Record<SupportedLocale, Messages> = {
   ru: {
-    "common.appName": "Schedule Masters",
+    "common.appName": "Chvilio",
     "common.language": "Язык",
     "common.save": "Сохранить",
     "common.cancel": "Отмена",
@@ -1444,7 +1444,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось обновить запись. Попробуйте ещё раз.",
   },
   cz: {
-    "common.appName": "Schedule Masters",
+    "common.appName": "Chvilio",
     "common.language": "Jazyk",
     "common.save": "Uložit",
     "common.cancel": "Zrušit",
@@ -2215,7 +2215,7 @@ const messages: Record<SupportedLocale, Messages> = {
       "Rezervaci se nepodařilo změnit. Zkuste to znovu.",
   },
   en: {
-    "common.appName": "Schedule Masters",
+    "common.appName": "Chvilio",
     "common.language": "Language",
     "common.save": "Save",
     "common.cancel": "Cancel",

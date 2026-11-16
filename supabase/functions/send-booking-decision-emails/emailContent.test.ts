@@ -23,7 +23,7 @@ Deno.test("accepted email contains the confirmed slot in the request locale", ()
   assert.match(email.html, /Studio &lt;Yahor&gt;/);
   assert.match(email.html, /<html lang="cs">/);
   assert.match(email.html, /name="viewport"/);
-  assert.match(email.html, /SCHEDULE MASTERS/);
+  assert.match(email.html, /Chvilio/);
   assert.match(email.text, /Europe\/Prague/);
   assert.ok(email.preheader.includes("Studio <Yahor>"));
   assert.equal(email.html.includes("client@example.test"), false);

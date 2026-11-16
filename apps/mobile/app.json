@@ -1,11 +1,21 @@
 {
   "expo": {
-    "name": "Schedule Masters Mobile",
+    "name": "Chvilio",
     "slug": "schedule-masters-mobile",
     "scheme": "schedulemasters",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#2F7D5C",
+          "image": "./assets/launch-wordmark.png",
+          "imageWidth": 150
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": false
     }

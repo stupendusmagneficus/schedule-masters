@@ -9,7 +9,7 @@ const copy = {
   en: {
     title: "Confirm your email",
     preheader:
-      "Confirm your email address to finish creating your Schedule Masters account.",
+      "Confirm your email address to finish creating your Chvilio account.",
     intro: "Finish creating your account by confirming your email address.",
     action: "Confirm email",
     fallback: "If the button does not work, open this link:",
@@ -17,8 +17,7 @@ const copy = {
   },
   cz: {
     title: "Potvrďte svůj e-mail",
-    preheader:
-      "Potvrďte e-mailovou adresu a dokončete registraci do Schedule Masters.",
+    preheader: "Potvrďte e-mailovou adresu a dokončete registraci do Chvilio.",
     intro: "Dokončete registraci potvrzením své e-mailové adresy.",
     action: "Potvrdit e-mail",
     fallback: "Pokud tlačítko nefunguje, otevřete tento odkaz:",
@@ -26,8 +25,7 @@ const copy = {
   },
   sk: {
     title: "Potvrďte svoj e-mail",
-    preheader:
-      "Potvrďte e-mailovú adresu a dokončite registráciu do Schedule Masters.",
+    preheader: "Potvrďte e-mailovú adresu a dokončite registráciu do Chvilio.",
     intro: "Dokončite registráciu potvrdením svojej e-mailovej adresy.",
     action: "Potvrdiť e-mail",
     fallback: "Ak tlačidlo nefunguje, otvorte tento odkaz:",
@@ -36,7 +34,7 @@ const copy = {
   ru: {
     title: "Подтвердите email",
     preheader:
-      "Подтвердите адрес электронной почты, чтобы завершить регистрацию в Schedule Masters.",
+      "Подтвердите адрес электронной почты, чтобы завершить регистрацию в Chvilio.",
     intro:
       "Подтвердите адрес электронной почты, чтобы завершить создание аккаунта.",
     action: "Подтвердить email",
@@ -46,7 +44,7 @@ const copy = {
   uk: {
     title: "Підтвердьте email",
     preheader:
-      "Підтвердьте адресу електронної пошти, щоб завершити реєстрацію в Schedule Masters.",
+      "Підтвердьте адресу електронної пошти, щоб завершити реєстрацію в Chvilio.",
     intro:
       "Підтвердьте адресу електронної пошти, щоб завершити створення облікового запису.",
     action: "Підтвердити email",

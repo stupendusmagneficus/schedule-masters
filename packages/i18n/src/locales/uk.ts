@@ -2,7 +2,7 @@ import type { Messages } from "../index";
 
 // Draft product translation; review layout-sensitive wording with a Ukrainian speaker before release.
 export const ukrainianMessages: Messages = {
-  "common.appName": "Schedule Masters",
+  "common.appName": "Chvilio",
   "common.language": "Мова",
   "common.save": "Зберегти",
   "common.cancel": "Скасувати",

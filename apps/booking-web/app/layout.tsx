@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Schedule Masters Booking",
+  title: "Chvilio Booking",
   description: "Public booking surface scaffold",
 };
 

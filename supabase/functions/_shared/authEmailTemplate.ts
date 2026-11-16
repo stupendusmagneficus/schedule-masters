@@ -37,7 +37,7 @@ export function createAuthEmail(
       : "en",
   );
   return {
-    subject: `Schedule Masters — ${fields.title}`,
+    subject: `Chvilio — ${fields.title}`,
     preheader: fields.preheader,
     ...render(fields, url),
   };
@@ -68,9 +68,9 @@ export function buildAuthEmailTemplate(copy: AuthEmailCatalog) {
   const subject = [
     ...branches.map(
       (locale, index) =>
-        `{{ ${index ? "else if" : "if"} eq (printf "%v" .Data.locale) "${locale}" }}Schedule Masters — ${copy[locale].title}`,
+        `{{ ${index ? "else if" : "if"} eq (printf "%v" .Data.locale) "${locale}" }}Chvilio — ${copy[locale].title}`,
     ),
-    `{{ else }}Schedule Masters — ${copy.en.title}{{ end }}`,
+    `{{ else }}Chvilio — ${copy.en.title}{{ end }}`,
   ].join("");
   return { html: `${prelude}\n${html}\n`, subject };
 }

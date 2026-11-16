@@ -7,7 +7,7 @@ import {
 const copy: AuthEmailCatalog = {
   en: {
     title: "Reset your password",
-    preheader: "Restore access to your Schedule Masters account.",
+    preheader: "Restore access to your Chvilio account.",
     intro:
       "Use this link to set a new password. Open it on the device and browser where you requested the reset.",
     action: "Set a new password",
@@ -17,7 +17,7 @@ const copy: AuthEmailCatalog = {
   },
   cz: {
     title: "Obnovit heslo",
-    preheader: "Obnovte přístup ke svému účtu Schedule Masters.",
+    preheader: "Obnovte přístup ke svému účtu Chvilio.",
     intro:
       "Pomocí odkazu si nastavte nové heslo. Otevřete jej na zařízení a v prohlížeči, kde jste o obnovu požádali.",
     action: "Nastavit nové heslo",
@@ -27,7 +27,7 @@ const copy: AuthEmailCatalog = {
   },
   sk: {
     title: "Obnoviť heslo",
-    preheader: "Obnovte prístup k svojmu účtu Schedule Masters.",
+    preheader: "Obnovte prístup k svojmu účtu Chvilio.",
     intro:
       "Pomocou odkazu si nastavte nové heslo. Otvorte ho na zariadení a v prehliadači, kde ste o obnovu požiadali.",
     action: "Nastaviť nové heslo",
@@ -37,7 +37,7 @@ const copy: AuthEmailCatalog = {
   },
   ru: {
     title: "Восстановление пароля",
-    preheader: "Восстановите доступ к аккаунту Schedule Masters.",
+    preheader: "Восстановите доступ к аккаунту Chvilio.",
     intro:
       "Перейдите по ссылке, чтобы задать новый пароль. Откройте её на том же устройстве и в том же браузере, где запросили восстановление.",
     action: "Задать новый пароль",
@@ -47,7 +47,7 @@ const copy: AuthEmailCatalog = {
   },
   uk: {
     title: "Відновлення пароля",
-    preheader: "Відновіть доступ до облікового запису Schedule Masters.",
+    preheader: "Відновіть доступ до облікового запису Chvilio.",
     intro:
       "Перейдіть за посиланням, щоб задати новий пароль. Відкрийте його на тому самому пристрої та в тому самому браузері, де запитали відновлення.",
     action: "Задати новий пароль",
