@@ -17,6 +17,9 @@ booking-web publishable key. They recorded status and counts only.
 | Hosted AI translation | A test generation returns an editable suggestion and updates usage within the configured budget. | Translation route is active. No `OPENAI_API_KEY` entry was present in the pilot function inventory. | Pilot owner and release operator, SCH-148 |
 | Native iPhone pilot | A named build passes sign-in, deep link, calendar, booking and cancellation on the device. | Pending. The iOS app configuration has the app scheme, but no explicit bundle identifier or committed EAS profile was found at the reviewed revision. | Pilot owner, SCH-57 |
 
+See the [internal TestFlight runbook](testflight-pilot.md) for iPhone build
+configuration, submission, and device checks.
+
 ## Hosted booking lifecycle
 
 1. Record the booking-web and master client URLs and build commits. Sign in as
