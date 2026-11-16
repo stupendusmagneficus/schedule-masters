@@ -14,7 +14,7 @@ for (const locale of emailLocales) {
       throw new Error("Invalid localized recovery layout");
     if (
       !email.text.includes("https://example.test/reset?a=1&b=2") ||
-      !email.subject.startsWith("Schedule Masters — ")
+      !email.subject.startsWith("Chvilio — ")
     )
       throw new Error("Missing recovery alternative");
   });

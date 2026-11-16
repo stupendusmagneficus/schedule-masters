@@ -2,7 +2,7 @@ import type { Messages } from "../index";
 
 // Draft product translation; review layout-sensitive wording with a Slovak speaker before release.
 export const slovakMessages: Messages = {
-  "common.appName": "Schedule Masters",
+  "common.appName": "Chvilio",
   "common.language": "Jazyk",
   "common.save": "Uložiť",
   "common.cancel": "Zrušiť",

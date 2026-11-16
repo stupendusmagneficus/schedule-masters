@@ -73,7 +73,7 @@ function alertSubject(alert: Alert): string {
   const provider =
     alert.provider === "openai_translation" ? "OpenAI" : "Resend";
   const period = alert.period_type === "day" ? "daily" : "monthly";
-  return `Schedule Masters: ${provider} ${period} budget at ${alert.threshold}%`;
+  return `Chvilio: ${provider} ${period} budget at ${alert.threshold}%`;
 }
 
 function alertText(alert: Alert): string {

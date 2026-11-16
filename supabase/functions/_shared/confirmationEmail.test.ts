@@ -11,7 +11,7 @@ for (const [locale, htmlLanguage, title] of [
   Deno.test(`${locale}: confirmation uses one language in its subject, HTML and text`, () => {
     const url = "https://auth.example.test/verify?token=test&type=signup";
     const email = createConfirmationEmail(locale, url);
-    assert.equal(email.subject, `Schedule Masters — ${title}`);
+    assert.equal(email.subject, `Chvilio — ${title}`);
     assert.ok(email.text.includes(title));
     assert.ok(email.text.includes(url));
     assert.ok(email.html.includes(`<html lang="${htmlLanguage}">`));

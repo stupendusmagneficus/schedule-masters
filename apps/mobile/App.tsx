@@ -30,6 +30,7 @@ import {
 import { useMasterWorkspace } from "./src/features/workspace/useMasterWorkspace";
 import { analytics, analyticsEvents } from "./src/lib/analytics";
 import { supabase } from "./src/lib/supabase";
+import { AppLaunchScreen } from "./src/screens/AppLaunchScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { PasswordRecoveryScreen } from "./src/screens/PasswordRecoveryScreen";
@@ -141,7 +142,7 @@ function AppContent() {
       />
     );
   if (!supabase) return <ConfigurationState />;
-  if (auth.restoring) return <LoadingState />;
+  if (auth.restoring) return <AppLaunchScreen />;
   if (session && isPasswordRecovery)
     return (
       <PasswordRecoveryScreen
