@@ -61,6 +61,8 @@ export type CalendarDataController = CalendarData & {
   readonly goToTodayDay: () => void;
   readonly isLoading: boolean;
   readonly isRefreshing: boolean;
+  /** True when the current range failed to load; data is not a free day. */
+  readonly loadFailed: boolean;
   readonly isSaving: boolean;
   readonly range: CalendarDateRange;
   readonly reload: () => Promise<void>;
@@ -104,6 +106,7 @@ export function useCalendarData({
   });
   const hasLoadedRangeRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(client));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -117,6 +120,7 @@ export function useCalendarData({
   const loadCurrentRange = useCallback(
     async (refresh = false) => {
       const requestId = requestGuard.begin();
+      setLoadFailed(false);
 
       if (refresh && client) {
         invalidateCalendarDataCache(client, workspaceId);
@@ -180,6 +184,7 @@ export function useCalendarData({
       } catch (loadError) {
         if (requestGuard.isCurrent(requestId)) {
           setError(loadError instanceof Error ? loadError.message : "unknown");
+          setLoadFailed(true);
         }
       } finally {
         if (requestGuard.isCurrent(requestId)) {
@@ -507,6 +512,7 @@ export function useCalendarData({
     isLoading,
     isRefreshing,
     isSaving,
+    loadFailed,
     range,
     reload,
     removeBlock,

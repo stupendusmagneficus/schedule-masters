@@ -462,6 +462,9 @@ export const slovakMessages: Messages = {
   "mobile.calendarClosedDescription":
     "Pre tento deň nie sú nastavené pracovné hodiny.",
   "mobile.calendarDaySettings": "Nastaviť deň",
+  "mobile.calendarLoadFailed": "Kalendár sa nepodarilo načítať",
+  "mobile.calendarLoadFailedDescription":
+    "Rezervácie za toto obdobie sa nezobrazujú. Skontrolujte pripojenie a skúste to znova.",
   "mobile.calendarDaySettingsDescription":
     "Zmena platí iba pre vybraný dátum a nemení týždenný rozvrh.",
   "mobile.calendarDayOpen": "Pracovný čas",
@@ -714,6 +717,14 @@ export const slovakMessages: Messages = {
   "mobile.serviceSortOrderInvalid":
     "Poradie musí byť celé číslo od 0 do 100 000.",
   "mobile.signOut": "Odhlásiť sa",
+  "mobile.deleteAccount": "Zmazať účet",
+  "mobile.deleteAccountDescription":
+    "Natrvalo zmaže účet, štúdio, služby, klientov a všetky rezervácie. Klienti nedostanú žiadne upozornenie.",
+  "mobile.deleteAccountConfirm": "Zmazať natrvalo",
+  "mobile.deleteAccountConfirmDescription":
+    "Túto akciu nie je možné vrátiť. Vopred si uložte všetko potrebné a informujte klientov o budúcich rezerváciách.",
+  "mobile.deleteAccountFailed":
+    "Účet sa nepodarilo zmazať. Skontrolujte pripojenie a skúste to znova.",
   "booking.description": "Online stránka rezervácií je pripravená.",
   "booking.loadingContext": "Načítava sa stránka rezervácií…",
   "booking.unavailableTitle": "Táto stránka rezervácií nie je dostupná",

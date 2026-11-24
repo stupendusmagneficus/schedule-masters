@@ -6,6 +6,7 @@ import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton } from "../../components/ActionButton";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
+import { DeleteAccountCard } from "../../components/DeleteAccountCard";
 import { InfoCard } from "../../components/InfoCard";
 import { LocalePicker } from "../../components/LocalePicker";
 import { ServiceCatalogCard } from "../../components/ServiceCatalogCard";
@@ -120,6 +121,8 @@ export function ProfileTab({
         <Text style={styles.sectionTitle}>{t("common.language")}</Text>
         <LocalePicker locale={locale} onLocaleChange={onLocaleChange} />
       </InfoCard>
+
+      {client ? <DeleteAccountCard client={client} t={t} /> : null}
 
       {signOutFailed ? (
         <Text accessibilityRole="alert" style={styles.signOutError}>

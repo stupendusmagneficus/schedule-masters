@@ -29,7 +29,7 @@ if (
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch:
-    "**/real-{booking,onboarding,payment,customer-privacy,reschedule}.spec.ts",
+    "**/real-{booking,onboarding,payment,customer-privacy,reschedule,account-deletion}.spec.ts",
   workers: 1,
   use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3102" },
   webServer: [
