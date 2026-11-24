@@ -4,12 +4,15 @@ The `pilot` EAS profile builds for App Store Connect and reads the EAS
 `preview` environment. Build and upload are separate steps so the operator can
 verify the target before sending an archive to Apple.
 
-1. Link the Expo project from `apps/mobile` with `eas init`. Register the final
-   iOS bundle identifier and create the matching app in App Store Connect.
-   Save the project link and bundle identifier in Expo config. The bundle
-   identifier does not need to match the public app name.
-2. Set the pilot Supabase URL and publishable key, the deployed HTTPS booking
-   URL, and `EXPO_PUBLIC_DEMO_MODE=false` in the EAS `preview` environment.
+1. Link the Expo project from `apps/mobile` with `eas init` and commit the
+   generated `extra.eas.projectId` and `owner`. The iOS bundle identifier
+   `cz.chvilio.app` is set in `app.json`; register it and create the matching
+   app in App Store Connect. It cannot change after the first upload.
+2. In the EAS `preview` environment set `EXPO_PUBLIC_SUPABASE_URL`,
+   `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_BOOKING_WEB_URL` (the
+   deployed HTTPS booking site) and `EXPO_PUBLIC_DEMO_MODE=false`. A release
+   without the Supabase or booking values shows "Mobile configuration
+   required"; `yarn deployment:test` checks that these values are inlined.
    Use `EXPO_PUBLIC_AUTH_REDIRECT_URL=schedulemasters://auth/callback` and allow
    the same callback in hosted Supabase Auth. Use only public values in
    `EXPO_PUBLIC_*`; these are embedded in the app.

@@ -359,6 +359,139 @@ describe("Supabase public booking contract", () => {
   );
 
   rlsIntegrationTest(
+    "books multiple services on a date with modified hours and keeps the override bounds",
+    async () => {
+      if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
+        return;
+      }
+
+      const admin = createSupabaseAdminTestClient({
+        serviceRoleKey: supabaseServiceRoleKey,
+        url: supabaseUrl,
+      });
+      const suffix = randomUUID();
+      const workspaceId = randomUUID();
+      const slug = `multi-override-${suffix}`;
+      const workDate = "2030-01-07";
+      const serviceIds = [randomUUID(), randomUUID()];
+
+      try {
+        expect(
+          (
+            await admin.from("workspaces").insert({
+              booking_interval_minutes: 30,
+              id: workspaceId,
+              name: "Multi-service override test",
+              slug,
+              timezone: "Europe/Prague",
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin
+              .from("booking_links")
+              .insert({ slug, workspace_id: workspaceId })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("services").insert([
+              {
+                duration_minutes: 90,
+                id: serviceIds[0],
+                name: "Manicure",
+                price_amount: 1200,
+                sort_order: 0,
+                workspace_id: workspaceId,
+              },
+              {
+                duration_minutes: 60,
+                id: serviceIds[1],
+                name: "Pedicure",
+                price_amount: 900,
+                sort_order: 1,
+                workspace_id: workspaceId,
+              },
+            ])
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("availability_rules").insert({
+              day_of_week: 1,
+              end_local_time: "18:00",
+              start_local_time: "09:00",
+              valid_from: workDate,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+        expect(
+          (
+            await admin.from("availability_date_overrides").insert({
+              end_local_time: "14:00",
+              override_kind: "modified",
+              start_local_time: "10:00",
+              work_date: workDate,
+              workspace_id: workspaceId,
+            })
+          ).error,
+        ).toBeNull();
+
+        const slots = await callUntypedRpc<
+          Array<{ starts_at: string; ends_at: string }>
+        >("get_public_available_slots_for_services", {
+          p_date: workDate,
+          p_service_ids: serviceIds,
+          p_slug: slug,
+        });
+        expect(slots.error).toBeNull();
+        expect(slots.data?.[0]).toMatchObject({
+          starts_at: "2030-01-07T09:00:00+00:00",
+          ends_at: "2030-01-07T11:30:00+00:00",
+        });
+
+        const booking = await callUntypedRpc<{ endsAt: string }>(
+          "create_public_booking_with_services",
+          {
+            p_customer_note: null,
+            p_email: "multi-override@example.test",
+            p_idempotency_key: `multi-override-${suffix}`,
+            p_locale: "en",
+            p_name: "Override Customer",
+            p_phone: null,
+            p_service_ids: serviceIds,
+            p_slug: slug,
+            p_starts_at: "2030-01-07T09:00:00.000Z",
+          },
+        );
+        expect(booking.error).toBeNull();
+        expect(booking.data?.endsAt).toBe("2030-01-07T11:30:00+00:00");
+
+        // 12:00 local + 150 minutes ends after the modified 14:00 close.
+        const outsideOverride = await callUntypedRpc<unknown>(
+          "create_public_booking_with_services",
+          {
+            p_email: "multi-override-late@example.test",
+            p_idempotency_key: `multi-override-late-${suffix}`,
+            p_name: "Late Customer",
+            p_phone: null,
+            p_service_ids: serviceIds,
+            p_slug: slug,
+            p_starts_at: "2030-01-07T11:00:00.000Z",
+          },
+        );
+        expect(outsideOverride.error?.message).toContain(
+          "Selected time is no longer available",
+        );
+      } finally {
+        await admin.from("workspaces").delete().eq("id", workspaceId);
+      }
+    },
+  );
+
+  rlsIntegrationTest(
     "creates a manual multi-service booking for one workspace member",
     async () => {
       if (!supabaseUrl || !supabasePublishableKey || !supabaseServiceRoleKey) {
