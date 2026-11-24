@@ -603,6 +603,7 @@ export function DashboardScreen({
         )}
         <FinancesTab
           client={client}
+          defaultCurrency={bookingServices[0]?.currency ?? "CZK"}
           demoData={demoData}
           locale={locale}
           refreshVersion={financeRefreshVersion}

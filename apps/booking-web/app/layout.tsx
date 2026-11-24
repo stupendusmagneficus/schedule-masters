@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Chvilio Booking",
-  description: "Public booking surface scaffold",
+  description: "Online booking with Chvilio",
 };
 
 export default function RootLayout({

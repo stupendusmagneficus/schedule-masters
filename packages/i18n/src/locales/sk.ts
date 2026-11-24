@@ -458,6 +458,9 @@ export const slovakMessages: Messages = {
     "Údaje klienta sa nepodarilo odstrániť. Skúste to znova.",
   "mobile.customerBooking": "Vytvoriť rezerváciu",
   "mobile.customerVisitCount": "Dokončené návštevy",
+  "mobile.customerNoContact": "Bez kontaktu",
+  "mobile.customerLastVisit": "Naposledy: {date}",
+  "mobile.customerNoVisitsYet": "Zatiaľ bez dokončenej návštevy",
   "mobile.calendarClosed": "Zatvorený deň",
   "mobile.calendarClosedDescription":
     "Pre tento deň nie sú nastavené pracovné hodiny.",
