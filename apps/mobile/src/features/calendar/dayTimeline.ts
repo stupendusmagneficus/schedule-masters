@@ -11,6 +11,8 @@ export const timelineSlotMinutes = 30;
 export const timelineSlotHeight = 48;
 
 export type DayTimelineSlot = {
+  /** False outside working hours; such rows only show existing events. */
+  readonly bookable: boolean;
   readonly label: string;
   readonly minute: number;
 };
@@ -61,86 +63,112 @@ export function buildDayTimeline({
     availabilityRules,
     dateOverrides,
   );
-  const startMinute = effectiveAvailability.startLocalTime
+  const workStart = effectiveAvailability.startLocalTime
     ? timeToMinutes(effectiveAvailability.startLocalTime)
     : 0;
-  const endMinute = effectiveAvailability.endLocalTime
+  const workEnd = effectiveAvailability.endLocalTime
     ? timeToMinutes(effectiveAvailability.endLocalTime)
     : 0;
+  const isOpen = !effectiveAvailability.isClosed && workEnd > workStart;
 
-  if (effectiveAvailability.isClosed || endMinute <= startMinute) {
+  const appointmentEvents = appointments.flatMap((appointment) => {
+    if (
+      appointment.status === "cancelled_by_master" ||
+      appointment.status === "cancelled_by_customer"
+    )
+      return [];
+    const range = getLocalRange(
+      appointment.starts_at,
+      appointment.ends_at,
+      selectedDate,
+      timezone,
+    );
+    if (!range) return [];
+    return [
+      {
+        appointment,
+        ...range,
+        id: appointment.id,
+        kind: "appointment" as const,
+        subtitle: appointment.service_name,
+        title: appointment.customer_name,
+      },
+    ];
+  });
+  const blockEvents = blocks.flatMap((block) => {
+    const range = getLocalRange(
+      block.starts_at,
+      block.ends_at,
+      selectedDate,
+      timezone,
+    );
+    if (!range) return [];
+    return [
+      {
+        block,
+        ...range,
+        id: block.id,
+        kind: "block" as const,
+        subtitle: "",
+        title: block.reason || "Personal block",
+      },
+    ];
+  });
+  const events = [...appointmentEvents, ...blockEvents].sort(
+    (left, right) => left.startMinute - right.startMinute,
+  );
+
+  if (!isOpen && events.length === 0) {
     return {
-      endMinute,
+      endMinute: workEnd,
       events: [],
       isClosed: true,
       slots: [],
-      startMinute,
+      startMinute: workStart,
     };
   }
 
-  const events = [
-    ...appointments.flatMap((appointment) => {
-      if (
-        appointment.status === "cancelled_by_master" ||
-        appointment.status === "cancelled_by_customer"
-      )
-        return [];
-      const start = getLocalTime(appointment.starts_at, timezone);
-      const end = getLocalTime(appointment.ends_at, timezone);
-      if (
-        start.date !== selectedDate ||
-        end.date !== selectedDate ||
-        end.minute <= startMinute ||
-        start.minute >= endMinute
-      ) {
-        return [];
-      }
-
-      return [
-        {
-          appointment,
-          endMinute: clamp(end.minute, startMinute, endMinute),
-          id: appointment.id,
-          kind: "appointment" as const,
-          startMinute: clamp(start.minute, startMinute, endMinute),
-          subtitle: appointment.service_name,
-          title: appointment.customer_name,
-        },
-      ];
-    }),
-    ...blocks.flatMap((block) => {
-      const start = getLocalTime(block.starts_at, timezone);
-      const end = getLocalTime(block.ends_at, timezone);
-      if (
-        start.date !== selectedDate ||
-        end.date !== selectedDate ||
-        end.minute <= startMinute ||
-        start.minute >= endMinute
-      ) {
-        return [];
-      }
-
-      return [
-        {
-          block,
-          endMinute: clamp(end.minute, startMinute, endMinute),
-          id: block.id,
-          kind: "block" as const,
-          startMinute: clamp(start.minute, startMinute, endMinute),
-          subtitle: "",
-          title: block.reason || "Personal block",
-        },
-      ];
-    }),
-  ].sort((left, right) => left.startMinute - right.startMinute);
+  // Bookings made before hours changed or the day was closed stay visible.
+  const startMinute = Math.min(
+    isOpen ? workStart : Number.POSITIVE_INFINITY,
+    ...events.map((event) => floorToSlot(event.startMinute)),
+  );
+  const endMinute = Math.max(
+    isOpen ? workEnd : Number.NEGATIVE_INFINITY,
+    ...events.map((event) => ceilToSlot(event.endMinute)),
+  );
 
   return {
     endMinute,
     events,
-    isClosed: false,
-    slots: createTimelineSlots(startMinute, endMinute),
+    isClosed: !isOpen,
+    slots: createTimelineSlots(startMinute, endMinute).map((slot) => ({
+      ...slot,
+      bookable: isOpen && slot.minute >= workStart && slot.minute < workEnd,
+    })),
     startMinute,
   };
+}
+
+function getLocalRange(
+  startsAt: string,
+  endsAt: string,
+  selectedDate: string,
+  timezone: string,
+): { readonly endMinute: number; readonly startMinute: number } | null {
+  const start = getLocalTime(startsAt, timezone);
+  const end = getLocalTime(endsAt, timezone);
+  if (start.date !== selectedDate || end.date !== selectedDate) return null;
+  if (end.minute <= start.minute) return null;
+  return { endMinute: end.minute, startMinute: start.minute };
+}
+
+function floorToSlot(minute: number): number {
+  return Math.floor(minute / timelineSlotMinutes) * timelineSlotMinutes;
+}
+
+function ceilToSlot(minute: number): number {
+  return Math.ceil(minute / timelineSlotMinutes) * timelineSlotMinutes;
 }
 
 export function buildDemoDayTimeline(
@@ -191,7 +219,7 @@ export function createTimelineSlots(
     minute < endMinute;
     minute += timelineSlotMinutes
   ) {
-    slots.push({ label: formatTimelineTime(minute), minute });
+    slots.push({ bookable: true, label: formatTimelineTime(minute), minute });
   }
   return slots;
 }
@@ -263,8 +291,4 @@ function getLocalDateTimeParts(date: Date, timezone: string) {
     month: values.month,
     year: values.year,
   };
-}
-
-function clamp(value: number, minimum: number, maximum: number): number {
-  return Math.min(Math.max(value, minimum), maximum);
 }
