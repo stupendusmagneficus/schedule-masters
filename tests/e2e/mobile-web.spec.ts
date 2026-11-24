@@ -604,7 +604,7 @@ test.describe("mobile web smoke", () => {
     const hasFilledDate = (day: Element) =>
       Array.from(day.querySelectorAll("div")).some(
         (node) =>
-          getComputedStyle(node).backgroundColor === "rgb(47, 125, 92)" &&
+          getComputedStyle(node).backgroundColor === "rgb(42, 116, 84)" &&
           getComputedStyle(node).width === "32px",
       );
     const selectedFlags = await weekDays.evaluateAll((days, fn) => {
