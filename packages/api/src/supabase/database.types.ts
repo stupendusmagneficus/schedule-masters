@@ -1479,6 +1479,10 @@ export type Database = {
         Args: { p_block_id: string; p_workspace_id: string }
         Returns: Json
       }
+      delete_my_account: {
+        Args: { p_confirmation: string }
+        Returns: undefined
+      }
       enforce_public_booking_quota: {
         Args: { p_workspace_id: string }
         Returns: undefined

@@ -463,6 +463,9 @@ export const ukrainianMessages: Messages = {
   "mobile.calendarClosedDescription":
     "Для цього дня не налаштовано робочі години.",
   "mobile.calendarDaySettings": "Налаштувати день",
+  "mobile.calendarLoadFailed": "Не вдалося завантажити календар",
+  "mobile.calendarLoadFailedDescription":
+    "Записи за цей період не показано. Перевірте підключення та спробуйте ще раз.",
   "mobile.calendarDaySettingsDescription":
     "Зміна діє лише для вибраної дати й не змінює тижневий графік.",
   "mobile.calendarDayOpen": "Робочі години",
@@ -715,6 +718,14 @@ export const ukrainianMessages: Messages = {
   "mobile.serviceSortOrderInvalid":
     "Порядок має бути цілим числом від 0 до 100 000.",
   "mobile.signOut": "Вийти",
+  "mobile.deleteAccount": "Видалити акаунт",
+  "mobile.deleteAccountDescription":
+    "Назавжди видаляє акаунт, студію, послуги, клієнтів і всі записи. Клієнти не отримають сповіщень.",
+  "mobile.deleteAccountConfirm": "Видалити назавжди",
+  "mobile.deleteAccountConfirmDescription":
+    "Цю дію не можна скасувати. Заздалегідь збережіть усе потрібне та попередьте клієнтів про майбутні записи.",
+  "mobile.deleteAccountFailed":
+    "Не вдалося видалити акаунт. Перевірте підключення та спробуйте ще раз.",
   "booking.description": "Сторінка онлайн-запису готова.",
   "booking.loadingContext": "Завантаження сторінки запису…",
   "booking.unavailableTitle": "Ця сторінка запису недоступна",

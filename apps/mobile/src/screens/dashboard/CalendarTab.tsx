@@ -217,6 +217,10 @@ export function CalendarTab({
       });
   const todayDate = getTodayCalendarDate(workspace.timezone);
   const navigationDisabled = !client && !demoData;
+  const calendarLoadFailed = calendar.loadFailed && !demoData;
+  // Configuring a day before its bookings load would hide the closure warning.
+  const calendarUnavailable =
+    calendarLoadFailed || (calendar.isLoading && !demoData);
   const monthAppointments = useMemo(
     () =>
       monthWindow.entries.flatMap((entry) => entry.data?.appointments ?? []),
@@ -402,14 +406,32 @@ export function CalendarTab({
                   : `${t("mobile.calendarDayWorkingHours")}: ${dayStartTime.slice(0, 5)}–${dayEndTime.slice(0, 5)}`}
               </Text>
               <ActionButton
-                disabled={!client}
+                disabled={!client || calendarUnavailable}
                 label={t("mobile.calendarDaySettings")}
                 onPress={() => setDaySettingsVisible(true)}
                 size="compact"
                 variant="secondary"
               />
             </View>
-            {calendar.view === "week" ? (
+            {calendarLoadFailed ? (
+              <View style={styles.calendarLoadError}>
+                <Text
+                  accessibilityRole="alert"
+                  style={styles.calendarLoadErrorTitle}
+                >
+                  {t("mobile.calendarLoadFailed")}
+                </Text>
+                <Text style={styles.helper}>
+                  {t("mobile.calendarLoadFailedDescription")}
+                </Text>
+                <ActionButton
+                  label={t("common.retry")}
+                  onPress={() => void calendar.reload()}
+                  size="compact"
+                  variant="secondary"
+                />
+              </View>
+            ) : calendar.view === "week" ? (
               <WeekCalendar
                 days={week}
                 disabled={navigationDisabled}
@@ -943,6 +965,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   error: { ...typography.caption, color: colors.danger, marginTop: 12 },
+  calendarLoadError: { alignItems: "flex-start", gap: 8, paddingVertical: 24 },
+  calendarLoadErrorTitle: {
+    ...typography.label,
+    color: colors.primaryText,
+    fontWeight: "700",
+  },
   helper: { ...typography.body, color: colors.secondaryText },
   sectionTitle: {
     color: colors.primaryText,
