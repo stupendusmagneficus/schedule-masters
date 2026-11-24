@@ -16,7 +16,7 @@
       "actionPressed": { "value": "#256246", "type": "color" },
       "onPrimary": { "value": "#FFFFFF", "type": "color" },
       "onAction": { "value": "#FFFFFF", "type": "color" },
-      "accent": { "value": "#2F7D5C", "type": "color" },
+      "accent": { "value": "#2A7454", "type": "color" },
       "accentPressed": { "value": "#256246", "type": "color" },
       "accentSoft": { "value": "#E8F2ED", "type": "color" }
     },
@@ -28,7 +28,7 @@
     },
     "content": {
       "primary": { "value": "#202522", "type": "color" },
-      "secondary": { "value": "#68716C", "type": "color" },
+      "secondary": { "value": "#636C67", "type": "color" },
       "muted": { "value": "#8A938D", "type": "color" },
       "inverse": { "value": "#FFFFFF", "type": "color" }
     },

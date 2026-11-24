@@ -1,5 +1,6 @@
 export const colors = {
-  accent: "#2F7D5C",
+  // Text/selection green is a shade darker than the action fill so it passes WCAG AA (4.5:1) on accentSoft and subtle surfaces.
+  accent: "#2A7454",
   accentPressed: "#256246",
   accentSoft: "#E8F2ED",
   action: "#2F7D5C",
@@ -18,7 +19,7 @@ export const colors = {
   primaryText: "#202522",
   scheduleOnline: "#705983",
   scheduleOnlineSoft: "#F0EDF5",
-  secondaryText: "#68716C",
+  secondaryText: "#636C67",
   subtleSurface: "#F0F2F0",
   surface: "#FFFFFF",
 } as const;

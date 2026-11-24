@@ -558,7 +558,7 @@ test.describe("public booking web", () => {
       "background-color",
       "rgb(232, 242, 237)",
     );
-    await expect(czechRadio).toHaveCSS("color", "rgb(47, 125, 92)");
+    await expect(czechRadio).toHaveCSS("color", "rgb(42, 116, 84)");
 
     await expect(
       page.getByRole("heading", { name: "Vyberte službu" }),
