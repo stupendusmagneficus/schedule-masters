@@ -389,7 +389,7 @@ test.describe("public booking web", () => {
     );
     await expect(page.locator(".confirmation-panel")).toContainText("120 min");
     await expect(page.locator(".confirmation-panel")).toContainText(
-      /CZK\s?1,300\.00/,
+      /CZK\s?1,300(?!\.)/,
     );
   });
 
@@ -613,7 +613,6 @@ test.describe("public booking web", () => {
     await expect(
       page.getByRole("searchbox", { name: "Search by service or category" }),
     ).toBeFocused();
-    await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await expect(page.locator(".service-option").first()).toHaveCSS(
       "outline-style",

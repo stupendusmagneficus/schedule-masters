@@ -383,7 +383,7 @@ export const ukrainianMessages: Messages = {
   "mobile.calendar": "Календар",
   "mobile.calendarCurrentTime": "Поточний час",
   "mobile.calendarSelectDate": "Виберіть дату",
-  "mobile.calendarSelectDays": "Вибрати дати",
+  "mobile.calendarSelectDays": "Налаштувати кілька днів",
   "mobile.calendarSelectionHint":
     "Виберіть дати, а потім вирішіть: змінити лише їх або повторювати розклад для цих днів тижня.",
   "mobile.calendarCancelSelection": "Скасувати вибір",
@@ -726,7 +726,8 @@ export const ukrainianMessages: Messages = {
     "Цю дію не можна скасувати. Заздалегідь збережіть усе потрібне та попередьте клієнтів про майбутні записи.",
   "mobile.deleteAccountFailed":
     "Не вдалося видалити акаунт. Перевірте підключення та спробуйте ще раз.",
-  "booking.description": "Сторінка онлайн-запису готова.",
+  "booking.description":
+    "Оберіть послугу та вільний час, потім залиште контакти — підтвердження прийде на email.",
   "booking.loadingContext": "Завантаження сторінки запису…",
   "booking.unavailableTitle": "Ця сторінка запису недоступна",
   "booking.unavailableDescription":

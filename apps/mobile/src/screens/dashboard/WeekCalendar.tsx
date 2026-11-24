@@ -1,5 +1,6 @@
 import type { MessageKey, SupportedLocale } from "@schedule-app/i18n";
 import { formatAccessibleDate, formatDate } from "@schedule-app/i18n";
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { getAppointmentStatusLabel } from "../../components/AppointmentStatusBadge";
@@ -24,6 +25,8 @@ import {
 const calendarTimeGutterWidth = 36;
 
 type WeekCalendarProps = {
+  /** Selected-day controls, placed under the period navigation as in the day view. */
+  readonly dayControl?: ReactNode;
   readonly days: readonly WeekCalendarDay[];
   readonly disabled?: boolean;
   readonly isCurrentWeek: boolean;
@@ -42,6 +45,7 @@ type WeekCalendarProps = {
 };
 
 export function WeekCalendar({
+  dayControl,
   days,
   disabled = false,
   isCurrentWeek,
@@ -92,6 +96,7 @@ export function WeekCalendar({
         title={weekLabel}
         todayLabel={t("mobile.today")}
       />
+      {dayControl}
       <CalendarWorkloadLegend t={t} />
       <View style={styles.monthWeekdays}>
         {monthDays.slice(0, 7).map((day) => (

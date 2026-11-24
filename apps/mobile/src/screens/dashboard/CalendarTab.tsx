@@ -2,6 +2,7 @@ import type { Database } from "@schedule-app/api";
 import {
   formatAccessibleDate,
   formatCompactDate,
+  formatDate,
   formatTime,
 } from "@schedule-app/i18n";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -338,6 +339,30 @@ export function CalendarTab({
     cancelDateSelection();
   };
 
+  // Same selected-day control in day and week view, always under the period navigation.
+  const selectedDayLabel = formatDate(
+    new Date(`${calendar.selectedDate}T12:00:00.000Z`),
+    locale,
+    { day: "numeric", month: "numeric", timeZone: "UTC", weekday: "short" },
+  );
+  const dayAvailabilityControl = (
+    <View style={styles.dayAvailabilityControl}>
+      <Text style={styles.dayAvailabilityStatus}>
+        {calendar.view === "week" ? `${selectedDayLabel} · ` : ""}
+        {effectiveAvailability.isClosed
+          ? t("mobile.calendarDayClosedStatus")
+          : `${t("mobile.calendarDayWorkingHours")}: ${dayStartTime.slice(0, 5)}–${dayEndTime.slice(0, 5)}`}
+      </Text>
+      <ActionButton
+        disabled={!client || calendarUnavailable}
+        label={t("mobile.calendarDaySettings")}
+        onPress={() => setDaySettingsVisible(true)}
+        size="compact"
+        variant="secondary"
+      />
+    </View>
+  );
+
   return (
     <>
       <View
@@ -399,20 +424,9 @@ export function CalendarTab({
                 todayLabel={t("mobile.today")}
               />
             ) : null}
-            <View style={styles.dayAvailabilityControl}>
-              <Text style={styles.dayAvailabilityStatus}>
-                {effectiveAvailability.isClosed
-                  ? t("mobile.calendarDayClosedStatus")
-                  : `${t("mobile.calendarDayWorkingHours")}: ${dayStartTime.slice(0, 5)}–${dayEndTime.slice(0, 5)}`}
-              </Text>
-              <ActionButton
-                disabled={!client || calendarUnavailable}
-                label={t("mobile.calendarDaySettings")}
-                onPress={() => setDaySettingsVisible(true)}
-                size="compact"
-                variant="secondary"
-              />
-            </View>
+            {calendar.view === "day" || calendarLoadFailed
+              ? dayAvailabilityControl
+              : null}
             {calendarLoadFailed ? (
               <View style={styles.calendarLoadError}>
                 <Text
@@ -433,6 +447,7 @@ export function CalendarTab({
               </View>
             ) : calendar.view === "week" ? (
               <WeekCalendar
+                dayControl={dayAvailabilityControl}
                 days={week}
                 disabled={navigationDisabled}
                 locale={locale}

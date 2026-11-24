@@ -873,7 +873,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.page,
     paddingTop: spacing.compact,
   },
-  content: { gap: spacing.section, padding: spacing.page, paddingBottom: 128 },
+  // Clears the floating New booking action (gap + 44pt button) above the bottom navigation.
+  content: { gap: spacing.section, padding: spacing.page, paddingBottom: 144 },
   monthCalendarContent: {
     flex: 1,
     gap: 0,

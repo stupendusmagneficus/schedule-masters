@@ -384,7 +384,7 @@ export const slovakMessages: Messages = {
   "mobile.calendar": "Kalendár",
   "mobile.calendarCurrentTime": "Aktuálny čas",
   "mobile.calendarSelectDate": "Vyberte dátum",
-  "mobile.calendarSelectDays": "Vybrať dátumy",
+  "mobile.calendarSelectDays": "Nastaviť viac dní",
   "mobile.calendarSelectionHint":
     "Vyberte dátumy a potom zvoľte, či zmeniť iba tieto dátumy, alebo opakovať rozvrh pre tieto dni v týždni.",
   "mobile.calendarCancelSelection": "Zrušiť výber",
@@ -728,7 +728,8 @@ export const slovakMessages: Messages = {
     "Túto akciu nie je možné vrátiť. Vopred si uložte všetko potrebné a informujte klientov o budúcich rezerváciách.",
   "mobile.deleteAccountFailed":
     "Účet sa nepodarilo zmazať. Skontrolujte pripojenie a skúste to znova.",
-  "booking.description": "Online stránka rezervácií je pripravená.",
+  "booking.description":
+    "Vyberte službu a voľný čas, potom nechajte kontakt — potvrdenie príde e-mailom.",
   "booking.loadingContext": "Načítava sa stránka rezervácií…",
   "booking.unavailableTitle": "Táto stránka rezervácií nie je dostupná",
   "booking.unavailableDescription":

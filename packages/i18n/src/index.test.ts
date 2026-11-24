@@ -109,6 +109,8 @@ describe("translations and formatting", () => {
     expect(formatDate(date, "en")).toContain("2026");
     expect(formatTime(date, "en")).toMatch(/\d/);
     expect(formatCurrency(149, "cz")).toContain("149");
+    expect(formatCurrency(149, "en")).toMatch(/^CZK\s149$/);
+    expect(formatCurrency(149.5, "en")).toMatch(/^CZK\s149\.50$/);
   });
 
   it("formats durations as localized hours and minutes without rounding", () => {

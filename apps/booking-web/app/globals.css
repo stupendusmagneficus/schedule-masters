@@ -75,11 +75,36 @@ button:focus-visible {
 
 .booking-header {
   display: flex;
+  flex-direction: row-reverse;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
   padding-bottom: 24px;
   border-bottom: 1px solid var(--line-subtle);
+}
+
+.booking-instruction {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  margin-top: 10px;
+  max-width: 46ch;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-right: 10px;
+  border-radius: 999px;
+  background: var(--action-soft);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+  vertical-align: 2px;
 }
 
 .eyebrow {
@@ -340,9 +365,12 @@ h2 {
 }
 
 .service-option:hover,
-.slot-option:hover,
-.language-button:hover {
+.slot-option:hover {
   border-color: var(--accent);
+}
+
+.language-button:hover {
+  color: var(--accent);
 }
 
 .service-option.selected,
@@ -529,26 +557,26 @@ textarea {
   margin-top: 24px;
 }
 
+/* Secondary control: quiet text buttons so the booking steps stay the focus. */
 .language-picker {
   display: flex;
-  gap: 4px;
+  flex: none;
+  gap: 0;
 }
 
 .language-button {
-  min-width: 44px;
+  min-width: 40px;
   min-height: 44px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: var(--radius-control);
-  background: var(--surface);
-  color: var(--muted);
+  background: transparent;
+  color: var(--quiet);
   font-size: 12px;
   font-weight: 700;
 }
 
 .language-button.selected {
   background: var(--action-soft);
-  border-color: var(--accent);
-  border-width: 2px;
   color: var(--accent);
 }
 
@@ -652,10 +680,12 @@ textarea {
   }
 
   .booking-header {
-    display: block;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .language-picker {
-    margin-top: 18px;
+    align-self: flex-end;
+    margin: -8px -8px 0 0;
   }
 }

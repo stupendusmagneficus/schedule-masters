@@ -570,7 +570,7 @@ test("master manages bookings and a working day with a real backend", async ({
     expect(controlSlots?.length).toBeGreaterThan(0);
     await masterPage.getByRole("tab", { name: "Month", exact: true }).click();
     await masterPage
-      .getByRole("button", { name: "Select dates", exact: true })
+      .getByRole("button", { name: "Configure several days", exact: true })
       .click();
     for (const date of [bookingDate, secondDate]) {
       await masterPage
