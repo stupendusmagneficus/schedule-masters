@@ -106,9 +106,9 @@ test("master erases customer data while retaining the completed visit", async ({
     const search = masterPage.getByRole("textbox", {
       name: "Name, phone, or email",
     });
+    // Customer rows announce name, contact and visit count.
     const customerRow = masterPage.getByRole("button", {
-      name: "Privacy customer",
-      exact: true,
+      name: /^Privacy customer,/,
     });
     await search.fill("Privacy customer");
     await customerRow.click();
