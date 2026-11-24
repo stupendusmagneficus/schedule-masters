@@ -69,8 +69,16 @@ describe("day timeline", () => {
     expect(timeline.startMinute).toBe(540);
     expect(timeline.endMinute).toBe(1080);
     expect(timeline.slots).toHaveLength(18);
-    expect(timeline.slots[0]).toEqual({ label: "09:00", minute: 540 });
-    expect(timeline.slots.at(-1)).toEqual({ label: "17:30", minute: 1050 });
+    expect(timeline.slots[0]).toEqual({
+      bookable: true,
+      label: "09:00",
+      minute: 540,
+    });
+    expect(timeline.slots.at(-1)).toEqual({
+      bookable: true,
+      label: "17:30",
+      minute: 1050,
+    });
   });
 
   it("places appointments and personal blocks on the selected local day", () => {
@@ -188,5 +196,66 @@ describe("day timeline", () => {
       startMinute: 570,
       title: "Anna K.",
     });
+  });
+});
+
+describe("day timeline keeps existing bookings visible", () => {
+  const rules = [
+    { dayOfWeek: 1, endLocalTime: "18:00", startLocalTime: "09:00" },
+  ];
+
+  it("shows bookings on a closed day without offering bookable slots", () => {
+    const timeline = buildDayTimeline({
+      appointments: [appointment],
+      availabilityRules: rules,
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: null,
+          override_kind: "closed",
+          start_local_time: null,
+          work_date: "2026-09-28",
+        },
+      ],
+      selectedDate: "2026-09-28",
+      timezone: "Europe/Prague",
+    });
+
+    expect(timeline.isClosed).toBe(true);
+    expect(timeline.events.map((event) => event.id)).toEqual(["appointment-1"]);
+    expect(timeline.startMinute).toBe(9 * 60 + 30);
+    expect(timeline.endMinute).toBe(11 * 60);
+    expect(timeline.slots.every((slot) => !slot.bookable)).toBe(true);
+  });
+
+  it("extends shortened hours to a booking that ends later", () => {
+    const timeline = buildDayTimeline({
+      appointments: [appointment],
+      availabilityRules: rules,
+      blocks: [],
+      dateOverrides: [
+        {
+          end_local_time: "10:00",
+          override_kind: "modified",
+          start_local_time: "09:00",
+          work_date: "2026-09-28",
+        },
+      ],
+      selectedDate: "2026-09-28",
+      timezone: "Europe/Prague",
+    });
+
+    expect(timeline.isClosed).toBe(false);
+    expect(timeline.endMinute).toBe(11 * 60);
+    expect(timeline.events[0]).toMatchObject({
+      endMinute: 11 * 60,
+      startMinute: 9 * 60 + 30,
+    });
+    expect(timeline.slots.map((slot) => [slot.label, slot.bookable])).toEqual([
+      ["09:00", true],
+      ["09:30", true],
+      ["10:00", false],
+      ["10:30", false],
+    ]);
   });
 });
