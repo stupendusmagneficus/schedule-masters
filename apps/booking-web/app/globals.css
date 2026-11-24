@@ -3,11 +3,11 @@
   --surface: #ffffff;
   --surface-subtle: #f0f2f0;
   --ink: #202522;
-  --muted: #68716c;
+  --muted: #636c67;
   --quiet: #8a938d;
   --line: #d8deda;
   --line-subtle: #ebefec;
-  --accent: #2f7d5c;
+  --accent: #2a7454;
   --accent-pressed: #256246;
   --action: #2f7d5c;
   --action-pressed: #256246;
@@ -570,7 +570,7 @@ textarea {
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
-  color: var(--quiet);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }

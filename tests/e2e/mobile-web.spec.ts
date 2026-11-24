@@ -692,7 +692,7 @@ test.describe("mobile web smoke", () => {
     expect(freeSlotsButtonSize?.height).toBeGreaterThanOrEqual(44);
     await expect(page.getByText("Volné termíny", { exact: true })).toHaveCSS(
       "color",
-      "rgb(47, 125, 92)",
+      "rgb(42, 116, 84)",
     );
     const freeSlotsButtonBox = await freeSlotsButton.boundingBox();
     const summaryBox = await page
@@ -825,7 +825,7 @@ test.describe("mobile web smoke", () => {
     await page.getByRole("tab", { name: "Kalendář" }).click();
 
     const dayTab = page.getByRole("tab", { name: "Den", exact: true });
-    await expect(dayTab).toHaveCSS("border-color", "rgb(47, 125, 92)");
+    await expect(dayTab).toHaveCSS("border-color", "rgb(42, 116, 84)");
     await expect(dayTab).toHaveCSS("background-color", "rgb(232, 242, 237)");
 
     const previousDate = page.getByRole("button", {
@@ -836,7 +836,7 @@ test.describe("mobile web smoke", () => {
     expect(arrowSize?.height).toBeGreaterThanOrEqual(44);
     await expect(previousDate).not.toHaveCSS(
       "background-color",
-      "rgb(47, 125, 92)",
+      "rgb(42, 116, 84)",
     );
   });
   test("renders the public booking URL as an actionable profile link", async ({

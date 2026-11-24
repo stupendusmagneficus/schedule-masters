@@ -80,10 +80,15 @@ provide hierarchy without heavy chrome.
 - `brand.action` — green primary action surfaces; `brand.actionPressed` is the darker pressed state.
 - `brand.accent` / `brand.accentSoft` — the restrained green used for available
   time, active navigation, successful actions and progress.
+  `brand.accent` (#2A7454) is one shade darker than `brand.action` (#2F7D5C):
+  green text and selection marks must reach WCAG AA 4.5:1 on `accentSoft`,
+  `surface.subtle` and the canvas, while the button fill keeps the brand green.
 - `surface.canvas` — warm off-white application background.
 - `surface.raised` — cards, sheets and booking panels.
 - `surface.subtle` — input backgrounds and secondary regions.
 - `content.primary` / `content.secondary` / `content.muted` — hierarchy.
+  `content.secondary` must stay readable (≥4.5:1) on `surface.subtle`; use
+  `content.muted` only for non-essential decoration, never for labels or controls.
 - `status.*` — success, warning, danger and informational feedback.
 - `border.default` and `border.strong` — quiet surface outlines and stronger
   grouping edges. `border.control` is reserved for interactive control outlines
