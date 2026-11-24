@@ -602,7 +602,8 @@ test("master manages bookings and a working day with a real backend", async ({
       .getByRole("textbox", { name: "Name, phone, or email" })
       .fill("Manual customer");
     await masterPage
-      .getByRole("button", { name: "Manual customer", exact: true })
+      // Customer rows announce name, contact and visit count.
+      .getByRole("button", { name: /^Manual customer,/ })
       .click();
     await expect(
       masterPage.getByText("Booking history", { exact: true }),
