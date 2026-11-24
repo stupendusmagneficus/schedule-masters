@@ -727,6 +727,8 @@ export const ukrainianMessages: Messages = {
   "booking.noServices": "Наразі немає доступних послуг для запису.",
   "booking.slotNoLongerAvailable":
     "Цей час уже зайняли. Виберіть інший вільний час.",
+  "booking.tooManyPendingRequests":
+    "У вас уже є кілька непідтверджених заявок у цього майстра. Дочекайтеся відповіді або зв’яжіться з майстром напряму.",
   "booking.chooseDate": "Виберіть дату",
   "booking.chooseTime": "Виберіть час",
   "booking.yourDetails": "Ваші дані",

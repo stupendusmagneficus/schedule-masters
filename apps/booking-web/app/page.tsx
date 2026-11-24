@@ -366,6 +366,10 @@ export default function HomePage() {
           setError(t("booking.slotNoLongerAvailable"));
           return;
         }
+        if (bookingError.message.includes("Too many pending requests")) {
+          setError(t("booking.tooManyPendingRequests"));
+          return;
+        }
         throw new Error(bookingError.message);
       }
       analytics.track(analyticsEvents.publicBookingSucceeded, { locale });
