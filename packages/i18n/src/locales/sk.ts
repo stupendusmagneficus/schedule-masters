@@ -746,7 +746,7 @@ export const slovakMessages: Messages = {
   "booking.confirmed": "Rezervácia potvrdená",
   "booking.requestReceived": "Žiadosť o rezerváciu odoslaná",
   "booking.pendingConfirmation":
-    "Majster musí tento termín potvrdiť. Po potvrdení vám zobrazíme aktualizáciu.",
+    "Majster termín potvrdí a ozve sa vám. S otázkami sa obráťte priamo na majstra.",
   "booking.close": "Zavrieť",
   "booking.noSlots": "V tento deň nie sú voľné termíny.",
   "booking.selectService": "Vyberte službu a zobrazia sa voľné termíny.",

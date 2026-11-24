@@ -18,7 +18,12 @@
       ]
     ],
     "ios": {
-      "supportsTablet": false
+      "bundleIdentifier": "cz.chvilio.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryAddUsageDescription": "Chvilio saves the free-slots image to your photos when you choose Save Image."
+      }
     }
   }
 }

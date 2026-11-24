@@ -1,11 +1,13 @@
 {
   "cli": {
+    "version": ">= 27.11.0",
     "appVersionSource": "remote"
   },
   "build": {
     "pilot": {
       "distribution": "store",
       "environment": "preview",
+      "node": "22.14.0",
       "ios": {
         "autoIncrement": true
       }

@@ -23,8 +23,8 @@ export function ConfigurationState() {
     <View style={styles.center}>
       <Text style={styles.title}>Mobile configuration required</Text>
       <Text style={styles.muted}>
-        Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to
-        run the mobile app.
+        Add EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY and
+        EXPO_PUBLIC_BOOKING_WEB_URL to run the mobile app.
       </Text>
     </View>
   );
