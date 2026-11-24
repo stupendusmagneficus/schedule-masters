@@ -1,11 +1,11 @@
 // biome-ignore-all lint/suspicious/noUndeclaredEnvVars: standalone opt-in test, not a Turbo task.
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { formatTime } from "../../packages/i18n/src/index";
 import {
   createAuthenticatedTestUser,
   createSupabaseAdminTestClient,
 } from "../../packages/api/src/supabase.integration.helpers";
+import { formatTime } from "../../packages/i18n/src/index";
 
 test("master moves a booking to another free time", async ({
   page: masterPage,
