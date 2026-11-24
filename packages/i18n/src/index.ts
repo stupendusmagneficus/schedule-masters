@@ -390,6 +390,8 @@ export type MessageKey =
   | "mobile.calendarClosed"
   | "mobile.calendarClosedDescription"
   | "mobile.calendarDaySettings"
+  | "mobile.calendarLoadFailed"
+  | "mobile.calendarLoadFailedDescription"
   | "mobile.calendarDaySettingsDescription"
   | "mobile.calendarDayOpen"
   | "mobile.calendarDayClose"
@@ -610,6 +612,11 @@ export type MessageKey =
   | "mobile.serviceDescriptionInvalid"
   | "mobile.serviceSortOrderInvalid"
   | "mobile.signOut"
+  | "mobile.deleteAccount"
+  | "mobile.deleteAccountDescription"
+  | "mobile.deleteAccountConfirm"
+  | "mobile.deleteAccountConfirmDescription"
+  | "mobile.deleteAccountFailed"
   | "booking.description"
   | "booking.loadingContext"
   | "booking.unavailableTitle"
@@ -1138,6 +1145,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosedDescription":
       "На этот день рабочие часы не настроены.",
     "mobile.calendarDaySettings": "Настроить день",
+    "mobile.calendarLoadFailed": "Не удалось загрузить календарь",
+    "mobile.calendarLoadFailedDescription":
+      "Записи за этот период не показаны. Проверьте подключение и попробуйте снова.",
     "mobile.calendarDaySettingsDescription":
       "Изменение действует только на выбранную дату и не меняет недельный график.",
     "mobile.calendarDayOpen": "Рабочие часы",
@@ -1394,6 +1404,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrderInvalid":
       "Порядок должен быть целым числом от 0 до 100 000.",
     "mobile.signOut": "Выйти",
+    "mobile.deleteAccount": "Удалить аккаунт",
+    "mobile.deleteAccountDescription":
+      "Навсегда удаляет аккаунт, студию, услуги, клиентов и все записи. Клиенты не получат уведомлений.",
+    "mobile.deleteAccountConfirm": "Удалить навсегда",
+    "mobile.deleteAccountConfirmDescription":
+      "Это действие нельзя отменить. Заранее сохраните всё, что понадобится, и предупредите клиентов о будущих записях.",
+    "mobile.deleteAccountFailed":
+      "Не удалось удалить аккаунт. Проверьте подключение и попробуйте снова.",
     "booking.description": "Страница онлайн-записи готова к работе.",
     "booking.loadingContext": "Загружаем страницу записи…",
     "booking.unavailableTitle": "Страница записи недоступна",
@@ -1927,6 +1945,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosedDescription":
       "Pro tento den nejsou nastavené pracovní hodiny.",
     "mobile.calendarDaySettings": "Nastavit den",
+    "mobile.calendarLoadFailed": "Kalendář se nepodařilo načíst",
+    "mobile.calendarLoadFailedDescription":
+      "Rezervace za toto období se nezobrazují. Zkontrolujte připojení a zkuste to znovu.",
     "mobile.calendarDaySettingsDescription":
       "Změna platí pouze pro vybrané datum a nemění týdenní rozvrh.",
     "mobile.calendarDayOpen": "Pracovní doba",
@@ -2177,6 +2198,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrderInvalid":
       "Pořadí musí být celé číslo od 0 do 100 000.",
     "mobile.signOut": "Odhlásit se",
+    "mobile.deleteAccount": "Smazat účet",
+    "mobile.deleteAccountDescription":
+      "Trvale smaže účet, studio, služby, klienty a všechny rezervace. Klienti nedostanou žádné upozornění.",
+    "mobile.deleteAccountConfirm": "Smazat natrvalo",
+    "mobile.deleteAccountConfirmDescription":
+      "Tuto akci nelze vrátit. Předem si uložte vše potřebné a informujte klienty o budoucích rezervacích.",
+    "mobile.deleteAccountFailed":
+      "Účet se nepodařilo smazat. Zkontrolujte připojení a zkuste to znovu.",
     "booking.description": "Stránka online rezervací je připravena.",
     "booking.loadingContext": "Načítáme stránku rezervace…",
     "booking.unavailableTitle": "Stránka rezervace není dostupná",
@@ -2712,6 +2741,9 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendarClosedDescription":
       "Working hours are not configured for this day.",
     "mobile.calendarDaySettings": "Configure day",
+    "mobile.calendarLoadFailed": "Could not load the calendar",
+    "mobile.calendarLoadFailedDescription":
+      "Bookings for this period are not shown. Check your connection and try again.",
     "mobile.calendarDaySettingsDescription":
       "This change applies only to the selected date and does not change the weekly schedule.",
     "mobile.calendarDayOpen": "Working hours",
@@ -2968,6 +3000,14 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.serviceSortOrderInvalid":
       "Sort order must be a whole number between 0 and 100,000.",
     "mobile.signOut": "Sign out",
+    "mobile.deleteAccount": "Delete account",
+    "mobile.deleteAccountDescription":
+      "Permanently deletes your account, studio, services, clients and all bookings. Clients are not notified.",
+    "mobile.deleteAccountConfirm": "Delete permanently",
+    "mobile.deleteAccountConfirmDescription":
+      "This cannot be undone. Save anything you need first and let clients with upcoming bookings know.",
+    "mobile.deleteAccountFailed":
+      "Could not delete the account. Check your connection and try again.",
     "booking.description": "The online booking page is ready.",
     "booking.loadingContext": "Loading booking page…",
     "booking.unavailableTitle": "This booking page is unavailable",
