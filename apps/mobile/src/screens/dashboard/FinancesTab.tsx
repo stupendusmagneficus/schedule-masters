@@ -27,6 +27,7 @@ import {
   moveCalendarDate,
 } from "../../features/calendar/calendar";
 import type { WeeklyPaidAmount } from "../../features/finance/financeReport";
+import { formatAmountsByCurrency } from "../../features/finance/formatAmountsByCurrency";
 import { useFinanceData } from "../../features/finance/useFinanceData";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -36,6 +37,7 @@ import type { DashboardTabProps } from "./types";
 
 type FinancesTabProps = DashboardTabProps & {
   readonly client: SupabaseClient<Database> | null;
+  readonly defaultCurrency: string;
   readonly demoData?: DemoData;
   readonly refreshVersion: number;
   readonly visible: boolean;
@@ -44,6 +46,7 @@ type FinancesTabProps = DashboardTabProps & {
 
 export function FinancesTab({
   client,
+  defaultCurrency,
   demoData,
   locale,
   refreshVersion,
@@ -81,11 +84,16 @@ export function FinancesTab({
     year: "numeric",
     timeZone: "UTC",
   });
-  const expectedAmounts = formatAmounts(
+  const expectedAmounts = formatAmountsByCurrency(
     report?.expectedByCurrency ?? {},
     locale,
+    defaultCurrency,
   );
-  const receivedAmounts = formatAmounts(report?.paidByCurrency ?? {}, locale);
+  const receivedAmounts = formatAmountsByCurrency(
+    report?.paidByCurrency ?? {},
+    locale,
+    defaultCurrency,
+  );
   const weeklyIncome = summarizeWeeklyIncome(
     report?.weeklyPaid ?? [],
     fromDate,
@@ -423,9 +431,7 @@ function IncomeByWeekChart({
                     <View style={styles.chartRowHeading}>
                       <Text style={styles.chartWeek}>{week.label}</Text>
                       <Text style={styles.chartValue}>
-                        {value > 0
-                          ? formatCurrency(value, locale, currency)
-                          : "—"}
+                        {formatCurrency(value, locale, currency)}
                       </Text>
                     </View>
                     <View style={styles.chartBarTrack}>
@@ -467,18 +473,6 @@ function summarizeWeeklyIncome(
     if (bucket) bucket.amounts[entry.currency] = entry.amount;
   }
   return buckets;
-}
-
-function formatAmounts(
-  amounts: Readonly<Record<string, number>>,
-  locale: SupportedLocale,
-): string {
-  const entries = Object.entries(amounts);
-  if (entries.length === 0) return "—";
-  return entries
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([currency, amount]) => formatCurrency(amount, locale, currency))
-    .join(" · ");
 }
 
 function monthBoundary(month: string, end: boolean): string {

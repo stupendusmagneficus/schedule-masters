@@ -456,6 +456,9 @@ export const ukrainianMessages: Messages = {
     "Не вдалося видалити дані клієнта. Спробуйте ще раз.",
   "mobile.customerBooking": "Створити запис",
   "mobile.customerVisitCount": "Завершені візити",
+  "mobile.customerNoContact": "Немає контакту",
+  "mobile.customerLastVisit": "Останній візит: {date}",
+  "mobile.customerNoVisitsYet": "Завершених візитів ще немає",
   "mobile.calendarClosed": "Вихідний день",
   "mobile.calendarClosedDescription":
     "Для цього дня не налаштовано робочі години.",

@@ -384,6 +384,9 @@ export type MessageKey =
   | "mobile.customerDeleteFailed"
   | "mobile.customerBooking"
   | "mobile.customerVisitCount"
+  | "mobile.customerNoContact"
+  | "mobile.customerLastVisit"
+  | "mobile.customerNoVisitsYet"
   | "mobile.calendarClosed"
   | "mobile.calendarClosedDescription"
   | "mobile.calendarDaySettings"
@@ -1128,6 +1131,9 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось удалить данные клиента. Попробуйте ещё раз.",
     "mobile.customerBooking": "Создать запись",
     "mobile.customerVisitCount": "Завершённых визитов",
+    "mobile.customerNoContact": "Нет контакта",
+    "mobile.customerLastVisit": "Последний визит: {date}",
+    "mobile.customerNoVisitsYet": "Завершённых визитов пока нет",
     "mobile.calendarClosed": "Нерабочий день",
     "mobile.calendarClosedDescription":
       "На этот день рабочие часы не настроены.",
@@ -1914,6 +1920,9 @@ const messages: Record<SupportedLocale, Messages> = {
       "Údaje klienta se nepodařilo odstranit. Zkuste to znovu.",
     "mobile.customerBooking": "Vytvořit rezervaci",
     "mobile.customerVisitCount": "Dokončené návštěvy",
+    "mobile.customerNoContact": "Bez kontaktu",
+    "mobile.customerLastVisit": "Naposledy: {date}",
+    "mobile.customerNoVisitsYet": "Zatím bez dokončené návštěvy",
     "mobile.calendarClosed": "Nepracovní den",
     "mobile.calendarClosedDescription":
       "Pro tento den nejsou nastavené pracovní hodiny.",
@@ -2696,6 +2705,9 @@ const messages: Record<SupportedLocale, Messages> = {
       "Could not remove the customer's data. Please try again.",
     "mobile.customerBooking": "Create booking",
     "mobile.customerVisitCount": "Completed visits",
+    "mobile.customerNoContact": "No contact",
+    "mobile.customerLastVisit": "Last visit: {date}",
+    "mobile.customerNoVisitsYet": "No completed visits yet",
     "mobile.calendarClosed": "Closed day",
     "mobile.calendarClosedDescription":
       "Working hours are not configured for this day.",
@@ -3168,6 +3180,7 @@ export function formatTime(
 export function formatDuration(
   minutes: number,
   locale: SupportedLocale,
+  style: "long" | "short" = "long",
 ): string {
   const safeMinutes = Math.max(0, Math.floor(minutes));
   const hours = Math.floor(safeMinutes / 60);
@@ -3175,7 +3188,7 @@ export function formatDuration(
   const formatter = new Intl.NumberFormat(getIntlLocale(locale), {
     style: "unit",
     unit: "minute",
-    unitDisplay: "long",
+    unitDisplay: style,
   });
   const parts = [
     ...(hours
@@ -3183,7 +3196,7 @@ export function formatDuration(
           new Intl.NumberFormat(getIntlLocale(locale), {
             style: "unit",
             unit: "hour",
-            unitDisplay: "long",
+            unitDisplay: style,
           }).format(hours),
         ]
       : []),
@@ -3192,10 +3205,12 @@ export function formatDuration(
   if (!parts.length) return formatter.format(0);
   return parts.length === 1
     ? parts[0]
-    : new Intl.ListFormat(getIntlLocale(locale), {
-        style: "long",
-        type: "conjunction",
-      }).format(parts);
+    : style === "short"
+      ? parts.join(" ")
+      : new Intl.ListFormat(getIntlLocale(locale), {
+          style: "long",
+          type: "conjunction",
+        }).format(parts);
 }
 
 export function formatDateTime(

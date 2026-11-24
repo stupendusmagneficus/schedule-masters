@@ -2,10 +2,8 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {
   formatAccessibleDate,
   formatCompactDate,
-  formatCurrency,
   formatDuration,
   formatTime,
-  type SupportedLocale,
 } from "@schedule-app/i18n";
 import {
   ActivityIndicator,
@@ -27,6 +25,7 @@ import { SummaryMetrics } from "../../components/SummaryMetrics";
 import type { DemoAppointment, DemoData } from "../../demo/types";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import { getTodayCalendarDate } from "../../features/calendar/calendar";
+import { formatAmountsByCurrency } from "../../features/finance/formatAmountsByCurrency";
 import { sumReceivedRevenueByCurrency } from "../../features/finance/todayRevenue";
 import { spacing } from "../../theme/spacing";
 import { colors, radii } from "../../theme/tokens";
@@ -112,7 +111,7 @@ export function TodayTab({
   const receivedRevenueByCurrency = demoData
     ? {}
     : sumReceivedRevenueByCurrency(masterAppointments);
-  const receivedRevenue = formatReceivedRevenue(
+  const receivedRevenue = formatAmountsByCurrency(
     receivedRevenueByCurrency,
     locale,
     defaultCurrency,
@@ -510,20 +509,6 @@ function ScheduleSectionHeader({
   );
 }
 
-function formatReceivedRevenue(
-  amounts: Readonly<Record<string, number>>,
-  locale: SupportedLocale,
-  defaultCurrency: string,
-): string {
-  const entries = Object.entries(amounts);
-  if (entries.length === 0) {
-    return formatCurrency(0, locale, defaultCurrency);
-  }
-  return entries
-    .map(([currency, amount]) => formatCurrency(amount, locale, currency))
-    .join(" · ");
-}
-
 function AppointmentRow({
   appointment,
   isNextBooking = false,
@@ -552,7 +537,7 @@ function AppointmentRow({
         <Text style={styles.serviceName}>{appointment.clientName}</Text>
         <Text style={styles.helper}>
           {appointment.startsAt} · {appointment.serviceName} ·{" "}
-          {formatDuration(appointment.durationMinutes, locale)}
+          {formatDuration(appointment.durationMinutes, locale, "short")}
         </Text>
       </View>
       <AppointmentStatusBadge label={statusLabel} status={appointment.status} />
@@ -601,7 +586,7 @@ function MasterAppointmentRow({
             timeZone: timezone,
           })}{" "}
           · {appointment.service_name} ·{" "}
-          {formatDuration(appointment.duration_minutes, locale)}
+          {formatDuration(appointment.duration_minutes, locale, "short")}
         </Text>
       </View>
       <AppointmentStatusBadge label={statusLabel} status={status} />

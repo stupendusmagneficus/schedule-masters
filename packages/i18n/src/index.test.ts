@@ -119,6 +119,12 @@ describe("translations and formatting", () => {
     expect(formatDuration(0, "cz")).toBe("0 minut");
   });
 
+  it("formats short durations for dense list rows", () => {
+    expect(formatDuration(90, "cz", "short")).toBe("1 h 30 min");
+    expect(formatDuration(60, "en", "short")).toBe("1 hr");
+    expect(formatDuration(45, "ru", "short")).toBe("45 мин");
+  });
+
   it("uses Slovak and Ukrainian Intl locales for dates and currency", () => {
     expect(getIntlLocale("sk")).toBe("sk-SK");
     expect(getIntlLocale("uk")).toBe("uk-UA");

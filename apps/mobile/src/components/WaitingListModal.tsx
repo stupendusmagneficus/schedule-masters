@@ -368,7 +368,9 @@ export function WaitingListModal({
                   >
                     <Text style={styles.body}>{customer.name}</Text>
                     <Text style={styles.secondary}>
-                      {customer.email || customer.phone || "—"}
+                      {customer.email ||
+                        customer.phone ||
+                        t("mobile.customerNoContact")}
                     </Text>
                   </Pressable>
                 ))}

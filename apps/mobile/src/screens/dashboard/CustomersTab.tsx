@@ -23,6 +23,7 @@ import {
   AppointmentStatusBadge,
   getAppointmentStatusLabel,
 } from "../../components/AppointmentStatusBadge";
+import { CustomerListRow } from "../../components/CustomerListRow";
 import { DashboardPageHeader } from "../../components/DashboardPageHeader";
 import { InfoCard } from "../../components/InfoCard";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
@@ -193,7 +194,7 @@ export function CustomersTab({
             </Text>
           ) : null}
           {!selected.phone && !selected.email ? (
-            <Text style={styles.helper}>—</Text>
+            <Text style={styles.helper}>{t("mobile.customerNoContact")}</Text>
           ) : null}
           {selected.notes ? (
             <View style={styles.note}>
@@ -388,81 +389,17 @@ export function CustomersTab({
       ) : null}
       {directory.customers.length > 0 ? (
         <InfoCard style={styles.customerList}>
-          {directory.customers.map((customer, index) => {
-            const phoneUrl = customer.phone
-              ? buildCustomerPhoneUrl(customer.phone, "call")
-              : null;
-
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={customer.name}
-                key={customer.id}
-                onPress={() => directory.selectCustomer(customer)}
-                style={[
-                  styles.customerRow,
-                  index > 0 && styles.customerRowSeparated,
-                ]}
-              >
-                <View style={styles.customerCopy}>
-                  <Text style={styles.customerName}>{customer.name}</Text>
-                  {customer.phone ? (
-                    phoneUrl ? (
-                      <Pressable
-                        accessibilityHint={customer.phone}
-                        accessibilityLabel={`${t("mobile.customerCall")}: ${customer.phone}`}
-                        accessibilityRole="link"
-                        onPress={(event) => {
-                          event.stopPropagation();
-                          void Linking.openURL(phoneUrl).catch(() =>
-                            Alert.alert(
-                              t("mobile.customerContactActionFailed"),
-                            ),
-                          );
-                        }}
-                        style={styles.phoneLink}
-                      >
-                        <MaterialCommunityIcons
-                          color={colors.secondaryText}
-                          name="phone-outline"
-                          size={16}
-                        />
-                        <Text numberOfLines={1} style={styles.phoneText}>
-                          {customer.phone}
-                        </Text>
-                      </Pressable>
-                    ) : (
-                      <View style={styles.phoneLink}>
-                        <MaterialCommunityIcons
-                          color={colors.secondaryText}
-                          name="phone-outline"
-                          size={16}
-                        />
-                        <Text numberOfLines={1} style={styles.phoneText}>
-                          {customer.phone}
-                        </Text>
-                      </View>
-                    )
-                  ) : null}
-                </View>
-                <Pressable
-                  accessibilityLabel={t("mobile.openCustomerDetails")}
-                  accessibilityRole="button"
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    directory.selectCustomer(customer);
-                  }}
-                  style={styles.detailsButton}
-                >
-                  <MaterialCommunityIcons
-                    color={colors.secondaryText}
-                    name="dots-horizontal"
-                    size={24}
-                  />
-                </Pressable>
-              </Pressable>
-            );
-          })}
+          {directory.customers.map((customer, index) => (
+            <CustomerListRow
+              customer={customer}
+              key={customer.id}
+              locale={locale}
+              onOpen={() => directory.selectCustomer(customer)}
+              separated={index > 0}
+              t={t}
+              timeZone={workspace.timezone}
+            />
+          ))}
         </InfoCard>
       ) : null}
     </View>
@@ -527,8 +464,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.control,
   },
-  customerCopy: { flex: 1, gap: 0, minWidth: 0 },
-  customerName: { ...typography.label, color: colors.primaryText },
   contactActions: { flexDirection: "row", gap: 4 },
   deleteActions: {
     flexDirection: "row",
@@ -545,26 +480,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     minWidth: 44,
   },
-  customerRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    minHeight: 64,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  customerRowSeparated: {
-    borderTopColor: colors.borderSubtle,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
   customerList: { gap: 0, padding: 0 },
-  detailsButton: {
-    alignItems: "center",
-    borderRadius: radii.control,
-    justifyContent: "center",
-    minHeight: 44,
-    minWidth: 44,
-  },
   error: { ...typography.body, color: colors.danger, marginBottom: 8 },
   eyebrow: {
     color: colors.accent,
@@ -595,19 +511,6 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.actionText,
     fontWeight: "700",
-  },
-  phoneLink: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    gap: 6,
-    minHeight: 44,
-    maxWidth: "100%",
-  },
-  phoneText: {
-    ...typography.body,
-    color: colors.secondaryText,
-    flexShrink: 1,
   },
   errorState: { alignItems: "flex-start", gap: 4 },
   retryButton: { alignSelf: "flex-start", marginLeft: -10 },
