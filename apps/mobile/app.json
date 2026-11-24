@@ -24,6 +24,12 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryAddUsageDescription": "Chvilio saves the free-slots image to your photos when you choose Save Image."
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7c4a4737-425e-4e91-baaa-8afe91ee7378"
+      }
+    },
+    "owner": "yd-apps-team"
   }
 }
