@@ -590,30 +590,41 @@ test.describe("mobile web smoke", () => {
     expect(target?.height).toBeGreaterThanOrEqual(44);
   });
 
-  test("keeps week selection in week view", async ({ page }) => {
+  test("selects a day from the week strip without leaving week view", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
     await page.getByRole("tab", { name: "Kalendář" }).click();
     await page.getByRole("tab", { name: "Týden" }).click();
-    const dateLabel = await page
-      .getByTestId("calendar-week-date")
-      .evaluateAll((buttons) => {
-        const unselectedDate = buttons.find(
-          (button) =>
-            getComputedStyle(button).backgroundColor !== "rgb(232, 242, 237)",
-        );
-        return unselectedDate?.getAttribute("aria-label") ?? null;
-      });
-    expect(dateLabel).not.toBeNull();
-    const dateInAnotherWeek = page.locator(
-      `[data-testid="calendar-week-date"][aria-label="${dateLabel}"]`,
-    );
-    await dateInAnotherWeek.click();
 
-    await expect(dateInAnotherWeek).toHaveCSS(
-      "background-color",
-      "rgb(232, 242, 237)",
-    );
+    const weekDays = page.getByTestId("calendar-week-date");
+    await expect(weekDays).toHaveCount(7);
+    // The selected day shows its date in a filled accent circle.
+    const hasFilledDate = (day: Element) =>
+      Array.from(day.querySelectorAll("div")).some(
+        (node) =>
+          getComputedStyle(node).backgroundColor === "rgb(47, 125, 92)" &&
+          getComputedStyle(node).width === "32px",
+      );
+    const selectedFlags = await weekDays.evaluateAll((days, fn) => {
+      const check = new Function(`return (${fn})`)() as (
+        day: Element,
+      ) => boolean;
+      return days.map(check);
+    }, hasFilledDate.toString());
+    expect(selectedFlags.filter(Boolean)).toHaveLength(1);
+    const targetIndex = selectedFlags.indexOf(false);
+    await weekDays.nth(targetIndex).click();
+
+    await expect(weekDays).toHaveCount(7);
+    const flagsAfter = await weekDays.evaluateAll((days, fn) => {
+      const check = new Function(`return (${fn})`)() as (
+        day: Element,
+      ) => boolean;
+      return days.map(check);
+    }, hasFilledDate.toString());
+    expect(flagsAfter.indexOf(true)).toBe(targetIndex);
   });
 
   test("keeps the free-slots shortcut on Today, not in Calendar", async ({
