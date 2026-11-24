@@ -729,6 +729,8 @@ export const slovakMessages: Messages = {
   "booking.noServices": "Momentálne nie sú dostupné žiadne služby.",
   "booking.slotNoLongerAvailable":
     "Tento čas už nie je voľný. Vyberte si iný termín.",
+  "booking.tooManyPendingRequests":
+    "U tohto majstra už máte niekoľko nepotvrdených žiadostí. Počkajte na odpoveď alebo majstra kontaktujte priamo.",
   "booking.chooseDate": "Vyberte dátum",
   "booking.chooseTime": "Vyberte čas",
   "booking.yourDetails": "Vaše údaje",

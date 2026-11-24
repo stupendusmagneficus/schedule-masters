@@ -621,6 +621,7 @@ export type MessageKey =
   | "booking.noMatchingServices"
   | "booking.noServices"
   | "booking.slotNoLongerAvailable"
+  | "booking.tooManyPendingRequests"
   | "booking.chooseDate"
   | "booking.chooseTime"
   | "booking.yourDetails"
@@ -1397,6 +1398,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.noServices": "Пока нет доступных услуг для записи.",
     "booking.slotNoLongerAvailable":
       "Это время уже заняли. Выберите другой свободный интервал.",
+    "booking.tooManyPendingRequests":
+      "У вас уже есть несколько неподтверждённых заявок у этого мастера. Дождитесь ответа или свяжитесь с мастером напрямую.",
     "booking.chooseDate": "Выберите дату",
     "booking.chooseTime": "Выберите время",
     "booking.yourDetails": "Ваши данные",
@@ -2168,6 +2171,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.noServices": "Momentálne nie sú dostupné žiadne služby.",
     "booking.slotNoLongerAvailable":
       "Tento čas už nie je voľný. Vyberte si iný termín.",
+    "booking.tooManyPendingRequests":
+      "U tohoto mistra už máte několik nepotvrzených žádostí. Počkejte na odpověď nebo mistra kontaktujte přímo.",
     "booking.chooseDate": "Vyberte datum",
     "booking.chooseTime": "Vyberte čas",
     "booking.yourDetails": "Vaše údaje",
@@ -2947,6 +2952,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.noServices": "There are no services available for booking yet.",
     "booking.slotNoLongerAvailable":
       "This time was just taken. Choose another available time.",
+    "booking.tooManyPendingRequests":
+      "You already have several unconfirmed requests with this professional. Wait for a reply or contact them directly.",
     "booking.chooseDate": "Choose a date",
     "booking.chooseTime": "Choose a time",
     "booking.yourDetails": "Your details",
