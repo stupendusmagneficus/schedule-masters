@@ -51,6 +51,7 @@ import { ActionButton } from "./ActionButton";
 import { DateTimePickerField } from "./DateTimePickerField";
 import { FullscreenModal } from "./FullscreenModal";
 import { ManualBookingServicesField } from "./ManualBookingServicesField";
+import { SlotGrid } from "./SlotGrid";
 
 type ManualBookingModalProps = {
   readonly client: SupabaseClient<Database>;
@@ -818,42 +819,15 @@ function TimeStep({
 
       <View style={styles.field}>
         <Text style={styles.sectionTitle}>{t("mobile.manualBookingTime")}</Text>
-        {isLoadingSlots ? (
-          <Text style={styles.helper}>{t("common.loading")}</Text>
-        ) : slots.length ? (
-          <View style={styles.slots}>
-            {slots.map((slot) => {
-              const isSelected = draft.startsAt === slot.starts_at;
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isSelected }}
-                  key={slot.starts_at}
-                  onPress={() => onSelectSlot(slot.starts_at)}
-                  style={[styles.slot, isSelected && styles.selectedSlot]}
-                >
-                  <Text
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.85}
-                    numberOfLines={1}
-                    style={[
-                      styles.slotText,
-                      isSelected && styles.selectedSlotText,
-                    ]}
-                  >
-                    {formatTime(new Date(slot.starts_at), locale, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: workspace.timezone,
-                    })}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : (
-          <Text style={styles.helper}>{t("mobile.manualBookingNoSlots")}</Text>
-        )}
+        <SlotGrid
+          isLoading={isLoadingSlots}
+          locale={locale}
+          onSelect={onSelectSlot}
+          selectedStartsAt={draft.startsAt}
+          slots={slots}
+          t={t}
+          timezone={workspace.timezone}
+        />
       </View>
     </View>
   );
@@ -1351,33 +1325,6 @@ const styles = StyleSheet.create({
   selectedOptionRow: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
-  },
-  selectedSlot: { backgroundColor: colors.action, borderColor: colors.action },
-  selectedSlotText: { color: colors.actionText },
-  slot: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: radii.control,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexGrow: 0,
-    minWidth: 0,
-    minHeight: 48,
-    paddingVertical: 10,
-    width: "31%",
-  },
-  slotText: {
-    ...typography.label,
-    color: colors.primaryText,
-    textAlign: "center",
-    width: "100%",
-  },
-  slots: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 8,
-    maxWidth: 540,
-    width: "100%",
   },
   summary: {
     backgroundColor: colors.surface,

@@ -305,6 +305,11 @@ export type MessageKey =
   | "mobile.customerContactActionFailed"
   | "mobile.confirmBooking"
   | "mobile.cancelBooking"
+  | "mobile.rescheduleBooking"
+  | "mobile.rescheduleBookingDescription"
+  | "mobile.rescheduleBookingSave"
+  | "mobile.rescheduleBookingFailed"
+  | "mobile.bookingRescheduled"
   | "mobile.cancelBookingConfirmDescription"
   | "mobile.completeBooking"
   | "mobile.markNoShow"
@@ -1023,6 +1028,13 @@ const messages: Record<SupportedLocale, Messages> = {
       "Не удалось открыть приложение для связи.",
     "mobile.confirmBooking": "Подтвердить запись",
     "mobile.cancelBooking": "Отменить запись",
+    "mobile.rescheduleBooking": "Перенести",
+    "mobile.rescheduleBookingDescription":
+      "Выберите новое время. Старая ссылка клиента перестанет работать — отправьте ему обновлённую запись.",
+    "mobile.rescheduleBookingSave": "Перенести запись",
+    "mobile.rescheduleBookingFailed":
+      "Не удалось перенести запись. Выберите другое время и попробуйте снова.",
+    "mobile.bookingRescheduled": "Запись перенесена",
     "mobile.cancelBookingConfirmDescription":
       "Вы уверены, что хотите отменить эту запись?",
     "mobile.completeBooking": "Завершить запись",
@@ -1800,6 +1812,13 @@ const messages: Record<SupportedLocale, Messages> = {
       "Aplikaci pro kontakt se nepodařilo otevřít.",
     "mobile.confirmBooking": "Potvrdit rezervaci",
     "mobile.cancelBooking": "Zrušit rezervaci",
+    "mobile.rescheduleBooking": "Přesunout",
+    "mobile.rescheduleBookingDescription":
+      "Vyberte nový čas. Původní odkaz klienta přestane fungovat, pošlete mu aktualizovanou rezervaci.",
+    "mobile.rescheduleBookingSave": "Přesunout rezervaci",
+    "mobile.rescheduleBookingFailed":
+      "Rezervaci se nepodařilo přesunout. Vyberte jiný čas a zkuste to znovu.",
+    "mobile.bookingRescheduled": "Rezervace byla přesunuta",
     "mobile.cancelBookingConfirmDescription":
       "Opravdu chcete tuto rezervaci zrušit?",
     "mobile.completeBooking": "Označit jako dokončenou",
@@ -2576,6 +2595,13 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.customerContactActionFailed": "Could not open the contact app.",
     "mobile.confirmBooking": "Confirm booking",
     "mobile.cancelBooking": "Cancel booking",
+    "mobile.rescheduleBooking": "Reschedule",
+    "mobile.rescheduleBookingDescription":
+      "Choose a new time. The client's previous link stops working, so share the updated booking with them.",
+    "mobile.rescheduleBookingSave": "Move booking",
+    "mobile.rescheduleBookingFailed":
+      "Could not move the booking. Choose another time and try again.",
+    "mobile.bookingRescheduled": "Booking moved",
     "mobile.cancelBookingConfirmDescription":
       "Are you sure you want to cancel this appointment?",
     "mobile.completeBooking": "Complete booking",

@@ -356,6 +356,13 @@ export const slovakMessages: Messages = {
     "Nepodarilo sa otvoriť aplikáciu na kontaktovanie.",
   "mobile.confirmBooking": "Potvrdiť rezerváciu",
   "mobile.cancelBooking": "Zrušiť rezerváciu",
+  "mobile.rescheduleBooking": "Presunúť",
+  "mobile.rescheduleBookingDescription":
+    "Vyberte nový čas. Pôvodný odkaz klienta prestane fungovať, pošlite mu aktualizovanú rezerváciu.",
+  "mobile.rescheduleBookingSave": "Presunúť rezerváciu",
+  "mobile.rescheduleBookingFailed":
+    "Rezerváciu sa nepodarilo presunúť. Vyberte iný čas a skúste to znova.",
+  "mobile.bookingRescheduled": "Rezervácia bola presunutá",
   "mobile.cancelBookingConfirmDescription":
     "Naozaj chcete zrušiť túto rezerváciu?",
   "mobile.completeBooking": "Dokončiť rezerváciu",

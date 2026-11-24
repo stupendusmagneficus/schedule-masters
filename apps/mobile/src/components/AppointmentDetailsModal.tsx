@@ -22,6 +22,7 @@ import type {
   FutureSeriesAppointment,
   MasterAppointment,
 } from "../features/appointments/manualBooking";
+import { canRescheduleAppointment } from "../features/appointments/rescheduleAppointment";
 import { parseAppointmentPayment } from "../features/finance/appointmentPayment";
 import { colors, radii } from "../theme/tokens";
 import { typography } from "../theme/typography";
@@ -44,6 +45,7 @@ type AppointmentDetailsModalProps = {
   readonly onPaymentSave?: (amount: number) => Promise<boolean>;
   readonly onNoteSave?: (note: string) => Promise<boolean>;
   readonly onCancelFutureSeries?: () => Promise<boolean>;
+  readonly onReschedule?: () => void;
   readonly onLoadFutureSeriesAppointments?: () => Promise<
     FutureSeriesAppointment[]
   >;
@@ -77,6 +79,7 @@ export function AppointmentDetailsModal({
   onNoteSave,
   onCancelFutureSeries,
   onLoadFutureSeriesAppointments,
+  onReschedule,
   customerPhone,
   customerContactLoading,
   customerContactError,
@@ -500,6 +503,14 @@ export function AppointmentDetailsModal({
 
             {actions.length > 0 || error ? (
               <View style={styles.actions}>
+                {onReschedule && canRescheduleAppointment(appointment) ? (
+                  <ActionButton
+                    disabled={isSaving || Boolean(activeStatusConfirmation)}
+                    label={t("mobile.rescheduleBooking")}
+                    onPress={onReschedule}
+                    variant="secondary"
+                  />
+                ) : null}
                 {actions.map((action) => (
                   <ActionButton
                     disabled={isSaving || Boolean(activeStatusConfirmation)}

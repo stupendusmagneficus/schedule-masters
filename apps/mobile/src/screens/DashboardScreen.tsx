@@ -16,6 +16,7 @@ import { FloatingBookingAction } from "../components/FloatingBookingAction";
 import { FreeSlotsModal } from "../components/FreeSlotsModal";
 import { ManualBookingModal } from "../components/ManualBookingModal";
 import { NewBookingNotice } from "../components/NewBookingNotice";
+import { RescheduleAppointmentModal } from "../components/RescheduleAppointmentModal";
 import { WaitingListMatchesModal } from "../components/WaitingListMatchesModal";
 import { WaitingListModal } from "../components/WaitingListModal";
 import { mobileEnv } from "../config/env";
@@ -137,6 +138,8 @@ export function DashboardScreen({
   } | null>(null);
   const [isManualBookingVisible, setManualBookingVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
+    useState<MasterAppointment | null>(null);
+  const [rescheduleTarget, setRescheduleTarget] =
     useState<MasterAppointment | null>(null);
   const [manualBookingDate, setManualBookingDate] = useState<string | null>(
     null,
@@ -284,6 +287,15 @@ export function DashboardScreen({
     } finally {
       setUpdatingAppointment(false);
     }
+  }
+
+  async function finishReschedule() {
+    analytics.track(analyticsEvents.appointmentRescheduled);
+    setRescheduleTarget(null);
+    setSelectedAppointment(null);
+    setFinanceRefreshVersion((version) => version + 1);
+    await Promise.all([calendar.reload(), bookingRequests.reload()]);
+    setFeedback(t("mobile.bookingRescheduled"));
   }
 
   async function loadWaitingListMatches(cancelledAppointmentId: string) {
@@ -723,6 +735,20 @@ export function DashboardScreen({
           workspace={workspace}
         />
       ) : null}
+      {client && rescheduleTarget ? (
+        <RescheduleAppointmentModal
+          appointment={rescheduleTarget}
+          client={client}
+          key={rescheduleTarget.id}
+          locale={locale}
+          onClose={() => setRescheduleTarget(null)}
+          onRescheduled={finishReschedule}
+          t={t}
+          timezone={workspace.timezone}
+          visible
+          workspaceId={workspace.id}
+        />
+      ) : null}
       <AppointmentDetailsModal
         emailStatus={
           client && selectedAppointment ? (
@@ -751,6 +777,11 @@ export function DashboardScreen({
         onNoteSave={saveAppointmentNote}
         onCancelFutureSeries={cancelFutureSeriesAppointments}
         onLoadFutureSeriesAppointments={loadFutureSeriesAppointments}
+        onReschedule={
+          client && selectedAppointment
+            ? () => setRescheduleTarget(selectedAppointment)
+            : undefined
+        }
         customerPhone={customerPhone.phone}
         customerContactLoading={customerPhone.isLoading}
         customerContactError={customerPhone.error}

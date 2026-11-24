@@ -1560,6 +1560,17 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_master_reschedule_slots: {
+        Args: {
+          p_appointment_id: string
+          p_date: string
+          p_workspace_id: string
+        }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string; p_slug: string }
         Returns: {
@@ -1791,8 +1802,12 @@ export type Database = {
         Args: { p_workspace_id: string }
         Returns: number
       }
-      reschedule_appointment: {
-        Args: { p_appointment_id: string; p_starts_at: string }
+      reschedule_master_appointment: {
+        Args: {
+          p_appointment_id: string
+          p_starts_at: string
+          p_workspace_id: string
+        }
         Returns: Json
       }
       reserve_platform_integration_usage: {
