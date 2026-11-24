@@ -355,6 +355,13 @@ export const ukrainianMessages: Messages = {
     "Не вдалося відкрити застосунок для зв’язку.",
   "mobile.confirmBooking": "Підтвердити запис",
   "mobile.cancelBooking": "Скасувати запис",
+  "mobile.rescheduleBooking": "Перенести",
+  "mobile.rescheduleBookingDescription":
+    "Виберіть новий час. Старе посилання клієнта перестане працювати — надішліть йому оновлений запис.",
+  "mobile.rescheduleBookingSave": "Перенести запис",
+  "mobile.rescheduleBookingFailed":
+    "Не вдалося перенести запис. Виберіть інший час і спробуйте ще раз.",
+  "mobile.bookingRescheduled": "Запис перенесено",
   "mobile.cancelBookingConfirmDescription": "Справді скасувати цей запис?",
   "mobile.completeBooking": "Завершити запис",
   "mobile.markNoShow": "Позначити як неявку",
