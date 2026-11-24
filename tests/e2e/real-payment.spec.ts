@@ -5,6 +5,7 @@ import {
   createAuthenticatedTestUser,
   createSupabaseAdminTestClient,
 } from "../../packages/api/src/supabase.integration.helpers";
+import { formatCurrency } from "../../packages/i18n/src/index";
 
 test("master records a payment and sees it in Finances", async ({
   page: masterPage,
@@ -142,10 +143,7 @@ test("master records a payment and sees it in Finances", async ({
       completedCount: 1,
       paidByCurrency: { CZK: paymentAmount },
     });
-    const paidAmount = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "CZK",
-    }).format(paymentAmount);
+    const paidAmount = formatCurrency(paymentAmount, "en", "CZK");
     await expect(
       masterPage
         .getByText(paidAmount, { exact: true })

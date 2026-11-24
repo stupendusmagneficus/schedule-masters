@@ -494,12 +494,6 @@ export default function HomePage() {
     <main className="booking-page page-shell">
       <section className="booking-panel">
         <div className="booking-header">
-          <div>
-            <p className="eyebrow">{t("common.appName")}</p>
-            <p className="booking-with-label">{t("booking.bookingWith")}</p>
-            <h1>{context.workspace.name}</h1>
-            <p className="muted-copy">{t("booking.description")}</p>
-          </div>
           <div
             className="language-picker"
             aria-label={t("common.language")}
@@ -522,10 +516,19 @@ export default function HomePage() {
               </button>
             ))}
           </div>
+          <div className="booking-intro">
+            <p className="eyebrow">{t("common.appName")}</p>
+            <p className="booking-with-label">{t("booking.bookingWith")}</p>
+            <h1>{context.workspace.name}</h1>
+            <p className="booking-instruction">{t("booking.description")}</p>
+          </div>
         </div>
 
         <div className="booking-section">
           <h2>
+            <span className="step-number" aria-hidden="true">
+              1
+            </span>
             {t("booking.chooseService")}
             <span className="required-marker" aria-hidden="true">
               *
@@ -551,6 +554,9 @@ export default function HomePage() {
         <div className="booking-section">
           <label htmlFor="booking-date">
             <h2>
+              <span className="step-number" aria-hidden="true">
+                2
+              </span>
               {t("booking.chooseDate")}
               <span className="required-marker" aria-hidden="true">
                 *
@@ -576,6 +582,9 @@ export default function HomePage() {
 
         <div className="booking-section">
           <h2>
+            <span className="step-number" aria-hidden="true">
+              3
+            </span>
             {t("booking.chooseTime")}
             <span className="required-marker" aria-hidden="true">
               *
@@ -624,7 +633,12 @@ export default function HomePage() {
         </div>
 
         <div className="booking-section details-section">
-          <h2>{t("booking.yourDetails")}</h2>
+          <h2>
+            <span className="step-number" aria-hidden="true">
+              4
+            </span>
+            {t("booking.yourDetails")}
+          </h2>
           <p className="required-hint">{t("booking.requiredHint")}</p>
           <div className="form-grid">
             <label>

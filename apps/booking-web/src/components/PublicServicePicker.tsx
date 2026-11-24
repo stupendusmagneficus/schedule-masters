@@ -62,21 +62,6 @@ export function PublicServicePicker({
           value={query}
         />
       </label>
-      {selectedServices.length > 0 && currency && (
-        <a
-          aria-label={`${t("booking.selectedServices")}: ${selectedServices.length}, ${formatDuration(summary.durationMinutes, locale)}, ${formatCurrency(summary.priceAmount, locale, currency)}`}
-          className="service-selection-quick-summary"
-          href="#booking-selected-services"
-        >
-          <span>
-            {t("booking.selectedServices")}: {selectedServices.length}
-          </span>
-          <span>{formatDuration(summary.durationMinutes, locale)}</span>
-          <strong>
-            {formatCurrency(summary.priceAmount, locale, currency)}
-          </strong>
-        </a>
-      )}
       {categories.size === 0 ? (
         <p className="empty-state" role="status">
           {services.length === 0

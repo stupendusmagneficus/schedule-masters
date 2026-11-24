@@ -28,7 +28,7 @@ test.describe("mobile web smoke", () => {
       page.getByText("Volné termíny", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Přijato", { exact: true })).toBeVisible();
-    await expect(page.getByText(/0,00\s*Kč/)).toBeVisible();
+    await expect(page.getByText(/^0\s*Kč$/)).toBeVisible();
   });
 
   test("keeps day browsing in Calendar instead of the Today header", async ({

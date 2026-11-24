@@ -1067,7 +1067,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendar": "Календарь",
     "mobile.calendarCurrentTime": "Текущее время",
     "mobile.calendarSelectDate": "Выберите дату",
-    "mobile.calendarSelectDays": "Выбрать даты",
+    "mobile.calendarSelectDays": "Настроить несколько дней",
     "mobile.calendarSelectionHint":
       "Выберите даты, затем решите: изменить только их или повторять график для этих дней недели.",
     "mobile.calendarCancelSelection": "Отменить выбор",
@@ -1412,7 +1412,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "Это действие нельзя отменить. Заранее сохраните всё, что понадобится, и предупредите клиентов о будущих записях.",
     "mobile.deleteAccountFailed":
       "Не удалось удалить аккаунт. Проверьте подключение и попробуйте снова.",
-    "booking.description": "Страница онлайн-записи готова к работе.",
+    "booking.description":
+      "Выберите услугу и свободное время, затем оставьте контакты — подтверждение придёт на email.",
     "booking.loadingContext": "Загружаем страницу записи…",
     "booking.unavailableTitle": "Страница записи недоступна",
     "booking.unavailableDescription":
@@ -1864,7 +1865,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendar": "Kalendář",
     "mobile.calendarCurrentTime": "Aktuální čas",
     "mobile.calendarSelectDate": "Vyberte datum",
-    "mobile.calendarSelectDays": "Vybrat dny",
+    "mobile.calendarSelectDays": "Nastavit více dní",
     "mobile.calendarSelectionHint":
       "Vyberte data a pak zvolte, zda změnit pouze tato data, nebo opakovat rozvrh pro tyto dny v týdnu.",
     "mobile.calendarCancelSelection": "Zrušit výběr",
@@ -2206,7 +2207,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "Tuto akci nelze vrátit. Předem si uložte vše potřebné a informujte klienty o budoucích rezervacích.",
     "mobile.deleteAccountFailed":
       "Účet se nepodařilo smazat. Zkontrolujte připojení a zkuste to znovu.",
-    "booking.description": "Stránka online rezervací je připravena.",
+    "booking.description":
+      "Vyberte službu a volný čas, pak nechte kontakt — potvrzení přijde e-mailem.",
     "booking.loadingContext": "Načítáme stránku rezervace…",
     "booking.unavailableTitle": "Stránka rezervace není dostupná",
     "booking.unavailableDescription":
@@ -2662,7 +2664,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "mobile.calendar": "Calendar",
     "mobile.calendarCurrentTime": "Current time",
     "mobile.calendarSelectDate": "Choose a date",
-    "mobile.calendarSelectDays": "Select dates",
+    "mobile.calendarSelectDays": "Configure several days",
     "mobile.calendarSelectionHint":
       "Select dates, then choose whether to change only those dates or repeat the schedule on those weekdays.",
     "mobile.calendarCancelSelection": "Cancel selection",
@@ -3008,7 +3010,8 @@ const messages: Record<SupportedLocale, Messages> = {
       "This cannot be undone. Save anything you need first and let clients with upcoming bookings know.",
     "mobile.deleteAccountFailed":
       "Could not delete the account. Check your connection and try again.",
-    "booking.description": "The online booking page is ready.",
+    "booking.description":
+      "Pick a service and a free time, then leave your contact — the confirmation comes by email.",
     "booking.loadingContext": "Loading booking page…",
     "booking.unavailableTitle": "This booking page is unavailable",
     "booking.unavailableDescription":
@@ -3269,9 +3272,11 @@ export function formatCurrency(
   locale: SupportedLocale,
   currency = "CZK",
 ): string {
+  // Whole amounts read as "700 Kč", not "700,00 Kč"; cents stay visible.
   return new Intl.NumberFormat(getIntlLocale(locale), {
     style: "currency",
     currency,
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
   }).format(value);
 }
 
