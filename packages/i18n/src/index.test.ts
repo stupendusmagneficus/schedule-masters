@@ -54,6 +54,15 @@ describe("locale resolution", () => {
 describe("translations and formatting", () => {
   const date = new Date("2026-01-15T13:30:00.000Z");
 
+  it("keeps Czech messages free of Slovak-only letters", () => {
+    const slovakOnly = /[ľĺŕôä]/i;
+    const slovakInCzech = translationKeys.filter((key) =>
+      slovakOnly.test(translate("cz", key)),
+    );
+
+    expect(slovakInCzech).toEqual([]);
+  });
+
   it("returns translated messages", () => {
     expect(translate("ru", "common.language")).toBe("Язык");
     expect(translate("cz", "common.language")).toBe("Jazyk");

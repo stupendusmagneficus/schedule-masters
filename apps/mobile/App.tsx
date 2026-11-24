@@ -141,7 +141,7 @@ function AppContent() {
         workspace={demoWorkspace}
       />
     );
-  if (!supabase) return <ConfigurationState />;
+  if (!supabase || !mobileEnv.bookingWebUrl) return <ConfigurationState />;
   if (auth.restoring) return <AppLaunchScreen />;
   if (session && isPasswordRecovery)
     return (
