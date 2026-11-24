@@ -6,14 +6,14 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { getAppointmentStatusLabel } from "../../components/AppointmentStatusBadge";
 import type { MasterAppointment } from "../../features/appointments/manualBooking";
 import type { PersonalBlock } from "../../features/availability/personalBlocks";
+import { getTodayCalendarDate } from "../../features/calendar/calendar";
 import { getCalendarWorkloadLevel } from "../../features/calendar/calendarWorkload";
 import { formatTimelineTime } from "../../features/calendar/dayTimeline";
-import {
-  buildWeekCalendarMonth,
-  type WeekCalendarDay,
-  type WeekCalendarEvent,
+import type {
+  WeekCalendarDay,
+  WeekCalendarEvent,
 } from "../../features/calendar/weekCalendar";
-import { colors, radii } from "../../theme/tokens";
+import { colors } from "../../theme/tokens";
 import { CalendarEventLegend } from "./CalendarEventLegend";
 import { CalendarPeriodNavigation } from "./CalendarPeriodNavigation";
 import { CalendarWorkloadLegend } from "./CalendarWorkloadLegend";
@@ -62,7 +62,7 @@ export function WeekCalendar({
   timezone,
   weekLabel,
 }: WeekCalendarProps) {
-  const monthDays = buildWeekCalendarMonth(selectedDate, days);
+  const todayDate = getTodayCalendarDate(timezone);
   const openDays = days.filter((day) => !day.isClosed);
   const startMinute = Math.min(
     ...(openDays.length ? openDays : days).map((day) => day.startMinute),
@@ -97,44 +97,6 @@ export function WeekCalendar({
         todayLabel={t("mobile.today")}
       />
       {dayControl}
-      <CalendarWorkloadLegend t={t} />
-      <View style={styles.monthWeekdays}>
-        {monthDays.slice(0, 7).map((day) => (
-          <Text key={day.date} style={styles.monthWeekday}>
-            {formatWeekday(day.date, locale)}
-          </Text>
-        ))}
-      </View>
-      <View style={styles.monthGrid}>
-        {monthDays.map((day) => (
-          <Pressable
-            accessibilityLabel={formatDateLabel(day.date, locale, timezone)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: day.isSelectedWeek }}
-            key={day.date}
-            onPress={() => onPressDay?.(day.date)}
-            testID="calendar-week-date"
-            style={({ pressed }) => [
-              styles.monthDay,
-              !day.isCurrentMonth && styles.monthDayOutside,
-              day.isSelectedWeek && styles.monthDaySelectedWeek,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text
-              style={[
-                styles.monthDayText,
-                !day.isCurrentMonth && styles.monthDayTextOutside,
-                day.date === selectedDate && styles.monthDayTextSelected,
-              ]}
-            >
-              {day.dayOfMonth}
-            </Text>
-            {day.hasEvents ? <View style={styles.monthDayDot} /> : null}
-          </Pressable>
-        ))}
-      </View>
-
       <View style={styles.weekHeaderRow}>
         <View style={styles.timeHeader} />
         <View style={styles.dayHeaderColumns}>
@@ -147,56 +109,49 @@ export function WeekCalendar({
                 t,
               )}
               accessibilityRole="button"
+              accessibilityState={{ selected: day.date === selectedDate }}
               key={day.date}
               onPress={() => onPressDay?.(day.date)}
+              testID="calendar-week-date"
               style={({ pressed }) => [
                 styles.weekDayHeader,
-                day.date === selectedDate && styles.weekDayHeaderSelected,
                 day.isClosed && styles.weekDayHeaderClosed,
                 pressed && styles.pressed,
               ]}
             >
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.weekDayName,
-                  day.date === selectedDate && styles.weekDayTextSelected,
-                ]}
-              >
+              <Text numberOfLines={1} style={styles.weekDayName}>
                 {formatWeekday(day.date, locale)}
-              </Text>
-              <Text
-                style={[
-                  styles.weekDayNumber,
-                  day.date === selectedDate && styles.weekDayTextSelected,
-                ]}
-              >
-                {day.date.slice(-2).replace(/^0/, "")}
-              </Text>
-              <Text
-                style={[
-                  styles.weekDayCount,
-                  {
-                    color:
-                      day.workloadPercent === null
-                        ? colors.secondaryText
-                        : getWorkloadColor(day.workloadPercent),
-                  },
-                  day.date === selectedDate && styles.weekDayTextSelected,
-                ]}
-              >
-                {day.bookingCount}
               </Text>
               <View
                 style={[
-                  styles.weekDayDot,
-                  day.bookingCount > 0 &&
-                    day.workloadPercent !== null && {
-                      backgroundColor: getWorkloadColor(day.workloadPercent),
-                    },
-                  day.isClosed && styles.weekDayDotClosed,
+                  styles.weekDayNumberCircle,
+                  day.date === todayDate && styles.weekDayNumberToday,
+                  day.date === selectedDate && styles.weekDayNumberSelected,
                 ]}
-              />
+              >
+                <Text
+                  style={[
+                    styles.weekDayNumber,
+                    day.date === todayDate && styles.weekDayNumberTodayText,
+                    day.date === selectedDate &&
+                      styles.weekDayNumberSelectedText,
+                  ]}
+                >
+                  {day.date.slice(-2).replace(/^0/, "")}
+                </Text>
+              </View>
+              {/* Load bar: width follows booked share of the working day. */}
+              <View style={styles.weekDayLoadTrack}>
+                <View
+                  style={[
+                    styles.weekDayLoadFill,
+                    {
+                      backgroundColor: getWorkloadColor(day.workloadPercent),
+                      width: `${Math.min(day.workloadPercent ?? 0, 100)}%`,
+                    },
+                  ]}
+                />
+              </View>
             </Pressable>
           ))}
         </View>
@@ -276,6 +231,7 @@ export function WeekCalendar({
           ))}
         </View>
       </View>
+      <CalendarWorkloadLegend t={t} />
       <CalendarEventLegend t={t} />
       <Text style={styles.hint}>{t("mobile.calendarTapToBook")}</Text>
     </View>
@@ -334,7 +290,7 @@ function WeekCalendarEventCard({
         />
       </View>
       <Text
-        numberOfLines={1}
+        numberOfLines={height >= 48 ? 2 : 1}
         style={[
           styles.eventTitle,
           event.kind === "block" && styles.blockEventText,
@@ -536,44 +492,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
-  monthDay: {
-    alignItems: "center",
-    borderRadius: radii.control,
-    height: 25,
-    justifyContent: "center",
-    position: "relative",
-    width: "14.2857%",
-  },
-  monthDayDot: {
-    backgroundColor: colors.accent,
-    borderRadius: 999,
-    bottom: 2,
-    height: 3,
-    position: "absolute",
-    width: 3,
-  },
-  monthDayOutside: { opacity: 0.4 },
-  monthDaySelectedWeek: { backgroundColor: colors.accentSoft },
-  monthDayText: { color: colors.primaryText, fontSize: 11, lineHeight: 15 },
-  monthDayTextOutside: { color: colors.secondaryText },
-  monthDayTextSelected: {
-    backgroundColor: colors.accent,
-    borderRadius: radii.control,
-    color: colors.actionText,
-    minWidth: 22,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    textAlign: "center",
-  },
-  monthGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 10 },
-  monthWeekday: {
-    color: colors.secondaryText,
-    fontSize: 9,
-    lineHeight: 12,
-    textAlign: "center",
-    width: "14.2857%",
-  },
-  monthWeekdays: { flexDirection: "row", marginBottom: 2 },
   pressed: { opacity: 0.72 },
   root: { minWidth: 0 },
   schedule: { flexDirection: "row", minWidth: 0 },
@@ -599,15 +517,6 @@ const styles = StyleSheet.create({
     paddingRight: 4,
     paddingTop: 2,
   },
-  weekDayDot: {
-    backgroundColor: colors.borderSubtle,
-    borderRadius: 999,
-    height: 3,
-    marginTop: 2,
-    width: 3,
-  },
-  weekDayDotActive: { backgroundColor: colors.accent },
-  weekDayDotClosed: { backgroundColor: colors.secondaryText },
   weekDayHeader: {
     alignItems: "center",
     borderBottomColor: colors.borderSubtle,
@@ -618,30 +527,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 1,
     paddingTop: 3,
   },
-  weekDayHeaderClosed: { backgroundColor: colors.subtleSurface },
-  weekDayHeaderSelected: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: 6,
+  weekDayHeaderClosed: {
+    backgroundColor: colors.subtleSurface,
+    borderRadius: 8,
+  },
+  weekDayLoadFill: { borderRadius: 999, height: 3 },
+  weekDayLoadTrack: {
+    backgroundColor: colors.borderSubtle,
+    borderRadius: 999,
+    height: 3,
+    marginTop: 4,
+    overflow: "hidden",
+    width: "70%",
   },
   weekDayName: {
     color: colors.secondaryText,
-    fontSize: 8,
-    lineHeight: 10,
+    fontSize: 11,
+    fontWeight: "600",
+    lineHeight: 14,
     textAlign: "center",
+    textTransform: "uppercase",
   },
   weekDayNumber: {
     color: colors.primaryText,
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: "700",
-    lineHeight: 15,
+    lineHeight: 20,
   },
-  weekDayCount: {
-    fontSize: 8,
-    fontWeight: "700",
-    lineHeight: 10,
-    textAlign: "center",
+  weekDayNumberCircle: {
+    alignItems: "center",
+    borderRadius: 999,
+    height: 32,
+    justifyContent: "center",
+    marginTop: 2,
+    width: 32,
   },
-  weekDayTextSelected: { color: colors.accentPressed },
+  weekDayNumberSelected: { backgroundColor: colors.accent },
+  weekDayNumberSelectedText: { color: colors.actionText },
+  weekDayNumberToday: { borderColor: colors.accent, borderWidth: 1.5 },
+  weekDayNumberTodayText: { color: colors.accent },
   weekHeaderRow: { flexDirection: "row", marginBottom: 2 },
 });
 

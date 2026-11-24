@@ -38,15 +38,6 @@ export type WeekCalendarDay = {
   readonly workloadPercent: number | null;
 };
 
-export type WeekCalendarMonthDay = {
-  readonly date: string;
-  readonly dayOfMonth: number;
-  readonly hasEvents: boolean;
-  readonly isClosed: boolean;
-  readonly isCurrentMonth: boolean;
-  readonly isSelectedWeek: boolean;
-};
-
 type BuildWeekCalendarParams = {
   readonly appointments: readonly MasterAppointment[];
   readonly availabilityRules: readonly WorkspaceAvailabilityRule[];
@@ -217,34 +208,6 @@ export function buildDemoWeekCalendar(
       ),
     };
   });
-}
-
-export function buildWeekCalendarMonth(
-  selectedDate: string,
-  days: readonly WeekCalendarDay[],
-): WeekCalendarMonthDay[] {
-  const monthRange = getCalendarDateRange(selectedDate, "month");
-  const firstWeekday = getIsoDayOfWeek(monthRange.fromDate);
-  const lastWeekday = getIsoDayOfWeek(monthRange.toDate);
-  const gridStart = addCalendarDays(monthRange.fromDate, 1 - firstWeekday);
-  const gridEnd = addCalendarDays(monthRange.toDate, 7 - lastWeekday);
-  const selectedWeek = new Set(days.map((day) => day.date));
-  const daysByDate = new Map(days.map((day) => [day.date, day]));
-  const monthDays: WeekCalendarMonthDay[] = [];
-
-  for (let date = gridStart; date <= gridEnd; date = addCalendarDays(date, 1)) {
-    const day = daysByDate.get(date);
-    monthDays.push({
-      date,
-      dayOfMonth: Number(date.slice(-2)),
-      hasEvents: Boolean(day?.events.length),
-      isClosed: day?.isClosed ?? false,
-      isCurrentMonth: date >= monthRange.fromDate && date <= monthRange.toDate,
-      isSelectedWeek: selectedWeek.has(date),
-    });
-  }
-
-  return monthDays;
 }
 
 function getIsoDayOfWeek(value: string): number {

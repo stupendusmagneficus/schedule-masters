@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { MasterAppointment } from "../appointments/manualBooking";
 import type { PersonalBlock } from "../availability/personalBlocks";
-import {
-  buildDemoWeekCalendar,
-  buildWeekCalendar,
-  buildWeekCalendarMonth,
-} from "./weekCalendar";
+import { buildDemoWeekCalendar, buildWeekCalendar } from "./weekCalendar";
 
 const appointment = {
   currency: "CZK",
@@ -163,33 +159,5 @@ describe("week calendar", () => {
       startMinute: 12 * 60,
     });
     expect(week[3]?.isClosed).toBe(true);
-  });
-
-  it("builds a compact month grid with the selected week highlighted", () => {
-    const week = buildDemoWeekCalendar([], "2030-01-09", "Europe/Prague");
-    const month = buildWeekCalendarMonth("2030-01-09", week);
-
-    expect(month).toHaveLength(35);
-    expect(month[0]).toMatchObject({
-      date: "2029-12-31",
-      isCurrentMonth: false,
-      isSelectedWeek: false,
-    });
-    expect(month.find((day) => day.date === "2030-01-09")).toMatchObject({
-      dayOfMonth: 9,
-      isCurrentMonth: true,
-      isSelectedWeek: true,
-    });
-    expect(
-      month.filter((day) => day.isSelectedWeek).map((day) => day.date),
-    ).toEqual([
-      "2030-01-07",
-      "2030-01-08",
-      "2030-01-09",
-      "2030-01-10",
-      "2030-01-11",
-      "2030-01-12",
-      "2030-01-13",
-    ]);
   });
 });
