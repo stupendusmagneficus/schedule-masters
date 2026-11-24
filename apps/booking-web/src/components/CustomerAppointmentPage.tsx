@@ -8,6 +8,10 @@ import {
   type SupportedLocale,
 } from "@schedule-app/i18n";
 import { useEffect, useMemo, useState } from "react";
+import {
+  isStartedAppointment,
+  isStartedAppointmentError,
+} from "../utils/appointmentManagement";
 
 type AppointmentDetails = {
   readonly appointmentId: string;
@@ -66,6 +70,14 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
       p_action: action,
       p_token: token,
     });
+    if (isStartedAppointmentError(error?.message)) {
+      setIsConfirmingCancellation(false);
+      setAppointment((current) =>
+        current ? { ...current, canCancel: false, canConfirm: false } : current,
+      );
+      setIsSaving(false);
+      return;
+    }
     if (error) {
       setHasError(true);
       setIsSaving(false);
@@ -147,6 +159,11 @@ export function CustomerAppointmentPage({ client, locale, token }: Props) {
           </p>
           <p>{getStatusLabel(appointment.status, t)}</p>
         </div>
+        {isStartedAppointment(appointment) ? (
+          <p className="muted-copy" role="status">
+            {t("booking.manageStarted")}
+          </p>
+        ) : null}
         {appointment.canConfirm || appointment.canCancel ? (
           <div className="management-actions">
             {appointment.canConfirm ? (

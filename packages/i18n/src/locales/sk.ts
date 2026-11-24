@@ -798,4 +798,6 @@ export const slovakMessages: Messages = {
   "booking.manageCompleted": "Dokončené",
   "booking.manageActionFailed":
     "Rezerváciu sa nepodarilo aktualizovať. Skúste to znova.",
+  "booking.manageStarted":
+    "Termín sa už začal, preto ho nie je možné zmeniť online. Kontaktujte priamo majstra.",
 };

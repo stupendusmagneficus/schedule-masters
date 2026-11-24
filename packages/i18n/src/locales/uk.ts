@@ -795,4 +795,6 @@ export const ukrainianMessages: Messages = {
   "booking.manageCancelled": "Скасовано",
   "booking.manageCompleted": "Завершено",
   "booking.manageActionFailed": "Не вдалося оновити запис. Спробуйте ще раз.",
+  "booking.manageStarted":
+    "Візит уже розпочався, тому змінити його онлайн не можна. Зв'яжіться з майстром напряму.",
 };
