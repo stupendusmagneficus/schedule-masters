@@ -293,6 +293,120 @@ test("recovers a password, keeps the form after reload, and signs out", async ({
   ).toBeNull();
 });
 
+test("keeps a booking visible on a day the master closed", async ({
+  page,
+}, testInfo) => {
+  const workspaceId = "16100000-0000-4000-8000-000000000001";
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Prague",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.addInitScript(() =>
+    localStorage.setItem("schedule-masters.locale", "en"),
+  );
+  await page.route("**/auth/v1/**", (route) =>
+    route.fulfill({
+      json: route.request().url().includes("/token")
+        ? {
+            access_token: token,
+            refresh_token: "fixture-refresh",
+            token_type: "bearer",
+            expires_in: 3600,
+            user,
+          }
+        : user,
+    }),
+  );
+  await page.route("**/rest/v1/**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/workspace_members"))
+      return route.fulfill({
+        json: { role: "owner", workspace_id: workspaceId },
+      });
+    if (path.endsWith("/workspaces"))
+      return route.fulfill({
+        json: {
+          id: workspaceId,
+          name: "Fixture studio",
+          slug: "fixture",
+          timezone: "Europe/Prague",
+          booking_interval_minutes: 30,
+          public_booking_min_notice_minutes: 0,
+        },
+      });
+    if (path.endsWith("/availability_rules"))
+      return route.fulfill({
+        json: [1, 2, 3, 4, 5, 6, 7].map((day_of_week) => ({
+          day_of_week,
+          start_local_time: "08:00:00",
+          end_local_time: "20:00:00",
+        })),
+      });
+    if (path.endsWith("/availability_date_overrides"))
+      return route.fulfill({
+        json: [
+          {
+            work_date: date,
+            override_kind: "closed",
+            start_local_time: null,
+            end_local_time: null,
+          },
+        ],
+      });
+    if (path.endsWith("/list_master_appointments"))
+      return route.fulfill({
+        json: [
+          {
+            id: "16100000-0000-4000-8000-000000000002",
+            customer_id: "16100000-0000-4000-8000-000000000003",
+            customer_name: "Kept on closed day",
+            service_name: "Fixture service",
+            starts_at: `${date}T09:00:00Z`,
+            ends_at: `${date}T10:00:00Z`,
+            duration_minutes: 60,
+            price_amount: 100,
+            currency: "CZK",
+            paid_amount: 0,
+            status: "confirmed",
+            source: "master_created",
+            master_note: null,
+            appointment_series_id: null,
+          },
+        ],
+      });
+    return route.fulfill({ json: [] });
+  });
+  await page.goto("/");
+  await page
+    .getByRole("button", {
+      name: "Already have an account? Sign in",
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill(user.email);
+  await page
+    .getByRole("textbox", { name: "Password", exact: true })
+    .fill("fixture-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.getByRole("tab", { name: "Calendar", exact: true }).click();
+
+  await expect(
+    page.getByText("Closed day", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Kept on closed day/ }).first(),
+  ).toBeVisible();
+  await testInfo.attach("closed-day-with-booking-375", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+});
+
 test("rejects expired links and offers a fresh reset request", async ({
   page,
 }, testInfo) => {

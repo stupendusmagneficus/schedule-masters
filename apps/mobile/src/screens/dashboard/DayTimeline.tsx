@@ -61,38 +61,48 @@ export function DayTimeline({
     timeZone: timezone,
   });
 
-  if (timeline.isClosed) {
-    return (
-      <View style={styles.closedState}>
-        <Text style={styles.closedTitle}>{t("mobile.calendarClosed")}</Text>
-        <Text style={styles.helper}>
-          {t("mobile.calendarClosedDescription")}
-        </Text>
-      </View>
-    );
-  }
+  const closedNotice = (
+    <View style={styles.closedState}>
+      <Text style={styles.closedTitle}>{t("mobile.calendarClosed")}</Text>
+      <Text style={styles.helper}>{t("mobile.calendarClosedDescription")}</Text>
+    </View>
+  );
+
+  if (timeline.isClosed && timeline.events.length === 0) return closedNotice;
 
   return (
     <View>
+      {timeline.isClosed ? (
+        <View style={styles.closedNoticeAbove}>{closedNotice}</View>
+      ) : null}
       <View accessibilityRole="list" style={styles.timeline}>
-        {timeline.slots.map((slot) => (
-          <Pressable
-            accessibilityHint={t("mobile.calendarTapToBook")}
-            accessibilityLabel={`${slot.label}, ${t("mobile.calendarTapToBook")}`}
-            accessibilityRole="button"
-            key={slot.minute}
-            onPress={() => onPressEmptySlot?.(slot.minute)}
-            style={({ pressed }) => [
-              styles.gridRow,
-              pressed && onPressEmptySlot && styles.gridRowPressed,
-            ]}
-          >
-            <View style={styles.timeColumn}>
-              <Text style={styles.timeLabel}>{slot.label}</Text>
+        {timeline.slots.map((slot) =>
+          slot.bookable ? (
+            <Pressable
+              accessibilityHint={t("mobile.calendarTapToBook")}
+              accessibilityLabel={`${slot.label}, ${t("mobile.calendarTapToBook")}`}
+              accessibilityRole="button"
+              key={slot.minute}
+              onPress={() => onPressEmptySlot?.(slot.minute)}
+              style={({ pressed }) => [
+                styles.gridRow,
+                pressed && onPressEmptySlot && styles.gridRowPressed,
+              ]}
+            >
+              <View style={styles.timeColumn}>
+                <Text style={styles.timeLabel}>{slot.label}</Text>
+              </View>
+              <View style={styles.gridCell} />
+            </Pressable>
+          ) : (
+            <View key={slot.minute} style={styles.gridRow}>
+              <View style={styles.timeColumn}>
+                <Text style={styles.timeLabel}>{slot.label}</Text>
+              </View>
+              <View style={[styles.gridCell, styles.gridCellOutsideHours]} />
             </View>
-            <View style={styles.gridCell} />
-          </Pressable>
-        ))}
+          ),
+        )}
         <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
           {timeline.events.map((event) => (
             <TimelineEvent
@@ -280,6 +290,7 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 16,
   },
+  closedNoticeAbove: { marginBottom: 12 },
   closedTitle: { ...typography.label, color: colors.primaryText },
   currentTimeDot: {
     backgroundColor: colors.danger,
@@ -340,6 +351,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: "700",
   },
+  gridCellOutsideHours: { backgroundColor: colors.subtleSurface },
   gridCell: {
     borderBottomColor: colors.borderSubtle,
     borderBottomWidth: StyleSheet.hairlineWidth,
