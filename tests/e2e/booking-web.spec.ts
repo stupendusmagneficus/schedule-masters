@@ -549,6 +549,34 @@ test.describe("public booking web", () => {
     ).toBeVisible();
   });
 
+  test("links from the booking page footer to the draft privacy policy", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await page.getByRole("radio", { name: "EN" }).click();
+    await page.getByRole("link", { name: "Privacy policy" }).click();
+
+    await expect(page).toHaveURL(/\/privacy$/);
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "Zásady ochrany osobních údajů",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Privacy policy" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Draft – not yet reviewed by a lawyer."),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Koncept – dosud nezkontrolováno právníkem."),
+    ).toBeVisible();
+    await expect(
+      page.getByText("ÚOOÚ", { exact: false }).first(),
+    ).toBeVisible();
+  });
+
   test("switches the booking page locale", async ({ page }) => {
     await page.goto("/?demo=1");
     await page.getByRole("radio", { name: "CZ" }).click();

@@ -17,6 +17,7 @@ import {
   type SupportedLocale,
   supportedLocales,
 } from "@schedule-app/i18n";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerAppointmentPage } from "../src/components/CustomerAppointmentPage";
 import { PublicServicePicker } from "../src/components/PublicServicePicker";
@@ -716,6 +717,9 @@ export default function HomePage() {
         >
           {isLoading ? t("common.loading") : t("booking.confirm")}
         </button>
+        <footer className="booking-footer">
+          <Link href="/privacy">{t("booking.privacyPolicy")}</Link>
+        </footer>
       </section>
     </main>
   );

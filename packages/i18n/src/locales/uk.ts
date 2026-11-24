@@ -768,6 +768,7 @@ export const ukrainianMessages: Messages = {
   "booking.pendingConfirmation":
     "Майстер підтвердить час і зв'яжеться з вами. З питаннями звертайтеся напряму до майстра.",
   "booking.close": "Закрити",
+  "booking.privacyPolicy": "Політика конфіденційності",
   "booking.noSlots": "На цю дату немає вільного часу.",
   "booking.selectService": "Виберіть послугу, щоб побачити вільний час.",
   "booking.selectTime": "Виберіть вільний час.",
