@@ -5,11 +5,11 @@ hosted jobs, backups, or provider retention have been configured or verified.
 
 | Data | Current repository behavior | Remaining work |
 | --- | --- | --- |
-| Booking email outbox and associated private links/webhook events | Terminal records are eligible after 30 days; pending/unconfigured after 90 days. Processing records are retained until finalized. Related link and webhook rows cascade with the outbox. | Verify the hosted daily job and monitor stale claims. An active external send cannot be ruled out merely by claim age. |
+| Booking email outbox and associated private links/webhook events | Terminal records are eligible after 30 days; pending/unconfigured after 90 days. Processing records are retained until finalized. Related link and webhook rows cascade with the outbox. Purged daily by `chvilio-data-retention` (see `pilot-health.md`). | Monitor stale claims (hourly pilot health check). An active external send cannot be ruled out merely by claim age. |
 | Appointment access token hashes | Expired or revoked tokens older than 90 days are cleaned when issuing a link for the workspace. | Verify scheduled cleanup for inactive workspaces and preserve active tokens. |
 | Service translation requests | Requests older than 12 months before the current UTC month are removed on a later request in that workspace. | Verify cleanup for inactive workspaces while preserving quota calculations. |
-| Public booking IP rate-limit rows | Rate limiting reads a five-minute window. Repository migrations contain no scheduled deletion for the stored rows. | Decide and test retention, including operational and privacy needs. |
-| Public, manual and recurring booking idempotency requests | Request and response records are kept for replay; repository migrations contain no scheduled deletion. | Agree on a replay horizon and test retries before deleting records. |
+| Public booking IP rate-limit rows | Rate limiting reads a five-minute window. Rows older than 1 day are deleted daily by `chvilio-data-retention`. | Confirm the job runs on hosted (pilot health check). |
+| Public, manual and recurring booking idempotency requests | Request and response records are kept for replay for 30 days, then deleted daily by `chvilio-data-retention`. | Confirm the job runs on hosted (pilot health check). |
 | Platform integration usage and alert records | Used for daily/monthly budget calculations and threshold alerts; no scheduled deletion was found in repository migrations. | Agree on retention without changing current budgets, unsettled reservations or pending alerts. |
 | Provider logs and stored backups | External to these database tables. | Verify actual provider policy and hosted backup/export availability separately. |
 

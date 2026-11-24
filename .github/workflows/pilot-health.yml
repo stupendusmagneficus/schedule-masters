@@ -1,0 +1,35 @@
+name: Pilot health
+
+# Hourly check of the hosted pilot: public booking page, booking email queue and
+# the daily data-retention job. A failed run is the alert: GitHub emails the
+# person who last changed this schedule (see docs/operations/pilot-health.md).
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pilot-health
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: pilot
+    env:
+      SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BOOKING_WEB_URL: ${{ vars.BOOKING_WEB_URL || 'https://chvilio-web.vercel.app/' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check hosted pilot health
+        run: node scripts/operations/pilot-health.mjs
