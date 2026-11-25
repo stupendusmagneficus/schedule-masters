@@ -652,6 +652,7 @@ export type MessageKey =
   | "booking.requestReceived"
   | "booking.pendingConfirmation"
   | "booking.close"
+  | "booking.privacyPolicy"
   | "booking.noSlots"
   | "booking.selectService"
   | "booking.selectTime"
@@ -1454,6 +1455,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.pendingConfirmation":
       "Мастер подтвердит время и свяжется с вами. С вопросами обращайтесь напрямую к мастеру.",
     "booking.close": "Закрыть",
+    "booking.privacyPolicy": "Политика конфиденциальности",
     "booking.noSlots": "На эту дату нет свободного времени.",
     "booking.selectService": "Выберите услугу, чтобы увидеть свободное время.",
     "booking.selectTime": "Выберите свободное время.",
@@ -2249,6 +2251,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.pendingConfirmation":
       "Mistr termín potvrdí a ozve se vám. S dotazy se obraťte přímo na mistra.",
     "booking.close": "Zavřít",
+    "booking.privacyPolicy": "Zásady ochrany osobních údajů",
     "booking.noSlots": "Pro toto datum nejsou volné termíny.",
     "booking.selectService": "Vyberte službu a zobrazí se volné termíny.",
     "booking.selectTime": "Vyberte volný termín.",
@@ -3052,6 +3055,7 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.pendingConfirmation":
       "The professional will confirm this time and contact you. For questions, reach out to them directly.",
     "booking.close": "Close",
+    "booking.privacyPolicy": "Privacy policy",
     "booking.noSlots": "There are no available times on this date.",
     "booking.selectService": "Choose a service to see available times.",
     "booking.selectTime": "Choose an available time.",

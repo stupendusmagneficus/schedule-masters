@@ -770,6 +770,7 @@ export const slovakMessages: Messages = {
   "booking.pendingConfirmation":
     "Majster termín potvrdí a ozve sa vám. S otázkami sa obráťte priamo na majstra.",
   "booking.close": "Zavrieť",
+  "booking.privacyPolicy": "Zásady ochrany osobných údajov",
   "booking.noSlots": "V tento deň nie sú voľné termíny.",
   "booking.selectService": "Vyberte službu a zobrazia sa voľné termíny.",
   "booking.selectTime": "Vyberte voľný čas.",
