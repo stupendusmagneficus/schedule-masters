@@ -676,7 +676,8 @@ export type MessageKey =
   | "booking.manageConfirmed"
   | "booking.manageCancelled"
   | "booking.manageCompleted"
-  | "booking.manageActionFailed";
+  | "booking.manageActionFailed"
+  | "booking.manageStarted";
 
 export type Messages = Record<MessageKey, string>;
 
@@ -1484,6 +1485,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageCompleted": "Завершена",
     "booking.manageActionFailed":
       "Не удалось обновить запись. Попробуйте ещё раз.",
+    "booking.manageStarted":
+      "Визит уже начался, поэтому изменить его онлайн нельзя. Свяжитесь с мастером напрямую.",
   },
   cz: {
     "common.appName": "Chvilio",
@@ -2280,6 +2283,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageCompleted": "Dokončeno",
     "booking.manageActionFailed":
       "Rezervaci se nepodařilo změnit. Zkuste to znovu.",
+    "booking.manageStarted":
+      "Termín už začal, proto ho nelze online změnit. Kontaktujte přímo mistra.",
   },
   en: {
     "common.appName": "Chvilio",
@@ -3083,6 +3088,8 @@ const messages: Record<SupportedLocale, Messages> = {
     "booking.manageCancelled": "Cancelled",
     "booking.manageCompleted": "Completed",
     "booking.manageActionFailed": "We couldn't update the booking. Try again.",
+    "booking.manageStarted":
+      "This appointment has already started, so it can't be changed online. Contact the professional directly.",
   },
   sk: slovakMessages,
   uk: ukrainianMessages,
